@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Al-Hifz — القرآن الكريم</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useMemo, useRef, useCallback } = React;
+
+// ─── Surah metadata ────────────────────────────────────────────────────────────
+const SURAHS = [
+{n:1,name:“Al-Fatiha”,ar:“الفاتحة”,v:7,juz:1,type:“Mecquoise”},
+{n:2,name:“Al-Baqara”,ar:“البقرة”,v:286,juz:1,type:“Médinoise”},
+{n:3,name:“Al-Imran”,ar:“آل عمران”,v:200,juz:3,type:“Médinoise”},
+{n:4,name:“An-Nisa”,ar:“النساء”,v:176,juz:4,type:“Médinoise”},
+{n:5,name:“Al-Maida”,ar:“المائدة”,v:120,juz:6,type:“Médinoise”},
+{n:6,name:“Al-Anam”,ar:“الأنعام”,v:165,juz:7,type:“Mecquoise”},
+{n:7,name:“Al-Araf”,ar:“الأعراف”,v:206,juz:8,type:“Mecquoise”},
+{n:8,name:“Al-Anfal”,ar:“الأنفال”,v:75,juz:9,type:“Médinoise”},
+{n:9,name:“At-Tawba”,ar:“التوبة”,v:129,juz:10,type:“Médinoise”},
+{n:10,name:“Yunus”,ar:“يونس”,v:109,juz:11,type:“Mecquoise”},
+{n:11,name:“Hud”,ar:“هود”,v:123,juz:11,type:“Mecquoise”},
+{n:12,name:“Yusuf”,ar:“يوسف”,v:111,juz:12,type:“Mecquoise”},
+{n:13,name:“Ar-Ra’d”,ar:“الرعد”,v:43,juz:13,type:“Médinoise”},
+{n:14,name:“Ibrahim”,ar:“إبراهيم”,v:52,juz:13,type:“Mecquoise”},
+{n:15,name:“Al-Hijr”,ar:“الحجر”,v:99,juz:14,type:“Mecquoise”},
+{n:16,name:“An-Nahl”,ar:“النحل”,v:128,juz:14,type:“Mecquoise”},
+{n:17,name:“Al-Isra”,ar:“الإسراء”,v:111,juz:15,type:“Mecquoise”},
+{n:18,name:“Al-Kahf”,ar:“الكهف”,v:110,juz:15,type:“Mecquoise”},
+{n:19,name:“Maryam”,ar:“مريم”,v:98,juz:16,type:“Mecquoise”},
+{n:20,name:“Ta-Ha”,ar:“طه”,v:135,juz:16,type:“Mecquoise”},
+{n:21,name:“Al-Anbiya”,ar:“الأنبياء”,v:112,juz:17,type:“Mecquoise”},
+{n:22,name:“Al-Hajj”,ar:“الحج”,v:78,juz:17,type:“Médinoise”},
+{n:23,name:“Al-Muminun”,ar:“المؤمنون”,v:118,juz:18,type:“Mecquoise”},
+{n:24,name:“An-Nur”,ar:“النور”,v:64,juz:18,type:“Médinoise”},
+{n:25,name:“Al-Furqan”,ar:“الفرقان”,v:77,juz:18,type:“Mecquoise”},
+{n:26,name:“Ash-Shuara”,ar:“الشعراء”,v:227,juz:19,type:“Mecquoise”},
+{n:27,name:“An-Naml”,ar:“النمل”,v:93,juz:19,type:“Mecquoise”},
+{n:28,name:“Al-Qasas”,ar:“القصص”,v:88,juz:20,type:“Mecquoise”},
+{n:29,name:“Al-Ankabut”,ar:“العنكبوت”,v:69,juz:20,type:“Mecquoise”},
+{n:30,name:“Ar-Rum”,ar:“الروم”,v:60,juz:21,type:“Mecquoise”},
+{n:31,name:“Luqman”,ar:“لقمان”,v:34,juz:21,type:“Mecquoise”},
+{n:32,name:“As-Sajda”,ar:“السجدة”,v:30,juz:21,type:“Mecquoise”},
+{n:33,name:“Al-Ahzab”,ar:“الأحزاب”,v:73,juz:21,type:“Médinoise”},
+{n:34,name:“Saba”,ar:“سبأ”,v:54,juz:22,type:“Mecquoise”},
+{n:35,name:“Fatir”,ar:“فاطر”,v:45,juz:22,type:“Mecquoise”},
+{n:36,name:“Ya-Sin”,ar:“يس”,v:83,juz:22,type:“Mecquoise”},
+{n:37,name:“As-Saffat”,ar:“الصافات”,v:182,juz:23,type:“Mecquoise”},
+{n:38,name:“Sad”,ar:“ص”,v:88,juz:23,type:“Mecquoise”},
+{n:39,name:“Az-Zumar”,ar:“الزمر”,v:75,juz:23,type:“Mecquoise”},
+{n:40,name:“Ghafir”,ar:“غافر”,v:85,juz:24,type:“Mecquoise”},
+{n:41,name:“Fussilat”,ar:“فصلت”,v:54,juz:24,type:“Mecquoise”},
+{n:42,name:“Ash-Shura”,ar:“الشورى”,v:53,juz:25,type:“Mecquoise”},
+{n:43,name:“Az-Zukhruf”,ar:“الزخرف”,v:89,juz:25,type:“Mecquoise”},
+{n:44,name:“Ad-Dukhan”,ar:“الدخان”,v:59,juz:25,type:“Mecquoise”},
+{n:45,name:“Al-Jathiya”,ar:“الجاثية”,v:37,juz:25,type:“Mecquoise”},
+{n:46,name:“Al-Ahqaf”,ar:“الأحقاف”,v:35,juz:26,type:“Mecquoise”},
+{n:47,name:“Muhammad”,ar:“محمد”,v:38,juz:26,type:“Médinoise”},
+{n:48,name:“Al-Fath”,ar:“الفتح”,v:29,juz:26,type:“Médinoise”},
+{n:49,name:“Al-Hujurat”,ar:“الحجرات”,v:18,juz:26,type:“Médinoise”},
+{n:50,name:“Qaf”,ar:“ق”,v:45,juz:26,type:“Mecquoise”},
+{n:51,name:“Adh-Dhariyat”,ar:“الذاريات”,v:60,juz:26,type:“Mecquoise”},
+{n:52,name:“At-Tur”,ar:“الطور”,v:49,juz:27,type:“Mecquoise”},
+{n:53,name:“An-Najm”,ar:“النجم”,v:62,juz:27,type:“Mecquoise”},
+{n:54,name:“Al-Qamar”,ar:“القمر”,v:55,juz:27,type:“Mecquoise”},
+{n:55,name:“Ar-Rahman”,ar:“الرحمن”,v:78,juz:27,type:“Mecquoise”},
+{n:56,name:“Al-Waqia”,ar:“الواقعة”,v:96,juz:27,type:“Mecquoise”},
+{n:57,name:“Al-Hadid”,ar:“الحديد”,v:29,juz:27,type:“Médinoise”},
+{n:58,name:“Al-Mujadila”,ar:“المجادلة”,v:22,juz:28,type:“Médinoise”},
+{n:59,name:“Al-Hashr”,ar:“الحشر”,v:24,juz:28,type:“Médinoise”},
+{n:60,name:“Al-Mumtahina”,ar:“الممتحنة”,v:13,juz:28,type:“Médinoise”},
+{n:61,name:“As-Saf”,ar:“الصف”,v:14,juz:28,type:“Médinoise”},
+{n:62,name:“Al-Jumua”,ar:“الجمعة”,v:11,juz:28,type:“Médinoise”},
+{n:63,name:“Al-Munafiqun”,ar:“المنافقون”,v:11,juz:28,type:“Médinoise”},
+{n:64,name:“At-Taghabun”,ar:“التغابن”,v:18,juz:28,type:“Médinoise”},
+{n:65,name:“At-Talaq”,ar:“الطلاق”,v:12,juz:28,type:“Médinoise”},
+{n:66,name:“At-Tahrim”,ar:“التحريم”,v:12,juz:28,type:“Médinoise”},
+{n:67,name:“Al-Mulk”,ar:“الملك”,v:30,juz:29,type:“Mecquoise”},
+{n:68,name:“Al-Qalam”,ar:“القلم”,v:52,juz:29,type:“Mecquoise”},
+{n:69,name:“Al-Haqqa”,ar:“الحاقة”,v:52,juz:29,type:“Mecquoise”},
+{n:70,name:“Al-Maarij”,ar:“المعارج”,v:44,juz:29,type:“Mecquoise”},
+{n:71,name:“Nuh”,ar:“نوح”,v:28,juz:29,type:“Mecquoise”},
+{n:72,name:“Al-Jinn”,ar:“الجن”,v:28,juz:29,type:“Mecquoise”},
+{n:73,name:“Al-Muzzammil”,ar:“المزمل”,v:20,juz:29,type:“Mecquoise”},
+{n:74,name:“Al-Muddaththir”,ar:“المدثر”,v:56,juz:29,type:“Mecquoise”},
+{n:75,name:“Al-Qiyama”,ar:“القيامة”,v:40,juz:29,type:“Mecquoise”},
+{n:76,name:“Al-Insan”,ar:“الإنسان”,v:31,juz:29,type:“Médinoise”},
+{n:77,name:“Al-Mursalat”,ar:“المرسلات”,v:50,juz:29,type:“Mecquoise”},
+{n:78,name:“An-Naba”,ar:“النبأ”,v:40,juz:30,type:“Mecquoise”},
+{n:79,name:“An-Naziat”,ar:“النازعات”,v:46,juz:30,type:“Mecquoise”},
+{n:80,name:“Abasa”,ar:“عبس”,v:42,juz:30,type:“Mecquoise”},
+{n:81,name:“At-Takwir”,ar:“التكوير”,v:29,juz:30,type:“Mecquoise”},
+{n:82,name:“Al-Infitar”,ar:“الانفطار”,v:19,juz:30,type:“Mecquoise”},
+{n:83,name:“Al-Mutaffifin”,ar:“المطففين”,v:36,juz:30,type:“Mecquoise”},
+{n:84,name:“Al-Inshiqaq”,ar:“الانشقاق”,v:25,juz:30,type:“Mecquoise”},
+{n:85,name:“Al-Buruj”,ar:“البروج”,v:22,juz:30,type:“Mecquoise”},
+{n:86,name:“At-Tariq”,ar:“الطارق”,v:17,juz:30,type:“Mecquoise”},
+{n:87,name:“Al-Ala”,ar:“الأعلى”,v:19,juz:30,type:“Mecquoise”},
+{n:88,name:“Al-Ghashiya”,ar:“الغاشية”,v:26,juz:30,type:“Mecquoise”},
+{n:89,name:“Al-Fajr”,ar:“الفجر”,v:30,juz:30,type:“Mecquoise”},
+{n:90,name:“Al-Balad”,ar:“البلد”,v:20,juz:30,type:“Mecquoise”},
+{n:91,name:“Ash-Shams”,ar:“الشمس”,v:15,juz:30,type:“Mecquoise”},
+{n:92,name:“Al-Layl”,ar:“الليل”,v:21,juz:30,type:“Mecquoise”},
+{n:93,name:“Ad-Duha”,ar:“الضحى”,v:11,juz:30,type:“Mecquoise”},
+{n:94,name:“Ash-Sharh”,ar:“الشرح”,v:8,juz:30,type:“Mecquoise”},
+{n:95,name:“At-Tin”,ar:“التين”,v:8,juz:30,type:“Mecquoise”},
+{n:96,name:“Al-Alaq”,ar:“العلق”,v:19,juz:30,type:“Mecquoise”},
+{n:97,name:“Al-Qadr”,ar:“القدر”,v:5,juz:30,type:“Mecquoise”},
+{n:98,name:“Al-Bayyina”,ar:“البينة”,v:8,juz:30,type:“Médinoise”},
+{n:99,name:“Az-Zalzala”,ar:“الزلزلة”,v:8,juz:30,type:“Médinoise”},
+{n:100,name:“Al-Adiyat”,ar:“العاديات”,v:11,juz:30,type:“Mecquoise”},
+{n:101,name:“Al-Qaria”,ar:“القارعة”,v:11,juz:30,type:“Mecquoise”},
+{n:102,name:“At-Takathur”,ar:“التكاثر”,v:8,juz:30,type:“Mecquoise”},
+{n:103,name:“Al-Asr”,ar:“العصر”,v:3,juz:30,type:“Mecquoise”},
+{n:104,name:“Al-Humaza”,ar:“الهمزة”,v:9,juz:30,type:“Mecquoise”},
+{n:105,name:“Al-Fil”,ar:“الفيل”,v:5,juz:30,type:“Mecquoise”},
+{n:106,name:“Quraysh”,ar:“قريش”,v:4,juz:30,type:“Mecquoise”},
+{n:107,name:“Al-Maun”,ar:“الماعون”,v:7,juz:30,type:“Mecquoise”},
+{n:108,name:“Al-Kawthar”,ar:“الكوثر”,v:3,juz:30,type:“Mecquoise”},
+{n:109,name:“Al-Kafirun”,ar:“الكافرون”,v:6,juz:30,type:“Mecquoise”},
+{n:110,name:“An-Nasr”,ar:“النصر”,v:3,juz:30,type:“Médinoise”},
+{n:111,name:“Al-Masad”,ar:“المسد”,v:5,juz:30,type:“Mecquoise”},
+{n:112,name:“Al-Ikhlas”,ar:“الإخلاص”,v:4,juz:30,type:“Mecquoise”},
+{n:113,name:“Al-Falaq”,ar:“الفلق”,v:5,juz:30,type:“Mecquoise”},
+{n:114,name:“An-Nas”,ar:“الناس”,v:6,juz:30,type:“Mecquoise”},
+];
+const TOTAL_VERSES = SURAHS.reduce((s,x)=>s+x.v,0);
+
+// ─── Embedded Quran data (Juz 30 + Al-Fatiha) ─────────────────────────────────
+const Q = {
+1:[
+{n:1,ar:”[m]بِسْمِ ٱللَّهِ[/m] [g]ٱلرَّحْمَٰنِ[/g] ٱلرَّحِيمِ”,fr:“Au nom d’Allah, le Tout Miséricordieux, le Très Miséricordieux.”,tf:“La Basmala inaugure chaque sourate sauf At-Tawba. Ar-Rahman désigne la miséricorde universelle, Ar-Rahim la miséricorde particulière aux croyants dans l’au-delà.”},
+{n:2,ar:”[m]ٱلْحَمْدُ لِلَّهِ[/m] رَبِّ [g]ٱلْعَٰلَمِينَ[/g]”,fr:“Louange à Allah, Seigneur de l’univers,”,tf:“Al-Hamd appartient à Allah seul. Rabb al-‘Alamin : Il est le Créateur et Dispensateur de bienfaits à toutes les créatures.”},
+{n:3,ar:”[g]ٱلرَّحْمَٰنِ[/g] ٱلرَّحِيمِ”,fr:“le Tout Miséricordieux, le Très Miséricordieux,”,tf:“Répétition pour insister sur la miséricorde — attribut fondamental d’Allah. Ar-Rahman couvre toutes les créatures en ce monde ; Ar-Rahim est pour les croyants au Jour du Jugement.”},
+{n:4,ar:”[t]مَٰلِكِ[/t] يَوْمِ [m]ٱلدِّينِ[/m]”,fr:“Maître du Jour de la rétribution.”,tf:“Maître absolu du Jugement. ‘Din’ ici signifie rétribution et jugement — rappel que toute action sera pesée avec une justice parfaite.”},
+{n:5,ar:“إِيَّاكَ [g]نَعْبُدُ[/g] وَإِيَّاكَ [g]نَسْتَعِينُ[/g]”,fr:“C’est Toi [Seul] que nous adorons, et c’est Toi [Seul] dont nous implorons le secours.”,tf:“Cœur de la sourate et de l’islam : adoration exclusive d’Allah et recours exclusif à Lui. Le passage du ‘Il’ au ‘Toi’ marque l’entrée dans Sa présence lors de la prière.”},
+{n:6,ar:”[m]ٱهْدِنَا[/m] ٱلصِّرَٰطَ [r]ٱلْمُسْتَقِيمَ[/r]”,fr:“Guide-nous dans le droit chemin,”,tf:“Supplication répétée 17 fois/jour dans la prière. Le chemin droit = l’islam dans sa totalité : croyance, actes et conduite vertueuse.”},
+{n:7,ar:“صِرَٰطَ [g]ٱلَّذِينَ[/g] أَنْعَمْتَ عَلَيْهِمْ [r]غَيْرِ[/r] ٱلْمَغْضُوبِ عَلَيْهِمْ وَلَا [q]ٱلضَّآلِّينَ[/q]”,fr:“le chemin de ceux que Tu as comblés de faveurs, non pas de ceux qui ont encouru Ta colère, ni des égarés.”,tf:“Comblés de faveurs : prophètes, véridiques, martyrs et vertueux. Colère : ceux qui connaissent la vérité et la rejettent. Égarés : ceux qui adorent sans méthode correcte.”},
+],
+97:[
+{n:1,ar:“إِنَّ[m]ٓا[/m] أَنزَلْنَٰهُ فِى لَيْلَةِ [r]ٱلْقَدْرِ[/r]”,fr:“Nous l’avons certes révélé pendant la nuit d’Al-Qadr.”,tf:“Le Coran fut descendu en totalité la nuit d’Al-Qadr puis révélé progressivement au Prophète ﷺ sur 23 ans. Cette nuit se situe dans les dix dernières nuits de Ramadan.”},
+{n:2,ar:“وَمَ[m]آ[/m] أَدْرَاكَ مَا لَيْلَةُ [r]ٱلْقَدْرِ[/r]”,fr:“Et qui te dira ce qu’est la nuit d’Al-Qadr?”,tf:“Question rhétorique pour magnifier l’importance de cette nuit — sa valeur dépasse toute compréhension ordinaire.”},
+{n:3,ar:“لَيْلَةُ [r]ٱلْقَدْرِ[/r] خَيْرٌ [g]مِّنْ[/g] أَلْفِ شَهْرٍ”,fr:“La nuit d’Al-Qadr est meilleure que mille mois.”,tf:“Mille mois ≈ 83 ans, une vie entière. L’adoration de cette nuit vaut plus qu’une vie d’adoration — miséricorde immense d’Allah.”},
+{n:4,ar:“تَنَزَّلُ [g]ٱلْمَلَٰٓئِكَةُ[/g] وَ[r]ٱلرُّوحُ[/r] فِيهَا بِإِذْنِ رَبِّهِم [g]مِّن[/g] كُلِّ أَمْرٍ”,fr:“Les Anges ainsi que l’Esprit descendent durant cette nuit, avec la permission de leur Seigneur pour tout ordre.”,tf:“Jibrîl et les anges descendent en masse portant les décrets divins pour l’année à venir.”},
+{n:5,ar:“سَلَٰمٌ هِىَ حَتَّىٰ مَطْلَعِ [r]ٱلْفَجْرِ[/r]”,fr:“Elle est paix et salut jusqu’à l’apparition de l’aube.”,tf:“Toute la nuit est paix et bénédiction. Les démons sont enchaînés, les anges présents, la paix spirituelle est profonde.”},
+],
+98:[
+{n:1,ar:“لَمْ يَكُنِ [r]ٱلَّذِينَ[/r] كَفَرُوا۟ [g]مِنْ[/g] أَهْلِ [m]ٱلْكِتَٰبِ[/m] وَٱلْمُشْرِكِينَ [g]مُنفَكِّينَ[/g] حَتَّىٰ تَأْتِيَهُمُ [r]ٱلْبَيِّنَةُ[/r]”,fr:“Les mécréants parmi les gens du Livre et les associateurs n’auraient pas abandonné leur mécréance jusqu’à ce que leur vînt la preuve manifeste,”,tf:“Les gens du Livre et les polythéistes arabes persistaient dans leur égarement. La preuve allait être le Prophète ﷺ et le Coran.”},
+{n:2,ar:“رَسُولٌ [g]مِّنَ[/g] ٱللَّهِ يَتْلُوا۟ صُحُفًا [t]مُّطَهَّرَةً[/t]”,fr:“un Messager d’Allah, qui récite des pages purifiées,”,tf:“Muhammad ﷺ récitant les feuillets du Coran — purifiés de tout mensonge, contradiction et altération.”},
+{n:3,ar:“فِيهَا كُتُبٌ [q]قَيِّمَةٌ[/q]”,fr:“contenant des écrits droits.”,tf:”‘Qayyima’ : droits, justes, immuables, valables pour tous les temps et tous les peuples.”},
+{n:4,ar:“وَمَا تَفَرَّقَ [r]ٱلَّذِينَ[/r] أُوتُوا۟ [m]ٱلْكِتَٰبَ[/m] إِلَّا [g]مِنۢ[/g] بَعْدِ مَا جَآءَتْهُمُ [r]ٱلْبَيِّنَةُ[/r]”,fr:“Ceux à qui le Livre a été donné ne se sont divisés qu’après que leur fut venue la preuve manifeste.”,tf:“Paradoxe : la division est venue après la preuve, non par ignorance, mais par jalousie et intérêts mondains.”},
+{n:5,ar:“وَمَ[m]آ[/m] أُمِرُوٓا۟ إِلَّا لِيَعْبُدُوا۟ ٱللَّهَ [g]مُخْلِصِينَ[/g] لَهُ [r]ٱلدِّينَ[/r] حُنَفَآءَ وَيُقِيمُوا۟ [m]ٱلصَّلَوٰةَ[/m] وَيُؤْتُوا۟ [m]ٱلزَّكَوٰةَ[/m] وَذَٰلِكَ دِينُ [r]ٱلْقَيِّمَةِ[/r]”,fr:“Ils n’avaient été commandés que d’adorer Allah sincèrement, d’accomplir la Salat et d’acquitter la Zakat. C’est là la religion droite.”,tf:“L’essence de tous les messages : tawhid, prière, zakat. Le ‘din al-qayyima’ — religion immuable valable pour tous les prophètes.”},
+{n:6,ar:“إِنَّ [r]ٱلَّذِينَ[/r] كَفَرُوا۟ [g]مِنْ[/g] أَهْلِ [m]ٱلْكِتَٰبِ[/m] وَٱلْمُشْرِكِينَ فِى [g]نَارِ[/g] جَهَنَّمَ خَٰلِدِينَ فِيهَا أُو۟لَٰٓئِكَ هُمْ شَرُّ [r]ٱلْبَرِيَّةِ[/r]”,fr:“Ceux qui ont mécru parmi les gens du Livre et les associateurs seront dans le feu de la Géhenne éternellement. Ils sont les pires des créatures.”,tf:“Verdict pour ceux qui ont reçu la preuve et l’ont rejetée sciemment. La gravité du rejet délibéré de la vérité.”},
+{n:7,ar:“إِنَّ [r]ٱلَّذِينَ[/r] ءَامَنُوا۟ وَعَمِلُوا۟ [m]ٱلصَّٰلِحَٰتِ[/m] أُو۟لَٰٓئِكَ هُمْ خَيْرُ [r]ٱلْبَرِيَّةِ[/r]”,fr:“Ceux qui ont cru et accompli de bonnes œuvres sont les meilleures des créatures.”,tf:“Contraste parfait. ‘Khayr al-bariyya’ — les meilleures créatures, supérieures même aux anges selon certains savants.”},
+{n:8,ar:“جَزَآؤُهُمْ عِندَ رَبِّهِمْ جَنَّٰتُ عَدْنٍ تَجْرِى [g]مِن[/g] تَحْتِهَا [m]ٱلْأَنْهَٰرُ[/m] خَٰلِدِينَ فِيهَآ أَبَدًا رَّضِىَ ٱللَّهُ عَنْهُمْ وَرَضُوا۟ عَنْهُ ذَٰلِكَ لِمَنْ خَشِىَ [r]رَبَّهُۥ[/r]”,fr:“Leur récompense sera les jardins d’Eden sous lesquels coulent les ruisseaux. Allah est satisfait d’eux et ils sont satisfaits de Lui. C’est pour celui qui craint son Seigneur.”,tf:“Le summum du paradis : le ridha — satisfaction mutuelle entre Allah et Ses serviteurs. Réservé à ceux qui ont la taqwa.”},
+],
+99:[
+{n:1,ar:“إِذَا [r]زُلْزِلَتِ[/r] ٱلْأَرْضُ [q]زِلْزَالَهَا[/q]”,fr:“Quand la terre sera secouée d’un violent tremblement,”,tf:“Le tremblement final de la Terre au Jour du Jugement — une convulsion planétaire sans précédent dans l’histoire humaine.”},
+{n:2,ar:“وَأَخْرَجَتِ [r]ٱلْأَرْضُ[/r] أَثْقَالَهَا”,fr:“et que la terre aura sorti ses fardeaux,”,tf:“La terre vomira tout : les morts ressusciteront, les trésors et secrets seront mis au jour.”},
+{n:3,ar:“وَقَالَ [r]ٱلْإِنسَٰنُ[/r] مَا لَهَا”,fr:“et que l’homme dira : «Qu’a-t-elle?»”,tf:“L’homme stupéfait demande ce qui se passe — incapable de comprendre l’ampleur de ce Jour terrible.”},
+{n:4,ar:“يَوْمَئِذٍ تُحَدِّثُ [m]أَخْبَارَهَا[/m]”,fr:“Ce jour-là, elle racontera ses nouvelles,”,tf:“La terre témoignera de tout ce qui s’est passé sur elle. Le Prophète ﷺ : ‘Elle témoignera contre chaque homme et femme de ce qu’ils ont fait sur elle.’”},
+{n:5,ar:“بِأَنَّ رَبَّكَ أَوْحَىٰ لَهَا”,fr:“parce que ton Seigneur lui aura inspiré cela.”,tf:“Allah inspirera à la terre sa mission de témoignage — toute la création obéit à Lui.”},
+{n:6,ar:“يَوْمَئِذٍ يَصْدُرُ [r]ٱلنَّاسُ[/r] أَشْتَاتًا [g]لِّيُرَوْا۟[/g] أَعْمَٰلَهُمْ”,fr:“Ce jour-là, les hommes sortiront en groupes séparés pour qu’on leur montre leurs œuvres.”,tf:“Groupes distincts selon leurs actes et destins. Chacun confronté à l’intégralité de ses actions.”},
+{n:7,ar:“فَمَن يَعْمَلْ [g]مِثْقَالَ[/g] ذَرَّةٍ خَيْرًا يَرَهُۥ”,fr:“Quiconque a fait le poids d’un atome de bien le verra,”,tf:“Justice absolue : même le bien le plus infime sera vu et récompensé. Aucun acte vertueux n’est trop petit pour Allah.”},
+{n:8,ar:“وَمَن يَعْمَلْ [g]مِثْقَالَ[/g] ذَرَّةٍ شَرًّا يَرَهُۥ”,fr:“et quiconque a fait le poids d’un atome de mal le verra.”,tf:“Symétrie parfaite. Ibn Masoud : ‘Verset le plus équitable du Coran.’ Rien n’échappe à la justice divine.”},
+],
+100:[
+{n:1,ar:“وَ[r]ٱلْعَٰدِيَٰتِ[/r] ضَبْحًا”,fr:“Par les coursiers haletants,”,tf:“Serment par les chevaux de guerre — symbole de vaillance et d’effort dans la cause d’Allah.”},
+{n:2,ar:“فَ[q]ٱلْمُورِيَٰتِ[/q] قَدْحًا”,fr:“qui font jaillir des étincelles de leurs sabots,”,tf:“Les sabots frappant les pierres — image de puissance et de rapidité.”},
+{n:3,ar:“فَ[r]ٱلْمُغِيرَٰتِ[/r] صُبْحًا”,fr:“qui font des raids à l’aube,”,tf:“Les raids à l’aube — moment de vigilance, courage et action décisive.”},
+{n:4,ar:“فَأَثَرْنَ بِهِۦ [g]نَقْعًا[/g]”,fr:“et soulèvent des nuages de poussière,”,tf:“Poussière soulevée au galop — image vivante du mouvement vers la cause divine.”},
+{n:5,ar:“فَوَسَطْنَ بِهِۦ [r]جَمْعًا[/r]”,fr:“et s’élancent au milieu de l’ennemi groupé.”,tf:“Pénétrant au cœur des rangs ennemis — point culminant du tableau de bravoure.”},
+{n:6,ar:“إِنَّ [r]ٱلْإِنسَٰنَ[/r] لِرَبِّهِۦ لَكَنُودٌ”,fr:“L’homme est vraiment ingrat envers son Seigneur,”,tf:“Conclusion : l’homme emploie sa force en oubliant Celui qui la lui a donnée. Ingratitude fondamentale.”},
+{n:7,ar:“وَإِنَّهُۥ عَلَىٰ ذَٰلِكَ لَشَهِيدٌ”,fr:“et il en est lui-même témoin.”,tf:“L’homme est son propre témoin de son ingratitude — sa conscience le sait.”},
+{n:8,ar:“وَإِنَّهُۥ لِحُبِّ [r]ٱلْخَيْرِ[/r] لَشَدِيدٌ”,fr:“Et il est passionnément attaché aux biens de ce monde.”,tf:“Amour excessif des richesses — racine de l’ingratitude envers Allah.”},
+{n:9,ar:“أَفَلَا يَعْلَمُ إِذَا بُعْثِرَ مَا فِى [r]ٱلْقُبُورِ[/r]”,fr:“Ne sait-il pas que lorsque ce qui est dans les tombes sera bouleversé,”,tf:“Rappel de la résurrection — comment s’attacher au monde sachant qu’on ressuscitera pour être jugé?”},
+{n:10,ar:“وَحُصِّلَ مَا فِى [r]ٱلصُّدُورِ[/r]”,fr:“et que ce qui est dans les poitrines sera rendu apparent,”,tf:“Les secrets du cœur — intentions, croyances cachées — seront tous révélés.”},
+{n:11,ar:“إِنَّ رَبَّهُم بِهِمْ يَوْمَئِذٍ لَّخَبِيرٌ”,fr:“leur Seigneur ce Jour-là est parfaitement informé de ce qu’ils ont fait.”,tf:“Allah est Al-Khabir — rien ne Lui échappe. Invitation à la vigilance et la sincérité.”},
+],
+101:[
+{n:1,ar:”[r]ٱلْقَارِعَةُ[/r]”,fr:“La Fracassante!”,tf:“Nom du Jour du Jugement — le bruit fracassant cosmique. Ce nom seul suffit à éveiller la vigilance.”},
+{n:2,ar:“مَا [r]ٱلْقَارِعَةُ[/r]”,fr:“Qu’est-ce que la Fracassante?”,tf:“Style d’amplification : la réponse normale est insuffisante pour décrire cet événement.”},
+{n:3,ar:“وَمَآ أَدْرَاكَ مَا [r]ٱلْقَارِعَةُ[/r]”,fr:“Et qui te dira ce qu’est la Fracassante?”,tf:“Même le Prophète ﷺ ne peut en avoir une image complète sans révélation.”},
+{n:4,ar:“يَوْمَ يَكُونُ [r]ٱلنَّاسُ[/r] كَ[g]ٱلْفَرَاشِ[/g] [r]ٱلْمَبْثُوثِ[/r]”,fr:“Le Jour où les hommes seront comme des papillons éparpillés,”,tf:“Humains comme papillons affolés — désorientés, apeurés, chaos absolu de la résurrection.”},
+{n:5,ar:“وَتَكُونُ [r]ٱلْجِبَالُ[/r] كَ[r]ٱلْعِهْنِ[/r] [r]ٱلْمَنفُوشِ[/r]”,fr:“et les montagnes comme de la laine cardée.”,tf:“Montagnes symboles de stabilité réduites à de la laine — si elles tombent, qu’en est-il des constructions humaines?”},
+{n:6,ar:“فَأَمَّا [g]مَن[/g] ثَقُلَتْ [g]مَوَٰزِينُهُۥ[/g]”,fr:“Quant à celui dont la balance sera lourde,”,tf:“La balance est réelle. Bonnes actions l’emportant = destin heureux. Justice divine absolue.”},
+{n:7,ar:“فَهُوَ فِى عِيشَةٍ [r]رَّاضِيَةٍ[/r]”,fr:“il jouira d’une vie agréable.”,tf:”‘Îsha radhiya’ — vie parfaite au paradis, sans aucune insatisfaction.”},
+{n:8,ar:“وَأَمَّا [g]مَنْ[/g] خَفَّتْ [g]مَوَٰزِينُهُۥ[/g]”,fr:“Mais quant à celui dont la balance sera légère,”,tf:“Mauvaises actions l’emportant — sort terrible.”},
+{n:9,ar:“فَأُمُّهُۥ هَاوِيَةٌ”,fr:“son refuge sera l’Abîme.”,tf:”‘Hawiya’ — l’abîme. Comme un enfant se réfugie chez sa mère, cet homme aura l’enfer pour ‘mère’.”},
+{n:10,ar:“وَمَآ أَدْرَاكَ مَا هِيَهْ”,fr:“Et qui te dira ce que c’est?”,tf:“La Hawiya dépasse toute imagination humaine.”},
+{n:11,ar:”[q]نَارٌ[/q] حَامِيَةٌ”,fr:“C’est un feu ardent!”,tf:“Feu d’une intensité incomparable à tout feu de ce monde.”},
+],
+102:[
+{n:1,ar:“أَلْهَاكُمُ [r]ٱلتَّكَاثُرُ[/r]”,fr:“La course aux richesses vous a distraits,”,tf:”‘Al-takathur’ : compétition pour accumuler toujours plus — richesses, enfants, prestige. Détourne de l’au-delà.”},
+{n:2,ar:“حَتَّىٰ زُرْتُمُ [r]ٱلْمَقَابِرَ[/r]”,fr:“jusqu’à ce que vous visitiez les tombeaux.”,tf:“Seule la mort met fin à cette course — certains comptaient même leurs morts pour se vanter.”},
+{n:3,ar:“كَلَّا سَوْفَ تَعْلَمُونَ”,fr:“Non! Vous saurez bientôt!”,tf:”‘Kalla’ — réprimande forte. À la mort vous comprendrez que cette course était une distraction fatale.”},
+{n:4,ar:“ثُمَّ كَلَّا سَوْفَ تَعْلَمُونَ”,fr:“Non, vraiment! Vous saurez bientôt!”,tf:“Répétition pour amplifier — d’abord dans la tombe, puis au Jour de la Résurrection.”},
+{n:5,ar:“كَلَّا لَوْ تَعْلَمُونَ عِلْمَ [r]ٱلْيَقِينِ[/r]”,fr:“Non! Si vous saviez avec une science certaine!”,tf:“Si vous connaissiez l’au-delà avec certitude, vous abandonneriez immédiatement cette course inutile.”},
+{n:6,ar:“لَتَرَوُنَّ [r]ٱلْجَحِيمَ[/r]”,fr:“Vous verrez sûrement la Fournaise!”,tf:“Certitude : vous verrez l’enfer — soit pour le traverser rapidement, soit pour y demeurer.”},
+{n:7,ar:“ثُمَّ لَتَرَوُنَّهَا عَيْنَ [r]ٱلْيَقِينِ[/r]”,fr:“Puis vous la verrez avec l’œil de la certitude.”,tf:”‘Ayn al-yaqin’ — certitude par la vue directe. Vous ne l’imaginerez plus, vous la verrez.”},
+{n:8,ar:“ثُمَّ لَتُسْـَٔلُنَّ يَوْمَئِذٍ عَنِ [r]ٱلنَّعِيمِ[/r]”,fr:“Puis, ce jour-là, vous serez interrogés sur les bienfaits reçus.”,tf:“Chaque bienfait — santé, nourriture, temps, sécurité — fera l’objet d’une question. Le Prophète ﷺ : parmi les premiers, la santé et l’eau fraîche.”},
+],
+103:[
+{n:1,ar:“وَ[r]ٱلْعَصْرِ[/r]”,fr:“Par le Temps!”,tf:“Serment par le temps — l’une des plus grandes faveurs d’Allah, dont l’homme est le plus négligent.”},
+{n:2,ar:“إِنَّ [r]ٱلْإِنسَٰنَ[/r] لَفِى خُسْرٍ”,fr:“L’être humain est certes en perdition,”,tf:“Verdict général : tout homme dilapide le capital de sa vie sans le rentabiliser pour l’au-delà.”},
+{n:3,ar:“إِلَّا [r]ٱلَّذِينَ[/r] ءَامَنُوا۟ وَعَمِلُوا۟ [m]ٱلصَّٰلِحَٰتِ[/m] وَتَوَاصَوْا۟ بِ[r]ٱلْحَقِّ[/r] وَتَوَاصَوْا۟ بِ[r]ٱلصَّبْرِ[/r]”,fr:“sauf ceux qui ont la foi, font de bonnes œuvres, s’enjoignent mutuellement la vérité et s’enjoignent mutuellement l’endurance.”,tf:“4 conditions : foi, bonnes œuvres, s’enjoindre la vérité, s’enjoindre la patience. Ash-Shafi’i : ‘Si Allah n’avait révélé que cette sourate, elle aurait suffi à guider l’humanité.’”},
+],
+104:[
+{n:1,ar:“وَيْلٌ لِّكُلِّ هُمَزَةٍ [r]لُّمَزَةٍ[/r]”,fr:“Malheur à tout diffamateur et calomniateur,”,tf:”‘Humazah’ : blesse par gestes et regard. ‘Lumazah’ : blesse par paroles et moqueries. Comportements destructeurs condamnés fermement.”},
+{n:2,ar:”[r]ٱلَّذِى[/r] جَمَعَ [g]مَالًا[/g] وَعَدَّدَهُ”,fr:“qui amasse des richesses et les compte sans cesse,”,tf:“Obsession d’accumuler et de compter — attachement maladif au monde, oubli de la finalité spirituelle.”},
+{n:3,ar:“يَحْسَبُ أَنَّ [g]مَالَهُۥ[/g] أَخْلَدَهُۥٓ”,fr:“croyant que sa fortune le rendra immortel!”,tf:“L’illusion suprême : croire que la richesse protège de la mort. Il se comporte comme s’il vivrait éternellement.”},
+{n:4,ar:“كَلَّا لَيُنۢبَذَنَّ فِى [r]ٱلْحُطَمَةِ[/r]”,fr:“Certes non! Il sera précipité dans Al-Hutama.”,tf:”‘Al-Hutama’ : qui broie et fracasse tout. ‘Kalla’ réfute brutalement l’illusion de l’immortalité.”},
+{n:5,ar:“وَمَآ أَدْرَاكَ مَا [r]ٱلْحُطَمَةُ[/r]”,fr:“Et qui te dira ce qu’est Al-Hutama?”,tf:“Ce que tu imagines est bien inférieur à la réalité.”},
+{n:6,ar:”[q]نَارُ[/q] ٱللَّهِ [r]ٱلْمُوقَدَةُ[/r]”,fr:“C’est le feu d’Allah, allumé,”,tf:”‘Nâr Allah’ — attribution à Allah souligne sa puissance incomparable.”},
+{n:7,ar:”[r]ٱلَّتِى[/r] تَطَّلِعُ عَلَى [r]ٱلْأَفْـِٔدَةِ[/r]”,fr:“qui s’élève jusqu’aux cœurs.”,tf:“Ce feu atteint les cœurs — châtiment correspondant au crime : il blessait les cœurs, son cœur sera brûlé.”},
+{n:8,ar:“إِنَّهَا عَلَيْهِم [r]مُّؤْصَدَةٌ[/r]”,fr:“elle se referme sur eux,”,tf:“Portes de l’enfer fermées à clé — enfermement total et définitif.”},
+{n:9,ar:“فِى عَمَدٍ [r]مُّمَدَّدَةٍۭ[/r]”,fr:“sur des colonnes étirées!”,tf:“Prison aux barreaux d’acier incandescent — emprisonnement inéluctable et éternel.”},
+],
+105:[
+{n:1,ar:“أَلَمْ تَرَ كَيْفَ فَعَلَ رَبُّكَ بِأَصْحَٰبِ [r]ٱلْفِيلِ[/r]”,fr:“N’as-tu pas vu comment ton Seigneur a agi avec les gens de l’Éléphant?”,tf:“An de l’Éléphant (570 EC) = année de naissance du Prophète ﷺ. Abraha marcha sur La Mecque avec des éléphants pour détruire la Ka’ba.”},
+{n:2,ar:“أَلَمْ يَجْعَلْ كَيْدَهُمْ فِى تَضْلِيلٍ”,fr:“N’a-t-Il pas rendu vain leur stratagème?”,tf:“Malgré éléphants et armée puissante, le plan fut anéanti — la force matérielle est impuissante face à la protection divine.”},
+{n:3,ar:“وَأَرْسَلَ عَلَيْهِمْ طَيْرًا أَبَابِيلَ”,fr:“N’a-t-Il pas envoyé sur eux des oiseaux en rangs serrés,”,tf:“Vols d’oiseaux bombant l’armée avec des pierres — miracle absolu de la protection divine.”},
+{n:4,ar:“تَرْمِيهِم بِحِجَارَةٍ [g]مِّن[/g] سِجِّيلٍ”,fr:“qui les bombardaient de pierres d’argile cuite,”,tf:“Projectiles d’argile durcie d’une force dévastatrice divine.”},
+{n:5,ar:“فَجَعَلَهُمْ كَعَصْفٍ [r]مَّأْكُولٍۭ[/r]”,fr:“et Il les a rendus pareils à de la paille mâchée.”,tf:“Armée toute-puissante réduite à des résidus — anéantissement total par la volonté divine.”},
+],
+106:[
+{n:1,ar:“لِإِيلَٰفِ [r]قُرَيْشٍ[/r]”,fr:“A cause de l’accoutumance des Quraychites,”,tf:“Liée à Al-Fil : Allah a protégé La Mecque pour assurer la sécurité des caravanes quraychites. ‘Ilaf’ = accords commerciaux et sauf-conduits.”},
+{n:2,ar:“إِيلَٰفِهِمْ رِحْلَةَ [r]ٱلشِّتَآءِ[/r] وَ[r]ٱلصَّيْفِ[/r]”,fr:“à leur habitude du voyage d’hiver et d’été,”,tf:“Deux caravanes annuelles : hiver vers le Yémen, été vers la Syrie — source de prospérité et d’influence.”},
+{n:3,ar:“فَلْيَعْبُدُوا۟ رَبَّ هَٰذَا [r]ٱلْبَيْتِ[/r]”,fr:“Qu’ils adorent donc le Seigneur de cette Maison,”,tf:“Conclusion logique : puisque Allah leur a accordé sécurité et prospérité, ils doivent L’adorer seul.”},
+{n:4,ar:”[r]ٱلَّذِى[/r] أَطْعَمَهُم [g]مِّن[/g] جُوعٍ وَءَامَنَهُم [g]مِّنْ[/g] خَوْفٍ”,fr:“qui les a nourris contre la faim et rassurés contre la peur.”,tf:“Deux bienfaits fondamentaux : subsistance et sécurité — fondements de toute vie civilisée. Accordés grâce à la sainteté de la Ka’ba.”},
+],
+107:[
+{n:1,ar:“أَرَءَيْتَ [r]ٱلَّذِى[/r] يُكَذِّبُ بِ[r]ٱلدِّينِ[/r]”,fr:“As-tu vu celui qui traite la religion de mensonge?”,tf:“Nier la rétribution a des conséquences comportementales : celui qui n’a pas de compte à rendre n’a aucune raison de protéger les faibles.”},
+{n:2,ar:“فَذَٰلِكَ [r]ٱلَّذِى[/r] يَدُعُّ [r]ٱلْيَتِيمَ[/r]”,fr:“C’est celui qui repousse l’orphelin,”,tf:“Premier signe : repousser brutalement l’orphelin. L’incroyance se manifeste dans la cruauté envers les vulnérables.”},
+{n:3,ar:“وَلَا يَحُضُّ عَلَىٰ طَعَامِ [r]ٱلْمِسْكِينِ[/r]”,fr:“et qui n’encourage pas à nourrir le pauvre.”,tf:“Deuxième signe : indifférence totale face à la misère. Symptôme de mort spirituelle.”},
+{n:4,ar:“فَوَيْلٌ لِّلْمُصَلِّينَ”,fr:“Malheur donc aux priants,”,tf:“Avertissement choquant — mais la suite précise de quels priants il s’agit.”},
+{n:5,ar:”[r]ٱلَّذِينَ[/r] هُمْ عَن صَلَاتِهِمْ سَاهُونَ”,fr:“ceux qui sont distraits dans leur prière,”,tf:”‘Sahun’ : négligents, inattentifs, retardant leurs prières. Prière habitude sociale, non acte sincère d’adoration.”},
+{n:6,ar:”[r]ٱلَّذِينَ[/r] هُمْ يُرَآءُونَ”,fr:“ceux qui prient pour être vus,”,tf:”‘Yura’un’ : ostentation — le shirk mineur que le Prophète ﷺ craignait le plus pour sa communauté.”},
+{n:7,ar:“وَيَمْنَعُونَ [r]ٱلْمَاعُونَ[/r]”,fr:“et qui refusent de prêter les ustensiles ordinaires.”,tf:“Refuser même le sel ou l’eau au voisin révèle l’égoïsme extrême. La foi authentique se manifeste dans les petits actes quotidiens.”},
+],
+108:[
+{n:1,ar:“إِنَّ[m]آ[/m] أَعْطَيْنَٰكَ [r]ٱلْكَوْثَرَ[/r]”,fr:“Nous t’avons certes donné l’Abondance.”,tf:”‘Al-Kawthar’ : le bassin du Prophète au paradis, la prophétie, le Coran, des millions de croyants. Consolation après la mort de ses fils.”},
+{n:2,ar:“فَصَلِّ لِرَبِّكَ وَ[r]ٱنْحَرْ[/r]”,fr:“Accomplis donc la Salat pour ton Seigneur et sacrifie.”,tf:“En réponse à ces dons immenses : prier et sacrifier exclusivement pour Allah — les deux actes d’adoration corporelle et matérielle les plus importants.”},
+{n:3,ar:“إِنَّ شَانِئَكَ هُوَ [r]ٱلْأَبْتَرُ[/r]”,fr:“C’est bien ton ennemi qui est sans postérité.”,tf:“Al-As ibn Wa’il traitait le Prophète d’abtar. Ironie divine : c’est son ennemi qui fut oublié — Muhammad ﷺ est le plus cité au monde chaque jour.”},
+],
+109:[
+{n:1,ar:”[q]قُلْ[/q] يَٰٓأَيُّهَا [r]ٱلْكَٰفِرُونَ[/r]”,fr:“Dis : «Ô vous les mécréants!»”,tf:“Révélée quand les chefs mecquois proposèrent un tour de rôle dans l’adoration. Allah ordonne de déclarer clairement la séparation.”},
+{n:2,ar:“لَآ أَعْبُدُ مَا تَعْبُدُونَ”,fr:“Je n’adore pas ce que vous adorez.”,tf:“Déclaration claire du présent : je n’adore pas vos idoles. Pas de compromis en matière de culte.”},
+{n:3,ar:“وَلَآ أَنتُمْ عَٰبِدُونَ مَآ أَعْبُدُ”,fr:“Et vous n’adorez pas ce que j’adore.”,tf:“Constatation : vous n’adorez pas Allah tel qu’Il mérite — avec pur tawhid, sans associés.”},
+{n:4,ar:“وَلَآ أَنَا۠ عَابِدٌ مَّا عَبَدتُّمْ”,fr:“Je ne suis pas adorateur de ce que vous avez adoré.”,tf:“Confirmation de la constance : jamais je n’adorerai vos idoles, quelle que soit la pression.”},
+{n:5,ar:“وَلَآ أَنتُمْ عَٰبِدُونَ مَآ أَعْبُدُ”,fr:“Et vous n’êtes pas adorateurs de ce que j’adore.”,tf:“Ces individus précis ont fait leur choix définitif — Allah savait qu’ils ne croiraient jamais.”},
+{n:6,ar:“لَكُمْ دِينُكُمْ وَلِىَ دِينِ”,fr:“A vous votre religion, et à moi ma religion.”,tf:“Séparation nette et respectueuse. Déclaration d’indépendance totale — ‘sourate de la désolidarisation’, libère de toute confusion syncrétiste.”},
+],
+110:[
+{n:1,ar:“إِذَا جَ[m]آءَ[/m] نَصْرُ ٱللَّهِ وَ[r]ٱلْفَتْحُ[/r]”,fr:“Quand arrive le secours d’Allah et la conquête,”,tf:”‘Al-Fath’ = conquête de La Mecque (an 8 H). Révélée lors du dernier pèlerinage, annonçant la fin de la mission et l’approche de la mort du Prophète.”},
+{n:2,ar:“وَرَأَيْتَ [r]ٱلنَّاسُ[/r] يَدْخُلُونَ فِى دِينِ ٱللَّهِ أَفْوَاجًا”,fr:“et que tu vois les gens entrer en foule dans la religion d’Allah,”,tf:“Après la conquête, des tribus entières embrassèrent l’islam — ‘afwajan’ (en foules) contraste avec les conversions individuelles des débuts.”},
+{n:3,ar:“فَسَبِّحْ بِحَمْدِ رَبِّكَ وَ[r]ٱسْتَغْفِرْهُ[/r] ۚ إِنَّهُۥ كَانَ تَوَّابًۢا”,fr:“alors, célèbre les louanges de ton Seigneur et implore Son pardon. Car Il est certes Grand Accueillant au repentir.”,tf:“La réponse à la victoire : non l’orgueil, mais la reconnaissance et l’istighfar. Aicha : dès cette révélation, il faisait abondamment dhikr — sachant que sa mort approchait.”},
+],
+111:[
+{n:1,ar:“تَبَّتْ يَدَآ أَبِى لَهَبٍ وَتَبَّ”,fr:“Que soient perdues les deux mains d’Abou Lahab!”,tf:“Abu Lahab, oncle du Prophète et ennemi acharné, cria ‘Que tu périsses!’ quand le Prophète appela à l’islam. Seule sourate condamnant quelqu’un par nom.”},
+{n:2,ar:“مَ[m]آ[/m] أَغْنَىٰ عَنْهُ مَالُهُۥ وَمَا كَسَبَ”,fr:“Sa fortune ne lui a servi à rien, ni ce qu’il a acquis.”,tf:“Toute sa richesse ne put le protéger de la malédiction divine ni éviter sa mort.”},
+{n:3,ar:“سَيَصْلَىٰ نَارًا ذَاتَ لَهَبٍ”,fr:“Il brûlera dans un feu plein de flammes.”,tf:“Ironie divine : ‘lahab’ (flamme) dans son surnom préfigurait son destin dans l’enfer.”},
+{n:4,ar:“وَ[r]ٱمْرَأَتُهُۥ[/r] حَمَّالَةَ [r]ٱلْحَطَبِ[/r]”,fr:“Et sa femme, porteuse de bois de brandon,”,tf:“Umm Jamil portait des épines sur le chemin du Prophète. ‘Hammalat al-hatab’ peut aussi signifier ‘colporteuse de ragots’.”},
+{n:5,ar:“فِى جِيدِهَا حَبْلٌ [g]مِّن[/g] [r]مَّسَدٍۭ[/r]”,fr:“aura à son cou une corde de fibres de palmier.”,tf:“Justice parfaite du talion divin : celle qui portait des fardeaux pour nuire portera un fardeau éternel.”},
+],
+112:[
+{n:1,ar:”[q]قُلْ[/q] هُوَ ٱللَّهُ أَحَدٌ”,fr:“Dis : «Il est Allah, Unique»”,tf:“Équivaut au tiers du Coran (Prophète ﷺ). ‘Ahad’ — Un absolu, unique dans Son essence, aucun comparable ni avant ni après.”},
+{n:2,ar:“ٱللَّهُ [r]ٱلصَّمَدُ[/r]”,fr:“Allah, le Seul à être imploré pour ce que nous désirons.”,tf:”‘As-Samad’ : vers qui toutes les créatures se tournent dans le besoin, Lui n’ayant besoin de rien. L’Absolu, le Parfait, l’Indépendant.”},
+{n:3,ar:“لَمْ يَلِدْ وَلَمْ يُولَدْ”,fr:“Il n’a jamais engendré, n’a pas été engendré non plus.”,tf:“Réfutation des déviations : fils (chrétiens), filles (Arabes polythéistes), généalogie divine. Allah est au-delà de toute naissance.”},
+{n:4,ar:“وَلَمْ يَكُن لَّهُۥ كُفُوًا أَحَدٌ”,fr:“Et nul n’est égal à Lui.”,tf:“Aucun équivalent dans l’essence, les attributs, les actes. Fondement du tawhid al-asmaa was-sifat. Cette sourate résume toute la théologie islamique.”},
+],
+113:[
+{n:1,ar:”[q]قُلْ[/q] أَعُوذُ بِرَبِّ [r]ٱلْفَلَقِ[/r]”,fr:“Dis : «Je cherche refuge auprès du Seigneur de l’Aube naissante»”,tf:“Al-Falaq : aube, lumière dissipant les ténèbres. Al-Mu’awwidhatain — les deux sourates de protection. Révélées pour le Prophète envoûté par Labid ibn al-Asam.”},
+{n:2,ar:”[g]مِن[/g] شَرِّ مَا خَلَقَ”,fr:“contre le mal de ce qu’Il a créé,”,tf:“Protection générale contre tout mal issu de la création — humains, animaux, démons, catastrophes.”},
+{n:3,ar:“وَ[g]مِن[/g] شَرِّ غَاسِقٍ إِذَا وَقَبَ”,fr:“contre le mal de l’obscurité quand elle s’étend,”,tf:“La nuit profonde — moment où mauvais esprits et dangers sont plus actifs. Le Prophète ﷺ montrait la lune : ‘Cherche refuge contre le mal de ceci.’”},
+{n:4,ar:“وَ[g]مِن[/g] شَرِّ [r]ٱلنَّفَّٰثَٰتِ[/r] فِى [r]ٱلْعُقَدِ[/r]”,fr:“contre le mal des souffleuses dans les nœuds,”,tf:“Femmes pratiquant la magie en soufflant sur des nœuds. En récitant Al-Mu’awwidhatain, le Prophète fut guéri de l’envoûtement.”},
+{n:5,ar:“وَ[g]مِن[/g] شَرِّ حَاسِدٍ إِذَا حَسَدَ”,fr:“contre le mal de l’envieux quand il envie.”,tf:“La jalousie peut provoquer le mauvais œil — réalité confirmée par le Prophète ﷺ. Le mal ne vient que quand la jalousie se manifeste activement.”},
+],
+114:[
+{n:1,ar:”[q]قُلْ[/q] أَعُوذُ بِرَبِّ [r]ٱلنَّاسِ[/r]”,fr:“Dis : «Je cherche refuge auprès du Seigneur des hommes,»”,tf:“Dernière sourate. Trois titres majestueux : Seigneur, Roi, Dieu des hommes — résumant les trois types de tawhid.”},
+{n:2,ar:“مَلِكِ [r]ٱلنَّاسِ[/r]”,fr:“du Roi des hommes,”,tf:”‘Malik an-nas’ — royauté absolue, éternelle, universelle. Protection qu’aucun roi terrestre ne peut offrir.”},
+{n:3,ar:“إِلَٰهِ [r]ٱلنَّاسِ[/r]”,fr:“du Dieu des hommes,”,tf:”‘Ilah an-nas’ — seul digne d’adoration. La sourate est un résumé du monothéisme islamique.”},
+{n:4,ar:”[g]مِن[/g] شَرِّ [r]ٱلْوَسْوَاسِ[/r] [r]ٱلْخَنَّاسِ[/r]”,fr:“contre le mal du tentateur sournois”,tf:”‘Al-waswas’ : le chuchoteur. ‘Al-khannas’ : qui recule quand on mentionne Allah. Shaytan susurre mais recule dès qu’Allah est mentionné.”},
+{n:5,ar:”[r]ٱلَّذِى[/r] يُوَسْوِسُ فِى صُدُورِ [r]ٱلنَّاسِ[/r]”,fr:“qui souffle le mal dans les poitrines des hommes,”,tf:“Shaytan suggère doucement depuis l’intérieur. La protection : se réfugier constamment auprès d’Allah.”},
+{n:6,ar:”[g]مِنَ[/g] [r]ٱلْجِنَّةِ[/r] وَ[r]ٱلنَّاسِ[/r]”,fr:“qu’il soit parmi les djinns ou parmi les hommes.”,tf:“Le tentateur peut être djinn ou humain. Conclusion parfaite du Coran : nous nous réfugions auprès d’Allah de tout mal, visible ou invisible.”},
+],
+};
+
+// ─── Calligraphy fonts ─────────────────────────────────────────────────────────
+const FONTS = [
+{id:“amiri-quran”,name:“Amiri Quran”,css:”‘Amiri Quran’, serif”,desc:“Police Mushaf classique”},
+{id:“amiri”,name:“Amiri”,css:”‘Amiri’, serif”,desc:“Naskhi élégant”},
+{id:“scheherazade”,name:“Scheherazade”,css:”‘Scheherazade New’, serif”,desc:“Naskhi arabe raffiné”},
+{id:“lateef”,name:“Lateef”,css:”‘Lateef’, serif”,desc:“Style Sindhi / Nastaliq”},
+{id:“noto-naskh”,name:“Noto Naskh”,css:”‘Noto Naskh Arabic’, serif”,desc:“Moderne et lisible”},
+];
+
+// ─── Reciters ──────────────────────────────────────────────────────────────────
+const RECITERS = [
+{id:“alafasy”,name:“Mishary Al-Afasy”},
+{id:“abdulbasitmurattal”,name:“Abdul Basit”},
+{id:“minshawi”,name:“Al-Minshawi”},
+{id:“husary”,name:“Al-Husary”},
+{id:“sudais”,name:“Al-Sudais”},
+];
+
+// ─── Khatma presets ────────────────────────────────────────────────────────────
+const KHATMA_PRESETS = [
+{id:“daily”,label:“Quotidienne”,desc:“1 Coran / jour — 18.7 pages”,pages:604,days:1},
+{id:“weekly”,label:“Hebdomadaire”,desc:“1 Coran / semaine — ~86 pages/j”,pages:604,days:7},
+{id:“monthly”,label:“Mensuelle”,desc:“1 Coran / mois — ~20 pages/j”,pages:604,days:30},
+{id:“ramadan”,label:“Ramadan”,desc:“1 Coran en 30 jours”,pages:604,days:30},
+{id:“custom”,label:“Personnalisée”,desc:“Définir son propre rythme”,pages:604,days:null},
+];
+
+// ─── Page data — first page of each surah in the 604-page Mushaf ───────────────
+// Source: standard Medina Mushaf (Hafs ’an Asim)
+const SURAH_PAGE = {
+1:1,2:2,3:50,4:77,5:106,6:128,7:151,8:177,9:187,10:208,
+11:221,12:235,13:249,14:255,15:262,16:267,17:282,18:293,19:305,20:312,
+21:322,22:332,23:342,24:350,25:359,26:367,27:377,28:385,29:396,30:404,
+31:411,32:415,33:418,34:428,35:434,36:440,37:446,38:453,39:458,40:467,
+41:477,42:483,43:489,44:496,45:499,46:502,47:507,48:511,49:515,50:518,
+51:520,52:523,53:526,54:528,55:531,56:534,57:537,58:542,59:545,60:549,
+61:551,62:553,63:554,64:556,65:558,66:560,67:562,68:566,69:568,70:570,
+71:572,72:574,73:575,74:577,75:578,76:580,77:581,78:582,79:583,80:585,
+81:586,82:587,83:587,84:589,85:590,86:591,87:591,88:592,89:593,90:594,
+91:595,92:595,93:596,94:596,95:597,96:597,97:598,98:598,99:599,100:599,
+101:600,102:600,103:601,104:601,105:601,106:602,107:602,108:602,109:603,110:603,
+111:603,112:604,113:604,114:604,
+};
+const TOTAL_PAGES = 604;
+
+// ─── Utils ─────────────────────────────────────────────────────────────────────
+const ld=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}};
+const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
+const today=()=>new Date().toISOString().split(“T”)[0];
+
+// ─── Themes ────────────────────────────────────────────────────────────────────
+const THEMES={
+dark:{bg:”#07090d”,s1:”#0d1117”,s2:”#131920”,s3:”#1a2230”,b1:”#1e2a38”,b2:”#243244”,
+acc:”#c9a84c”,acc2:”#e2c46a”,acc3:”#f5dc8c”,gr:”#22c55e”,grD:“rgba(34,197,94,.12)”,
+tx:”#e2e8f0”,tx2:”#94a3b8”,tx3:”#4b5c70”,rd:”#ef4444”,bl:”#4fc3f7”,pu:”#a855f7”,
+navBg:”#0d1117”,cardBg:”#0d1117”,inputBg:”#131920”,hero:“linear-gradient(160deg,#131920,#1a2230)”},
+light:{bg:”#f0f7f0”,s1:”#ffffff”,s2:”#f4faf4”,s3:”#e8f5e8”,b1:”#d0e8d0”,b2:”#bddcbd”,
+acc:”#2e7d32”,acc2:”#388e3c”,acc3:”#43a047”,gr:”#2e7d32”,grD:“rgba(46,125,50,.12)”,
+tx:”#1a2e1a”,tx2:”#3d5c3d”,tx3:”#6a8f6a”,rd:”#c62828”,bl:”#1565c0”,pu:”#6a1b9a”,
+navBg:”#ffffff”,cardBg:”#ffffff”,inputBg:”#f4faf4”,hero:“linear-gradient(160deg,#e8f5e8,#c8e6c9)”},
+};
+const TJC_DARK={m:”#4fc3f7”,g:”#66bb6a”,q:”#ffa726”,r:”#ef5350”,t:”#a1887f”};
+const TJC_LIGHT={m:”#0d47a1”,g:”#1b5e20”,q:”#bf360c”,r:”#b71c1c”,t:”#4e342e”};
+
+// ─── SVG Icons ─────────────────────────────────────────────────────────────────
+const Icons = {
+Book: ({size=24,color=“currentColor”})=>(
+<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+</svg>),
+Brain: ({size=24,color=“currentColor”})=>(
+<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+<path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/>
+<path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/>
+</svg>),
+Star: ({size=24,color=“currentColor”})=>(
+<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+</svg>),
+Chart: ({size=24,color=“currentColor”})=>(
+<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+</svg>),
+Moon: ({size=24,color=“currentColor”})=>(
+<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+</svg>),
+Sun: ({size=24,color=“currentColor”})=>(
+<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+<line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+<line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+<line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+</svg>),
+Check: ({size=24,color=“currentColor”})=>(
+<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+<polyline points="20 6 9 17 4 12"/>
+</svg>),
+Play: ({size=24,color=“currentColor”,fill=false})=>(
+<svg width={size} height={size} viewBox=“0 0 24 24” fill={fill?color:“none”} stroke={color} strokeWidth=“1.8” strokeLinecap=“round” strokeLinejoin=“round”>
+<polygon points="5 3 19 12 5 21 5 3"/>
+</svg>),
+Settings: ({size=24,color=“currentColor”})=>(
+<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+<circle cx="12" cy="12" r="3"/>
+<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+</svg>),
+Scroll: ({size=24,color=“currentColor”})=>(
+<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+<line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+</svg>),
+};
+
+// ─── Tajwid component ──────────────────────────────────────────────────────────
+function TajwidSpan({text, enabled, tjc}) {
+if (!enabled) {
+// Strip any tajwid markup if present (for safety)
+const clean = text.replace(/[[mgqrt]](.*?)[/[mgqrt]]/g, “$1”);
+return <span>{clean}</span>;
+}
+const parts=[];
+const regex=/[([mgqrt])](.*?)[/\1]/g; // new regex per call, no stale state
+let last=0, m;
+const colors={m:tjc.m,g:tjc.g,q:tjc.q,r:tjc.r,t:tjc.t};
+while ((m=regex.exec(text))!==null) {
+if (m.index>last) parts.push(<span key={last}>{text.slice(last,m.index)}</span>);
+parts.push(<span key={m.index} style={{color:colors[m[1]]||tjc.r,fontWeight:700}}>{m[2]}</span>);
+last=m.index+m[0].length;
+}
+if (last<text.length) parts.push(<span key={`e${last}`}>{text.slice(last)}</span>);
+return <>{parts}</>;
+}
+
+// ─── CSS ───────────────────────────────────────────────────────────────────────
+function buildCSS(t, tjc, arFont) {
+return `
+@import url(‘https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Lateef:wght@400&family=Noto+Naskh+Arabic:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap’);
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:${t.bg};color:${t.tx};font-family:‘DM Sans’,sans-serif;min-height:100vh;padding-bottom:80px;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:${t.s1};}
+::-webkit-scrollbar-thumb{background:${t.b2};border-radius:99px;}
+
+/* ── Top bar ── */
+.topbar{position:sticky;top:0;z-index:60;background:${t.navBg};border-bottom:1px solid ${t.b1};backdrop-filter:blur(12px);}
+.tb{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 16px;}
+.logo{display:flex;align-items:baseline;gap:8px;}
+.logo-h{font-family:‘Amiri’,serif;font-size:1.4rem;color:${t.acc};}
+.logo-ar{font-family:‘Amiri Quran’,serif;font-size:1.1rem;color:${t.acc2};}
+.logo-sub{font-size:.55rem;color:${t.tx3};letter-spacing:2px;text-transform:uppercase;}
+.tb-r{display:flex;gap:6px;align-items:center;}
+.ib{background:transparent;border:1px solid ${t.b2};color:${t.tx2};padding:5px 10px;border-radius:8px;font-size:.68rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:4px;}
+.ib:hover{border-color:${t.acc};color:${t.acc};}
+.ib.pri{background:${t.acc};border-color:${t.acc};color:#fff;font-weight:600;}
+
+/* ── Hero ── */
+.hero{background:${t.hero};border-bottom:1px solid ${t.b1};padding:14px 16px;}
+.hero-i{max-width:1200px;margin:0 auto;}
+.hero-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
+.h-pct{font-size:2.2rem;font-weight:700;color:${t.acc};font-variant-numeric:tabular-nums;}
+.h-pct sup{font-size:.9rem;color:${t.tx2};font-weight:400;}
+.h-lbl{font-size:.6rem;color:${t.tx3};text-transform:uppercase;letter-spacing:2px;}
+.h-track{height:12px;background:${t.b1};border-radius:99px;overflow:hidden;margin-bottom:9px;}
+.h-fill{height:100%;background:linear-gradient(90deg,${t.acc},${t.acc2},${t.acc3});border-radius:99px;transition:width 1s ease;}
+.h-kpis{display:flex;gap:18px;flex-wrap:wrap;}
+.kpi .v{font-size:.95rem;font-weight:600;line-height:1.2;}
+.kpi .l{font-size:.55rem;color:${t.tx3};text-transform:uppercase;letter-spacing:1.5px;}
+.kpi.g .v{color:${t.gr};} .kpi.b .v{color:${t.bl};} .kpi.o .v{color:#f97316;} .kpi.a .v{color:${t.acc};}
+
+/* ── Bottom nav ── */
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:60;background:${t.navBg};border-top:1px solid ${t.b1};display:flex;align-items:stretch;height:62px;backdrop-filter:blur(12px);}
+.bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:transparent;color:${t.tx3};font-size:.58rem;font-weight:500;cursor:pointer;transition:all .2s;padding:6px 2px;position:relative;}
+.bn:hover{color:${t.tx2};}
+.bn.on{color:${t.acc};}
+.bn.on::after{content:’’;position:absolute;top:0;left:25%;right:25%;height:2px;background:${t.acc};border-radius:0 0 99px 99px;}
+.bn-lbl{font-size:.57rem;font-weight:500;}
+
+/* ── Content wrap ── */
+.wrap{max-width:1200px;margin:0 auto;padding:14px 16px 100px;}
+.two{display:grid;grid-template-columns:300px 1fr;gap:12px;align-items:start;}
+
+/* ── Cards ── */
+.card{background:${t.cardBg};border:1px solid ${t.b1};border-radius:14px;overflow:hidden;}
+.ch{padding:10px 14px;border-bottom:1px solid ${t.b1};display:flex;align-items:center;justify-content:space-between;}
+.ct{font-size:.63rem;text-transform:uppercase;letter-spacing:1.5px;color:${t.tx3};font-weight:600;}
+
+/* ── Left panel ── */
+.lp{display:flex;flex-direction:column;max-height:calc(100vh - 200px);position:sticky;top:58px;}
+.ltabs{display:flex;border-bottom:1px solid ${t.b1};}
+.lt{flex:1;padding:9px 4px;border:none;background:transparent;color:${t.tx2};font-size:.68rem;font-weight:500;border-bottom:2px solid transparent;cursor:pointer;transition:all .15s;}
+.lt:hover{color:${t.tx};} .lt.on{color:${t.acc};border-bottom-color:${t.acc};}
+.sbox{padding:8px;}
+.sinp{width:100%;background:${t.inputBg};border:1px solid ${t.b2};border-radius:8px;padding:7px 10px;color:${t.tx};font-size:.76rem;outline:none;}
+.sinp:focus{border-color:${t.acc};} .sinp::placeholder{color:${t.tx3};}
+.slist{flex:1;overflow-y:auto;}
+.srow{padding:8px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:background .1s;border-left:3px solid transparent;}
+.srow:hover{background:${t.s2};} .srow.sel{background:${t.s2};border-left-color:${t.acc};} .srow.done{border-left-color:${t.gr};}
+.snum{width:21px;height:21px;border-radius:50%;border:1px solid ${t.b2};display:flex;align-items:center;justify-content:center;font-size:.56rem;color:${t.tx3};flex-shrink:0;}
+.snum.done{background:${t.grD};border-color:${t.gr};color:${t.gr};}
+.sname{font-size:.76rem;font-weight:500;}
+.smeta{font-size:.56rem;color:${t.tx3};margin-top:1px;}
+.sar{font-family:‘Amiri’,serif;font-size:.9rem;color:${t.acc};}
+.mbar{width:36px;height:3px;background:${t.b2};border-radius:99px;overflow:hidden;margin-top:3px;}
+.mfill{height:100%;background:${t.gr};border-radius:99px;}
+
+/* Juz grid */
+.jg{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:7px;}
+.jc{background:${t.s2};border:1px solid ${t.b1};border-radius:7px;padding:6px 3px;text-align:center;cursor:pointer;transition:all .15s;}
+.jc:hover{border-color:${t.acc};} .jc.sel{border-color:${t.acc};background:${t.s3};}
+.jn{font-family:‘Amiri’,serif;font-size:1.2rem;color:${t.acc};line-height:1;}
+.jl{font-size:.48rem;color:${t.tx3};text-transform:uppercase;}
+.jb{height:3px;background:${t.b1};border-radius:99px;overflow:hidden;margin-top:3px;}
+.jf{height:100%;background:${t.gr};border-radius:99px;}
+
+/* ── Verse viewer ── */
+.rp{position:sticky;top:58px;}
+.vhd{padding:12px 14px;border-bottom:1px solid ${t.b1};}
+.v-ar-title{font-family:${arFont};font-size:1.9rem;color:${t.acc};direction:rtl;text-align:right;line-height:1.5;margin-bottom:4px;}
+.v-info{font-size:.65rem;color:${t.tx3};}
+.vbar{height:4px;background:${t.b2};border-radius:99px;overflow:hidden;margin-top:7px;}
+.vfill{height:100%;background:${t.gr};border-radius:99px;transition:width .5s;}
+.vtoolbar{padding:7px 12px;border-bottom:1px solid ${t.b1};display:flex;align-items:center;gap:5px;flex-wrap:wrap;background:${t.s2};}
+.tbtn{padding:4px 9px;border-radius:99px;border:1px solid ${t.b2};background:transparent;color:${t.tx2};font-size:.65rem;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.tbtn:hover{border-color:${t.acc};color:${t.acc};} .tbtn.on{background:${t.acc};border-color:${t.acc};color:#fff;font-weight:600;}
+.tsel{background:${t.inputBg};border:1px solid ${t.b2};color:${t.tx};padding:4px 8px;border-radius:8px;font-size:.65rem;outline:none;}
+
+.tj-legend{display:flex;gap:10px;flex-wrap:wrap;padding:5px 12px;background:${t.s3};border-bottom:1px solid ${t.b1};font-size:.58rem;}
+.tj-item{display:flex;align-items:center;gap:3px;}
+.tj-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+
+.arow{padding:6px 12px;border-bottom:1px solid ${t.b1};background:${t.s2};display:flex;align-items:center;gap:7px;}
+
+.vscroll{max-height:calc(100vh - 380px);overflow-y:auto;}
+.vitem{padding:12px 14px;border-bottom:1px solid ${t.b1};transition:background .1s;}
+.vitem:hover{background:${t.s2};} .vitem.mem{background:${t.grD};border-left:3px solid ${t.gr};} .vitem.pl{background:rgba(201,168,76,.08);border-left:3px solid ${t.acc};}
+.vtop{display:flex;align-items:flex-start;gap:8px;}
+.vnum{min-width:24px;height:24px;border-radius:50%;border:1px solid ${t.b2};display:flex;align-items:center;justify-content:center;font-size:.6rem;color:${t.tx3};flex-shrink:0;cursor:pointer;transition:all .2s;margin-top:6px;}
+.vnum:hover{border-color:${t.bl};color:${t.bl};} .vnum.mem{background:${t.grD};border-color:${t.gr};color:${t.gr};} .vnum.pl{border-color:${t.acc};color:${t.acc};}
+.var-text{font-family:${arFont};font-size:1.65rem;direction:rtl;text-align:right;line-height:2.1;flex:1;}
+.vmark{margin-right:4px;font-size:.8rem;color:${t.tx3};font-family:‘Amiri’,serif;}
+.vfr{font-size:.74rem;color:${t.tx2};line-height:1.7;margin-top:6px;padding-top:6px;border-top:1px solid ${t.b1};font-style:italic;}
+.vtf{margin-top:7px;padding:8px 10px;background:rgba(168,85,247,.07);border-left:3px solid ${t.pu};border-radius:0 8px 8px 0;font-size:.7rem;color:${t.tx2};line-height:1.7;}
+.vtf-hd{font-size:.58rem;color:${t.pu};text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:3px;}
+.vacts{display:flex;gap:4px;margin-top:7px;flex-wrap:wrap;}
+.vbtn{padding:3px 8px;border-radius:99px;border:1px solid ${t.b2};background:transparent;color:${t.tx3};font-size:.6rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:3px;}
+.vbtn:hover{border-color:${t.acc};color:${t.acc};} .vbtn.mem{background:${t.grD};border-color:${t.gr};color:${t.gr};} .vbtn.snd{border-color:${t.bl};color:${t.bl};}
+
+/* ── Stats ── */
+.sp{display:flex;flex-direction:column;gap:12px;}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.sc{background:${t.cardBg};border:1px solid ${t.b1};border-radius:13px;padding:13px;}
+.slbl{font-size:.58rem;text-transform:uppercase;letter-spacing:1.5px;color:${t.tx3};margin-bottom:6px;}
+.sval{font-size:1.4rem;font-weight:700;line-height:1;margin-bottom:3px;}
+.ssub{font-size:.62rem;color:${t.tx3};}
+.sc.a .sval{color:${t.acc};} .sc.g .sval{color:${t.gr};} .sc.b .sval{color:${t.bl};} .sc.r .sval{color:${t.rd};}
+.two-h{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.donut-w{position:relative;width:150px;height:150px;margin:0 auto;}
+.donut-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.d-pct{font-size:1.75rem;font-weight:700;color:${t.acc};} .d-lbl{font-size:.58rem;color:${t.tx3};text-transform:uppercase;letter-spacing:1px;}
+.bc{display:flex;align-items:flex-end;gap:3px;height:100px;}
+.bcol{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;}
+.bfw{flex:1;width:100%;display:flex;flex-direction:column;justify-content:flex-end;}
+.bfi{background:linear-gradient(180deg,${t.acc2},${t.acc});border-radius:3px 3px 0 0;min-height:2px;}
+.blbl{font-size:.48rem;color:${t.tx3};} .bval{font-size:.48rem;color:${t.acc};}
+.trow{display:flex;align-items:center;gap:8px;padding:5px 0;}
+.tbar{flex:2;height:5px;background:${t.b1};border-radius:99px;overflow:hidden;}
+.tfill{height:100%;background:${t.gr};border-radius:99px;}
+.cd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;padding:12px;}
+.cdc{background:${t.s2};border:1px solid ${t.b1};border-radius:10px;padding:11px;cursor:pointer;transition:border-color .2s;}
+.cdc:hover{border-color:${t.acc};}
+
+/* ── Khatma ── */
+.khatma-wrap{display:flex;flex-direction:column;gap:14px;padding-bottom:20px;}
+.kh-active{background:${t.cardBg};border:1px solid ${t.b1};border-radius:14px;padding:18px;overflow:visible;}
+.kp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;}
+.kp-card{background:${t.s2};border:2px solid ${t.b1};border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;text-align:center;}
+.kp-card:hover{border-color:${t.acc};} .kp-card.sel{border-color:${t.acc};background:${t.s3};}
+.kp-label{font-size:.85rem;font-weight:600;color:${t.tx};margin-bottom:4px;}
+.kp-desc{font-size:.65rem;color:${t.tx3};}
+.kp-icon{font-size:1.5rem;margin-bottom:6px;}
+.kh-active{background:${t.cardBg};border:1px solid ${t.b1};border-radius:14px;padding:18px;}
+.kh-title{font-family:‘Amiri’,serif;font-size:1.4rem;color:${t.acc};margin-bottom:4px;}
+.kh-sub{font-size:.68rem;color:${t.tx3};margin-bottom:14px;}
+.kh-track{height:20px;background:${t.b1};border-radius:99px;overflow:hidden;margin-bottom:8px;position:relative;}
+.kh-fill{height:100%;background:linear-gradient(90deg,${t.acc},${t.acc2});border-radius:99px;transition:width .8s ease;}
+.kh-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5);}
+@keyframes spin{to{transform:rotate(360deg)}}
+.kd-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:12px;}
+.kd-cell{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;cursor:pointer;transition:all .15s;border:1.5px solid ${t.b2};background:${t.s2};color:${t.tx3};min-height:32px;}
+.kd-cell.done{background:${t.gr};border-color:${t.gr};color:#fff;}
+.kd-cell.today{border-color:${t.acc};color:${t.acc};background:${t.s3};font-weight:800;}
+.kd-cell:hover{border-color:${t.acc};transform:scale(1.05);}
+.kh-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}
+.khs{background:${t.s2};border-radius:10px;padding:12px;text-align:center;}
+.khs-v{font-size:1.3rem;font-weight:700;color:${t.acc};}
+.khs-l{font-size:.6rem;color:${t.tx3};text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.streak-fire{font-size:1.8rem;}
+
+/* ── Settings ── */
+.settings-wrap{display:flex;flex-direction:column;gap:14px;max-width:600px;margin:0 auto;}
+.settings-section{background:${t.cardBg};border:1px solid ${t.b1};border-radius:14px;overflow:hidden;}
+.ss-hd{padding:12px 16px;border-bottom:1px solid ${t.b1};font-size:.68rem;text-transform:uppercase;letter-spacing:1.5px;color:${t.tx3};font-weight:600;}
+.font-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:12px;}
+.font-card{border:2px solid ${t.b1};border-radius:10px;padding:10px;cursor:pointer;transition:all .2s;}
+.font-card:hover{border-color:${t.acc};} .font-card.sel{border-color:${t.acc};background:${t.s3};}
+.font-preview{font-size:1.4rem;direction:rtl;text-align:center;margin-bottom:4px;line-height:1.6;}
+.font-name{font-size:.68rem;font-weight:600;color:${t.tx};text-align:center;}
+.font-desc{font-size:.58rem;color:${t.tx3};text-align:center;}
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid ${t.b1};}
+.set-row:last-child{border-bottom:none;}
+.set-lbl{font-size:.78rem;color:${t.tx};}
+.set-sub{font-size:.63rem;color:${t.tx3};margin-top:2px;}
+.set-inp{background:${t.inputBg};border:1px solid ${t.b2};color:${t.tx};padding:6px 10px;border-radius:8px;font-size:.76rem;outline:none;width:100px;}
+.set-inp:focus{border-color:${t.acc};}
+.toggle{width:42px;height:24px;background:${t.b2};border-radius:99px;cursor:pointer;position:relative;transition:background .2s;border:none;flex-shrink:0;}
+.toggle::after{content:’’;position:absolute;top:2px;left:2px;width:20px;height:20px;background:white;border-radius:50%;transition:transform .2s;}
+.toggle.on{background:${t.acc};}
+.toggle.on::after{transform:translateX(18px);}
+
+/* ── Modal ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);}
+.modal{background:${t.s1};border:1px solid ${t.acc};border-radius:18px;padding:26px;max-width:380px;width:92%;}
+.modal h2{font-family:‘Amiri’,serif;font-size:1.7rem;color:${t.acc};margin-bottom:5px;}
+.modal p{font-size:.76rem;color:${t.tx2};line-height:1.65;margin-bottom:18px;}
+.modal label{display:block;font-size:.64rem;color:${t.tx3};text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.modal input{width:100%;background:${t.inputBg};border:1px solid ${t.b2};border-radius:8px;padding:8px 12px;color:${t.tx};font-size:.85rem;margin-bottom:10px;outline:none;}
+.modal input:focus{border-color:${t.acc};}
+.mbtn{width:100%;padding:11px;background:${t.acc};border:none;border-radius:8px;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer;}
+.mbtn:hover{opacity:.9;}
+
+.empty{text-align:center;padding:36px 14px;color:${t.tx3};font-size:.8rem;}
+.big-ar{font-family:${arFont};font-size:2rem;color:${t.acc};margin-bottom:8px;}
+
+@media(max-width:860px){
+.two{grid-template-columns:1fr;} .rp,.lp{position:static;max-height:none;} .vscroll{max-height:none;}
+.sg{grid-template-columns:repeat(2,1fr);} .two-h{grid-template-columns:1fr;}
+}
+`;}
+
+// ─── Main App ──────────────────────────────────────────────────────────────────
+function App() {
+const [tn, setTn] = useState(()=>ld(“qtheme”,“dark”));
+const t = THEMES[tn]||THEMES.dark;
+const tjc = tn===“dark”?TJC_DARK:TJC_LIGHT;
+
+const [fontId, setFontId] = useState(()=>ld(“qfont”,“amiri-quran”));
+const arFont = (FONTS.find(f=>f.id===fontId)||FONTS[0]).css;
+
+// Core state
+const [mem, setMem] = useState(()=>ld(“qmem6”,{}));
+const [settings, setSettings] = useState(()=>ld(“qset6”,null));
+const [hist, setHist] = useState(()=>ld(“qhist6”,{}));
+const [setup, setSetup] = useState(()=>!ld(“qset6”,null));
+const [page, setPage] = useState(“quran”);
+
+// Quran page
+const [ltab, setLtab] = useState(“list”);
+const [selS, setSelS] = useState(null);
+const [selJuz, setSelJuz] = useState(null);
+const [search, setSearch] = useState(””);
+const [showTr, setShowTr] = useState(true);
+const [showTj, setShowTj] = useState(true);
+const [showTf, setShowTf] = useState(false);
+const [showPage, setShowPage] = useState(false);
+const [mushafPage, setMushafPage] = useState(null);
+const [rec, setRec] = useState(RECITERS[0]);
+const [playing, setPlaying] = useState(null);
+
+// Khatma state
+const [khatmas, setKhatmas] = useState(()=>ld(“qkhatmas”,[]));
+const [activeKhatma, setActiveKhatma] = useState(()=>ld(“qakthatma”,null));
+const [kPreset, setKPreset] = useState(null);
+const [kCustomDays, setKCustomDays] = useState(“30”);
+const [kName, setKName] = useState(“Ma Khatma”);
+
+// Settings
+const [goal, setGoal] = useState(“5”);
+const [startDate, setStartDate] = useState(new Date().toISOString().split(“T”)[0]);
+
+const audioRef = useRef(null);
+const vpRef = useRef(null);
+
+// Persist
+useEffect(()=>sv(“qmem6”,mem),[mem]);
+useEffect(()=>sv(“qset6”,settings),[settings]);
+useEffect(()=>sv(“qhist6”,hist),[hist]);
+useEffect(()=>sv(“qtheme”,tn),[tn]);
+useEffect(()=>sv(“qfont”,fontId),[fontId]);
+useEffect(()=>sv(“qkhatmas”,khatmas),[khatmas]);
+useEffect(()=>sv(“qakthatma”,activeKhatma),[activeKhatma]);
+
+// Track daily versets
+useEffect(()=>{
+const tod=today();
+const tot=Object.values(mem).reduce((s,v)=>s+Object.keys(v).length,0);
+setHist(h=>({…h,[tod]:tot}));
+},[mem]);
+
+// Derived
+const totalMem = useMemo(()=>Object.values(mem).reduce((s,v)=>s+Object.keys(v).length,0),[mem]);
+const remaining = TOTAL_VERSES - totalMem;
+const pct = +(totalMem/TOTAL_VERSES*100).toFixed(1);
+
+const {vpd, daysLeft, eta} = useMemo(()=>{
+if (!settings) return {vpd:5, daysLeft:0, eta:”-”};
+const start=new Date(settings.startDate), now=new Date();
+const dp=Math.max(1,Math.floor((now-start)/86400000));
+const rate=totalMem>0?Math.round(totalMem/dp):parseInt(settings.dailyGoal)||5;
+const eff=Math.max(rate,1);
+const days=remaining>0?Math.ceil(remaining/eff):0;
+const d=new Date(); d.setDate(d.getDate()+days);
+return {vpd:eff, daysLeft:days,
+eta:remaining>0?d.toLocaleDateString(“fr-FR”,{day:“numeric”,month:“long”,year:“numeric”}):“🎉 Terminé!”};
+},[settings, totalMem, remaining]);
+
+const sMem=(s)=>Object.keys(mem[String(s.n)]||{}).length;
+const sPct=(s)=>Math.round(sMem(s)/s.v*100);
+const juzPct=(j)=>{
+const ss=SURAHS.filter(s=>s.juz===j);
+const tot=ss.reduce((a,s)=>a+s.v,0), don=ss.reduce((a,s)=>a+sMem(s),0);
+return tot>0?Math.round(don/tot*100):0;
+};
+
+const doSelect=(s)=>{
+setSelS(s); setPlaying(null);
+setMushafPage(SURAH_PAGE[s.n]||1);
+if(audioRef.current) { audioRef.current.pause(); audioRef.current.src=””; }
+setTimeout(()=>vpRef.current?.scrollIntoView({behavior:“smooth”,block:“start”}),60);
+};
+
+const toggleV=(sn,vn)=>setMem(p=>{
+const k=String(sn), vk=String(vn), c={…p[k]||{}};
+if(c[vk]) delete c[vk]; else c[vk]=true;
+return {…p,[k]:c};
+});
+
+const toggleAll=(s)=>{
+const k=String(s.n), done=sMem(s)===s.v;
+setMem(p=>{
+if(done){const n={…p};delete n[k];return n;}
+const a={}; for(let i=1;i<=s.v;i++) a[String(i)]=true;
+return {…p,[k]:a};
+});
+};
+
+const doPlay=(vn)=>{
+if(!selS||!audioRef.current) return;
+if(playing===vn){
+if(!audioRef.current.paused) audioRef.current.pause();
+else audioRef.current.play().catch(()=>{});
+return;
+}
+audioRef.current.pause();
+const sn=String(selS.n).padStart(3,“0”), vnn=String(vn).padStart(3,“0”);
+const url=`https://cdn.islamic.network/quran/audio/128/${rec.id}/${sn}${vnn}.mp3`;
+audioRef.current.src=url;
+audioRef.current.load();
+setPlaying(vn);
+audioRef.current.play().catch(()=>{ setPlaying(null); });
+};
+
+// Verses with API fetch + localStorage cache
+const [verses, setVerses] = useState([]);
+const [loadState, setLoadState] = useState(“idle”); // idle | loading | done | error
+
+useEffect(()=>{
+if(!selS){ setVerses([]); setLoadState(“idle”); return; }
+// 1) Embedded data
+if(Q[selS.n]){ setVerses(Q[selS.n]); setLoadState(“done”); return; }
+// 2) localStorage cache
+const cacheKey=`qv_${selS.n}`;
+try{
+const cached=localStorage.getItem(cacheKey);
+if(cached){ setVerses(JSON.parse(cached)); setLoadState(“done”); return; }
+}catch{}
+// 3) Fetch from API (runs in browser, not in sandbox)
+setVerses([]); setLoadState(“loading”);
+Promise.all([
+fetch(`https://api.alquran.cloud/v1/surah/${selS.n}/quran-uthmani`).then(r=>r.json()),
+fetch(`https://api.alquran.cloud/v1/surah/${selS.n}/fr.hamidullah`).then(r=>r.json()),
+]).then(([arData, frData])=>{
+const arAyahs=arData?.data?.ayahs||[];
+const frAyahs=frData?.data?.ayahs||[];
+if(!arAyahs.length){ setLoadState(“error”); return; }
+const result=arAyahs.map((a,i)=>({
+n:a.numberInSurah,
+ar:a.text,
+fr:frAyahs[i]?.text||””,
+tf:””,
+}));
+setVerses(result);
+setLoadState(“done”);
+try{ localStorage.setItem(cacheKey, JSON.stringify(result)); }catch{}
+}).catch(()=>setLoadState(“error”));
+},[selS]);
+
+const filtered = useMemo(()=>{
+const q=search.toLowerCase().trim();
+if(!q) return SURAHS;
+return SURAHS.filter(s=>s.name.toLowerCase().includes(q)||s.ar.includes(q)||String(s.n).includes(q));
+},[search]);
+
+const juzList=[…new Set(SURAHS.map(s=>s.juz))].sort((a,b)=>a-b);
+
+// Khatma logic
+const createKhatma=()=>{
+if(!kPreset) return;
+const days=kPreset.id===“custom”?parseInt(kCustomDays)||30:kPreset.days;
+const nk={id:Date.now(), name:kName, preset:kPreset.id, totalDays:days,
+startDate:today(), log:{}, pages:604};
+setKhatmas(p=>[…p,nk]);
+setActiveKhatma(nk);
+setKPreset(null);
+};
+
+const markKhatmaDay=(k, d)=>{
+const updated={…k, log:{…k.log, [d]:!(k.log[d])}};
+setKhatmas(p=>p.map(x=>x.id===k.id?updated:x));
+if(activeKhatma?.id===k.id) setActiveKhatma(updated);
+};
+
+const getKhatmaDays=(k)=>{
+const days=[]; const start=new Date(k.startDate);
+for(let i=0;i<k.totalDays;i++){
+const d=new Date(start); d.setDate(d.getDate()+i);
+days.push(d.toISOString().split(“T”)[0]);
+}
+return days;
+};
+
+const khatmaStreak=(k)=>{
+const days=getKhatmaDays(k).filter(d=>d<=today()).reverse();
+let streak=0;
+for(const d of days){ if(k.log[d]) streak++; else break; }
+return streak;
+};
+
+// Pages state
+const [pageRead, setPageRead] = useState(()=>ld(“qpages”,{}));
+useEffect(()=>sv(“qpages”,pageRead),[pageRead]);
+const togglePage=(p)=>setPageRead(prev=>({…prev,[String(p)]:!prev[String(p)]}));
+
+// Stats data
+const histKeys=Object.keys(hist).sort().slice(-14);
+const histVals=histKeys.map(k=>hist[k]||0);
+const gains=histVals.map((v,i)=>i===0?v:Math.max(0,v-histVals[i-1]));
+const maxG=Math.max(…gains,1);
+const topS=[…SURAHS].map(s=>({…s,p:sPct(s)})).filter(s=>s.p>0).sort((a,b)=>b.p-a.p).slice(0,10);
+const cdS=SURAHS.map(s=>{
+const done=sMem(s), rem=s.v-done, days=vpd>0?Math.ceil(rem/vpd):null;
+return {…s,done,rem,days,p:sPct(s)};
+}).filter(s=>s.rem>0).slice(0,30);
+
+return (
+<>
+<style>{buildCSS(t, tjc, arFont)}</style>
+
+```
+  {/* Setup modal */}
+  {setup&&(
+    <div className="overlay">
+      <div className="modal">
+        <h2>بِسْمِ ٱللَّهِ</h2>
+        <p>Bienvenue dans Al-Hifz. Configure ton objectif pour suivre ta mémorisation.</p>
+        <label>Versets à mémoriser par jour</label>
+        <input type="number" min="1" max="100" value={goal} onChange={e=>setGoal(e.target.value)}/>
+        <label>Date de début</label>
+        <input type="date" value={startDate} onChange={e=>setStartDate(e.target.value)}/>
+        <button className="mbtn" onClick={()=>{
+          setSettings({dailyGoal:parseInt(goal)||5, startDate});
+          setSetup(false);
+        }}>Commencer →</button>
+      </div>
+    </div>
+  )}
+
+  {/* Top bar */}
+  <div className="topbar">
+    <div className="tb">
+      <div className="logo">
+        <span className="logo-h">Al-Hifz</span>
+        <span className="logo-ar">القرآن</span>
+        <span className="logo-sub">mémorisation</span>
+      </div>
+      <div className="tb-r">
+        <button className="ib" onClick={()=>setTn(n=>n==="dark"?"light":"dark")} title="Thème">
+          {tn==="dark"?<Icons.Sun size={14}/>:<Icons.Moon size={14}/>}
+          <span>{tn==="dark"?"Clair":"Sombre"}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  {/* Hero */}
+  <div className="hero">
+    <div className="hero-i">
+      <div className="hero-top">
+        <span className="h-lbl">Hifz — {TOTAL_VERSES} versets</span>
+        <div className="h-pct">{pct}<sup>%</sup></div>
+      </div>
+      <div className="h-track"><div className="h-fill" style={{width:`${pct}%`}}/></div>
+      <div className="h-kpis">
+        <div className="kpi g"><span className="v">{totalMem.toLocaleString()}</span><span className="l">Appris</span></div>
+        <div className="kpi"><span className="v">{remaining.toLocaleString()}</span><span className="l">Restants</span></div>
+        <div className="kpi b"><span className="v">{vpd}/j</span><span className="l">Rythme</span></div>
+        <div className="kpi o"><span className="v">{daysLeft>0?`${daysLeft}j`:"🎉"}</span><span className="l">Avant fin</span></div>
+        <div className="kpi a"><span className="v" style={{fontSize:".72rem"}}>{eta}</span><span className="l">Estimation</span></div>
+      </div>
+    </div>
+  </div>
+
+  {/* Main content */}
+  <div className="wrap">
+
+    {/* ── CORAN ── */}
+    {page==="quran"&&(
+      <div className="two">
+        <div className="lp card">
+          <div className="ltabs">
+            {[["list","Sourates"],["juz","Juz"],["search","Recherche"]].map(([id,l])=>(
+              <button key={id} className={`lt ${ltab===id?"on":""}`} onClick={()=>setLtab(id)}>{l}</button>
+            ))}
+          </div>
+          {ltab==="search"&&(
+            <div className="sbox">
+              <input className="sinp" placeholder="Nom, arabe, numéro…" value={search} onChange={e=>setSearch(e.target.value)} autoFocus/>
+            </div>
+          )}
+          {(ltab==="list"||ltab==="search")&&(
+            <div className="slist">
+              {(ltab==="search"?filtered:SURAHS).map(s=>{
+                const p=sPct(s), emb=!!Q[s.n];
+                return (
+                  <div key={s.n} className={`srow ${selS?.n===s.n?"sel":""} ${p===100?"done":""}`} onClick={()=>doSelect(s)}>
+                    <div className={`snum ${p===100?"done":""}`}>
+                      {p===100?<Icons.Check size={10} color={t.gr}/>:s.n}
+                    </div>
+                    <div style={{flex:1}}>
+                      <div className="sname">{s.name}{emb&&<span style={{fontSize:".48rem",color:t.gr,marginLeft:4}}>⬤</span>}</div>
+                      <div className="smeta">Juz {s.juz} · {s.v}v · {s.type}</div>
+                    </div>
+                    <div style={{textAlign:"right",flexShrink:0}}>
+                      <div className="sar">{s.ar}</div>
+                      <div className="mbar"><div className="mfill" style={{width:`${p}%`}}/></div>
+                      <div style={{fontSize:".52rem",color:t.tx3,marginTop:2}}>{sMem(s)}/{s.v}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {ltab==="juz"&&(
+            <>
+              <div className="jg">
+                {juzList.map(j=>{
+                  const p=juzPct(j);
+                  return (
+                    <div key={j} className={`jc ${selJuz===j?"sel":""}`} onClick={()=>setSelJuz(j===selJuz?null:j)}>
+                      <div className="jl">Juz</div>
+                      <div className="jn">{j}</div>
+                      <div className="jb"><div className="jf" style={{width:`${p}%`}}/></div>
+                      <div style={{fontSize:".56rem",color:p===100?t.gr:p>0?t.acc:t.tx3,marginTop:2}}>{p}%</div>
+                    </div>
+                  );
+                })}
+              </div>
+              {selJuz&&(
+                <div className="slist" style={{borderTop:`1px solid ${t.b1}`}}>
+                  {SURAHS.filter(s=>s.juz===selJuz).map(s=>(
+                    <div key={s.n} className={`srow ${selS?.n===s.n?"sel":""}`} onClick={()=>doSelect(s)}>
+                      <div className={`snum ${sPct(s)===100?"done":""}`}>{sPct(s)===100?<Icons.Check size={10} color={t.gr}/>:s.n}</div>
+                      <div style={{flex:1}}><div className="sname">{s.name}</div><div className="smeta">{s.v}v{!!Q[s.n]&&<span style={{color:t.gr,marginLeft:4}}>⬤</span>}</div></div>
+                      <div className="sar">{s.ar}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Verse viewer */}
+        <div ref={vpRef} className="rp">
+          {!selS?(
+            <div className="card empty">
+              <div className="big-ar">اختر سورة</div>
+              Sélectionne une sourate pour lire, mémoriser et écouter
+              <div style={{marginTop:8,fontSize:".65rem",color:t.acc}}>⬤ = embarqué · autres = chargés depuis internet</div>
+            </div>
+          ):(
+            <div className="card">
+              <div className="vhd">
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10}}>
+                  <div>
+                    <div className="v-ar-title">{selS.ar}</div>
+                    <div className="v-info">Sourate {selS.n} · {selS.name} · Juz {selS.juz} · {selS.v} versets · {selS.type}</div>
+                    <div style={{fontSize:".6rem",color:t.tx3,marginTop:2}}>
+                      {sMem(selS)}/{selS.v} mémorisés ({sPct(selS)}%)
+                      {vpd>0&&sMem(selS)<selS.v&&<span style={{marginLeft:8,color:t.bl}}>· ~{Math.ceil((selS.v-sMem(selS))/vpd)} jours</span>}
+                      {loadState==="error"&&<span style={{marginLeft:8,color:t.rd}}>· erreur chargement</span>}
+                      {loadState==="loading"&&<span style={{marginLeft:8,color:t.tx3}}>· chargement…</span>}
+                    </div>
+                  </div>
+                  <button className="tbtn" onClick={()=>toggleAll(selS)} style={{flexShrink:0}}>
+                    {sMem(selS)===selS.v?"Tout décocher":"Tout cocher"}
+                  </button>
+                </div>
+                <div className="vbar"><div className="vfill" style={{width:`${sPct(selS)}%`}}/></div>
+              </div>
+
+              <div className="vtoolbar">
+                <button className={`tbtn ${showTj?"on":""}`} onClick={()=>setShowTj(v=>!v)}>Tajwid</button>
+                <button className={`tbtn ${showTr?"on":""}`} onClick={()=>setShowTr(v=>!v)}>Traduction</button>
+                <button className={`tbtn ${showTf?"on":""}`} onClick={()=>setShowTf(v=>!v)}>Tafsir</button>
+                <button className={`tbtn ${showPage?"on":""}`} onClick={()=>setShowPage(v=>!v)}>Page</button>
+                <select className="tsel" value={rec.id} onChange={e=>setRec(RECITERS.find(r=>r.id===e.target.value)||RECITERS[0])}>
+                  {RECITERS.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}
+                </select>
+              </div>
+
+              {/* ── Page Mushaf — affichage pleine page ── */}
+              {showPage&&(
+                <div style={{background:t.s1}}>
+                  {/* Navigation pages */}
+                  <div style={{display:"flex",alignItems:"center",gap:6,padding:"8px 12px",borderBottom:`1px solid ${t.b1}`,background:t.s2}}>
+                    <button className="tbtn" onClick={()=>setMushafPage(p=>Math.max(1,(p||SURAH_PAGE[selS.n]||1)-1))}>←</button>
+                    <span style={{flex:1,textAlign:"center",fontSize:".72rem",color:t.tx2,fontWeight:600}}>
+                      Page {mushafPage||SURAH_PAGE[selS.n]||1} / 604
+                    </span>
+                    <button className="tbtn" onClick={()=>setMushafPage(p=>Math.min(604,(p||SURAH_PAGE[selS.n]||1)+1))}>→</button>
+                    <button
+                      className={`tbtn ${pageRead[String(mushafPage||SURAH_PAGE[selS.n]||1)]?"on":""}`}
+                      onClick={()=>togglePage(mushafPage||SURAH_PAGE[selS.n]||1)}>
+                      {pageRead[String(mushafPage||SURAH_PAGE[selS.n]||1)]?"Lue ✓":"Marquer lue"}
+                    </button>
+                  </div>
+                  {/* Image pleine page */}
+                  <div style={{width:"100%",background:"#fff",minHeight:400,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                    <img
+                      key={mushafPage||SURAH_PAGE[selS.n]||1}
+                      src={`https://static.qurancdn.com/images/background/page${String(mushafPage||SURAH_PAGE[selS.n]||1).padStart(3,"0")}.jpg`}
+                      alt={`Page ${mushafPage||SURAH_PAGE[selS.n]||1}`}
+                      style={{width:"100%",display:"block",maxWidth:"100%"}}
+                      onError={e=>{
+                        const pg=String(mushafPage||SURAH_PAGE[selS.n]||1).padStart(3,"0");
+                        if(!e.target.dataset.fb2){
+                          e.target.dataset.fb2="1";
+                          e.target.src=`https://everyayah.com/data/images_png/pages/page${pg}.png`;
+                        } else if(!e.target.dataset.fb3){
+                          e.target.dataset.fb3="1";
+                          e.target.src=`https://www.searchtruth.com/quran/images/pages/page${pg}.jpg`;
+                        } else {
+                          e.target.replaceWith(Object.assign(document.createElement("div"),{
+                            textContent:"Image non disponible — vérifier la connexion",
+                            style:`padding:20px;text-align:center;color:${t.tx3};font-size:.75rem`
+                          }));
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {showTj&&(
+                <div className="tj-legend">
+                  <span style={{color:t.tx3,marginRight:3}}>Tajwid :</span>
+                  {[[tjc.m,"Madd"],[tjc.g,"Ghunna ن م"],[tjc.q,"Qalqala"],[tjc.r,"Règles spéciales"],[tjc.t,"Tafkhim"]].map(([c,l])=>(
+                    <div key={l} className="tj-item"><div className="tj-dot" style={{background:c}}/><span style={{color:t.tx2}}>{l}</span></div>
+                  ))}
+                </div>
+              )}
+
+              {playing!==null&&(
+                <div className="arow">
+                  <button className="vbtn snd" style={{flexShrink:0}} onClick={()=>doPlay(playing)}>
+                    <Icons.Play size={11}/>{audioRef.current?.paused?"▶":"⏸"}
+                  </button>
+                  <span style={{fontSize:".62rem",color:t.tx2,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                    {selS?.name} · v.{playing} · {rec.name}
+                  </span>
+                  <button className="tbtn" style={{flexShrink:0}} onClick={()=>{
+                    setPlaying(null);
+                    if(audioRef.current){audioRef.current.pause();audioRef.current.src="";}
+                  }}>✕</button>
+                </div>
+              )}
+
+              <div className="vscroll">
+                {loadState==="loading"&&(
+                  <div style={{textAlign:"center",padding:"30px 14px",color:t.tx3}}>
+                    <div style={{display:"inline-block",width:22,height:22,border:`2px solid ${t.b2}`,borderTopColor:t.acc,borderRadius:"50%",animation:"spin .7s linear infinite",marginBottom:10}}/>
+                    <div style={{fontSize:".8rem"}}>Chargement des versets…</div>
+                    <div style={{fontSize:".65rem",marginTop:4,color:t.tx3}}>Vérifier la connexion internet</div>
+                  </div>
+                )}
+                {loadState==="error"&&(
+                  <div style={{textAlign:"center",padding:"24px 14px",color:t.rd,fontSize:".78rem"}}>
+                    <div style={{fontSize:"1.8rem",marginBottom:8}}>⚠️</div>
+                    Impossible de charger cette sourate.<br/>
+                    <span style={{fontSize:".65rem",color:t.tx3}}>Vérifie ta connexion internet et réessaie.</span><br/>
+                    <button className="tbtn" style={{marginTop:10,borderColor:t.acc,color:t.acc}} onClick={()=>{
+                      const s=selS; setSelS(null); setTimeout(()=>setSelS(s),50);
+                    }}>↻ Réessayer</button>
+                  </div>
+                )}
+                {loadState==="done"&&verses.map(v=>{
+                  const isMem=!!(mem[String(selS.n)]||{})[String(v.n)];
+                  const isPl=playing===v.n;
+                  return (
+                    <div key={v.n} className={`vitem ${isMem?"mem":""} ${isPl?"pl":""}`}>
+                      <div className="vtop">
+                        <div className={`vnum ${isMem?"mem":""} ${isPl?"pl":""}`} onClick={()=>toggleV(selS.n,v.n)}>
+                          {isMem?<Icons.Check size={11} color={t.gr}/>:v.n}
+                        </div>
+                        <div className="var-text">
+                          <TajwidSpan text={v.ar} enabled={showTj&&!!Q[selS.n]} tjc={tjc}/>
+                          <span className="vmark"> ﴿{v.n}﴾</span>
+                        </div>
+                      </div>
+                      {showTr&&v.fr&&<div className="vfr">{v.fr}</div>}
+                      {showTf&&v.tf&&(
+                        <div className="vtf">
+                          <div className="vtf-hd">Tafsir Ibn Kathir</div>
+                          {v.tf}
+                        </div>
+                      )}
+                      <div className="vacts">
+                        <button className={`vbtn ${isMem?"mem":""}`} onClick={()=>toggleV(selS.n,v.n)}>
+                          {isMem?<><Icons.Check size={10}/>Mémorisé</>:<>+ Mémoriser</>}
+                        </button>
+                        <button className="vbtn snd" onClick={()=>doPlay(v.n)}>
+                          <Icons.Play size={10}/>{isPl?"Stop":"Écouter"}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+
+    {/* ── KHATMA ── */}
+    {page==="khatma"&&(
+      <div className="khatma-wrap">
+        {/* Active khatma */}
+        {activeKhatma&&(()=>{
+          const k=activeKhatma;
+          const days=getKhatmaDays(k);
+          const doneDays=days.filter(d=>k.log[d]).length;
+          const kpct=Math.round(doneDays/days.length*100);
+          const streak=khatmaStreak(k);
+          const todayStr=today();
+          return (
+            <div className="kh-active">
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}>
+                <div>
+                  <div className="kh-title">{k.name}</div>
+                  <div className="kh-sub">Khatma {k.preset} · {k.totalDays} jours · depuis le {k.startDate}</div>
+                </div>
+                <button className="tbtn" onClick={()=>setActiveKhatma(null)}>Changer</button>
+              </div>
+              <div className="kh-track">
+                <div className="kh-fill" style={{width:`${kpct}%`}}/>
+                <div className="kh-pct">{kpct}% — {doneDays}/{days.length} jours</div>
+              </div>
+              <div className="kh-stats">
+                <div className="khs"><div className="streak-fire">{streak>0?"🔥":""}{streak}</div><div className="khs-l">Jours consécutifs</div></div>
+                <div className="khs"><div className="khs-v">{doneDays}</div><div className="khs-l">Jours lus</div></div>
+                <div className="khs"><div className="khs-v">{days.length-doneDays}</div><div className="khs-l">Jours restants</div></div>
+              </div>
+              {/* Calendar grid */}
+              <div style={{marginTop:14}}>
+                <div style={{fontSize:".65rem",color:t.tx3,marginBottom:6}}>Calendrier — cliquer pour cocher/décocher</div>
+                <div className="kd-grid">
+                  {days.map(d=>{
+                    const done=k.log[d], isToday=d===todayStr;
+                    const short=d.slice(8);
+                    return (
+                      <div key={d}
+                        className={`kd-cell${done?" done":""}${isToday&&!done?" today":""}`}
+                        onClick={()=>markKhatmaDay(k,d)}
+                        title={d}>
+                        {done?"✓":short}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Create new */}
+        {!activeKhatma&&(
+          <div className="card">
+            <div className="ch"><span className="ct">Nouvelle Khatma</span></div>
+            <div style={{padding:"16px",display:"flex",flexDirection:"column",gap:14}}>
+
+              {/* Nom */}
+              <div>
+                <label style={{fontSize:".65rem",color:t.tx3,display:"block",marginBottom:6,textTransform:"uppercase",letterSpacing:"1px"}}>Nom de ta khatma</label>
+                <input className="sinp" value={kName} onChange={e=>setKName(e.target.value)} placeholder="Ex: Ramadan 2025"/>
+              </div>
+
+              {/* Presets */}
+              <div>
+                <div style={{fontSize:".65rem",color:t.tx3,marginBottom:8,textTransform:"uppercase",letterSpacing:"1px"}}>Choisir un rythme</div>
+                <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                  {KHATMA_PRESETS.map(p=>(
+                    <div key={p.id}
+                      onClick={()=>setKPreset(p)}
+                      style={{
+                        padding:"14px 16px",
+                        borderRadius:12,
+                        border:`2px solid ${kPreset?.id===p.id?t.acc:t.b1}`,
+                        background:kPreset?.id===p.id?t.s3:t.s2,
+                        cursor:"pointer",
+                        display:"flex",alignItems:"center",gap:12,
+                        transition:"all .15s",
+                      }}>
+                      <div style={{
+                        width:40,height:40,borderRadius:10,
+                        background:kPreset?.id===p.id?t.acc:t.b1,
+                        display:"flex",alignItems:"center",justifyContent:"center",
+                        fontSize:".85rem",fontWeight:700,color:kPreset?.id===p.id?"#fff":t.tx3,
+                        flexShrink:0,
+                      }}>
+                        {p.id==="daily"?"1j":p.id==="weekly"?"7j":p.id==="monthly"?"30j":p.id==="ramadan"?"رمضان":"?"}
+                      </div>
+                      <div style={{flex:1}}>
+                        <div style={{fontSize:".82rem",fontWeight:600,color:t.tx}}>{p.label}</div>
+                        <div style={{fontSize:".62rem",color:t.tx3,marginTop:2}}>{p.desc}</div>
+                      </div>
+                      {kPreset?.id===p.id&&<Icons.Check size={16} color={t.acc}/>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Custom days input */}
+              {kPreset?.id==="custom"&&(
+                <div>
+                  <label style={{fontSize:".65rem",color:t.tx3,display:"block",marginBottom:6}}>Nombre de jours</label>
+                  <input className="sinp" type="number" min="1" max="365" value={kCustomDays}
+                    onChange={e=>setKCustomDays(e.target.value)}
+                    style={{width:"100%"}}/>
+                </div>
+              )}
+
+              {/* CTA button — full width, prominent */}
+              <button
+                onClick={createKhatma}
+                disabled={!kPreset}
+                style={{
+                  width:"100%",
+                  padding:"16px",
+                  borderRadius:14,
+                  border:"none",
+                  background:kPreset?t.acc:t.b2,
+                  color:kPreset?"#fff":t.tx3,
+                  fontSize:".95rem",
+                  fontWeight:700,
+                  cursor:kPreset?"pointer":"not-allowed",
+                  transition:"all .2s",
+                  letterSpacing:".5px",
+                }}>
+                {kPreset?"Démarrer la Khatma":"Choisir un rythme d'abord"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Past khatmas */}
+        {khatmas.length>0&&(
+          <div className="card">
+            <div className="ch"><span className="ct">Mes Khatmas</span></div>
+            <div style={{display:"flex",flexDirection:"column"}}>
+              {khatmas.map(k=>{
+                const days=getKhatmaDays(k);
+                const done=days.filter(d=>k.log[d]).length;
+                const p=Math.round(done/days.length*100);
+                return (
+                  <div key={k.id} style={{padding:"10px 14px",borderBottom:`1px solid ${t.b1}`,display:"flex",alignItems:"center",gap:10,cursor:"pointer"}}
+                    onClick={()=>setActiveKhatma(k)}>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:".78rem",fontWeight:600}}>{k.name}</div>
+                      <div style={{fontSize:".6rem",color:t.tx3}}>{k.preset} · {done}/{days.length} jours</div>
+                    </div>
+                    <div style={{textAlign:"right"}}>
+                      <div style={{fontSize:".85rem",fontWeight:700,color:t.acc}}>{p}%</div>
+                      <div style={{width:60,height:4,background:t.b1,borderRadius:99,marginTop:3,overflow:"hidden"}}>
+                        <div style={{height:"100%",background:t.acc,width:`${p}%`,borderRadius:99}}/>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    )}
+
+    {/* ── STATS ── */}
+    {page==="stats"&&(
+      <div className="sp">
+        <div className="sg">
+          <div className="sc a"><div className="slbl">Progression</div><div className="sval">{pct}%</div><div className="ssub">{totalMem}/{TOTAL_VERSES}</div></div>
+          <div className="sc g"><div className="slbl">Appris</div><div className="sval">{totalMem.toLocaleString()}</div><div className="ssub">versets</div></div>
+          <div className="sc b"><div className="slbl">Rythme</div><div className="sval">{vpd}/j</div><div className="ssub">v/jour</div></div>
+          <div className="sc r"><div className="slbl">Clôture</div><div className="sval">{daysLeft>0?`${daysLeft}j`:"🎉"}</div><div className="ssub">{eta}</div></div>
+        </div>
+
+        <div className="two-h">
+          <div className="card">
+            <div className="ch"><span className="ct">Vue globale</span></div>
+            <div style={{display:"flex",flexDirection:"column",alignItems:"center",padding:"18px 14px 12px"}}>
+              <div className="donut-w">
+                <svg width="150" height="150" viewBox="0 0 150 150">
+                  <defs><linearGradient id="dg4" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor={t.acc}/><stop offset="100%" stopColor={t.acc3}/>
+                  </linearGradient></defs>
+                  <circle cx="75" cy="75" r="55" fill="none" stroke={t.b1} strokeWidth="14"/>
+                  <circle cx="75" cy="75" r="55" fill="none" stroke="url(#dg4)" strokeWidth="14"
+                    strokeDasharray={`${2*Math.PI*55*pct/100} ${2*Math.PI*55*(1-pct/100)}`}
+                    strokeLinecap="round" transform="rotate(-90 75 75)" style={{transition:"stroke-dasharray 1s ease"}}/>
+                </svg>
+                <div className="donut-c"><div className="d-pct">{pct}%</div><div className="d-lbl">mémorisé</div></div>
+              </div>
+              <div style={{width:"100%",marginTop:11,display:"flex",flexDirection:"column",gap:5}}>
+                {[["✓ Complètes",SURAHS.filter(s=>sPct(s)===100).length,t.gr],
+                  ["En cours",SURAHS.filter(s=>sPct(s)>0&&sPct(s)<100).length,t.acc],
+                  ["Non commencées",SURAHS.filter(s=>sPct(s)===0).length,t.tx3]
+                ].map(([l,v,c])=>(
+                  <div key={l} style={{display:"flex",justifyContent:"space-between",fontSize:".72rem"}}>
+                    <span style={{color:t.tx2}}>{l}</span><span style={{color:c,fontWeight:600}}>{v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="ch"><span className="ct">Gains quotidiens (14j)</span></div>
+            <div style={{padding:"10px 14px"}}>
+              {gains.some(v=>v>0)?(
+                <div className="bc">
+                  {gains.map((v,i)=>(
+                    <div key={i} className="bcol">
+                      <div className="bval">{v>0?v:""}</div>
+                      <div className="bfw"><div className="bfi" style={{height:`${Math.round(v/maxG*100)}%`}}/></div>
+                      <div className="blbl">{histKeys[i]?.slice(5)||""}</div>
+                    </div>
+                  ))}
+                </div>
+              ):(
+                <div className="empty" style={{padding:20}}>Commence à mémoriser</div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="ch"><span className="ct">Top sourates</span></div>
+          {topS.length===0?<div className="empty">Aucune sourate commencée</div>:(
+            <div style={{padding:"8px 12px",display:"flex",flexDirection:"column",gap:1}}>
+              {topS.map(s=>(
+                <div key={s.n} className="trow">
+                  <span style={{width:18,fontSize:".58rem",color:t.tx3}}>#{s.n}</span>
+                  <span style={{flex:1,fontSize:".72rem"}}>{s.name} <span style={{fontFamily:"'Amiri',serif",color:t.acc}}>{s.ar}</span></span>
+                  <div className="tbar"><div className="tfill" style={{width:`${s.p}%`}}/></div>
+                  <span style={{fontSize:".65rem",color:s.p===100?t.gr:t.tx2,minWidth:30,textAlign:"right",fontWeight:600}}>{s.p}%</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="card">
+          <div className="ch"><span className="ct">Décompte par sourate</span><span style={{fontSize:".6rem",color:t.tx3}}>{vpd}v/j</span></div>
+          <div className="cd-grid">
+            {cdS.map(s=>{
+              const col=s.p>60?t.gr:s.p>20?t.acc:t.bl;
+              return (
+                <div key={s.n} style={{background:t.s2,border:`1px solid ${t.b1}`,borderRadius:10,padding:"10px",cursor:"pointer",transition:"border-color .2s"}}
+                  onClick={()=>{setPage("quran");setLtab("list");doSelect(s);}}>
+                  <div style={{fontSize:".7rem",fontWeight:600,display:"flex",justifyContent:"space-between",marginBottom:2}}>
+                    <span>{s.name}</span><span style={{fontFamily:"'Amiri',serif",color:t.acc}}>{s.ar}</span>
+                  </div>
+                  <div style={{fontSize:"1rem",fontWeight:700,color:t.bl}}>{s.rem}<span style={{fontSize:".58rem",fontWeight:400,color:t.tx3}}> restants</span></div>
+                  <div style={{fontSize:".6rem",color:t.tx3}}>{s.days?`≈${s.days}j`:"—"}</div>
+                  <div style={{height:4,background:t.b1,borderRadius:99,overflow:"hidden",marginTop:6}}>
+                    <div style={{height:"100%",background:col,borderRadius:99,width:`${s.p}%`}}/>
+                  </div>
+                </div>
+              );
+            })}
+            {cdS.length===0&&<div className="empty" style={{gridColumn:"1/-1"}}><div className="big-ar">🎉</div>Toutes mémorisées!</div>}
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* ── PAGES ── */}
+    {page==="pages"&&(()=>{
+      const totalRead = Object.keys(pageRead).filter(k=>pageRead[k]).length;
+      const pctPages = Math.round(totalRead/TOTAL_PAGES*100);
+      return (
+        <div className="sp">
+          {/* KPIs */}
+          <div className="sg">
+            <div className="sc a"><div className="slbl">Progression</div><div className="sval">{pctPages}%</div><div className="ssub">{totalRead} / {TOTAL_PAGES} pages</div></div>
+            <div className="sc g"><div className="slbl">Pages lues</div><div className="sval">{totalRead}</div><div className="ssub">sur {TOTAL_PAGES}</div></div>
+            <div className="sc b"><div className="slbl">Pages restantes</div><div className="sval">{TOTAL_PAGES-totalRead}</div><div className="ssub">à lire</div></div>
+            <div className="sc r"><div className="slbl">Mushaf standard</div><div className="sval">604</div><div className="ssub">pages Hafs</div></div>
+          </div>
+          {/* Progress bar */}
+          <div className="card" style={{padding:"14px 16px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+              <span style={{fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1.5px"}}>Coran complet — 604 pages</span>
+              <span style={{fontSize:".9rem",fontWeight:700,color:t.acc}}>{pctPages}%</span>
+            </div>
+            <div style={{height:14,background:t.b1,borderRadius:99,overflow:"hidden"}}>
+              <div style={{height:"100%",background:`linear-gradient(90deg,${t.acc},${t.acc2})`,borderRadius:99,width:`${pctPages}%`,transition:"width .8s ease"}}/>
+            </div>
+            <div style={{display:"flex",justifyContent:"space-between",marginTop:5,fontSize:".6rem",color:t.tx3}}>
+              <span>Page 1</span><span>Page 604</span>
+            </div>
+          </div>
+          {/* Page grid */}
+          <div className="card">
+            <div className="ch">
+              <span className="ct">Grille des 604 pages</span>
+              <div style={{display:"flex",gap:6}}>
+                <button className="tbtn" onClick={()=>{
+                  const all={};for(let i=1;i<=604;i++)all[String(i)]=true;
+                  setPageRead(all);
+                }}>Tout cocher</button>
+                <button className="tbtn" onClick={()=>setPageRead({})}>Réinitialiser</button>
+              </div>
+            </div>
+            <div style={{padding:"10px",display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(38px,1fr))",gap:4}}>
+              {Array.from({length:TOTAL_PAGES},(_,i)=>i+1).map(p=>{
+                const done=!!pageRead[String(p)];
+                // Find which surah this page belongs to
+                const surahOnPage=SURAHS.filter(s=>SURAH_PAGE[s.n]===p).map(s=>s.name).join(", ");
+                return (
+                  <div key={p}
+                    onClick={()=>togglePage(p)}
+                    title={surahOnPage?`Page ${p} — ${surahOnPage}`:`Page ${p}`}
+                    style={{
+                      aspectRatio:"1",
+                      display:"flex",alignItems:"center",justifyContent:"center",
+                      borderRadius:6,
+                      fontSize:".55rem",fontWeight:600,
+                      cursor:"pointer",
+                      transition:"all .15s",
+                      background:done?t.gr:t.s2,
+                      color:done?"#fff":t.tx3,
+                      border:`1px solid ${done?t.gr:t.b2}`,
+                      boxShadow:surahOnPage?`0 0 0 2px ${t.acc}44`:undefined,
+                    }}>
+                    {p}
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{padding:"8px 14px",borderTop:`1px solid ${t.b1}`,display:"flex",gap:12,fontSize:".62rem",color:t.tx3}}>
+              <span><span style={{display:"inline-block",width:10,height:10,borderRadius:3,background:t.gr,marginRight:4}}/>Lu</span>
+              <span><span style={{display:"inline-block",width:10,height:10,borderRadius:3,border:`2px solid ${t.acc}`,marginRight:4}}/>Début de sourate</span>
+            </div>
+          </div>
+          {/* Sourates par page */}
+          <div className="card">
+            <div className="ch"><span className="ct">Début de sourate par page</span></div>
+            <div style={{display:"flex",flexDirection:"column"}}>
+              {SURAHS.map(s=>{
+                const pg=SURAH_PAGE[s.n];
+                const done=!!pageRead[String(pg)];
+                return (
+                  <div key={s.n} style={{padding:"8px 14px",borderBottom:`1px solid ${t.b1}`,display:"flex",alignItems:"center",gap:10,cursor:"pointer"}}
+                    onClick={()=>togglePage(pg)}>
+                    <div style={{width:34,height:34,borderRadius:8,background:done?t.gr:t.s2,border:`1px solid ${done?t.gr:t.b2}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".62rem",fontWeight:700,color:done?"#fff":t.tx3,flexShrink:0}}>
+                      {pg}
+                    </div>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:".78rem",fontWeight:600}}>{s.name}</div>
+                      <div style={{fontSize:".6rem",color:t.tx3}}>Juz {s.juz} · {s.v} versets</div>
+                    </div>
+                    <div style={{fontFamily:"'Amiri',serif",fontSize:"1.1rem",color:t.acc}}>{s.ar}</div>
+                    {done&&<Icons.Check size={14} color={t.gr}/>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      );
+    })()}
+
+    {/* ── SETTINGS ── */}
+    {page==="settings"&&(
+      <div className="settings-wrap">
+        <div className="settings-section">
+          <div className="ss-hd">Calligraphie arabe</div>
+          <div className="font-grid">
+            {FONTS.map(f=>(
+              <div key={f.id} className={`font-card ${fontId===f.id?"sel":""}`} onClick={()=>setFontId(f.id)}>
+                <div className="font-preview" style={{fontFamily:f.css}}>بِسْمِ ٱللَّهِ</div>
+                <div className="font-name">{f.name}</div>
+                <div className="font-desc">{f.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="settings-section">
+          <div className="ss-hd">Objectif de mémorisation</div>
+          <div className="set-row">
+            <div><div className="set-lbl">Versets par jour</div><div className="set-sub">Objectif quotidien de mémorisation</div></div>
+            <input className="set-inp" type="number" min="1" max="100"
+              defaultValue={settings?.dailyGoal||5}
+              onChange={e=>setSettings(s=>({...s,dailyGoal:parseInt(e.target.value)||5}))}/>
+          </div>
+          <div className="set-row">
+            <div><div className="set-lbl">Date de début</div><div className="set-sub">Pour le calcul du rythme réel</div></div>
+            <input className="set-inp" type="date"
+              defaultValue={settings?.startDate||today()}
+              onChange={e=>setSettings(s=>({...s,startDate:e.target.value}))}/>
+          </div>
+        </div>
+
+        <div className="settings-section">
+          <div className="ss-hd">Thème & Affichage</div>
+          <div className="set-row">
+            <div><div className="set-lbl">Thème</div><div className="set-sub">Clair ou sombre</div></div>
+            <button className="toggle on" style={{background:t.acc}} onClick={()=>setTn(n=>n==="dark"?"light":"dark")}>
+            </button>
+          </div>
+        </div>
+
+        <div className="settings-section">
+          <div className="ss-hd">À propos</div>
+          <div className="set-row"><div><div className="set-lbl">Al-Hifz</div><div className="set-sub">Application de mémorisation du Saint Coran · Version 5.0</div></div></div>
+          <div className="set-row"><div><div className="set-lbl">Données embarquées</div><div className="set-sub">Al-Fatiha + Juz 30 complet (S.97–114) avec tafsir Ibn Kathir en français</div></div></div>
+          <div className="set-row"><div><div className="set-lbl">Audio</div><div className="set-sub">5 récitateurs · cdn.islamic.network</div></div></div>
+        </div>
+      </div>
+    )}
+  </div>
+
+  {/* ── Bottom Navigation ── */}
+  <nav className="bnav">
+    {[
+      ["quran",<Icons.Book size={22}/>, "Coran"],
+      ["pages",<Icons.Star size={22}/>, "Pages"],
+      ["khatma",<Icons.Scroll size={22}/>, "Khatma"],
+      ["stats",<Icons.Chart size={22}/>, "Stats"],
+      ["settings",<Icons.Settings size={22}/>, "Réglages"],
+    ].map(([id,icon,label])=>(
+      <button key={id} className={`bn ${page===id?"on":""}`} onClick={()=>setPage(id)}>
+        {icon}
+        <span className="bn-lbl">{label}</span>
+      </button>
+    ))}
+  </nav>
+
+  <audio ref={audioRef} style={{display:"none"}}
+    onEnded={()=>setPlaying(null)}
+    onError={()=>setPlaying(null)}/>
+</>
+```
+
+);
+}
+const root = ReactDOM.createRoot(document.getElementById(‘root’));
+root.render(<App />);
+</script>
+
+</body>
+</html>
