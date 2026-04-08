@@ -875,31 +875,31 @@ if(audioRef.current) audioRef.current.playbackRate=playbackRate;
 
 const toggleFav=(sn,vn,ar,fr,surah)=>{
 const key=`${sn}_${vn}`;
-setFavorites(p=>p.find(f=>f.key===key)?p.filter(f=>f.key!==key):[…p,{key,sn,vn,ar,fr,surah}]);
+setFavorites(p=>p.find(f=>f.key===key)?p.filter(f=>f.key!==key):[...p,{key,sn,vn,ar,fr,surah}]);
 };
 const isFav=(sn,vn)=>favorites.some(f=>f.key===`${sn}_${vn}`);
 
 const saveNote=(sn,vn,text)=>{
 const k=`${sn}_${vn}`;
-if(text.trim()) setNotes(p=>({…p,[k]:text.trim()}));
-else setNotes(p=>{const n={…p};delete n[k];return n;});
+if(text.trim()) setNotes(p=>({...p,[k]:text.trim()}));
+else setNotes(p=>{const n={...p};delete n[k];return n;});
 setEditingNote(null);
 };
 
 const createList=(name)=>{
 if(!name.trim()) return;
 const nl={id:Date.now(),name:name.trim(),items:[]};
-setLists(p=>[…p,nl]);
+setLists(p=>[...p,nl]);
 setNewListName(””);
 return nl;
 };
 
 const addToList=(listId,sn,vn)=>{
-setLists(p=>p.map(l=>l.id===listId?{…l,items:l.items.find(i=>i.sn===sn&&i.vn===vn)?l.items:[…l.items,{sn,vn}]}:l));
+setLists(p=>p.map(l=>l.id===listId?{...l,items:l.items.find(i=>i.sn===sn&&i.vn===vn)?l.items:[...l.items,{sn,vn}]}:l));
 };
 
 const removeFromList=(listId,sn,vn)=>{
-setLists(p=>p.map(l=>l.id===listId?{…l,items:l.items.filter(i=>!(i.sn===sn&&i.vn===vn))}:l));
+setLists(p=>p.map(l=>l.id===listId?{...l,items:l.items.filter(i=>!(i.sn===sn&&i.vn===vn))}:l));
 };
 
 // Auto night mode
@@ -920,7 +920,7 @@ if(totalMem>=500&&!badges.includes(“500_verses”)) newBadges.push(“500_vers
 if(totalMem>=1000&&!badges.includes(“1000_verses”)) newBadges.push(“1000_verses”);
 const juz30=SURAHS.filter(s=>s.juz===30).every(s=>sMem(s)===s.v);
 if(juz30&&!badges.includes(“juz30”)) newBadges.push(“juz30”);
-if(newBadges.length>0) setBadges(p=>[…p,…newBadges]);
+if(newBadges.length>0) setBadges(p=>[...p,...newBadges]);
 },[mem]);
 
 // Spaced repetition due versets
@@ -936,7 +936,7 @@ return now-v.last>interval;
 
 const markSpaced=(sn,vn)=>{
 const k=`${sn}_${vn}`;
-setSpaced(p=>({…p,[k]:{last:Date.now(),count:(p[k]?.count||0)+1}}));
+setSpaced(p=>({...p,[k]:{last:Date.now(),count:(p[k]?.count||0)+1}}));
 };
 
 const audioRef = useRef(null);
@@ -955,7 +955,7 @@ useEffect(()=>sv(“qakthatma”,activeKhatma),[activeKhatma]);
 useEffect(()=>{
 const tod=today();
 const tot=Object.values(mem).reduce((s,v)=>s+Object.keys(v).length,0);
-setHist(h=>({…h,[tod]:tot}));
+setHist(h=>({...h,[tod]:tot}));
 },[mem]);
 
 // Derived
@@ -991,17 +991,17 @@ setTimeout(()=>vpRef.current?.scrollIntoView({behavior:“smooth”,block:“sta
 };
 
 const toggleV=(sn,vn)=>setMem(p=>{
-const k=String(sn), vk=String(vn), c={…p[k]||{}};
+const k=String(sn), vk=String(vn), c={...p[k]||{}};
 if(c[vk]) delete c[vk]; else c[vk]=true;
-return {…p,[k]:c};
+return {...p,[k]:c};
 });
 
 const toggleAll=(s)=>{
 const k=String(s.n), done=sMem(s)===s.v;
 setMem(p=>{
-if(done){const n={…p};delete n[k];return n;}
+if(done){const n={...p};delete n[k];return n;}
 const a={}; for(let i=1;i<=s.v;i++) a[String(i)]=true;
-return {…p,[k]:a};
+return {...p,[k]:a};
 });
 };
 
@@ -1083,7 +1083,7 @@ if(!q) return SURAHS;
 return SURAHS.filter(s=>s.name.toLowerCase().includes(q)||s.ar.includes(q)||String(s.n).includes(q));
 },[search]);
 
-const juzList=[…new Set(SURAHS.map(s=>s.juz))].sort((a,b)=>a-b);
+const juzList=[...new Set(SURAHS.map(s=>s.juz))].sort((a,b)=>a-b);
 
 // Khatma logic
 const createKhatma=()=>{
@@ -1091,13 +1091,13 @@ if(!kPreset) return;
 const days=kPreset.id===“custom”?parseInt(kCustomDays)||30:kPreset.days;
 const nk={id:Date.now(), name:kName, preset:kPreset.id, totalDays:days,
 startDate:today(), log:{}, pages:604};
-setKhatmas(p=>[…p,nk]);
+setKhatmas(p=>[...p,nk]);
 setActiveKhatma(nk);
 setKPreset(null);
 };
 
 const markKhatmaDay=(k, d)=>{
-const updated={…k, log:{…k.log, [d]:!(k.log[d])}};
+const updated={...k, log:{...k.log, [d]:!(k.log[d])}};
 setKhatmas(p=>p.map(x=>x.id===k.id?updated:x));
 if(activeKhatma?.id===k.id) setActiveKhatma(updated);
 };
@@ -1121,24 +1121,23 @@ return streak;
 // Pages state
 const [pageRead, setPageRead] = useState(()=>ld(“qpages”,{}));
 useEffect(()=>sv(“qpages”,pageRead),[pageRead]);
-const togglePage=(p)=>setPageRead(prev=>({…prev,[String(p)]:!prev[String(p)]}));
+const togglePage=(p)=>setPageRead(prev=>({...prev,[String(p)]:!prev[String(p)]}));
 
 // Stats data
 const histKeys=Object.keys(hist).sort().slice(-14);
 const histVals=histKeys.map(k=>hist[k]||0);
 const gains=histVals.map((v,i)=>i===0?v:Math.max(0,v-histVals[i-1]));
-const maxG=Math.max(…gains,1);
-const topS=[…SURAHS].map(s=>({…s,p:sPct(s)})).filter(s=>s.p>0).sort((a,b)=>b.p-a.p).slice(0,10);
+const maxG=Math.max(...gains,1);
+const topS=[...SURAHS].map(s=>({...s,p:sPct(s)})).filter(s=>s.p>0).sort((a,b)=>b.p-a.p).slice(0,10);
 const cdS=SURAHS.map(s=>{
 const done=sMem(s), rem=s.v-done, days=vpd>0?Math.ceil(rem/vpd):null;
-return {…s,done,rem,days,p:sPct(s)};
+return {...s,done,rem,days,p:sPct(s)};
 }).filter(s=>s.rem>0).slice(0,30);
 
 return (
 <>
 <style>{buildCSS(t, tjc, arFont, tn)}</style>
 
-```
   {/* Setup modal */}
   {setup&&(
     <div className="overlay">
@@ -2582,8 +2581,6 @@ return (
   <audio ref={audioRef} style={{display:"none"}}
     onError={()=>setPlaying(null)}/>
 </>
-```
-
 );
 }
 const root = ReactDOM.createRoot(document.getElementById(‘root’));
