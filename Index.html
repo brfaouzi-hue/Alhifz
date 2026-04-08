@@ -338,6 +338,32 @@ const SURAH_PAGE = {
 };
 const TOTAL_PAGES = 604;
 
+// ─── Badges ────────────────────────────────────────────────────────────────────
+const BADGE_DEFS = [
+{id:“first_surah”, label:“Première sourate”, desc:“Mémoriser une sourate complète”, icon:“🌱”},
+{id:“ten_surahs”, label:“Dix sourates”, desc:“Mémoriser 10 sourates”, icon:“📚”},
+{id:“juz30”, label:“Juz 30 complet”, desc:“Mémoriser tout le Juz 30”, icon:“⭐”},
+{id:“100_verses”, label:“100 versets”, desc:“Mémoriser 100 versets”, icon:“💯”},
+{id:“500_verses”, label:“500 versets”, desc:“Mémoriser 500 versets”, icon:“🏆”},
+{id:“1000_verses”, label:“1000 versets”, desc:“Mémoriser 1000 versets”, icon:“👑”},
+];
+
+// ─── Surah virtues & dua occasions ────────────────────────────────────────────
+const SURAH_INFO = {
+1:{virtue:“Oum al-Kitab — mère du Livre. Récitée dans chaque rakat de la prière. Le Prophète ﷺ : ‘Par Celui qui détient mon âme, aucune sourate semblable n’a été révélée dans la Torah, l’Évangile ni le Psautier.’”,occasion:“Réciter à chaque prière, pour la guérison (ruqya), avant toute chose importante.”},
+2:{virtue:“La plus grande sourate du Coran. Contient le Verset du Trône (2:255) — le plus grand verset. Réciter les 2 derniers versets le soir protège.”,occasion:“Verset du Trône après chaque prière obligatoire, avant de dormir.”},
+18:{virtue:“Protection contre le Dajjal — réciter les 10 premiers versets protège. Le Prophète ﷺ recommandait de la réciter chaque vendredi.”,occasion:“Chaque vendredi — de préférence le matin.”},
+36:{virtue:“Cœur du Coran selon le Prophète ﷺ. Récitée auprès des mourants pour faciliter le passage.”,occasion:“Auprès des mourants, pour des besoins importants.”},
+55:{virtue:”‘La mariée du Coran.’ Chaque verset ‘Lequel des bienfaits de votre Seigneur nierez-vous?’ — rappel de la gratitude.”,occasion:“Méditation sur les bienfaits d’Allah, actions de grâce.”},
+56:{virtue:“Récitée chaque nuit, elle protège de la pauvreté selon Ibn Masoud.”,occasion:“Chaque nuit avant de dormir.”},
+67:{virtue:“Protège de l’azab al-qabr (tourment de la tombe). Le Prophète ﷺ ne dormait pas sans la réciter.”,occasion:“Chaque soir avant de dormir — obligatoire pour tout mémorisateur.”},
+97:{virtue:“Meilleure que 1000 mois d’adoration. Nuit d’Al-Qadr dans les 10 dernières nuits de Ramadan.”,occasion:“Les 10 dernières nuits de Ramadan, surtout les nuits impaires.”},
+108:{virtue:“Al-Kawthar — la plus courte sourate. Réponse divine à ceux qui insultaient le Prophète ﷺ.”,occasion:“Réciter lors des sacrifices (Aïd al-Adha).”},
+112:{virtue:“Équivaut au tiers du Coran. Réciter 3 fois équivaut à réciter le Coran entier.”,occasion:“Après chaque prière, avant de dormir, lors de la ruqya.”},
+113:{virtue:“Al-Mu’awwidhatain — sourate de protection. Récitée par le Prophète ﷺ pour se protéger du mauvais œil et de la magie.”,occasion:“Matin et soir (3 fois), avant de dormir, ruqya.”},
+114:{virtue:“Dernière sourate — complète la protection commencée par Al-Falaq. Ensemble elles forment le bouclier du croyant.”,occasion:“Matin et soir (3 fois), avant de dormir, ruqya.”},
+};
+
 // ─── Utils ─────────────────────────────────────────────────────────────────────
 const ld=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}};
 const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
@@ -354,8 +380,20 @@ acc:”#2e7d32”,acc2:”#388e3c”,acc3:”#43a047”,gr:”#2e7d32”,grD:“
 tx:”#1a2e1a”,tx2:”#3d5c3d”,tx3:”#6a8f6a”,rd:”#c62828”,bl:”#1565c0”,pu:”#6a1b9a”,
 navBg:”#ffffff”,cardBg:”#ffffff”,inputBg:”#f4faf4”,hero:“linear-gradient(160deg,#e8f5e8,#c8e6c9)”},
 };
-const TJC_DARK={m:”#4fc3f7”,g:”#66bb6a”,q:”#ffa726”,r:”#ef5350”,t:”#a1887f”};
-const TJC_LIGHT={m:”#0d47a1”,g:”#1b5e20”,q:”#bf360c”,r:”#b71c1c”,t:”#4e342e”};
+const TJC_DARK={
+m:”#2196f3”,   // Madd — bleu vif
+g:”#4caf50”,   // Ghunna/Ikhfa/Idgham — vert
+q:”#f44336”,   // Qalqala — rouge
+r:”#ff9800”,   // Madd wajib 4-5h — orange
+t:”#1565c0”,   // Tafkhim — bleu foncé
+};
+const TJC_LIGHT={
+m:”#1565c0”,   // Madd — bleu foncé
+g:”#2e7d32”,   // Ghunna — vert foncé
+q:”#c62828”,   // Qalqala — rouge foncé
+r:”#e65100”,   // Madd wajib — orange foncé
+t:”#0d47a1”,   // Tafkhim — bleu très foncé
+};
 
 // ─── SVG Icons ─────────────────────────────────────────────────────────────────
 const Icons = {
@@ -405,6 +443,20 @@ Scroll: ({size=24,color=“currentColor”})=>(
 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
 <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
 </svg>),
+Share: ({size=24,color=“currentColor”})=>(
+<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+<line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+</svg>),
+Heart: ({size=24,color=“currentColor”,filled=false})=>(
+<svg width={size} height={size} viewBox=“0 0 24 24” fill={filled?color:“none”} stroke={color} strokeWidth=“1.8” strokeLinecap=“round” strokeLinejoin=“round”>
+<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+</svg>),
+List: ({size=24,color=“currentColor”})=>(
+<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+<line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+</svg>),
 };
 
 // ─── Tajwid component ──────────────────────────────────────────────────────────
@@ -428,7 +480,7 @@ return <>{parts}</>;
 }
 
 // ─── CSS ───────────────────────────────────────────────────────────────────────
-function buildCSS(t, tjc, arFont) {
+function buildCSS(t, tjc, arFont, tn) {
 return `
 @import url(‘https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Lateef:wght@400&family=Noto+Naskh+Arabic:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap’);
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -437,11 +489,35 @@ body{background:${t.bg};color:${t.tx};font-family:‘DM Sans’,sans-serif;min-h
 ::-webkit-scrollbar-track{background:${t.s1};}
 ::-webkit-scrollbar-thumb{background:${t.b2};border-radius:99px;}
 
+/* ── Geometric Islamic background ── */
+body::before{
+content:’’;
+position:fixed;inset:0;
+pointer-events:none;
+z-index:0;
+opacity:${tn===“dark”?”.018”:”.035”};
+background-image:
+repeating-linear-gradient(0deg,transparent,transparent 40px,${t.acc} 40px,${t.acc} 41px),
+repeating-linear-gradient(90deg,transparent,transparent 40px,${t.acc} 40px,${t.acc} 41px),
+repeating-linear-gradient(45deg,transparent,transparent 28px,${t.acc} 28px,${t.acc} 29px),
+repeating-linear-gradient(-45deg,transparent,transparent 28px,${t.acc} 28px,${t.acc} 29px);
+}
+body>*{position:relative;z-index:1;}
+
+/* ── Animations ── */
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes memGlow{0%{box-shadow:0 0 0 0 ${t.gr}66}70%{box-shadow:0 0 0 10px ${t.gr}00}100%{box-shadow:0 0 0 0 ${t.gr}00}}
+@keyframes confetti{0%{transform:scale(1) rotate(0deg);opacity:1}50%{transform:scale(1.4) rotate(10deg);opacity:.8}100%{transform:scale(1) rotate(0deg);opacity:1}}
+@keyframes slideIn{from{transform:translateX(30px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
 /* ── Top bar ── */
-.topbar{position:sticky;top:0;z-index:60;background:${t.navBg};border-bottom:1px solid ${t.b1};backdrop-filter:blur(12px);}
+.topbar{position:sticky;top:0;z-index:60;background:${t.navBg};border-bottom:1px solid ${t.b1};backdrop-filter:blur(16px);}
 .tb{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 16px;}
 .logo{display:flex;align-items:baseline;gap:8px;}
-.logo-h{font-family:‘Amiri’,serif;font-size:1.4rem;color:${t.acc};}
+.logo-h{font-family:‘Amiri’,serif;font-size:1.4rem;color:${t.acc};text-shadow:0 0 20px ${t.acc}44;}
 .logo-ar{font-family:‘Amiri Quran’,serif;font-size:1.1rem;color:${t.acc2};}
 .logo-sub{font-size:.55rem;color:${t.tx3};letter-spacing:2px;text-transform:uppercase;}
 .tb-r{display:flex;gap:6px;align-items:center;}
@@ -450,33 +526,47 @@ body{background:${t.bg};color:${t.tx};font-family:‘DM Sans’,sans-serif;min-h
 .ib.pri{background:${t.acc};border-color:${t.acc};color:#fff;font-weight:600;}
 
 /* ── Hero ── */
-.hero{background:${t.hero};border-bottom:1px solid ${t.b1};padding:14px 16px;}
-.hero-i{max-width:1200px;margin:0 auto;}
+.hero{
+background:${t.hero};
+border-bottom:1px solid ${t.b1};
+padding:16px 16px 14px;
+position:relative;
+overflow:hidden;
+}
+.hero::before{
+content:’’;
+position:absolute;inset:0;
+background:
+radial-gradient(ellipse at 10% 50%, ${t.acc}08 0%, transparent 60%),
+radial-gradient(ellipse at 90% 50%, ${t.acc}08 0%, transparent 60%);
+pointer-events:none;
+}
+.hero-i{max-width:1200px;margin:0 auto;position:relative;}
 .hero-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
-.h-pct{font-size:2.2rem;font-weight:700;color:${t.acc};font-variant-numeric:tabular-nums;}
+.h-pct{font-size:2.2rem;font-weight:700;color:${t.acc};font-variant-numeric:tabular-nums;text-shadow:0 0 30px ${t.acc}55;}
 .h-pct sup{font-size:.9rem;color:${t.tx2};font-weight:400;}
 .h-lbl{font-size:.6rem;color:${t.tx3};text-transform:uppercase;letter-spacing:2px;}
-.h-track{height:12px;background:${t.b1};border-radius:99px;overflow:hidden;margin-bottom:9px;}
-.h-fill{height:100%;background:linear-gradient(90deg,${t.acc},${t.acc2},${t.acc3});border-radius:99px;transition:width 1s ease;}
+.h-track{height:12px;background:${t.b1};border-radius:99px;overflow:hidden;margin-bottom:9px;box-shadow:inset 0 1px 3px rgba(0,0,0,.2);}
+.h-fill{height:100%;background:linear-gradient(90deg,${t.acc},${t.acc2},${t.acc3});border-radius:99px;transition:width 1s ease;box-shadow:0 0 8px ${t.acc}66;}
 .h-kpis{display:flex;gap:18px;flex-wrap:wrap;}
 .kpi .v{font-size:.95rem;font-weight:600;line-height:1.2;}
 .kpi .l{font-size:.55rem;color:${t.tx3};text-transform:uppercase;letter-spacing:1.5px;}
 .kpi.g .v{color:${t.gr};} .kpi.b .v{color:${t.bl};} .kpi.o .v{color:#f97316;} .kpi.a .v{color:${t.acc};}
 
 /* ── Bottom nav ── */
-.bnav{position:fixed;bottom:0;left:0;right:0;z-index:60;background:${t.navBg};border-top:1px solid ${t.b1};display:flex;align-items:stretch;height:62px;backdrop-filter:blur(12px);}
-.bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:transparent;color:${t.tx3};font-size:.58rem;font-weight:500;cursor:pointer;transition:all .2s;padding:6px 2px;position:relative;}
-.bn:hover{color:${t.tx2};}
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:60;background:${t.navBg}ee;border-top:1px solid ${t.b1};display:flex;align-items:stretch;height:62px;backdrop-filter:blur(16px);}
+.bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:transparent;color:${t.tx3};font-size:.58rem;font-weight:500;cursor:pointer;transition:all .25s;padding:6px 2px;position:relative;}
+.bn:hover{color:${t.tx2};transform:translateY(-1px);}
 .bn.on{color:${t.acc};}
-.bn.on::after{content:’’;position:absolute;top:0;left:25%;right:25%;height:2px;background:${t.acc};border-radius:0 0 99px 99px;}
-.bn-lbl{font-size:.57rem;font-weight:500;}
+.bn.on::after{content:’’;position:absolute;top:0;left:20%;right:20%;height:2px;background:linear-gradient(90deg,${t.acc},${t.acc2});border-radius:0 0 99px 99px;box-shadow:0 0 6px ${t.acc};}
+.bn-lbl{font-size:.52rem;font-weight:500;}
 
 /* ── Content wrap ── */
 .wrap{max-width:1200px;margin:0 auto;padding:14px 16px 100px;}
 .two{display:grid;grid-template-columns:300px 1fr;gap:12px;align-items:start;}
 
 /* ── Cards ── */
-.card{background:${t.cardBg};border:1px solid ${t.b1};border-radius:14px;overflow:hidden;}
+.card{background:${t.cardBg};border:1px solid ${t.b1};border-radius:14px;overflow:hidden;transition:box-shadow .2s;}
 .ch{padding:10px 14px;border-bottom:1px solid ${t.b1};display:flex;align-items:center;justify-content:space-between;}
 .ct{font-size:.63rem;text-transform:uppercase;letter-spacing:1.5px;color:${t.tx3};font-weight:600;}
 
@@ -527,8 +617,21 @@ body{background:${t.bg};color:${t.tx};font-family:‘DM Sans’,sans-serif;min-h
 .arow{padding:6px 12px;border-bottom:1px solid ${t.b1};background:${t.s2};display:flex;align-items:center;gap:7px;}
 
 .vscroll{max-height:calc(100vh - 380px);overflow-y:auto;}
-.vitem{padding:12px 14px;border-bottom:1px solid ${t.b1};transition:background .1s;}
-.vitem:hover{background:${t.s2};} .vitem.mem{background:${t.grD};border-left:3px solid ${t.gr};} .vitem.pl{background:rgba(201,168,76,.08);border-left:3px solid ${t.acc};}
+.vitem{padding:12px 14px;border-bottom:1px solid ${t.b1};transition:background .15s, transform .15s;animation:fadeIn .3s ease;}
+.vitem:hover{background:${t.s2};}
+.vitem.mem{background:${t.grD};border-left:3px solid ${t.gr};animation:memGlow .6s ease;}
+.vitem.pl{background:rgba(201,168,76,.08);border-left:3px solid ${t.acc};}
+.vitem.due{border-left:3px solid ${t.rd};background:rgba(239,68,68,.05);}
+
+/* ── Immersive mode ── */
+.immersive{position:fixed;inset:0;z-index:100;background:${tn===“dark”?”#04060a”:”#faf6ef”};display:flex;flex-direction:column;overflow:hidden;}
+.immersive-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid ${t.b1};}
+.immersive-title{font-family:‘Amiri’,serif;font-size:1.3rem;color:${t.acc};}
+.immersive-scroll{flex:1;overflow-y:auto;padding:20px 18px;display:flex;flex-direction:column;gap:24px;}
+.immersive-verse{text-align:center;padding:20px 0;}
+.immersive-ar{font-family:${arFont};direction:rtl;text-align:center;line-height:2.5;color:${tn===“dark”?”#f0e6c8”:”#2a1a00”};}
+.immersive-fr{font-size:.82rem;color:${t.tx2};font-style:italic;line-height:1.8;margin-top:10px;text-align:center;}
+.immersive-num{font-size:.65rem;color:${t.tx3};margin-top:8px;}
 .vtop{display:flex;align-items:flex-start;gap:8px;}
 .vnum{min-width:24px;height:24px;border-radius:50%;border:1px solid ${t.b2};display:flex;align-items:center;justify-content:center;font-size:.6rem;color:${t.tx3};flex-shrink:0;cursor:pointer;transition:all .2s;margin-top:6px;}
 .vnum:hover{border-color:${t.bl};color:${t.bl};} .vnum.mem{background:${t.grD};border-color:${t.gr};color:${t.gr};} .vnum.pl{border-color:${t.acc};color:${t.acc};}
@@ -633,6 +736,49 @@ body{background:${t.bg};color:${t.tx};font-family:‘DM Sans’,sans-serif;min-h
 }
 `;}
 
+// ─── MushafPage component ──────────────────────────────────────────────────────
+function MushafPage({page, t}) {
+const [srcIdx, setSrcIdx] = useState(0);
+const [loaded, setLoaded] = useState(false);
+const pg = String(page).padStart(3,“0”);
+const sources = [
+`https://static.qurancdn.com/images/background/page${pg}.jpg`,
+`https://www.searchtruth.com/quran/images/pages/page${pg}.jpg`,
+`https://everyayah.com/data/images_png/pages/page${pg}.png`,
+`https://qurancdn.com/images/pages/page${pg}.png`,
+];
+useEffect(()=>{ setSrcIdx(0); setLoaded(false); },[page]);
+return (
+<div style={{width:“100%”,position:“relative”,minHeight:400}}>
+{!loaded&&(
+<div style={{position:“absolute”,inset:0,display:“flex”,flexDirection:“column”,alignItems:“center”,justifyContent:“center”,background:”#f5f0e8”,gap:12}}>
+<div style={{width:32,height:32,border:“3px solid #d4a843”,borderTopColor:“transparent”,borderRadius:“50%”,animation:“spin .7s linear infinite”}}/>
+<div style={{fontSize:”.75rem”,color:”#888”}}>Chargement page {page}…</div>
+<div style={{fontSize:”.65rem”,color:”#aaa”}}>Connexion internet requise</div>
+</div>
+)}
+<img
+key={`${page}-${srcIdx}`}
+src={sources[srcIdx]}
+alt={`Page ${page} du Mushaf`}
+style={{width:“100%”,display:loaded?“block”:“none”,maxWidth:“100%”}}
+onLoad={()=>setLoaded(true)}
+onError={()=>{
+if(srcIdx<sources.length-1){ setSrcIdx(i=>i+1); }
+else {
+setLoaded(true); // show error state
+}
+}}
+/>
+{loaded&&srcIdx>=sources.length&&(
+<div style={{padding:20,textAlign:“center”,color:”#888”,fontSize:”.78rem”}}>
+Image non disponible — vérifie la connexion internet
+</div>
+)}
+</div>
+);
+}
+
 // ─── Main App ──────────────────────────────────────────────────────────────────
 function App() {
 const [tn, setTn] = useState(()=>ld(“qtheme”,“dark”));
@@ -672,6 +818,126 @@ const [kName, setKName] = useState(“Ma Khatma”);
 // Settings
 const [goal, setGoal] = useState(“5”);
 const [startDate, setStartDate] = useState(new Date().toISOString().split(“T”)[0]);
+
+// New features state
+const [arabicSize, setArabicSize] = useState(()=>ld(“qasize”,1.65));
+const [loopCount, setLoopCount] = useState(3);
+const [loopCurrent, setLoopCurrent] = useState(0);
+const [reviewMode, setReviewMode] = useState(false);
+const [revealedVerses, setRevealedVerses] = useState({});
+const [bookmark, setBookmark] = useState(()=>ld(“qbookmark”,null));
+const [spaced, setSpaced] = useState(()=>ld(“qspaced”,{}));
+const [badges, setBadges] = useState(()=>ld(“qbadges”,[]));
+const [autoNight, setAutoNight] = useState(()=>ld(“qautonight”,false));
+const [playbackRate, setPlaybackRate] = useState(1);
+const [favorites, setFavorites] = useState(()=>ld(“qfavs”,[])); // [{sn,vn,ar,fr,surah}]
+const [notes, setNotes] = useState(()=>ld(“qnotes”,{})); // {“sn_vn”: text}
+const [lists, setLists] = useState(()=>ld(“qlists”,[])); // [{id,name,items:[{sn,vn}]}]
+const [editingNote, setEditingNote] = useState(null); // “sn_vn”
+const [noteText, setNoteText] = useState(””);
+const [shareVerse, setShareVerse] = useState(null);
+const [newListName, setNewListName] = useState(””);
+const [selList, setSelList] = useState(null);
+const [immersive, setImmersive] = useState(false);
+const touchStartX = useRef(null);
+const touchStartY = useRef(null);
+
+// Swipe handlers for surah navigation
+const handleTouchStart = useCallback((e)=>{
+touchStartX.current = e.touches[0].clientX;
+touchStartY.current = e.touches[0].clientY;
+},[]);
+
+const handleTouchEnd = useCallback((e)=>{
+if(!touchStartX.current||!selS) return;
+const dx = touchStartX.current - e.changedTouches[0].clientX;
+const dy = Math.abs(touchStartY.current - e.changedTouches[0].clientY);
+if(Math.abs(dx)>60 && dy<50) {
+// Horizontal swipe — navigate surahs
+const idx = SURAHS.findIndex(s=>s.n===selS.n);
+if(dx>0 && idx<SURAHS.length-1) doSelect(SURAHS[idx+1]); // swipe left = next
+if(dx<0 && idx>0) doSelect(SURAHS[idx-1]); // swipe right = prev
+}
+touchStartX.current = null;
+},[selS]);
+useEffect(()=>sv(“qbookmark”,bookmark),[bookmark]);
+useEffect(()=>sv(“qspaced”,spaced),[spaced]);
+useEffect(()=>sv(“qbadges”,badges),[badges]);
+useEffect(()=>sv(“qautonight”,autoNight),[autoNight]);
+useEffect(()=>sv(“qfavs”,favorites),[favorites]);
+useEffect(()=>sv(“qnotes”,notes),[notes]);
+useEffect(()=>sv(“qlists”,lists),[lists]);
+
+// Playback speed
+useEffect(()=>{
+if(audioRef.current) audioRef.current.playbackRate=playbackRate;
+},[playbackRate,playing]);
+
+const toggleFav=(sn,vn,ar,fr,surah)=>{
+const key=`${sn}_${vn}`;
+setFavorites(p=>p.find(f=>f.key===key)?p.filter(f=>f.key!==key):[…p,{key,sn,vn,ar,fr,surah}]);
+};
+const isFav=(sn,vn)=>favorites.some(f=>f.key===`${sn}_${vn}`);
+
+const saveNote=(sn,vn,text)=>{
+const k=`${sn}_${vn}`;
+if(text.trim()) setNotes(p=>({…p,[k]:text.trim()}));
+else setNotes(p=>{const n={…p};delete n[k];return n;});
+setEditingNote(null);
+};
+
+const createList=(name)=>{
+if(!name.trim()) return;
+const nl={id:Date.now(),name:name.trim(),items:[]};
+setLists(p=>[…p,nl]);
+setNewListName(””);
+return nl;
+};
+
+const addToList=(listId,sn,vn)=>{
+setLists(p=>p.map(l=>l.id===listId?{…l,items:l.items.find(i=>i.sn===sn&&i.vn===vn)?l.items:[…l.items,{sn,vn}]}:l));
+};
+
+const removeFromList=(listId,sn,vn)=>{
+setLists(p=>p.map(l=>l.id===listId?{…l,items:l.items.filter(i=>!(i.sn===sn&&i.vn===vn))}:l));
+};
+
+// Auto night mode
+useEffect(()=>{
+if(!autoNight) return;
+const h=new Date().getHours();
+if(h>=20||h<7) setTn(“dark”); else setTn(“light”);
+},[autoNight]);
+
+// Badge checker
+useEffect(()=>{
+const newBadges=[];
+const completedSurahs=SURAHS.filter(s=>sMem(s)===s.v);
+if(completedSurahs.length>=1&&!badges.includes(“first_surah”)) newBadges.push(“first_surah”);
+if(completedSurahs.length>=10&&!badges.includes(“ten_surahs”)) newBadges.push(“ten_surahs”);
+if(totalMem>=100&&!badges.includes(“100_verses”)) newBadges.push(“100_verses”);
+if(totalMem>=500&&!badges.includes(“500_verses”)) newBadges.push(“500_verses”);
+if(totalMem>=1000&&!badges.includes(“1000_verses”)) newBadges.push(“1000_verses”);
+const juz30=SURAHS.filter(s=>s.juz===30).every(s=>sMem(s)===s.v);
+if(juz30&&!badges.includes(“juz30”)) newBadges.push(“juz30”);
+if(newBadges.length>0) setBadges(p=>[…p,…newBadges]);
+},[mem]);
+
+// Spaced repetition due versets
+const spacedDue = useMemo(()=>{
+const now=Date.now();
+const intervals=[1,3,7,30].map(d=>d*86400000);
+return Object.entries(spaced).filter(([k,v])=>{
+const reviews=v.count||0;
+const interval=intervals[Math.min(reviews,intervals.length-1)];
+return now-v.last>interval;
+}).map(([k])=>k);
+},[spaced]);
+
+const markSpaced=(sn,vn)=>{
+const k=`${sn}_${vn}`;
+setSpaced(p=>({…p,[k]:{last:Date.now(),count:(p[k]?.count||0)+1}}));
+};
 
 const audioRef = useRef(null);
 const vpRef = useRef(null);
@@ -754,6 +1020,27 @@ audioRef.current.load();
 setPlaying(vn);
 audioRef.current.play().catch(()=>{ setPlaying(null); });
 };
+
+// Handle loop repetition
+useEffect(()=>{
+if(!audioRef.current) return;
+const handleEnded=()=>{
+if(loopCount>1&&loopCurrent<loopCount){
+setLoopCurrent(p=>p+1);
+setTimeout(()=>{
+if(audioRef.current&&playing!==null){
+audioRef.current.currentTime=0;
+audioRef.current.play().catch(()=>{});
+}
+},500);
+} else {
+setPlaying(null);
+setLoopCurrent(0);
+}
+};
+audioRef.current.addEventListener(“ended”,handleEnded);
+return ()=>audioRef.current?.removeEventListener(“ended”,handleEnded);
+},[playing,loopCount,loopCurrent]);
 
 // Verses with API fetch + localStorage cache
 const [verses, setVerses] = useState([]);
@@ -849,7 +1136,7 @@ return {…s,done,rem,days,p:sPct(s)};
 
 return (
 <>
-<style>{buildCSS(t, tjc, arFont)}</style>
+<style>{buildCSS(t, tjc, arFont, tn)}</style>
 
 ```
   {/* Setup modal */}
@@ -866,6 +1153,60 @@ return (
           setSettings({dailyGoal:parseInt(goal)||5, startDate});
           setSetup(false);
         }}>Commencer →</button>
+      </div>
+    </div>
+  )}
+
+  {/* Note modal */}
+  {editingNote&&(
+    <div className="overlay" onClick={()=>setEditingNote(null)}>
+      <div className="modal" onClick={e=>e.stopPropagation()}>
+        <h2>Note personnelle</h2>
+        <p style={{fontSize:".72rem",color:t.tx3,marginBottom:12}}>
+          {editingNote.replace("_"," · verset ")}
+        </p>
+        <textarea
+          value={noteText}
+          onChange={e=>setNoteText(e.target.value)}
+          placeholder="Écris ta note, explication, mnémotechnique…"
+          style={{width:"100%",minHeight:100,background:t.inputBg,border:`1px solid ${t.b2}`,borderRadius:8,padding:"10px 12px",color:t.tx,fontSize:".85rem",resize:"vertical",outline:"none",marginBottom:12}}
+        />
+        <div style={{display:"flex",gap:8}}>
+          <button className="mbtn" style={{flex:1}} onClick={()=>{
+            const [sn,vn]=editingNote.split("_");
+            saveNote(sn,vn,noteText);
+          }}>Sauvegarder</button>
+          {notes[editingNote]&&(
+            <button className="tbtn" style={{borderColor:t.rd,color:t.rd}} onClick={()=>{
+              const [sn,vn]=editingNote.split("_");
+              saveNote(sn,vn,"");
+            }}>Supprimer</button>
+          )}
+        </div>
+      </div>
+    </div>
+  )}
+
+  {/* Share modal */}
+  {shareVerse&&(
+    <div className="overlay" onClick={()=>setShareVerse(null)}>
+      <div className="modal" onClick={e=>e.stopPropagation()}>
+        <h2 style={{fontFamily:"'Amiri',serif",color:t.acc,marginBottom:4}}>{shareVerse.surahAr}</h2>
+        <p style={{fontSize:".68rem",color:t.tx3,marginBottom:14}}>{shareVerse.surah} · verset {shareVerse.vn}</p>
+        {/* Preview card */}
+        <div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,border:`2px solid ${t.acc}`,borderRadius:14,padding:"20px 18px",marginBottom:14,textAlign:"center"}}>
+          <div style={{fontFamily:"'Amiri Quran',serif",fontSize:"1.5rem",direction:"rtl",lineHeight:2.2,color:t.tx,marginBottom:10}}>
+            {shareVerse.ar.replace(/\[[mgqrt]\](.*?)\[\/[mgqrt]\]/g,"$1")}
+          </div>
+          <div style={{fontSize:".75rem",color:t.tx2,fontStyle:"italic",lineHeight:1.6}}>{shareVerse.fr}</div>
+          <div style={{marginTop:10,fontSize:".6rem",color:t.tx3}}>— {shareVerse.surah} ({shareVerse.sn}:{shareVerse.vn}) · Al-Hifz</div>
+        </div>
+        <p style={{fontSize:".68rem",color:t.tx3,marginBottom:10,textAlign:"center"}}>Copie ce texte pour le partager</p>
+        <button className="mbtn" onClick={()=>{
+          const txt=`${shareVerse.ar.replace(/\[[mgqrt]\](.*?)\[\/[mgqrt]\]/g,"$1")}\n\n${shareVerse.fr}\n\n— ${shareVerse.surah} (${shareVerse.sn}:${shareVerse.vn})`;
+          navigator.clipboard?.writeText(txt).catch(()=>{});
+          setShareVerse(null);
+        }}>Copier le verset</button>
       </div>
     </div>
   )}
@@ -887,22 +1228,247 @@ return (
     </div>
   </div>
 
-  {/* Hero */}
+  {/* ── Hero ── */}
   <div className="hero">
-    <div className="hero-i">
-      <div className="hero-top">
-        <span className="h-lbl">Hifz — {TOTAL_VERSES} versets</span>
-        <div className="h-pct">{pct}<sup>%</sup></div>
+
+    {/* Arabesque SVG top border */}
+    <svg style={{position:"absolute",top:0,left:0,width:"100%",height:12,display:"block"}} preserveAspectRatio="none" viewBox="0 0 800 12">
+      <defs>
+        <linearGradient id="bord" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="transparent"/>
+          <stop offset="15%" stopColor={t.acc}/>
+          <stop offset="50%" stopColor={t.acc3}/>
+          <stop offset="85%" stopColor={t.acc}/>
+          <stop offset="100%" stopColor="transparent"/>
+        </linearGradient>
+      </defs>
+      <rect y="0" width="800" height="1.5" fill="url(#bord)"/>
+      <path d="M0,6 Q25,2 50,6 Q75,10 100,6 Q125,2 150,6 Q175,10 200,6 Q225,2 250,6 Q275,10 300,6 Q325,2 350,6 Q375,10 400,6 Q425,2 450,6 Q475,10 500,6 Q525,2 550,6 Q575,10 600,6 Q625,2 650,6 Q675,10 700,6 Q725,2 750,6 Q775,10 800,6"
+        stroke={t.acc} strokeWidth="1" fill="none" opacity=".35"/>
+      <rect y="11" width="800" height=".5" fill="url(#bord)" opacity=".3"/>
+    </svg>
+
+    {/* Corner ornaments */}
+    <svg style={{position:"absolute",top:8,left:8,opacity:.18}} width="40" height="40" viewBox="0 0 40 40">
+      <path d="M0,0 L40,0 L40,4 L4,4 L4,40 L0,40 Z" fill={t.acc}/>
+      <circle cx="4" cy="4" r="3" fill="none" stroke={t.acc} strokeWidth="1"/>
+      <path d="M8,4 Q20,4 20,16" stroke={t.acc} strokeWidth=".8" fill="none"/>
+      <path d="M4,8 Q4,20 16,20" stroke={t.acc} strokeWidth=".8" fill="none"/>
+    </svg>
+    <svg style={{position:"absolute",top:8,right:8,opacity:.18,transform:"scaleX(-1)"}} width="40" height="40" viewBox="0 0 40 40">
+      <path d="M0,0 L40,0 L40,4 L4,4 L4,40 L0,40 Z" fill={t.acc}/>
+      <circle cx="4" cy="4" r="3" fill="none" stroke={t.acc} strokeWidth="1"/>
+      <path d="M8,4 Q20,4 20,16" stroke={t.acc} strokeWidth=".8" fill="none"/>
+      <path d="M4,8 Q4,20 16,20" stroke={t.acc} strokeWidth=".8" fill="none"/>
+    </svg>
+
+    {/* Radial glow bg */}
+    <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse at 50% 100%,${t.acc}0e 0%,transparent 70%)`,pointerEvents:"none"}}/>
+
+    <div className="hero-i" style={{paddingTop:6}}>
+
+      {/* App title row */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,marginBottom:14}}>
+        {/* Left decorative line */}
+        <svg width="80" height="10" viewBox="0 0 80 10">
+          <line x1="0" y1="5" x2="55" y2="5" stroke={t.acc} strokeWidth=".8" opacity=".4"/>
+          <circle cx="62" cy="5" r="2.5" fill="none" stroke={t.acc} strokeWidth=".8" opacity=".6"/>
+          <circle cx="72" cy="5" r="1.5" fill={t.acc} opacity=".5"/>
+          <circle cx="79" cy="5" r=".8" fill={t.acc} opacity=".3"/>
+        </svg>
+
+        <div style={{textAlign:"center"}}>
+          <div style={{
+            fontFamily:"'Amiri',serif",
+            fontSize:"1.6rem",
+            fontWeight:700,
+            color:t.acc,
+            lineHeight:1,
+            letterSpacing:"1px",
+            textShadow:`0 0 30px ${t.acc}55, 0 2px 4px rgba(0,0,0,.3)`,
+          }}>Al-Hifz</div>
+          <div style={{
+            fontSize:".48rem",
+            textTransform:"uppercase",
+            letterSpacing:"4px",
+            color:t.tx3,
+            marginTop:2,
+          }}>حفظ القرآن الكريم</div>
+        </div>
+
+        {/* Right decorative line */}
+        <svg width="80" height="10" viewBox="0 0 80 10" style={{transform:"scaleX(-1)"}}>
+          <line x1="0" y1="5" x2="55" y2="5" stroke={t.acc} strokeWidth=".8" opacity=".4"/>
+          <circle cx="62" cy="5" r="2.5" fill="none" stroke={t.acc} strokeWidth=".8" opacity=".6"/>
+          <circle cx="72" cy="5" r="1.5" fill={t.acc} opacity=".5"/>
+          <circle cx="79" cy="5" r=".8" fill={t.acc} opacity=".3"/>
+        </svg>
       </div>
-      <div className="h-track"><div className="h-fill" style={{width:`${pct}%`}}/></div>
-      <div className="h-kpis">
-        <div className="kpi g"><span className="v">{totalMem.toLocaleString()}</span><span className="l">Appris</span></div>
-        <div className="kpi"><span className="v">{remaining.toLocaleString()}</span><span className="l">Restants</span></div>
-        <div className="kpi b"><span className="v">{vpd}/j</span><span className="l">Rythme</span></div>
-        <div className="kpi o"><span className="v">{daysLeft>0?`${daysLeft}j`:"🎉"}</span><span className="l">Avant fin</span></div>
-        <div className="kpi a"><span className="v" style={{fontSize:".72rem"}}>{eta}</span><span className="l">Estimation</span></div>
+
+      {/* Main stats block */}
+      <div style={{display:"flex",gap:14,alignItems:"stretch"}}>
+
+        {/* Left — circular progress */}
+        <div style={{flexShrink:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+          <div style={{position:"relative",width:88,height:88}}>
+            <svg width="88" height="88" viewBox="0 0 88 88">
+              <defs>
+                <linearGradient id="cg" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor={t.acc}/>
+                  <stop offset="100%" stopColor={t.acc3}/>
+                </linearGradient>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="2" result="blur"/>
+                  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+              {/* Outer ring decoration */}
+              <circle cx="44" cy="44" r="42" fill="none" stroke={t.acc} strokeWidth=".4" opacity=".2" strokeDasharray="3,4"/>
+              {/* Track */}
+              <circle cx="44" cy="44" r="35" fill="none" stroke={t.b1} strokeWidth="7"/>
+              {/* Progress */}
+              <circle cx="44" cy="44" r="35" fill="none" stroke="url(#cg)" strokeWidth="7"
+                strokeDasharray={`${2*Math.PI*35*pct/100} ${2*Math.PI*35*(1-pct/100)}`}
+                strokeLinecap="round" transform="rotate(-90 44 44)"
+                filter="url(#glow)"
+                style={{transition:"stroke-dasharray 1.2s cubic-bezier(.4,0,.2,1)"}}/>
+              {/* Inner geometric */}
+              <circle cx="44" cy="44" r="26" fill="none" stroke={t.acc} strokeWidth=".4" opacity=".15"/>
+              <circle cx="44" cy="44" r="18" fill="none" stroke={t.acc} strokeWidth=".3" opacity=".1"/>
+              {/* Star center */}
+              <g transform="translate(44,44)" opacity=".15">
+                {[0,60,120,180,240,300].map(a=>(
+                  <line key={a} x1="0" y1="-12" x2="0" y2="-7" stroke={t.acc} strokeWidth=".8"
+                    transform={`rotate(${a})`}/>
+                ))}
+              </g>
+            </svg>
+            <div style={{
+              position:"absolute",inset:0,
+              display:"flex",flexDirection:"column",
+              alignItems:"center",justifyContent:"center",
+              gap:0,
+            }}>
+              <div style={{
+                fontSize:"1.55rem",fontWeight:800,
+                color:t.acc,lineHeight:1,
+                textShadow:`0 0 12px ${t.acc}77`,
+                fontVariantNumeric:"tabular-nums",
+              }}>{pct}<span style={{fontSize:".65rem",fontWeight:600}}>%</span></div>
+              <div style={{fontSize:".48rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px"}}>mémorisé</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right — progress bar + KPIs */}
+        <div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",gap:8}}>
+
+          {/* Progress bar */}
+          <div>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
+              <span style={{fontSize:".58rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1.5px"}}>Versets mémorisés</span>
+              <span style={{fontSize:".65rem",color:t.acc,fontWeight:700,fontVariantNumeric:"tabular-nums"}}>{totalMem.toLocaleString()} <span style={{color:t.tx3,fontWeight:400}}>/ {TOTAL_VERSES}</span></span>
+            </div>
+            <div style={{
+              height:10,background:t.b1,borderRadius:99,overflow:"hidden",
+              boxShadow:"inset 0 2px 4px rgba(0,0,0,.25)",
+            }}>
+              <div style={{
+                height:"100%",width:`${pct}%`,borderRadius:99,
+                background:`linear-gradient(90deg,${t.acc},${t.acc2},${t.acc3})`,
+                boxShadow:`0 0 10px ${t.acc}99`,
+                transition:"width 1.2s cubic-bezier(.4,0,.2,1)",
+                position:"relative",
+              }}>
+                {/* Shimmer */}
+                <div style={{
+                  position:"absolute",inset:0,
+                  background:"linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent)",
+                  backgroundSize:"200% 100%",
+                  animation:"shimmer 2.5s infinite",
+                  borderRadius:99,
+                }}/>
+              </div>
+            </div>
+          </div>
+
+          {/* KPI grid */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px 12px"}}>
+            {[
+              {v:`${vpd}/j`, l:"Rythme", c:t.bl, icon:"◈"},
+              {v:daysLeft>0?`${daysLeft}j`:"Fini!", l:"Avant fin", c:"#f97316", icon:"◇"},
+              {v:SURAHS.filter(s=>sPct(s)===100).length, l:"Sourates complètes", c:t.gr, icon:"✦"},
+              {v:remaining.toLocaleString(), l:"Restants", c:t.tx2, icon:"◆"},
+            ].map((k,i)=>(
+              <div key={i} style={{display:"flex",alignItems:"center",gap:5}}>
+                <span style={{fontSize:".7rem",color:k.c,opacity:.6}}>{k.icon}</span>
+                <div>
+                  <div style={{fontSize:".85rem",fontWeight:700,color:k.c,lineHeight:1.1,
+                    textShadow:`0 0 6px ${k.c}33`,fontVariantNumeric:"tabular-nums"}}>{k.v}</div>
+                  <div style={{fontSize:".48rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px"}}>{k.l}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
+
+      {/* Bottom separator with eta */}
+      <div style={{
+        marginTop:10,
+        padding:"7px 0 0",
+        borderTop:`1px solid ${t.acc}20`,
+        display:"flex",alignItems:"center",justifyContent:"center",gap:8,
+      }}>
+        {/* Geometric diamond ornament */}
+        <svg width="32" height="8" viewBox="0 0 32 8">
+          <polygon points="4,4 8,1 12,4 8,7" fill="none" stroke={t.acc} strokeWidth=".8" opacity=".5"/>
+          <line x1="0" y1="4" x2="3" y2="4" stroke={t.acc} strokeWidth=".8" opacity=".3"/>
+          <line x1="13" y1="4" x2="32" y2="4" stroke={t.acc} strokeWidth=".5" opacity=".2"/>
+        </svg>
+        <span style={{fontSize:".65rem",color:t.tx2,fontStyle:"italic"}}>
+          {remaining>0?`Fin estimée · ${eta}`:"🎉 Félicitations — Coran complet !"}
+        </span>
+        <svg width="32" height="8" viewBox="0 0 32 8" style={{transform:"scaleX(-1)"}}>
+          <polygon points="4,4 8,1 12,4 8,7" fill="none" stroke={t.acc} strokeWidth=".8" opacity=".5"/>
+          <line x1="0" y1="4" x2="3" y2="4" stroke={t.acc} strokeWidth=".3" opacity=".3"/>
+          <line x1="13" y1="4" x2="32" y2="4" stroke={t.acc} strokeWidth=".5" opacity=".2"/>
+        </svg>
+      </div>
+
+      {/* Revision alert */}
+      {spacedDue.length>0&&(
+        <div style={{
+          marginTop:7,display:"flex",alignItems:"center",gap:8,
+          padding:"5px 10px",background:`${t.rd}15`,
+          borderRadius:8,border:`1px solid ${t.rd}30`,cursor:"pointer",
+        }} onClick={()=>setPage("stats")}>
+          <div style={{width:6,height:6,borderRadius:"50%",background:t.rd,animation:"pulse 1.5s infinite"}}/>
+          <span style={{fontSize:".65rem",color:t.rd,fontWeight:600}}>{spacedDue.length} verset{spacedDue.length>1?"s":""} à réviser aujourd'hui</span>
+          <span style={{fontSize:".6rem",color:t.rd,marginLeft:"auto",opacity:.7}}>Voir →</span>
+        </div>
+      )}
+
+      {/* Bookmark */}
+      {bookmark&&(
+        <div style={{
+          marginTop:7,display:"flex",alignItems:"center",gap:8,
+          padding:"6px 10px",background:`${t.acc}10`,
+          borderRadius:8,cursor:"pointer",border:`1px solid ${t.acc}25`,
+        }} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>x.n===bookmark.sn);if(s)doSelect(s);}}>
+          <span style={{fontSize:".75rem",color:t.acc}}>◈</span>
+          <span style={{fontSize:".68rem",color:t.tx,fontWeight:600,flex:1}}>Reprendre : {bookmark.name}</span>
+          <span style={{fontSize:".58rem",color:t.tx3}}>→</span>
+        </div>
+      )}
     </div>
+
+    {/* Arabesque bottom border */}
+    <svg style={{position:"absolute",bottom:0,left:0,width:"100%",height:10,display:"block"}} preserveAspectRatio="none" viewBox="0 0 800 10">
+      <path d="M0,5 Q25,9 50,5 Q75,1 100,5 Q125,9 150,5 Q175,1 200,5 Q225,9 250,5 Q275,1 300,5 Q325,9 350,5 Q375,1 400,5 Q425,9 450,5 Q475,1 500,5 Q525,9 550,5 Q575,1 600,5 Q625,9 650,5 Q675,1 700,5 Q725,9 750,5 Q775,1 800,5"
+        stroke={t.acc} strokeWidth=".8" fill="none" opacity=".3"/>
+      <rect y="9" width="800" height="1" fill="url(#bord)" opacity=".4"/>
+    </svg>
   </div>
 
   {/* Main content */}
@@ -1009,9 +1575,63 @@ return (
                 <button className={`tbtn ${showTr?"on":""}`} onClick={()=>setShowTr(v=>!v)}>Traduction</button>
                 <button className={`tbtn ${showTf?"on":""}`} onClick={()=>setShowTf(v=>!v)}>Tafsir</button>
                 <button className={`tbtn ${showPage?"on":""}`} onClick={()=>setShowPage(v=>!v)}>Page</button>
+                <button className={`tbtn ${reviewMode?"on":""}`}
+                  style={reviewMode?{background:t.rd,borderColor:t.rd,color:"#fff"}:{}}
+                  onClick={()=>{setReviewMode(v=>!v);setRevealedVerses({});}}>
+                  {reviewMode?"Quitter révision":"Révision"}
+                </button>
+                <button className="tbtn" onClick={()=>setImmersive(true)} title="Mode lecture immersive">
+                  Immersif
+                </button>
                 <select className="tsel" value={rec.id} onChange={e=>setRec(RECITERS.find(r=>r.id===e.target.value)||RECITERS[0])}>
                   {RECITERS.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}
                 </select>
+                <div style={{display:"flex",alignItems:"center",gap:4,marginLeft:"auto"}}>
+                  <span style={{fontSize:".6rem",color:t.tx3}}>Taille</span>
+                  <button className="tbtn" onClick={()=>setArabicSize(s=>Math.max(1,s-0.15))}>A-</button>
+                  <button className="tbtn" onClick={()=>setArabicSize(s=>Math.min(3,s+0.15))}>A+</button>
+                </div>
+              </div>
+
+              {/* Virtue & occasions */}
+              {SURAH_INFO[selS.n]&&(
+                <div style={{padding:"10px 14px",background:t.s3,borderBottom:`1px solid ${t.b1}`,fontSize:".7rem",color:t.tx2,lineHeight:1.6}}>
+                  <div style={{fontWeight:700,color:t.acc,marginBottom:3,fontSize:".65rem",textTransform:"uppercase",letterSpacing:"1px"}}>Vertus & occasions</div>
+                  <div style={{marginBottom:4}}>{SURAH_INFO[selS.n].virtue}</div>
+                  <div style={{color:t.gr,fontWeight:600}}>Quand réciter : {SURAH_INFO[selS.n].occasion}</div>
+                </div>
+              )}
+
+              {/* Review mode banner */}
+              {reviewMode&&(
+                <div style={{padding:"8px 14px",background:`${t.rd}22`,borderBottom:`1px solid ${t.rd}44`,display:"flex",alignItems:"center",gap:8}}>
+                  <div style={{fontSize:".72rem",color:t.rd,fontWeight:600,flex:1}}>
+                    Mode révision — le texte est masqué, récite puis appuie pour révéler
+                  </div>
+                  <button className="tbtn" style={{borderColor:t.rd,color:t.rd}}
+                    onClick={()=>setRevealedVerses({})}>Tout masquer</button>
+                </div>
+              )}
+
+              {/* Loop audio control */}
+              <div style={{padding:"6px 14px",background:t.s2,borderBottom:`1px solid ${t.b1}`,display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                <span style={{fontSize:".62rem",color:t.tx3}}>Répétition :</span>
+                {[1,3,5,10].map(n=>(
+                  <button key={n} className={`tbtn ${loopCount===n?"on":""}`}
+                    onClick={()=>setLoopCount(n)} style={{minWidth:28}}>{n}x</button>
+                ))}
+                {loopCurrent>0&&(
+                  <span style={{fontSize:".62rem",color:t.acc,marginLeft:4}}>{loopCurrent}/{loopCount}</span>
+                )}
+                <span style={{fontSize:".62rem",color:t.tx3,marginLeft:8}}>Vitesse :</span>
+                {[0.75,1,1.25,1.5].map(s=>(
+                  <button key={s} className={`tbtn ${playbackRate===s?"on":""}`}
+                    onClick={()=>setPlaybackRate(s)} style={{minWidth:36}}>{s}x</button>
+                ))}
+                <button className="tbtn" style={{marginLeft:"auto",borderColor:bookmark?.sn===selS.n?t.acc:t.b2,color:bookmark?.sn===selS.n?t.acc:t.tx3}}
+                  onClick={()=>setBookmark({sn:selS.n,name:selS.name})}>
+                  {bookmark?.sn===selS.n?"Signet ✓":"Signet"}
+                </button>
               </div>
 
               {/* ── Page Mushaf — affichage pleine page ── */}
@@ -1059,9 +1679,18 @@ return (
 
               {showTj&&(
                 <div className="tj-legend">
-                  <span style={{color:t.tx3,marginRight:3}}>Tajwid :</span>
-                  {[[tjc.m,"Madd"],[tjc.g,"Ghunna ن م"],[tjc.q,"Qalqala"],[tjc.r,"Règles spéciales"],[tjc.t,"Tafkhim"]].map(([c,l])=>(
-                    <div key={l} className="tj-item"><div className="tj-dot" style={{background:c}}/><span style={{color:t.tx2}}>{l}</span></div>
+                  <span style={{color:t.tx3,marginRight:3,fontSize:".6rem"}}>Tajwid :</span>
+                  {[
+                    [tjc.q,"Qalqala — ق ط ب ج د"],
+                    [tjc.m,"Madd 6 harakat"],
+                    [tjc.r,"Madd 4-5 harakat"],
+                    [tjc.g,"Ghunna / Ikhfa / Idgham"],
+                    [tjc.t,"Tafkhim"],
+                  ].map(([c,l])=>(
+                    <div key={l} className="tj-item">
+                      <div className="tj-dot" style={{background:c}}/>
+                      <span style={{color:t.tx2,fontSize:".6rem"}}>{l}</span>
+                    </div>
                   ))}
                 </div>
               )}
@@ -1081,7 +1710,9 @@ return (
                 </div>
               )}
 
-              <div className="vscroll">
+              <div className="vscroll"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}>
                 {loadState==="loading"&&(
                   <div style={{textAlign:"center",padding:"30px 14px",color:t.tx3}}>
                     <div style={{display:"inline-block",width:22,height:22,border:`2px solid ${t.b2}`,borderTopColor:t.acc,borderRadius:"50%",animation:"spin .7s linear infinite",marginBottom:10}}/>
@@ -1102,19 +1733,34 @@ return (
                 {loadState==="done"&&verses.map(v=>{
                   const isMem=!!(mem[String(selS.n)]||{})[String(v.n)];
                   const isPl=playing===v.n;
+                  const isRevealed=!!revealedVerses[v.n];
+                  const spacedKey=`${selS.n}_${v.n}`;
+                  const isDue=spacedDue.includes(spacedKey);
                   return (
-                    <div key={v.n} className={`vitem ${isMem?"mem":""} ${isPl?"pl":""}`}>
+                    <div key={v.n} className={`vitem ${isMem?"mem":""} ${isPl?"pl":""} ${isDue?"due":""}`}>
                       <div className="vtop">
                         <div className={`vnum ${isMem?"mem":""} ${isPl?"pl":""}`} onClick={()=>toggleV(selS.n,v.n)}>
                           {isMem?<Icons.Check size={11} color={t.gr}/>:v.n}
                         </div>
-                        <div className="var-text">
-                          <TajwidSpan text={v.ar} enabled={showTj&&!!Q[selS.n]} tjc={tjc}/>
-                          <span className="vmark"> ﴿{v.n}﴾</span>
+                        <div className="var-text" style={{fontSize:`${arabicSize}rem`}}>
+                          {reviewMode&&!isRevealed?(
+                            <div style={{
+                              background:t.b1,borderRadius:8,padding:"8px 14px",
+                              cursor:"pointer",textAlign:"center",color:t.tx3,fontSize:".75rem",
+                              userSelect:"none",
+                            }} onClick={()=>setRevealedVerses(p=>({...p,[v.n]:true}))}>
+                              Appuyer pour révéler le verset {v.n}
+                            </div>
+                          ):(
+                            <>
+                              <TajwidSpan text={v.ar} enabled={showTj&&!!Q[selS.n]} tjc={tjc}/>
+                              <span className="vmark"> ﴿{v.n}﴾</span>
+                            </>
+                          )}
                         </div>
                       </div>
-                      {showTr&&v.fr&&<div className="vfr">{v.fr}</div>}
-                      {showTf&&v.tf&&(
+                      {showTr&&v.fr&&(!reviewMode||isRevealed)&&<div className="vfr">{v.fr}</div>}
+                      {showTf&&v.tf&&(!reviewMode||isRevealed)&&(
                         <div className="vtf">
                           <div className="vtf-hd">Tafsir Ibn Kathir</div>
                           {v.tf}
@@ -1124,9 +1770,32 @@ return (
                         <button className={`vbtn ${isMem?"mem":""}`} onClick={()=>toggleV(selS.n,v.n)}>
                           {isMem?<><Icons.Check size={10}/>Mémorisé</>:<>+ Mémoriser</>}
                         </button>
-                        <button className="vbtn snd" onClick={()=>doPlay(v.n)}>
+                        <button className="vbtn snd" onClick={()=>{setLoopCurrent(1);doPlay(v.n);}}>
                           <Icons.Play size={10}/>{isPl?"Stop":"Écouter"}
                         </button>
+                        <button className={`vbtn ${isFav(selS.n,v.n)?"mem":""}`}
+                          onClick={()=>toggleFav(selS.n,v.n,v.ar,v.fr,selS.name)}>
+                          <Icons.Heart size={10} filled={isFav(selS.n,v.n)}/>
+                          {isFav(selS.n,v.n)?"Favori":"Favori"}
+                        </button>
+                        <button className={`vbtn ${notes[`${selS.n}_${v.n}`]?"on":""}`}
+                          style={notes[`${selS.n}_${v.n}`]?{borderColor:t.pu,color:t.pu}:{}}
+                          onClick={()=>{
+                            setEditingNote(`${selS.n}_${v.n}`);
+                            setNoteText(notes[`${selS.n}_${v.n}`]||"");
+                          }}>
+                          Note{notes[`${selS.n}_${v.n}`]?" ✓":""}
+                        </button>
+                        <button className="vbtn" onClick={()=>setShareVerse({sn:selS.n,vn:v.n,ar:v.ar,fr:v.fr,surah:selS.name,surahAr:selS.ar})}>
+                          <Icons.Share size={10}/>Partager
+                        </button>
+                        {isMem&&(
+                          <button className={`vbtn ${spacedDue.includes(`${selS.n}_${v.n}`)?"":"snd"}`}
+                            style={spacedDue.includes(`${selS.n}_${v.n}`)?{borderColor:t.rd,color:t.rd}:{}}
+                            onClick={()=>markSpaced(selS.n,v.n)}>
+                            {spacedDue.includes(`${selS.n}_${v.n}`)?"Révision due":"Révisé"}
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
@@ -1397,97 +2066,198 @@ return (
             {cdS.length===0&&<div className="empty" style={{gridColumn:"1/-1"}}><div className="big-ar">🎉</div>Toutes mémorisées!</div>}
           </div>
         </div>
-      </div>
-    )}
 
-    {/* ── PAGES ── */}
-    {page==="pages"&&(()=>{
-      const totalRead = Object.keys(pageRead).filter(k=>pageRead[k]).length;
-      const pctPages = Math.round(totalRead/TOTAL_PAGES*100);
-      return (
-        <div className="sp">
-          {/* KPIs */}
-          <div className="sg">
-            <div className="sc a"><div className="slbl">Progression</div><div className="sval">{pctPages}%</div><div className="ssub">{totalRead} / {TOTAL_PAGES} pages</div></div>
-            <div className="sc g"><div className="slbl">Pages lues</div><div className="sval">{totalRead}</div><div className="ssub">sur {TOTAL_PAGES}</div></div>
-            <div className="sc b"><div className="slbl">Pages restantes</div><div className="sval">{TOTAL_PAGES-totalRead}</div><div className="ssub">à lire</div></div>
-            <div className="sc r"><div className="slbl">Mushaf standard</div><div className="sval">604</div><div className="ssub">pages Hafs</div></div>
+        {/* Badges */}
+        <div className="card">
+          <div className="ch"><span className="ct">Badges & Récompenses</span><span style={{fontSize:".62rem",color:t.tx3}}>{badges.length}/{BADGE_DEFS.length}</span></div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))",gap:10,padding:14}}>
+            {BADGE_DEFS.map(b=>{
+              const earned=badges.includes(b.id);
+              return (
+                <div key={b.id} style={{
+                  padding:"12px",borderRadius:12,textAlign:"center",
+                  background:earned?t.s3:t.s2,
+                  border:`2px solid ${earned?t.acc:t.b1}`,
+                  opacity:earned?1:0.5,
+                  transition:"all .3s",
+                }}>
+                  <div style={{fontSize:"1.8rem",marginBottom:5,filter:earned?"none":"grayscale(100%)"}}>{b.icon}</div>
+                  <div style={{fontSize:".72rem",fontWeight:700,color:earned?t.acc:t.tx3}}>{b.label}</div>
+                  <div style={{fontSize:".6rem",color:t.tx3,marginTop:2}}>{b.desc}</div>
+                  {earned&&<div style={{fontSize:".58rem",color:t.gr,marginTop:4,fontWeight:600}}>Obtenu ✓</div>}
+                </div>
+              );
+            })}
           </div>
-          {/* Progress bar */}
-          <div className="card" style={{padding:"14px 16px"}}>
-            <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
-              <span style={{fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1.5px"}}>Coran complet — 604 pages</span>
-              <span style={{fontSize:".9rem",fontWeight:700,color:t.acc}}>{pctPages}%</span>
-            </div>
-            <div style={{height:14,background:t.b1,borderRadius:99,overflow:"hidden"}}>
-              <div style={{height:"100%",background:`linear-gradient(90deg,${t.acc},${t.acc2})`,borderRadius:99,width:`${pctPages}%`,transition:"width .8s ease"}}/>
-            </div>
-            <div style={{display:"flex",justifyContent:"space-between",marginTop:5,fontSize:".6rem",color:t.tx3}}>
-              <span>Page 1</span><span>Page 604</span>
-            </div>
-          </div>
-          {/* Page grid */}
+        </div>
+
+        {/* Spaced repetition due */}
+        {spacedDue.length>0&&(
           <div className="card">
             <div className="ch">
-              <span className="ct">Grille des 604 pages</span>
-              <div style={{display:"flex",gap:6}}>
-                <button className="tbtn" onClick={()=>{
-                  const all={};for(let i=1;i<=604;i++)all[String(i)]=true;
-                  setPageRead(all);
-                }}>Tout cocher</button>
-                <button className="tbtn" onClick={()=>setPageRead({})}>Réinitialiser</button>
-              </div>
+              <span className="ct">Révisions dues</span>
+              <span style={{fontSize:".62rem",color:t.rd,fontWeight:700}}>{spacedDue.length} versets</span>
             </div>
-            <div style={{padding:"10px",display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(38px,1fr))",gap:4}}>
-              {Array.from({length:TOTAL_PAGES},(_,i)=>i+1).map(p=>{
-                const done=!!pageRead[String(p)];
-                // Find which surah this page belongs to
-                const surahOnPage=SURAHS.filter(s=>SURAH_PAGE[s.n]===p).map(s=>s.name).join(", ");
+            <div style={{padding:14,display:"flex",flexDirection:"column",gap:8}}>
+              {spacedDue.slice(0,10).map(k=>{
+                const [sn,vn]=k.split("_");
+                const s=SURAHS.find(x=>x.n===parseInt(sn));
                 return (
-                  <div key={p}
-                    onClick={()=>togglePage(p)}
-                    title={surahOnPage?`Page ${p} — ${surahOnPage}`:`Page ${p}`}
-                    style={{
-                      aspectRatio:"1",
-                      display:"flex",alignItems:"center",justifyContent:"center",
-                      borderRadius:6,
-                      fontSize:".55rem",fontWeight:600,
-                      cursor:"pointer",
-                      transition:"all .15s",
-                      background:done?t.gr:t.s2,
-                      color:done?"#fff":t.tx3,
-                      border:`1px solid ${done?t.gr:t.b2}`,
-                      boxShadow:surahOnPage?`0 0 0 2px ${t.acc}44`:undefined,
-                    }}>
-                    {p}
+                  <div key={k} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 12px",background:t.s2,borderRadius:10,cursor:"pointer"}}
+                    onClick={()=>{const su=SURAHS.find(x=>x.n===parseInt(sn));if(su){setPage("quran");doSelect(su);}}}>
+                    <div style={{flex:1}}>
+                      <span style={{fontSize:".75rem",fontWeight:600}}>{s?.name}</span>
+                      <span style={{fontSize:".65rem",color:t.tx3,marginLeft:8}}>verset {vn}</span>
+                    </div>
+                    <button className="tbtn" style={{borderColor:t.gr,color:t.gr}}
+                      onClick={e=>{e.stopPropagation();markSpaced(sn,vn);}}>
+                      Révisé ✓
+                    </button>
                   </div>
                 );
               })}
-            </div>
-            <div style={{padding:"8px 14px",borderTop:`1px solid ${t.b1}`,display:"flex",gap:12,fontSize:".62rem",color:t.tx3}}>
-              <span><span style={{display:"inline-block",width:10,height:10,borderRadius:3,background:t.gr,marginRight:4}}/>Lu</span>
-              <span><span style={{display:"inline-block",width:10,height:10,borderRadius:3,border:`2px solid ${t.acc}`,marginRight:4}}/>Début de sourate</span>
+              {spacedDue.length>10&&<div style={{textAlign:"center",fontSize:".65rem",color:t.tx3}}>+{spacedDue.length-10} autres</div>}
             </div>
           </div>
-          {/* Sourates par page */}
+        )}
+      </div>
+    )}
+
+    {/* ── MUSHAF ── */}
+    {page==="mushaf"&&(()=>{
+      const totalRead=Object.keys(pageRead).filter(k=>pageRead[k]).length;
+      const pctPages=Math.round(totalRead/TOTAL_PAGES*100);
+      const curPage=mushafPage||1;
+      const surahsOnPage=SURAHS.filter(s=>SURAH_PAGE[s.n]===curPage);
+      // Multiple image sources to try
+      const imgSrcs=[
+        `https://static.qurancdn.com/images/background/page${String(curPage).padStart(3,"0")}.jpg`,
+        `https://www.searchtruth.com/quran/images/pages/page${String(curPage).padStart(3,"0")}.jpg`,
+        `https://everyayah.com/data/images_png/pages/page${String(curPage).padStart(3,"0")}.png`,
+      ];
+      return (
+        <div style={{display:"flex",flexDirection:"column",gap:0,height:"calc(100vh - 200px)"}}>
+
+          {/* Top bar */}
+          <div style={{display:"flex",alignItems:"center",gap:6,padding:"8px 12px",background:t.navBg,borderBottom:`1px solid ${t.b1}`,flexShrink:0,flexWrap:"wrap"}}>
+            {/* Page navigation */}
+            <button className="tbtn" style={{minWidth:36,fontWeight:700}} onClick={()=>setMushafPage(p=>Math.max(1,(p||1)-1))}>←</button>
+            <div style={{flex:1,textAlign:"center"}}>
+              <span style={{fontSize:".78rem",fontWeight:700,color:t.acc}}>Page {curPage}</span>
+              <span style={{fontSize:".62rem",color:t.tx3,marginLeft:6}}>/ 604</span>
+              {surahsOnPage.length>0&&(
+                <span style={{fontSize:".62rem",color:t.tx2,marginLeft:8}}>
+                  {surahsOnPage.map(s=>s.name).join(" · ")}
+                </span>
+              )}
+            </div>
+            <button className="tbtn" style={{minWidth:36,fontWeight:700}} onClick={()=>setMushafPage(p=>Math.min(604,(p||1)+1))}>→</button>
+            <button
+              className={`tbtn ${pageRead[String(curPage)]?"on":""}`}
+              style={pageRead[String(curPage)]?{borderColor:t.gr,color:t.gr,background:t.grD}:{}}
+              onClick={()=>togglePage(curPage)}>
+              {pageRead[String(curPage)]?"Lue ✓":"Marquer lue"}
+            </button>
+          </div>
+
+          {/* Progress bar */}
+          <div style={{height:4,background:t.b1,flexShrink:0}}>
+            <div style={{height:"100%",background:`linear-gradient(90deg,${t.acc},${t.acc2})`,width:`${curPage/604*100}%`,transition:"width .3s"}}/>
+          </div>
+
+          {/* Surah jump */}
+          <div style={{padding:"6px 12px",background:t.s2,borderBottom:`1px solid ${t.b1}`,flexShrink:0,display:"flex",gap:6,alignItems:"center",overflowX:"auto"}}>
+            <span style={{fontSize:".6rem",color:t.tx3,flexShrink:0}}>Aller à :</span>
+            <select className="tsel" style={{flex:1,maxWidth:200}}
+              onChange={e=>setMushafPage(parseInt(e.target.value))}
+              value={curPage}>
+              {SURAHS.map(s=>(
+                <option key={s.n} value={SURAH_PAGE[s.n]}>
+                  {s.n}. {s.name} (p.{SURAH_PAGE[s.n]})
+                </option>
+              ))}
+            </select>
+            <input type="number" min="1" max="604" className="sinp" style={{width:70}}
+              placeholder="N° page"
+              onKeyDown={e=>{if(e.key==="Enter"){const v=parseInt(e.target.value);if(v>=1&&v<=604)setMushafPage(v);}}}
+            />
+            <span style={{fontSize:".6rem",color:t.tx3,flexShrink:0}}>{totalRead}/604 lues ({pctPages}%)</span>
+          </div>
+
+          {/* Full page image */}
+          <div style={{flex:1,overflow:"auto",background:"#f5f0e8",display:"flex",alignItems:"flex-start",justifyContent:"center"}}>
+            <MushafPage page={curPage} t={t}/>
+          </div>
+
+          {/* Bottom page nav */}
+          <div style={{display:"flex",gap:0,borderTop:`1px solid ${t.b1}`,flexShrink:0,background:t.navBg}}>
+            <button style={{flex:1,padding:"12px",border:"none",background:"transparent",color:t.tx2,fontSize:".75rem",fontWeight:600,cursor:"pointer",borderRight:`1px solid ${t.b1}`}}
+              onClick={()=>setMushafPage(p=>Math.max(1,(p||1)-1))}>← Page précédente</button>
+            <div style={{padding:"12px 16px",fontSize:".75rem",fontWeight:700,color:t.acc,display:"flex",alignItems:"center"}}>{curPage}/604</div>
+            <button style={{flex:1,padding:"12px",border:"none",background:"transparent",color:t.tx2,fontSize:".75rem",fontWeight:600,cursor:"pointer",borderLeft:`1px solid ${t.b1}`}}
+              onClick={()=>setMushafPage(p=>Math.min(604,(p||1)+1))}>Page suivante →</button>
+          </div>
+        </div>
+      );
+    })()}
+    {/* ── PAGES ── */}
+    {page==="pages"&&(()=>{
+      const totalRead=Object.keys(pageRead).filter(k=>pageRead[k]).length;
+      const pctPages=Math.round(totalRead/TOTAL_PAGES*100);
+      return (
+        <div className="sp">
+          <div className="sg">
+            <div className="sc a"><div className="slbl">Progression</div><div className="sval">{pctPages}%</div><div className="ssub">{totalRead} / 604 pages</div></div>
+            <div className="sc g"><div className="slbl">Lues</div><div className="sval">{totalRead}</div><div className="ssub">pages</div></div>
+            <div className="sc b"><div className="slbl">Restantes</div><div className="sval">{604-totalRead}</div><div className="ssub">pages</div></div>
+            <div className="sc r"><div className="slbl">Mushaf</div><div className="sval">604</div><div className="ssub">pages Hafs</div></div>
+          </div>
+          <div className="card" style={{padding:"12px 16px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+              <span style={{fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1.5px"}}>604 pages</span>
+              <div style={{display:"flex",gap:6}}>
+                <button className="tbtn" onClick={()=>{const a={};for(let i=1;i<=604;i++)a[String(i)]=true;setPageRead(a);}}>Tout cocher</button>
+                <button className="tbtn" onClick={()=>setPageRead({})}>Reset</button>
+              </div>
+            </div>
+            <div style={{height:12,background:t.b1,borderRadius:99,overflow:"hidden",marginBottom:8}}>
+              <div style={{height:"100%",background:`linear-gradient(90deg,${t.acc},${t.acc2})`,borderRadius:99,width:`${pctPages}%`,transition:"width .8s"}}/>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(36px,1fr))",gap:3}}>
+              {Array.from({length:604},(_,i)=>i+1).map(p=>{
+                const done=!!pageRead[String(p)];
+                const isStart=SURAHS.some(s=>SURAH_PAGE[s.n]===p);
+                return (
+                  <div key={p} onClick={()=>togglePage(p)}
+                    style={{aspectRatio:"1",display:"flex",alignItems:"center",justifyContent:"center",
+                      borderRadius:5,fontSize:".52rem",fontWeight:600,cursor:"pointer",transition:"all .15s",
+                      background:done?t.gr:t.s2,color:done?"#fff":t.tx3,
+                      border:`1px solid ${done?t.gr:isStart?t.acc:t.b2}`,
+                    }}>{p}</div>
+                );
+              })}
+            </div>
+            <div style={{marginTop:8,display:"flex",gap:12,fontSize:".6rem",color:t.tx3}}>
+              <span><span style={{display:"inline-block",width:8,height:8,borderRadius:2,background:t.gr,marginRight:3}}/>Lu</span>
+              <span><span style={{display:"inline-block",width:8,height:8,borderRadius:2,border:`1.5px solid ${t.acc}`,marginRight:3}}/>Début sourate</span>
+            </div>
+          </div>
           <div className="card">
-            <div className="ch"><span className="ct">Début de sourate par page</span></div>
+            <div className="ch"><span className="ct">Sourates par page</span></div>
             <div style={{display:"flex",flexDirection:"column"}}>
               {SURAHS.map(s=>{
                 const pg=SURAH_PAGE[s.n];
                 const done=!!pageRead[String(pg)];
                 return (
                   <div key={s.n} style={{padding:"8px 14px",borderBottom:`1px solid ${t.b1}`,display:"flex",alignItems:"center",gap:10,cursor:"pointer"}}
-                    onClick={()=>togglePage(pg)}>
-                    <div style={{width:34,height:34,borderRadius:8,background:done?t.gr:t.s2,border:`1px solid ${done?t.gr:t.b2}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".62rem",fontWeight:700,color:done?"#fff":t.tx3,flexShrink:0}}>
-                      {pg}
-                    </div>
+                    onClick={()=>{setPage("mushaf");setMushafPage(pg);}}>
+                    <div style={{width:32,height:32,borderRadius:7,background:done?t.gr:t.s2,border:`1px solid ${done?t.gr:t.b2}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".6rem",fontWeight:700,color:done?"#fff":t.tx3,flexShrink:0}}>{pg}</div>
                     <div style={{flex:1}}>
-                      <div style={{fontSize:".78rem",fontWeight:600}}>{s.name}</div>
-                      <div style={{fontSize:".6rem",color:t.tx3}}>Juz {s.juz} · {s.v} versets</div>
+                      <div style={{fontSize:".76rem",fontWeight:600}}>{s.name}</div>
+                      <div style={{fontSize:".58rem",color:t.tx3}}>Juz {s.juz} · {s.v} versets</div>
                     </div>
-                    <div style={{fontFamily:"'Amiri',serif",fontSize:"1.1rem",color:t.acc}}>{s.ar}</div>
-                    {done&&<Icons.Check size={14} color={t.gr}/>}
+                    <div style={{fontFamily:"'Amiri',serif",fontSize:"1rem",color:t.acc}}>{s.ar}</div>
+                    {done&&<Icons.Check size={13} color={t.gr}/>}
                   </div>
                 );
               })}
@@ -1496,6 +2266,156 @@ return (
         </div>
       );
     })()}
+
+    {/* ── COMMUNAUTÉ & ORGANISATION ── */}
+    {page==="communaute"&&(
+      <div className="sp">
+
+        {/* Favoris */}
+        <div className="card">
+          <div className="ch">
+            <span className="ct">Favoris</span>
+            <span style={{fontSize:".62rem",color:t.tx3}}>{favorites.length} verset(s)</span>
+          </div>
+          {favorites.length===0?(
+            <div className="empty">Aucun favori — appuie sur le coeur dans un verset</div>
+          ):(
+            <div style={{display:"flex",flexDirection:"column"}}>
+              {favorites.map(f=>(
+                <div key={f.key} style={{padding:"12px 14px",borderBottom:`1px solid ${t.b1}`}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+                    <span style={{fontSize:".72rem",fontWeight:600,color:t.acc}}>{f.surah} · v.{f.vn}</span>
+                    <div style={{display:"flex",gap:6}}>
+                      <button className="tbtn" style={{borderColor:t.acc,color:t.acc}}
+                        onClick={()=>setShareVerse({sn:f.sn,vn:f.vn,ar:f.ar,fr:f.fr,surah:f.surah,surahAr:SURAHS.find(s=>s.n===f.sn)?.ar||""})}>
+                        <Icons.Share size={10}/>
+                      </button>
+                      <button className="tbtn" style={{borderColor:t.rd,color:t.rd}}
+                        onClick={()=>toggleFav(f.sn,f.vn,f.ar,f.fr,f.surah)}>✕</button>
+                    </div>
+                  </div>
+                  <div style={{fontFamily:"'Amiri Quran',serif",fontSize:"1.3rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx}}>
+                    {f.ar.replace(/\[[mgqrt]\](.*?)\[\/[mgqrt]\]/g,"$1")} ﴿{f.vn}﴾
+                  </div>
+                  {f.fr&&<div style={{fontSize:".72rem",color:t.tx2,fontStyle:"italic",marginTop:4}}>{f.fr}</div>}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Notes */}
+        <div className="card">
+          <div className="ch">
+            <span className="ct">Notes personnelles</span>
+            <span style={{fontSize:".62rem",color:t.tx3}}>{Object.keys(notes).length} note(s)</span>
+          </div>
+          {Object.keys(notes).length===0?(
+            <div className="empty">Aucune note — appuie sur "Note" dans un verset</div>
+          ):(
+            <div style={{display:"flex",flexDirection:"column"}}>
+              {Object.entries(notes).map(([k,txt])=>{
+                const [sn,vn]=k.split("_");
+                const s=SURAHS.find(x=>x.n===parseInt(sn));
+                return (
+                  <div key={k} style={{padding:"12px 14px",borderBottom:`1px solid ${t.b1}`}}>
+                    <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+                      <span style={{fontSize:".72rem",fontWeight:600,color:t.pu}}>{s?.name} · v.{vn}</span>
+                      <button className="tbtn" style={{fontSize:".6rem"}}
+                        onClick={()=>{setEditingNote(k);setNoteText(txt);}}>Modifier</button>
+                    </div>
+                    <div style={{fontSize:".78rem",color:t.tx2,lineHeight:1.6}}>{txt}</div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Listes personnalisées */}
+        <div className="card">
+          <div className="ch">
+            <span className="ct">Mes listes</span>
+            <span style={{fontSize:".62rem",color:t.tx3}}>{lists.length} liste(s)</span>
+          </div>
+          <div style={{padding:"12px 14px",borderBottom:`1px solid ${t.b1}`,display:"flex",gap:8}}>
+            <input className="sinp" style={{flex:1}} placeholder="Nom de la liste…"
+              value={newListName} onChange={e=>setNewListName(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&createList(newListName)}/>
+            <button className="tbtn" style={{borderColor:t.acc,color:t.acc}}
+              onClick={()=>createList(newListName)}>+ Créer</button>
+          </div>
+          {lists.length===0?(
+            <div className="empty">Crée une liste pour organiser tes versets</div>
+          ):(
+            <div style={{display:"flex",flexDirection:"column"}}>
+              {lists.map(l=>(
+                <div key={l.id}>
+                  <div style={{padding:"10px 14px",borderBottom:`1px solid ${t.b1}`,display:"flex",alignItems:"center",gap:8,cursor:"pointer",background:selList===l.id?t.s2:"transparent"}}
+                    onClick={()=>setSelList(selList===l.id?null:l.id)}>
+                    <Icons.List size={14} color={t.acc}/>
+                    <span style={{flex:1,fontSize:".78rem",fontWeight:600}}>{l.name}</span>
+                    <span style={{fontSize:".62rem",color:t.tx3}}>{l.items.length} versets</span>
+                    <button className="tbtn" style={{borderColor:t.rd,color:t.rd,fontSize:".6rem"}}
+                      onClick={e=>{e.stopPropagation();setLists(p=>p.filter(x=>x.id!==l.id));}}>✕</button>
+                  </div>
+                  {selList===l.id&&(
+                    <div style={{padding:"8px 14px",background:t.s2,borderBottom:`1px solid ${t.b1}`}}>
+                      {l.items.length===0?(
+                        <div style={{fontSize:".7rem",color:t.tx3,textAlign:"center",padding:"8px 0"}}>
+                          Liste vide — ajoute des versets depuis l'onglet Coran
+                        </div>
+                      ):(
+                        l.items.map(item=>{
+                          const s=SURAHS.find(x=>x.n===item.sn);
+                          return (
+                            <div key={`${item.sn}_${item.vn}`} style={{display:"flex",alignItems:"center",gap:8,padding:"5px 0",borderBottom:`1px solid ${t.b1}`}}>
+                              <span style={{flex:1,fontSize:".75rem"}}>{s?.name} · verset {item.vn}</span>
+                              <button className="tbtn" style={{borderColor:t.rd,color:t.rd,fontSize:".6rem"}}
+                                onClick={()=>removeFromList(l.id,item.sn,item.vn)}>✕</button>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Partager progression */}
+        <div className="card">
+          <div className="ch"><span className="ct">Partager ma progression</span></div>
+          <div style={{padding:16}}>
+            <div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,border:`2px solid ${t.acc}`,borderRadius:14,padding:"20px",textAlign:"center",marginBottom:14}}>
+              <div style={{fontFamily:"'Amiri Quran',serif",fontSize:"1.8rem",color:t.acc,marginBottom:6}}>القرآن الكريم</div>
+              <div style={{fontSize:"2.5rem",fontWeight:700,color:t.acc,lineHeight:1}}>{pct}%</div>
+              <div style={{fontSize:".75rem",color:t.tx2,marginTop:4}}>{totalMem.toLocaleString()} / {TOTAL_VERSES} versets mémorisés</div>
+              <div style={{height:8,background:t.b1,borderRadius:99,overflow:"hidden",margin:"12px 0 8px"}}>
+                <div style={{height:"100%",background:`linear-gradient(90deg,${t.acc},${t.acc2})`,borderRadius:99,width:`${pct}%`}}/>
+              </div>
+              <div style={{fontSize:".65rem",color:t.tx3}}>
+                {SURAHS.filter(s=>sPct(s)===100).length} sourates complètes · Juz {[...new Set(SURAHS.filter(s=>sPct(s)===100).map(s=>s.juz))].length} juz · Al-Hifz
+              </div>
+              {badges.length>0&&(
+                <div style={{marginTop:8,display:"flex",gap:4,justifyContent:"center",flexWrap:"wrap"}}>
+                  {badges.map(b=>BADGE_DEFS.find(x=>x.id===b)).filter(Boolean).map(b=>(
+                    <span key={b.id} style={{fontSize:"1.2rem"}}>{b.icon}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+            <button className="mbtn" onClick={()=>{
+              const txt=`بِسْمِ ٱللَّهِ\n\nMa progression Al-Hifz :\n${pct}% du Coran mémorisé\n${totalMem} / ${TOTAL_VERSES} versets\n${SURAHS.filter(s=>sPct(s)===100).length} sourates complètes\n\nBadges : ${badges.map(b=>BADGE_DEFS.find(x=>x.id===b)?.icon||"").join(" ")}\n\nAl-Hifz — Application de mémorisation du Coran`;
+              navigator.clipboard?.writeText(txt).catch(()=>{});
+            }}>Copier ma progression</button>
+          </div>
+        </div>
+
+      </div>
+    )}
 
     {/* ── SETTINGS ── */}
     {page==="settings"&&(
@@ -1533,27 +2453,122 @@ return (
           <div className="ss-hd">Thème & Affichage</div>
           <div className="set-row">
             <div><div className="set-lbl">Thème</div><div className="set-sub">Clair ou sombre</div></div>
-            <button className="toggle on" style={{background:t.acc}} onClick={()=>setTn(n=>n==="dark"?"light":"dark")}>
-            </button>
+            <button className="toggle on" style={{background:t.acc}} onClick={()=>setTn(n=>n==="dark"?"light":"dark")}/>
+          </div>
+          <div className="set-row">
+            <div><div className="set-lbl">Mode nuit automatique</div><div className="set-sub">Sombre entre 20h et 7h</div></div>
+            <button className={`toggle ${autoNight?"on":""}`} style={{background:autoNight?t.acc:t.b2}}
+              onClick={()=>setAutoNight(v=>!v)}/>
+          </div>
+          <div className="set-row">
+            <div><div className="set-lbl">Taille du texte arabe</div><div className="set-sub">Actuelle : {arabicSize.toFixed(1)}rem</div></div>
+            <div style={{display:"flex",gap:8,alignItems:"center"}}>
+              <button className="tbtn" onClick={()=>setArabicSize(s=>Math.max(1,+(s-0.1).toFixed(1)))}>A-</button>
+              <span style={{fontSize:".75rem",color:t.acc,fontWeight:700,minWidth:30,textAlign:"center"}}>{arabicSize.toFixed(1)}</span>
+              <button className="tbtn" onClick={()=>setArabicSize(s=>Math.min(3,+(s+0.1).toFixed(1)))}>A+</button>
+            </div>
+          </div>
+        </div>
+
+        <div className="settings-section">
+          <div className="ss-hd">Répétition espacée</div>
+          <div className="set-row">
+            <div>
+              <div className="set-lbl">Versets à réviser</div>
+              <div className="set-sub">{spacedDue.length} verset(s) dû(s) aujourd'hui</div>
+            </div>
+            <button className="tbtn" style={{borderColor:t.acc,color:t.acc}}
+              onClick={()=>setPage("stats")}>Voir →</button>
+          </div>
+          <div className="set-row">
+            <div><div className="set-lbl">Réinitialiser révisions</div><div className="set-sub">Remet à zéro toutes les dates</div></div>
+            <button className="tbtn" style={{borderColor:t.rd,color:t.rd}}
+              onClick={()=>setSpaced({})}>Reset</button>
+          </div>
+        </div>
+
+        <div className="settings-section">
+          <div className="ss-hd">Badges ({badges.length}/{BADGE_DEFS.length})</div>
+          <div style={{padding:12,display:"flex",gap:8,flexWrap:"wrap"}}>
+            {BADGE_DEFS.map(b=>(
+              <div key={b.id} style={{
+                padding:"6px 10px",borderRadius:99,fontSize:".68rem",fontWeight:600,
+                background:badges.includes(b.id)?t.acc:t.b1,
+                color:badges.includes(b.id)?"#fff":t.tx3,
+              }}>
+                {b.icon} {b.label}
+              </div>
+            ))}
           </div>
         </div>
 
         <div className="settings-section">
           <div className="ss-hd">À propos</div>
-          <div className="set-row"><div><div className="set-lbl">Al-Hifz</div><div className="set-sub">Application de mémorisation du Saint Coran · Version 5.0</div></div></div>
-          <div className="set-row"><div><div className="set-lbl">Données embarquées</div><div className="set-sub">Al-Fatiha + Juz 30 complet (S.97–114) avec tafsir Ibn Kathir en français</div></div></div>
-          <div className="set-row"><div><div className="set-lbl">Audio</div><div className="set-sub">5 récitateurs · cdn.islamic.network</div></div></div>
+          <div className="set-row"><div><div className="set-lbl">Al-Hifz</div><div className="set-sub">Application de mémorisation du Saint Coran · Version 6.0</div></div></div>
+          <div className="set-row"><div><div className="set-lbl">Données embarquées</div><div className="set-sub">Al-Fatiha + Juz 30 complet (S.97–114) avec tafsir Ibn Kathir</div></div></div>
+          <div className="set-row"><div><div className="set-lbl">Audio</div><div className="set-sub">5 récitateurs · répétition 1x–10x · cdn.islamic.network</div></div></div>
         </div>
       </div>
     )}
   </div>
 
+  {/* ── Immersive mode ── */}
+  {immersive&&selS&&verses.length>0&&(
+    <div className="immersive">
+      <div className="immersive-header">
+        <div>
+          <div className="immersive-title">{selS.ar}</div>
+          <div style={{fontSize:".62rem",color:t.tx3}}>{selS.name} · {selS.v} versets</div>
+        </div>
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          <button className="tbtn" style={{borderColor:t.acc,color:t.acc}}
+            onClick={()=>setShowTr(v=>!v)}>{showTr?"Masquer trad.":"Afficher trad."}</button>
+          <button className="tbtn" style={{borderColor:t.rd,color:t.rd}}
+            onClick={()=>setImmersive(false)}>✕ Fermer</button>
+        </div>
+      </div>
+      <div className="immersive-scroll"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}>
+        {verses.map(v=>{
+          const isMem=!!(mem[String(selS.n)]||{})[String(v.n)];
+          return (
+            <div key={v.n} className="immersive-verse"
+              style={{borderBottom:`1px solid ${t.b1}`,opacity:isMem?1:0.7}}>
+              <div className="immersive-ar" style={{fontSize:`${Math.max(arabicSize,1.8)}rem`}}>
+                <TajwidSpan text={v.ar} enabled={showTj&&!!Q[selS.n]} tjc={tjc}/>
+                <span style={{fontSize:"0.8rem",color:t.acc,marginRight:6,fontFamily:"'Amiri',serif"}}> ﴿{v.n}﴾</span>
+              </div>
+              {showTr&&v.fr&&<div className="immersive-fr">{v.fr}</div>}
+              <div className="immersive-num" style={{display:"flex",gap:10,justifyContent:"center",marginTop:10}}>
+                <button className={`vbtn ${isMem?"mem":""}`} onClick={()=>toggleV(selS.n,v.n)}>
+                  {isMem?"✓ Mémorisé":"+ Mémoriser"}
+                </button>
+                <button className="vbtn snd" onClick={()=>doPlay(v.n)}>
+                  <Icons.Play size={10}/> Écouter
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {/* Immersive bottom nav */}
+      <div style={{padding:"10px 16px",borderTop:`1px solid ${t.b1}`,display:"flex",justifyContent:"space-between",background:t.navBg,backdropFilter:"blur(16px)"}}>
+        <button className="tbtn" onClick={()=>{const idx=SURAHS.findIndex(s=>s.n===selS.n);if(idx>0)doSelect(SURAHS[idx-1]);}}>← Sourate préc.</button>
+        <span style={{fontSize:".7rem",color:t.tx3,display:"flex",alignItems:"center"}}>Swipe ← → pour naviguer</span>
+        <button className="tbtn" onClick={()=>{const idx=SURAHS.findIndex(s=>s.n===selS.n);if(idx<SURAHS.length-1)doSelect(SURAHS[idx+1]);}}>Sourate suiv. →</button>
+      </div>
+    </div>
+  )}
+
   {/* ── Bottom Navigation ── */}
   <nav className="bnav">
     {[
       ["quran",<Icons.Book size={22}/>, "Coran"],
-      ["pages",<Icons.Star size={22}/>, "Pages"],
+      ["mushaf",<Icons.Star size={22}/>, "Mushaf"],
+      ["pages",<Icons.List size={22}/>, "Pages"],
       ["khatma",<Icons.Scroll size={22}/>, "Khatma"],
+      ["communaute",<Icons.Share size={22}/>, "Partage"],
       ["stats",<Icons.Chart size={22}/>, "Stats"],
       ["settings",<Icons.Settings size={22}/>, "Réglages"],
     ].map(([id,icon,label])=>(
@@ -1565,7 +2580,6 @@ return (
   </nav>
 
   <audio ref={audioRef} style={{display:"none"}}
-    onEnded={()=>setPlaying(null)}
     onError={()=>setPlaying(null)}/>
 </>
 
