@@ -447,32 +447,32 @@ const THEME_META={
   abbasid:{label:"Abbasside",sub:"Bagdad — or sur noir",preview:["#080600","#f0c040","#50c878"]},
 };
 const TJC_DARK={
-  m:"#2196f3",      // Madd normal — bleu
-  mr:"#00bcd4",     // Madd permissible — cyan  
-  mo:"#ff5722",     // Madd obligatoire — orange-rouge
-  ml:"#e91e63",     // Madd lazim — rose
-  g:"#4caf50",      // Ghunna — vert
-  idg:"#8bc34a",    // Idgham sans ghunna — vert clair
-  q:"#9c27b0",      // Qalqala — violet
-  ikh:"#ff9800",    // Ikhfa — orange
-  iql:"#f44336",    // Iqlab — rouge
-  ls:"#03a9f4",     // Lam shamsiyya — bleu clair
-  hw:"#78909c",     // Ham Wasl — gris
+  m:"#4FC3F7",      // Madd naturel (2h) — bleu clair comme Mushaf
+  mr:"#0288D1",     // Madd permissible (2-4-6h) — bleu moyen
+  mo:"#880E4F",     // Madd wajib muttasil (4-5h) — bordeaux/magenta
+  ml:"#B71C1C",     // Madd lazim (6h) — rouge foncé comme Mushaf
+  g:"#2E7D32",      // Ghunna — vert foncé
+  idg:"#388E3C",    // Idgham avec ghunna — vert
+  q:"#B71C1C",      // Qalqala — rouge (comme Mushaf standard)
+  ikh:"#F57F17",    // Ikhfa — jaune-orange
+  iql:"#E65100",    // Iqlab — orange foncé
+  ls:"#01579B",     // Lam shamsiyya — bleu foncé
+  hw:"#546E7A",     // Ham Wasl — gris bleu
   sl:"#607d8b",     // Silence/Sakt — gris bleu
 };
 const TJC_LIGHT={
-  m:"#1565c0",      // Madd — bleu foncé
-  mr:"#006064",     // Madd permissible — teal foncé
-  mo:"#bf360c",     // Madd obligatoire — brun-rouge
-  ml:"#880e4f",     // Madd lazim — bordeaux
-  g:"#2e7d32",      // Ghunna — vert foncé
-  idg:"#33691e",    // Idgham — vert olive
-  q:"#6a1b9a",      // Qalqala — violet foncé
-  ikh:"#e65100",    // Ikhfa — orange foncé
-  iql:"#b71c1c",    // Iqlab — rouge foncé
-  ls:"#01579b",     // Lam shamsiyya
-  hw:"#546e7a",     // Ham Wasl
-  sl:"#37474f",
+  m:"#0277BD",      // Madd naturel — bleu
+  mr:"#01579B",     // Madd permissible — bleu foncé
+  mo:"#880E4F",     // Madd wajib — bordeaux
+  ml:"#B71C1C",     // Madd lazim — rouge foncé
+  g:"#1B5E20",      // Ghunna — vert très foncé
+  idg:"#2E7D32",    // Idgham — vert foncé
+  q:"#B71C1C",      // Qalqala — rouge
+  ikh:"#E65100",    // Ikhfa — orange
+  iql:"#BF360C",    // Iqlab — orange-rouge
+  ls:"#01579B",     // Lam shamsiyya
+  hw:"#37474F",     // Ham Wasl
+  sl:"#263238",
 };
 
 // Icons
@@ -712,21 +712,21 @@ function TajwidSpan({text,enabled,tjc}) {
 
 // MushafPage
 // Vraies URL par édition — plusieurs fallbacks pour fiabilité
-// URLs Mushaf — via l'API qurancdn (même domaine que le fetch des versets → pas de CORS)
-// L'API retourne l'URL de l'image hébergée sur leur propre CDN
+// URLs Mushaf — proxy Vercel en premier (pas de CORS), puis CDN directs en fallback
 const EDITION_IMGS = {
-  // Hafs Médine — API qurancdn + fallbacks
   hafs: pg => [
+    `/api/mushaf?page=${pg}&edition=hafs`,           // proxy Vercel — toujours disponible
     `https://static.qurancdn.com/images/quran/pages/v4/en/hafs/${pg}.png`,
-    `https://qurancdn.com/images/pages/${String(pg).padStart(3,"0")}.png`,
     `https://cdn.islamic.network/quran/images/high-resolution/${pg}.jpg`,
   ],
   tajweed: pg => [], // mode texte uniquement
   warsh: pg => [
+    `/api/mushaf?page=${pg}&edition=warsh`,
     `https://static.qurancdn.com/images/quran/pages/v4/en/warsh/${pg}.png`,
     `https://cdn.islamic.network/quran/images/high-resolution/${pg}.jpg`,
   ],
   indopak: pg => [
+    `/api/mushaf?page=${pg}&edition=indopak`,
     `https://static.qurancdn.com/images/quran/pages/v4/en/indopak/${pg}.png`,
     `https://cdn.islamic.network/quran/images/high-resolution/${pg}.jpg`,
   ],
@@ -1288,7 +1288,7 @@ export default function App() {
     const t=setTimeout(()=>setSplash(false),2200);
     // Migrate: clear old qv3 cache entries (had wrong tajweed data)
     try{
-      Object.keys(localStorage).filter(k=>k.startsWith("qv3_")).forEach(k=>localStorage.removeItem(k));
+      Object.keys(localStorage).filter(k=>k.startsWith("qv3_")||k.startsWith("qv4_")).forEach(k=>localStorage.removeItem(k));
     }catch{}
     return()=>clearTimeout(t);
   },[]);
@@ -1675,7 +1675,7 @@ export default function App() {
   // Q[s.n] utilisé uniquement comme fallback traduction hors ligne
   useEffect(()=>{
     if(!selS){setVerses([]);setLoadState("idle");return;}
-    const cacheKey=`qv4_${selS.n}`; // v4 = tajweed HTML + traduction fusionnée
+    const cacheKey=`qv5_${selS.n}`; // v4 = tajweed HTML + traduction fusionnée
     // Check cache first
     try{
       const cached=localStorage.getItem(cacheKey);
