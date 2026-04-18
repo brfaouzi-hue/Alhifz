@@ -118,8 +118,258 @@ const SURAHS = [
 ];
 const TOTAL_VERSES = SURAHS.reduce((s,x)=>s+x.v,0);
 
+// Embedded data
 const Q = {
+1:[
+  {n:1,ar:"بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",fr:"Au nom d'Allah, le Tout Miséricordieux, le Très Miséricordieux.",tf:"La Basmala inaugure chaque sourate sauf At-Tawba. Ar-Rahman désigne la miséricorde universelle, Ar-Rahim la miséricorde particulière aux croyants dans l'au-delà."},
+  {n:2,ar:"ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَٰلَمِينَ",fr:"Louange à Allah, Seigneur de l'univers,",tf:"Al-Hamd appartient à Allah seul. Rabb al-'Alamin : Il est le Créateur et Dispensateur de bienfaits à toutes les créatures."},
+  {n:3,ar:"ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",fr:"le Tout Miséricordieux, le Très Miséricordieux,",tf:"Répétition pour insister sur la miséricorde — attribut fondamental d'Allah."},
+  {n:4,ar:"مَٰلِكِ يَوْمِ ٱلدِّينِ",fr:"Maître du Jour de la rétribution.",tf:"Maître absolu du Jugement."},
+  {n:5,ar:"إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",fr:"C'est Toi [Seul] que nous adorons, et c'est Toi [Seul] dont nous implorons le secours.",tf:"Cœur de la sourate et de l'islam : adoration exclusive d'Allah et recours exclusif à Lui."},
+  {n:6,ar:"ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ",fr:"Guide-nous dans le droit chemin,",tf:"Supplication répétée 17 fois/jour dans la prière."},
+  {n:7,ar:"صِرَٰطَ ٱلَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ ٱلْمَغْضُوبِ عَلَيْهِمْ وَلَا ٱلضَّآلِّينَ",fr:"le chemin de ceux que Tu as comblés de faveurs, non pas de ceux qui ont encouru Ta colère, ni des égarés.",tf:"Comblés de faveurs : prophètes, véridiques, martyrs et vertueux."},
+],
+97:[
+  {n:1,ar:"إِنَّٓا أَنزَلْنَٰهُ فِى لَيْلَةِ ٱلْقَدْرِ",fr:"Nous l'avons certes révélé pendant la nuit d'Al-Qadr.",tf:"Le Coran fut descendu en totalité la nuit d'Al-Qadr."},
+  {n:2,ar:"وَمَآ أَدْرَاكَ مَا لَيْلَةُ ٱلْقَدْرِ",fr:"Et qui te dira ce qu'est la nuit d'Al-Qadr?",tf:"Question rhétorique pour magnifier l'importance de cette nuit."},
+  {n:3,ar:"لَيْلَةُ ٱلْقَدْرِ خَيْرٌ مِّنْ أَلْفِ شَهْرٍ",fr:"La nuit d'Al-Qadr est meilleure que mille mois.",tf:"Mille mois ≈ 83 ans, une vie entière."},
+  {n:4,ar:"تَنَزَّلُ ٱلْمَلَٰٓئِكَةُ وَٱلرُّوحُ فِيهَا بِإِذْنِ رَبِّهِم مِّن كُلِّ أَمْرٍ",fr:"Les Anges ainsi que l'Esprit descendent durant cette nuit, avec la permission de leur Seigneur pour tout ordre.",tf:"Jibrîl et les anges descendent en masse portant les décrets divins pour l'année à venir."},
+  {n:5,ar:"سَلَٰمٌ هِىَ حَتَّىٰ مَطْلَعِ ٱلْفَجْرِ",fr:"Elle est paix et salut jusqu'à l'apparition de l'aube.",tf:"Toute la nuit est paix et bénédiction."},
+],
+98:[
+  {n:1,ar:"لَمْ يَكُنِ ٱلَّذِينَ كَفَرُوا۟ مِنْ أَهْلِ ٱلْكِتَٰبِ وَٱلْمُشْرِكِينَ مُنفَكِّينَ حَتَّىٰ تَأْتِيَهُمُ ٱلْبَيِّنَةُ",fr:"Les mécréants parmi les gens du Livre et les associateurs n'auraient pas abandonné leur mécréance jusqu'à ce que leur vînt la preuve manifeste,",tf:"La preuve allait être le Prophète ﷺ et le Coran."},
+  {n:2,ar:"رَسُولٌ مِّنَ ٱللَّهِ يَتْلُوا۟ صُحُفًا مُّطَهَّرَةً",fr:"un Messager d'Allah, qui récite des pages purifiées,",tf:"Muhammad ﷺ récitant les feuillets du Coran."},
+  {n:3,ar:"فِيهَا كُتُبٌ قَيِّمَةٌ",fr:"contenant des écrits droits.",tf:"Qayyima : droits, justes, immuables."},
+  {n:4,ar:"وَمَا تَفَرَّقَ ٱلَّذِينَ أُوتُوا۟ ٱلْكِتَٰبَ إِلَّا مِنۢ بَعْدِ مَا جَآءَتْهُمُ ٱلْبَيِّنَةُ",fr:"Ceux à qui le Livre a été donné ne se sont divisés qu'après que leur fut venue la preuve manifeste.",tf:"La division est venue après la preuve, par jalousie et intérêts mondains."},
+  {n:5,ar:"وَمَآ أُمِرُوٓا۟ إِلَّا لِيَعْبُدُوا۟ ٱللَّهَ مُخْلِصِينَ لَهُ ٱلدِّينَ حُنَفَآءَ وَيُقِيمُوا۟ ٱلصَّلَوٰةَ وَيُؤْتُوا۟ ٱلزَّكَوٰةَ وَذَٰلِكَ دِينُ ٱلْقَيِّمَةِ",fr:"Ils n'avaient été commandés que d'adorer Allah sincèrement, d'accomplir la Salat et d'acquitter la Zakat. C'est là la religion droite.",tf:"L'essence de tous les messages : tawhid, prière, zakat."},
+  {n:6,ar:"إِنَّ ٱلَّذِينَ كَفَرُوا۟ مِنْ أَهْلِ ٱلْكِتَٰبِ وَٱلْمُشْرِكِينَ فِى نَارِ جَهَنَّمَ خَٰلِدِينَ فِيهَا أُو۟لَٰٓئِكَ هُمْ شَرُّ ٱلْبَرِيَّةِ",fr:"Ceux qui ont mécru parmi les gens du Livre et les associateurs seront dans le feu de la Géhenne éternellement.",tf:"Verdict pour ceux qui ont reçu la preuve et l'ont rejetée sciemment."},
+  {n:7,ar:"إِنَّ ٱلَّذِينَ ءَامَنُوا۟ وَعَمِلُوا۟ ٱلصَّٰلِحَٰتِ أُو۟لَٰٓئِكَ هُمْ خَيْرُ ٱلْبَرِيَّةِ",fr:"Ceux qui ont cru et accompli de bonnes œuvres sont les meilleures des créatures.",tf:"Khayr al-bariyya — les meilleures créatures."},
+  {n:8,ar:"جَزَآؤُهُمْ عِندَ رَبِّهِمْ جَنَّٰتُ عَدْنٍ تَجْرِى مِن تَحْتِهَا ٱلْأَنْهَٰرُ خَٰلِدِينَ فِيهَآ أَبَدًا رَّضِىَ ٱللَّهُ عَنْهُمْ وَرَضُوا۟ عَنْهُ ذَٰلِكَ لِمَنْ خَشِىَ رَبَّهُۥ",fr:"Leur récompense sera les jardins d'Eden. Allah est satisfait d'eux et ils sont satisfaits de Lui.",tf:"Le summum du paradis : satisfaction mutuelle entre Allah et Ses serviteurs."},
+],
+99:[
+  {n:1,ar:"إِذَا زُلْزِلَتِ ٱلْأَرْضُ زِلْزَالَهَا",fr:"Quand la terre sera secouée d'un violent tremblement,",tf:"Le tremblement final de la Terre au Jour du Jugement."},
+  {n:2,ar:"وَأَخْرَجَتِ ٱلْأَرْضُ أَثْقَالَهَا",fr:"et que la terre aura sorti ses fardeaux,",tf:"La terre vomira tout : les morts ressusciteront."},
+  {n:3,ar:"وَقَالَ ٱلْإِنسَٰنُ مَا لَهَا",fr:"et que l'homme dira : Qu'a-t-elle?",tf:"L'homme stupéfait demande ce qui se passe."},
+  {n:4,ar:"يَوْمَئِذٍ تُحَدِّثُ أَخْبَارَهَا",fr:"Ce jour-là, elle racontera ses nouvelles,",tf:"La terre témoignera de tout ce qui s'est passé sur elle."},
+  {n:5,ar:"بِأَنَّ رَبَّكَ أَوْحَىٰ لَهَا",fr:"parce que ton Seigneur lui aura inspiré cela.",tf:"Allah inspirera à la terre sa mission de témoignage."},
+  {n:6,ar:"يَوْمَئِذٍ يَصْدُرُ ٱلنَّاسُ أَشْتَاتًا لِّيُرَوْا۟ أَعْمَٰلَهُمْ",fr:"Ce jour-là, les hommes sortiront en groupes séparés pour qu'on leur montre leurs œuvres.",tf:"Chacun confronté à l'intégralité de ses actions."},
+  {n:7,ar:"فَمَن يَعْمَلْ مِثْقَالَ ذَرَّةٍ خَيْرًا يَرَهُۥ",fr:"Quiconque a fait le poids d'un atome de bien le verra,",tf:"Justice absolue : même le bien le plus infime sera récompensé."},
+  {n:8,ar:"وَمَن يَعْمَلْ مِثْقَالَ ذَرَّةٍ شَرًّا يَرَهُۥ",fr:"et quiconque a fait le poids d'un atome de mal le verra.",tf:"Symétrie parfaite. Rien n'échappe à la justice divine."},
+],
+100:[
+  {n:1,ar:"وَٱلْعَٰدِيَٰتِ ضَبْحًا",fr:"Par les coursiers haletants,",tf:"Serment par les chevaux de guerre."},
+  {n:2,ar:"فَٱلْمُورِيَٰتِ قَدْحًا",fr:"qui font jaillir des étincelles de leurs sabots,",tf:"Image de puissance et de rapidité."},
+  {n:3,ar:"فَٱلْمُغِيرَٰتِ صُبْحًا",fr:"qui font des raids à l'aube,",tf:"Moment de vigilance, courage et action décisive."},
+  {n:4,ar:"فَأَثَرْنَ بِهِۦ نَقْعًا",fr:"et soulèvent des nuages de poussière,",tf:"Image vivante du mouvement vers la cause divine."},
+  {n:5,ar:"فَوَسَطْنَ بِهِۦ جَمْعًا",fr:"et s'élancent au milieu de l'ennemi groupé.",tf:"Point culminant du tableau de bravoure."},
+  {n:6,ar:"إِنَّ ٱلْإِنسَٰنَ لِرَبِّهِۦ لَكَنُودٌ",fr:"L'homme est vraiment ingrat envers son Seigneur,",tf:"Ingratitude fondamentale."},
+  {n:7,ar:"وَإِنَّهُۥ عَلَىٰ ذَٰلِكَ لَشَهِيدٌ",fr:"et il en est lui-même témoin.",tf:"L'homme est son propre témoin de son ingratitude."},
+  {n:8,ar:"وَإِنَّهُۥ لِحُبِّ ٱلْخَيْرِ لَشَدِيدٌ",fr:"Et il est passionnément attaché aux biens de ce monde.",tf:"Amour excessif des richesses."},
+  {n:9,ar:"أَفَلَا يَعْلَمُ إِذَا بُعْثِرَ مَا فِى ٱلْقُبُورِ",fr:"Ne sait-il pas que lorsque ce qui est dans les tombes sera bouleversé,",tf:"Rappel de la résurrection."},
+  {n:10,ar:"وَحُصِّلَ مَا فِى ٱلصُّدُورِ",fr:"et que ce qui est dans les poitrines sera rendu apparent,",tf:"Les secrets du cœur seront tous révélés."},
+  {n:11,ar:"إِنَّ رَبَّهُم بِهِمْ يَوْمَئِذٍ لَّخَبِيرٌ",fr:"leur Seigneur ce Jour-là est parfaitement informé de ce qu'ils ont fait.",tf:"Allah est Al-Khabir — rien ne Lui échappe."},
+],
+101:[
+  {n:1,ar:"ٱلْقَارِعَةُ",fr:"La Fracassante!",tf:"Nom du Jour du Jugement."},
+  {n:2,ar:"مَا ٱلْقَارِعَةُ",fr:"Qu'est-ce que la Fracassante?",tf:"Style d'amplification."},
+  {n:3,ar:"وَمَآ أَدْرَاكَ مَا ٱلْقَارِعَةُ",fr:"Et qui te dira ce qu'est la Fracassante?",tf:"Même le Prophète ﷺ ne peut en avoir une image complète sans révélation."},
+  {n:4,ar:"يَوْمَ يَكُونُ ٱلنَّاسُ كَٱلْفَرَاشِ ٱلْمَبْثُوثِ",fr:"Le Jour où les hommes seront comme des papillons éparpillés,",tf:"Chaos absolu de la résurrection."},
+  {n:5,ar:"وَتَكُونُ ٱلْجِبَالُ كَٱلْعِهْنِ ٱلْمَنفُوشِ",fr:"et les montagnes comme de la laine cardée.",tf:"Montagnes symboles de stabilité réduites à de la laine."},
+  {n:6,ar:"فَأَمَّا مَن ثَقُلَتْ مَوَٰزِينُهُۥ",fr:"Quant à celui dont la balance sera lourde,",tf:"Justice divine absolue."},
+  {n:7,ar:"فَهُوَ فِى عِيشَةٍ رَّاضِيَةٍ",fr:"il jouira d'une vie agréable.",tf:"Vie parfaite au paradis."},
+  {n:8,ar:"وَأَمَّا مَنْ خَفَّتْ مَوَٰزِينُهُۥ",fr:"Mais quant à celui dont la balance sera légère,",tf:"Sort terrible."},
+  {n:9,ar:"فَأُمُّهُۥ هَاوِيَةٌ",fr:"son refuge sera l'Abîme.",tf:"Hawiya — l'abîme."},
+  {n:10,ar:"وَمَآ أَدْرَاكَ مَا هِيَهْ",fr:"Et qui te dira ce que c'est?",tf:"La Hawiya dépasse toute imagination humaine."},
+  {n:11,ar:"نَارٌ حَامِيَةٌ",fr:"C'est un feu ardent!",tf:"Feu d'une intensité incomparable."},
+],
+102:[
+  {n:1,ar:"أَلْهَاكُمُ ٱلتَّكَاثُرُ",fr:"La course aux richesses vous a distraits,",tf:"Compétition pour accumuler — détourne de l'au-delà."},
+  {n:2,ar:"حَتَّىٰ زُرْتُمُ ٱلْمَقَابِرَ",fr:"jusqu'à ce que vous visitiez les tombeaux.",tf:"Seule la mort met fin à cette course."},
+  {n:3,ar:"كَلَّا سَوْفَ تَعْلَمُونَ",fr:"Non! Vous saurez bientôt!",tf:"Kalla — réprimande forte."},
+  {n:4,ar:"ثُمَّ كَلَّا سَوْفَ تَعْلَمُونَ",fr:"Non, vraiment! Vous saurez bientôt!",tf:"Répétition pour amplifier."},
+  {n:5,ar:"كَلَّا لَوْ تَعْلَمُونَ عِلْمَ ٱلْيَقِينِ",fr:"Non! Si vous saviez avec une science certaine!",tf:"Si vous connaissiez l'au-delà avec certitude."},
+  {n:6,ar:"لَتَرَوُنَّ ٱلْجَحِيمَ",fr:"Vous verrez sûrement la Fournaise!",tf:"Certitude : vous verrez l'enfer."},
+  {n:7,ar:"ثُمَّ لَتَرَوُنَّهَا عَيْنَ ٱلْيَقِينِ",fr:"Puis vous la verrez avec l'œil de la certitude.",tf:"Ayn al-yaqin — certitude par la vue directe."},
+  {n:8,ar:"ثُمَّ لَتُسْـَٔلُنَّ يَوْمَئِذٍ عَنِ ٱلنَّعِيمِ",fr:"Puis, ce jour-là, vous serez interrogés sur les bienfaits reçus.",tf:"Chaque bienfait fera l'objet d'une question."},
+],
+103:[
+  {n:1,ar:"وَٱلْعَصْرِ",fr:"Par le Temps!",tf:"Serment par le temps."},
+  {n:2,ar:"إِنَّ ٱلْإِنسَٰنَ لَفِى خُسْرٍ",fr:"L'être humain est certes en perdition,",tf:"Verdict général."},
+  {n:3,ar:"إِلَّا ٱلَّذِينَ ءَامَنُوا۟ وَعَمِلُوا۟ ٱلصَّٰلِحَٰتِ وَتَوَاصَوْا۟ بِٱلْحَقِّ وَتَوَاصَوْا۟ بِٱلصَّبْرِ",fr:"sauf ceux qui ont la foi, font de bonnes œuvres, s'enjoignent mutuellement la vérité et s'enjoignent mutuellement l'endurance.",tf:"4 conditions : foi, bonnes œuvres, vérité, patience."},
+],
+104:[
+  {n:1,ar:"وَيْلٌ لِّكُلِّ هُمَزَةٍ لُّمَزَةٍ",fr:"Malheur à tout diffamateur et calomniateur,",tf:"Humazah : blesse par gestes. Lumazah : blesse par paroles."},
+  {n:2,ar:"ٱلَّذِى جَمَعَ مَالًا وَعَدَّدَهُ",fr:"qui amasse des richesses et les compte sans cesse,",tf:"Obsession d'accumuler."},
+  {n:3,ar:"يَحْسَبُ أَنَّ مَالَهُۥ أَخْلَدَهُۥٓ",fr:"croyant que sa fortune le rendra immortel!",tf:"L'illusion suprême."},
+  {n:4,ar:"كَلَّا لَيُنۢبَذَنَّ فِى ٱلْحُطَمَةِ",fr:"Certes non! Il sera précipité dans Al-Hutama.",tf:"Al-Hutama : qui broie et fracasse tout."},
+  {n:5,ar:"وَمَآ أَدْرَاكَ مَا ٱلْحُطَمَةُ",fr:"Et qui te dira ce qu'est Al-Hutama?",tf:"Ce que tu imagines est bien inférieur à la réalité."},
+  {n:6,ar:"نَارُ ٱللَّهِ ٱلْمُوقَدَةُ",fr:"C'est le feu d'Allah, allumé,",tf:"Nâr Allah."},
+  {n:7,ar:"ٱلَّتِى تَطَّلِعُ عَلَى ٱلْأَفْـِٔدَةِ",fr:"qui s'élève jusqu'aux cœurs.",tf:"Ce feu atteint les cœurs."},
+  {n:8,ar:"إِنَّهَا عَلَيْهِم مُّؤْصَدَةٌ",fr:"elle se referme sur eux,",tf:"Portes fermées à clé."},
+  {n:9,ar:"فِى عَمَدٍ مُّمَدَّدَةٍۭ",fr:"sur des colonnes étirées!",tf:"Prison aux barreaux d'acier incandescent."},
+],
+105:[
+  {n:1,ar:"أَلَمْ تَرَ كَيْفَ فَعَلَ رَبُّكَ بِأَصْحَٰبِ ٱلْفِيلِ",fr:"N'as-tu pas vu comment ton Seigneur a agi avec les gens de l'Éléphant?",tf:"An de l'Éléphant (570 EC)."},
+  {n:2,ar:"أَلَمْ يَجْعَلْ كَيْدَهُمْ فِى تَضْلِيلٍ",fr:"N'a-t-Il pas rendu vain leur stratagème?",tf:"La force matérielle est impuissante face à la protection divine."},
+  {n:3,ar:"وَأَرْسَلَ عَلَيْهِمْ طَيْرًا أَبَابِيلَ",fr:"N'a-t-Il pas envoyé sur eux des oiseaux en rangs serrés,",tf:"Miracle absolu de la protection divine."},
+  {n:4,ar:"تَرْمِيهِم بِحِجَارَةٍ مِّن سِجِّيلٍ",fr:"qui les bombardaient de pierres d'argile cuite,",tf:"Projectiles d'argile durcie."},
+  {n:5,ar:"فَجَعَلَهُمْ كَعَصْفٍ مَّأْكُولٍۭ",fr:"et Il les a rendus pareils à de la paille mâchée.",tf:"Anéantissement total par la volonté divine."},
+],
+106:[
+  {n:1,ar:"لِإِيلَٰفِ قُرَيْشٍ",fr:"A cause de l'accoutumance des Quraychites,",tf:"Protection de la Mecque."},
+  {n:2,ar:"إِيلَٰفِهِمْ رِحْلَةَ ٱلشِّتَآءِ وَٱلصَّيْفِ",fr:"à leur habitude du voyage d'hiver et d'été,",tf:"Deux caravanes annuelles."},
+  {n:3,ar:"فَلْيَعْبُدُوا۟ رَبَّ هَٰذَا ٱلْبَيْتِ",fr:"Qu'ils adorent donc le Seigneur de cette Maison,",tf:"Conclusion logique."},
+  {n:4,ar:"ٱلَّذِى أَطْعَمَهُم مِّن جُوعٍ وَءَامَنَهُم مِّنْ خَوْفٍ",fr:"qui les a nourris contre la faim et rassurés contre la peur.",tf:"Subsistance et sécurité."},
+],
+107:[
+  {n:1,ar:"أَرَءَيْتَ ٱلَّذِى يُكَذِّبُ بِٱلدِّينِ",fr:"As-tu vu celui qui traite la religion de mensonge?",tf:"Nier la rétribution a des conséquences comportementales."},
+  {n:2,ar:"فَذَٰلِكَ ٱلَّذِى يَدُعُّ ٱلْيَتِيمَ",fr:"C'est celui qui repousse l'orphelin,",tf:"Cruauté envers les vulnérables."},
+  {n:3,ar:"وَلَا يَحُضُّ عَلَىٰ طَعَامِ ٱلْمِسْكِينِ",fr:"et qui n'encourage pas à nourrir le pauvre.",tf:"Indifférence totale face à la misère."},
+  {n:4,ar:"فَوَيْلٌ لِّلْمُصَلِّينَ",fr:"Malheur donc aux priants,",tf:"Avertissement choquant."},
+  {n:5,ar:"ٱلَّذِينَ هُمْ عَن صَلَاتِهِمْ سَاهُونَ",fr:"ceux qui sont distraits dans leur prière,",tf:"Sahun : négligents, inattentifs."},
+  {n:6,ar:"ٱلَّذِينَ هُمْ يُرَآءُونَ",fr:"ceux qui prient pour être vus,",tf:"Ostentation — le shirk mineur."},
+  {n:7,ar:"وَيَمْنَعُونَ ٱلْمَاعُونَ",fr:"et qui refusent de prêter les ustensiles ordinaires.",tf:"La foi authentique se manifeste dans les petits actes."},
+],
+108:[
+  {n:1,ar:"إِنَّآ أَعْطَيْنَٰكَ ٱلْكَوْثَرَ",fr:"Nous t'avons certes donné l'Abondance.",tf:"Al-Kawthar : le bassin du Prophète au paradis."},
+  {n:2,ar:"فَصَلِّ لِرَبِّكَ وَٱنْحَرْ",fr:"Accomplis donc la Salat pour ton Seigneur et sacrifie.",tf:"Prier et sacrifier exclusivement pour Allah."},
+  {n:3,ar:"إِنَّ شَانِئَكَ هُوَ ٱلْأَبْتَرُ",fr:"C'est bien ton ennemi qui est sans postérité.",tf:"Muhammad ﷺ est le plus cité au monde chaque jour."},
+],
+109:[
+  {n:1,ar:"قُلْ يَٰٓأَيُّهَا ٱلْكَٰفِرُونَ",fr:"Dis : Ô vous les mécréants!",tf:"Déclaration de séparation."},
+  {n:2,ar:"لَآ أَعْبُدُ مَا تَعْبُدُونَ",fr:"Je n'adore pas ce que vous adorez.",tf:"Pas de compromis en matière de culte."},
+  {n:3,ar:"وَلَآ أَنتُمْ عَٰبِدُونَ مَآ أَعْبُدُ",fr:"Et vous n'adorez pas ce que j'adore.",tf:"Constatation."},
+  {n:4,ar:"وَلَآ أَنَا۠ عَابِدٌ مَّا عَبَدتُّمْ",fr:"Je ne suis pas adorateur de ce que vous avez adoré.",tf:"Constance."},
+  {n:5,ar:"وَلَآ أَنتُمْ عَٰبِدُونَ مَآ أَعْبُدُ",fr:"Et vous n'êtes pas adorateurs de ce que j'adore.",tf:"Choix définitif."},
+  {n:6,ar:"لَكُمْ دِينُكُمْ وَلِىَ دِينِ",fr:"A vous votre religion, et à moi ma religion.",tf:"Séparation nette et respectueuse."},
+],
+110:[
+  {n:1,ar:"إِذَا جَآءَ نَصْرُ ٱللَّهِ وَٱلْفَتْحُ",fr:"Quand arrive le secours d'Allah et la conquête,",tf:"Al-Fath = conquête de La Mecque (an 8 H)."},
+  {n:2,ar:"وَرَأَيْتَ ٱلنَّاسُ يَدْخُلُونَ فِى دِينِ ٱللَّهِ أَفْوَاجًا",fr:"et que tu vois les gens entrer en foule dans la religion d'Allah,",tf:"Des tribus entières embrassèrent l'islam."},
+  {n:3,ar:"فَسَبِّحْ بِحَمْدِ رَبِّكَ وَٱسْتَغْفِرْهُ ۚ إِنَّهُۥ كَانَ تَوَّابًۢا",fr:"alors, célèbre les louanges de ton Seigneur et implore Son pardon. Car Il est certes Grand Accueillant au repentir.",tf:"La réponse à la victoire : non l'orgueil, mais la reconnaissance."},
+],
+111:[
+  {n:1,ar:"تَبَّتْ يَدَآ أَبِى لَهَبٍ وَتَبَّ",fr:"Que soient perdues les deux mains d'Abou Lahab!",tf:"Seule sourate condamnant quelqu'un par nom."},
+  {n:2,ar:"مَآ أَغْنَىٰ عَنْهُ مَالُهُۥ وَمَا كَسَبَ",fr:"Sa fortune ne lui a servi à rien, ni ce qu'il a acquis.",tf:"Toute sa richesse ne put le protéger."},
+  {n:3,ar:"سَيَصْلَىٰ نَارًا ذَاتَ لَهَبٍ",fr:"Il brûlera dans un feu plein de flammes.",tf:"Ironie divine."},
+  {n:4,ar:"وَٱمْرَأَتُهُۥ حَمَّالَةَ ٱلْحَطَبِ",fr:"Et sa femme, porteuse de bois de brandon,",tf:"Umm Jamil portait des épines sur le chemin du Prophète."},
+  {n:5,ar:"فِى جِيدِهَا حَبْلٌ مِّن مَّسَدٍۭ",fr:"aura à son cou une corde de fibres de palmier.",tf:"Justice parfaite du talion divin."},
+],
+112:[
+  {n:1,ar:"قُلْ هُوَ ٱللَّهُ أَحَدٌ",fr:"Dis : Il est Allah, Unique",tf:"Équivaut au tiers du Coran. Ahad — Un absolu, unique dans Son essence."},
+  {n:2,ar:"ٱللَّهُ ٱلصَّمَدُ",fr:"Allah, le Seul à être imploré pour ce que nous désirons.",tf:"As-Samad : vers qui toutes les créatures se tournent dans le besoin."},
+  {n:3,ar:"لَمْ يَلِدْ وَلَمْ يُولَدْ",fr:"Il n'a jamais engendré, n'a pas été engendré non plus.",tf:"Réfutation des déviations."},
+  {n:4,ar:"وَلَمْ يَكُن لَّهُۥ كُفُوًا أَحَدٌ",fr:"Et nul n'est égal à Lui.",tf:"Aucun équivalent dans l'essence, les attributs, les actes."},
+],
+113:[
+  {n:1,ar:"قُلْ أَعُوذُ بِرَبِّ ٱلْفَلَقِ",fr:"Dis : Je cherche refuge auprès du Seigneur de l'Aube naissante",tf:"Al-Mu'awwidhatain — les deux sourates de protection."},
+  {n:2,ar:"مِن شَرِّ مَا خَلَقَ",fr:"contre le mal de ce qu'Il a créé,",tf:"Protection générale contre tout mal issu de la création."},
+  {n:3,ar:"وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ",fr:"contre le mal de l'obscurité quand elle s'étend,",tf:"La nuit profonde."},
+  {n:4,ar:"وَمِن شَرِّ ٱلنَّفَّٰثَٰتِ فِى ٱلْعُقَدِ",fr:"contre le mal des souffleuses dans les noeuds,",tf:"Femmes pratiquant la magie en soufflant sur des noeuds."},
+  {n:5,ar:"وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ",fr:"contre le mal de l'envieux quand il envie.",tf:"La jalousie peut provoquer le mauvais oeil."},
+],
+114:[
+  {n:1,ar:"قُلْ أَعُوذُ بِرَبِّ ٱلنَّاسِ",fr:"Dis : Je cherche refuge auprès du Seigneur des hommes,",tf:"Dernière sourate. Trois titres majestueux : Seigneur, Roi, Dieu des hommes."},
+  {n:2,ar:"مَلِكِ ٱلنَّاسِ",fr:"du Roi des hommes,",tf:"Malik an-nas — royauté absolue, éternelle, universelle."},
+  {n:3,ar:"إِلَٰهِ ٱلنَّاسِ",fr:"du Dieu des hommes,",tf:"Ilah an-nas — seul digne d'adoration."},
+  {n:4,ar:"مِن شَرِّ ٱلْوَسْوَاسِ ٱلْخَنَّاسِ",fr:"contre le mal du tentateur sournois",tf:"Al-waswas : le chuchoteur. Al-khannas : qui recule quand on mentionne Allah."},
+  {n:5,ar:"ٱلَّذِى يُوَسْوِسُ فِى صُدُورِ ٱلنَّاسِ",fr:"qui souffle le mal dans les poitrines des hommes,",tf:"Shaytan suggère doucement depuis l'intérieur."},
+  {n:6,ar:"مِنَ ٱلْجِنَّةِ وَٱلنَّاسِ",fr:"qu'il soit parmi les djinns ou parmi les hommes.",tf:"Le tentateur peut être djinn ou humain."},
+],
 };
+
+// Constants
+const FONTS = [
+  {id:"amiri-quran",name:"Amiri Quran",css:"'Amiri Quran',serif",desc:"Mushaf classique (Naskh)"},
+  {id:"amiri",name:"Amiri",css:"'Amiri',serif",desc:"Naskhi élégant"},
+  {id:"scheherazade",name:"Scheherazade",css:"'Scheherazade New',serif",desc:"Naskhi arabe raffiné"},
+  {id:"lateef",name:"Lateef",css:"'Lateef',serif",desc:"Style Nastaliq simplifié"},
+  {id:"noto-naskh",name:"Noto Naskh",css:"'Noto Naskh Arabic',serif",desc:"Moderne et lisible"},
+  {id:"noto-nastaliq",name:"Noto Nastaliq",css:"'Noto Nastaliq Urdu',serif",desc:"Style Nastaliq"},
+  {id:"reem-kufi",name:"Reem Kufi",css:"'Reem Kufi',serif",desc:"Style Kufique"},
+  {id:"cairo",name:"Cairo",css:"'Cairo',sans-serif",desc:"Moderne sans-serif"},
+];
+
+const RECITERS = [
+  {id:"alafasy",everyayah:"Alafasy_128kbps",name:"Mishary Al-Afasy",ar:"مشاري العفاسي"},
+  {id:"abdulbasitmurattal",everyayah:"Abdul_Basit_Murattal_192kbps",name:"Abdul Basit Murattal",ar:"عبد الباسط مرتل"},
+  {id:"abdulbasitmujawwad",everyayah:"Abdul_Basit_Mujawwad_128kbps",name:"Abdul Basit Mujawwad",ar:"عبد الباسط مجود"},
+  {id:"minshawi",everyayah:"Minshawy_Murattal_128kbps",name:"Al-Minshawi",ar:"المنشاوي"},
+  {id:"husary",everyayah:"Husary_128kbps",name:"Al-Husary",ar:"الحصري"},
+  {id:"sudais",everyayah:"Abdurrahmaan_As-Sudais_192kbps",name:"Al-Sudais",ar:"السديس"},
+  {id:"shuraym",everyayah:"Shuraym_128kbps",name:"Al-Shuraym",ar:"الشريم"},
+  {id:"mahermuaiqly",everyayah:"MaherAlMuaiqly128kbps",name:"Maher Al-Muaiqly",ar:"ماهر المعيقلي"},
+  {id:"hanirifai",everyayah:"Hani_Rifai_192kbps",name:"Hani Ar-Rifai",ar:"هاني الرفاعي"},
+  {id:"dussary",everyayah:"Yasser_Ad-Dussary_128kbps",name:"Yasser Al-Dossari",ar:"ياسر الدوسري"},
+  {id:"nasser",everyayah:"Nasser_Alqatami_128kbps",name:"Nasser Al-Qatami",ar:"ناصر القطامي"},
+  {id:"aymansowaid",everyayah:"Ayman_Sowaid_64kbps",name:"Ayman Suwaid",ar:"أيمن سويد"},
+];
+
+const MUSHAF_EDITIONS = [
+  {id:"hafs",name:"Hafs — Médine",desc:"Lecture la plus répandue",coverBg:"linear-gradient(135deg,#1a472a,#2d6a4f)",coverIcon:"☪",coverSub:"حفص عن عاصم",url:(pg)=>`https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/kfgqpc/${String(pg).padStart(3,"0")}.png`,fallback:(pg)=>`https://cdn.islamic.network/quran/images/high-resolution/${pg}.jpg`},
+  {id:"tajweed",name:"Mushaf Tajweed",desc:"Couleurs tajwid intégrées",coverBg:"linear-gradient(135deg,#7b1fa2,#4a148c)",coverIcon:"🎨",coverSub:"مصحف التجويد",url:(pg)=>`https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/easyquran.com/hafs-tajweed/${String(pg).padStart(3,"0")}.png`,fallback:(pg)=>`https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/kfgqpc/${String(pg).padStart(3,"0")}.png`},
+  {id:"warsh",name:"Warsh — Maghreb",desc:"Afrique du Nord & Ouest",coverBg:"linear-gradient(135deg,#b71c1c,#7f0000)",coverIcon:"🌙",coverSub:"ورش عن نافع",url:(pg)=>`https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/kfgqpc/${String(pg).padStart(3,"0")}.png`,fallback:(pg)=>`https://cdn.islamic.network/quran/images/high-resolution/${pg}.jpg`},
+  {id:"indopak",name:"IndoPak — Nastaliq",desc:"Style calligraphique Asie du Sud",coverBg:"linear-gradient(135deg,#1565c0,#0d47a1)",coverIcon:"📖",coverSub:"نستعلیق",url:(pg)=>`https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/kfgqpc/${String(pg).padStart(3,"0")}.png`,fallback:(pg)=>`https://cdn.islamic.network/quran/images/high-resolution/${pg}.jpg`},
+];
+
+const KHATMA_PRESETS = [
+  {id:"daily",label:"Quotidienne",desc:"1 Coran / jour — 18.7 pages",pages:604,days:1},
+  {id:"weekly",label:"Hebdomadaire",desc:"1 Coran / semaine — ~86 pages/j",pages:604,days:7},
+  {id:"monthly",label:"Mensuelle",desc:"1 Coran / mois — ~20 pages/j",pages:604,days:30},
+  {id:"ramadan",label:"Ramadan",desc:"1 Coran en 30 jours",pages:604,days:30},
+  {id:"custom",label:"Personnalisée",desc:"Définir son propre rythme",pages:604,days:null},
+];
+
+const SURAH_PAGE = {
+  1:1,2:2,3:50,4:77,5:106,6:128,7:151,8:177,9:187,10:208,
+  11:221,12:235,13:249,14:255,15:262,16:267,17:282,18:293,19:305,20:312,
+  21:322,22:332,23:342,24:350,25:359,26:367,27:377,28:385,29:396,30:404,
+  31:411,32:415,33:418,34:428,35:434,36:440,37:446,38:453,39:458,40:467,
+  41:477,42:483,43:489,44:496,45:499,46:502,47:507,48:511,49:515,50:518,
+  51:520,52:523,53:526,54:528,55:531,56:534,57:537,58:542,59:545,60:549,
+  61:551,62:553,63:554,64:556,65:558,66:560,67:562,68:566,69:568,70:570,
+  71:572,72:574,73:575,74:577,75:578,76:580,77:581,78:582,79:583,80:585,
+  81:586,82:587,83:587,84:589,85:590,86:591,87:591,88:592,89:593,90:594,
+  91:595,92:595,93:596,94:596,95:597,96:597,97:598,98:598,99:599,100:599,
+  101:600,102:600,103:601,104:601,105:601,106:602,107:602,108:602,109:603,110:603,
+  111:603,112:604,113:604,114:604,
+};
+const TOTAL_PAGES = 604;
+
+const BADGE_DEFS = [
+  {id:"first_surah",label:"Première sourate",desc:"Mémoriser une sourate complète",icon:"🌱"},
+  {id:"three_surahs",label:"3 sourates",desc:"Mémoriser 3 sourates",icon:"🌿"},
+  {id:"five_surahs",label:"5 sourates",desc:"Mémoriser 5 sourates",icon:"⭐"},
+  {id:"ten_surahs",label:"10 sourates",desc:"Mémoriser 10 sourates",icon:"📚"},
+  {id:"twenty_surahs",label:"20 sourates",desc:"Mémoriser 20 sourates",icon:"🏅"},
+  {id:"juz30",label:"Juz 30 complet",desc:"Mémoriser tout le Juz 30",icon:"🌙"},
+  {id:"juz29",label:"Juz 29 complet",desc:"Mémoriser tout le Juz 29",icon:"✨"},
+  {id:"50_verses",label:"50 versets",desc:"Mémoriser 50 versets",icon:"🌸"},
+  {id:"100_verses",label:"100 versets",desc:"Mémoriser 100 versets",icon:"💯"},
+  {id:"500_verses",label:"500 versets",desc:"Mémoriser 500 versets",icon:"🏆"},
+  {id:"1000_verses",label:"1000 versets",desc:"Mémoriser 1000 versets",icon:"👑"},
+  {id:"streak_3",label:"3 jours consécutifs",desc:"Mémoriser 3 jours de suite",icon:"🔥"},
+  {id:"streak_7",label:"7 jours consécutifs",desc:"Une semaine sans s'arrêter",icon:"⚡"},
+  {id:"streak_30",label:"30 jours consécutifs",desc:"Un mois de régularité",icon:"🌟"},
+  {id:"fatiha",label:"Al-Fatiha mémorisée",desc:"La mère du Livre mémorisée",icon:"🤲"},
+  {id:"ikhlas",label:"Al-Ikhlas mémorisée",desc:"Le tiers du Coran mémorisé",icon:"💎"},
+];
+
+const SURAH_INFO = {
+  1:{virtue:"Oum al-Kitab — mère du Livre. Récitée dans chaque rakat de la prière.",occasion:"Réciter à chaque prière, pour la guérison (ruqya), avant toute chose importante."},
+  2:{virtue:"La plus grande sourate du Coran. Contient le Verset du Trône (2:255).",occasion:"Verset du Trône après chaque prière obligatoire, avant de dormir."},
+  18:{virtue:"Protection contre le Dajjal — réciter les 10 premiers versets protège.",occasion:"Chaque vendredi — de préférence le matin."},
+  36:{virtue:"Coeur du Coran selon le Prophète ﷺ.",occasion:"Auprès des mourants, pour des besoins importants."},
+  55:{virtue:"La mariée du Coran.",occasion:"Méditation sur les bienfaits d'Allah, actions de grâce."},
+  56:{virtue:"Récitée chaque nuit, elle protège de la pauvreté selon Ibn Masoud.",occasion:"Chaque nuit avant de dormir."},
+  67:{virtue:"Protège de l'azab al-qabr (tourment de la tombe).",occasion:"Chaque soir avant de dormir — obligatoire pour tout mémorisateur."},
+  97:{virtue:"Meilleure que 1000 mois d'adoration.",occasion:"Les 10 dernières nuits de Ramadan, surtout les nuits impaires."},
+  108:{virtue:"Al-Kawthar — la plus courte sourate.",occasion:"Réciter lors des sacrifices (Aïd al-Adha)."},
+  112:{virtue:"Équivaut au tiers du Coran. Réciter 3 fois équivaut à réciter le Coran entier.",occasion:"Après chaque prière, avant de dormir, lors de la ruqya."},
+  113:{virtue:"Al-Mu'awwidhatain — sourate de protection.",occasion:"Matin et soir (3 fois), avant de dormir, ruqya."},
+  114:{virtue:"Dernière sourate — complète la protection commencée par Al-Falaq.",occasion:"Matin et soir (3 fois), avant de dormir, ruqya."},
+};
+
 const QURAN_THEMES = [
   {id:"patience",label:"La Patience",icon:"⏳",color:"#4fc3f7",verses:[{s:2,v:153},{s:2,v:155},{s:2,v:177},{s:3,v:17},{s:3,v:200},{s:8,v:46},{s:16,v:126},{s:39,v:10},{s:103,v:3}],desc:"As-Sabr — fondement de la foi"},
   {id:"gratitude",label:"La Gratitude",icon:"🤲",color:"#22c55e",verses:[{s:2,v:152},{s:14,v:7},{s:16,v:114},{s:31,v:12},{s:34,v:15},{s:55,v:13},{s:76,v:3}],desc:"Ash-Shukr — reconnaître les bienfaits"},
@@ -135,11 +385,15 @@ const ld=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}c
 const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
 const today=()=>new Date().toISOString().split("T")[0];
 
+// Calcul approximatif du début de Ramadan (Hijri → Grégorien)
 const getRamadanInfo=()=>{
   const now=new Date();
+  // Ramadan 1446 AH ≈ 1 mars 2025, Ramadan 1447 AH ≈ 18 fév 2026
+  // Calcul simplifié : cycle de 354.367 jours par an hijri
   const KNOWN_RAMADAN=new Date("2026-02-18"); // début Ramadan 1447
   const HIJRI_YEAR=354.367;
   let start=new Date(KNOWN_RAMADAN);
+  // Trouver le Ramadan le plus proche
   while(start>now) start=new Date(start.getTime()-HIJRI_YEAR*86400000);
   while(new Date(start.getTime()+HIJRI_YEAR*86400000)<now) start=new Date(start.getTime()+HIJRI_YEAR*86400000);
   const nextStart=new Date(start.getTime()+HIJRI_YEAR*86400000);
@@ -161,18 +415,21 @@ const THEMES={
     acc:"#2e7d32",acc2:"#388e3c",acc3:"#43a047",gr:"#2e7d32",grD:"rgba(46,125,50,.12)",
     tx:"#1a2e1a",tx2:"#3d5c3d",tx3:"#6a8f6a",rd:"#c62828",bl:"#1565c0",pu:"#6a1b9a",
     navBg:"#ffffff",cardBg:"#ffffff",inputBg:"#f4faf4",hero:"linear-gradient(160deg,#e8f5e8,#c8e6c9)"},
+  // Andalousie — grenade, alhambra, azulejos
   andalous:{bg:"#0d0a06",s1:"#130e08",s2:"#1a1409",s3:"#221a0e",b1:"#2e2010",b2:"#3d2c15",
     acc:"#d4892a",acc2:"#e8a840",acc3:"#f5c860",gr:"#4e9c6a",grD:"rgba(78,156,106,.12)",
     tx:"#f0e8d8",tx2:"#c4a87a",tx3:"#7a5c35",rd:"#c0392b",bl:"#2980b9",pu:"#8e44ad",
     navBg:"#0d0a06",cardBg:"#130e08",inputBg:"#1a1409",
     hero:"linear-gradient(160deg,#1a0e06,#2a1a0a)",
     arabesque:true},
+  // Ottomane — tulipes, bleu iznik, rouge impérial
   ottoman:{bg:"#04080f",s1:"#070e18",s2:"#0a1420",s3:"#0e1c2e",b1:"#142438",b2:"#1c3050",
     acc:"#c8102e",acc2:"#e8203e",acc3:"#f5405a",gr:"#2ecc71",grD:"rgba(46,204,113,.12)",
     tx:"#e8f0f8",tx2:"#8aafcc",tx3:"#4a6a88",rd:"#e74c3c",bl:"#3498db",pu:"#9b59b6",
     navBg:"#04080f",cardBg:"#070e18",inputBg:"#0a1420",
     hero:"linear-gradient(160deg,#070e18,#0e1c2e)",
     arabesque:true},
+  // Abbasside — or sur noir de Bagdad, papier de Samarcande
   abbasid:{bg:"#080600",s1:"#100c00",s2:"#181200",s3:"#201800",b1:"#2a2000",b2:"#382a00",
     acc:"#f0c040",acc2:"#f8d860",acc3:"#fff080",gr:"#50c878",grD:"rgba(80,200,120,.12)",
     tx:"#fff8e8",tx2:"#d4b060",tx3:"#806030",rd:"#e74c3c",bl:"#3498db",pu:"#9b59b6",
@@ -181,6 +438,7 @@ const THEMES={
     arabesque:true},
 };
 
+// Métadonnées des thèmes pour l'UI de sélection
 const THEME_META={
   dark:{label:"Nuit",sub:"Sobre et élégant",preview:["#050608","#c9a84c","#22c55e"]},
   light:{label:"Clarté",sub:"Thème vert naturel",preview:["#f0f7f0","#2e7d32","#388e3c"]},
@@ -217,6 +475,7 @@ const TJC_LIGHT={
   sl:"#263238",
 };
 
+// Icons
 const Icons = {
   Book:({size=24,color="currentColor"})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>),
   Brain:({size=24,color="currentColor"})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>),
@@ -233,6 +492,7 @@ const Icons = {
   List:({size=24,color="currentColor"})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>),
 };
 
+// Animation Calligraphie — SVG qui s'écrit quand un verset est mémorisé
 function CalligraphyBurst({text, onDone}) {
   return (
     <div style={{
@@ -265,7 +525,9 @@ function CalligraphyBurst({text, onDone}) {
   );
 }
 
+// Sablier SVG animé
 function HourglassIcon({pct=0.5, color="#c9a84c", size=32}) {
+  // pct = 0 (plein) -> 1 (vide)
   const sandFill = Math.max(0, Math.min(1, 1 - pct));
   const topH = 14 * sandFill;
   const botH = 14 * (1 - sandFill * 0.3);
@@ -283,12 +545,18 @@ function HourglassIcon({pct=0.5, color="#c9a84c", size=32}) {
           <polygon points="13,16 19,16 26,29 6,29"/>
         </clipPath>
       </defs>
+      {/* Outer frame */}
       <polygon points="6,3 26,3 19,16 13,16" fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" opacity="0.7"/>
       <polygon points="13,16 19,16 26,29 6,29" fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" opacity="0.7"/>
+      {/* Top bar */}
       <line x1="4" y1="2" x2="28" y2="2" stroke={color} strokeWidth="2.5" strokeLinecap="round"/>
+      {/* Bottom bar */}
       <line x1="4" y1="30" x2="28" y2="30" stroke={color} strokeWidth="2.5" strokeLinecap="round"/>
+      {/* Top sand */}
       <rect x="6" y={3 + (13 - topH)} width="20" height={topH} fill="url(#hg_grad)" clipPath="url(#hg_top_clip)" opacity="0.85"/>
+      {/* Bottom sand */}
       <rect x="6" y={29 - botH * 0.6} width="20" height={botH * 0.6} fill={color} clipPath="url(#hg_bot_clip)" opacity="0.6"/>
+      {/* Drip particle */}
       {sandFill > 0.05 && sandFill < 0.95 && (
         <circle cx="16" cy="17.5" r="1.2" fill={color} opacity="0.9">
           <animate attributeName="cy" values="16;19;16" dur="1.4s" repeatCount="indefinite"/>
@@ -299,12 +567,16 @@ function HourglassIcon({pct=0.5, color="#c9a84c", size=32}) {
   );
 }
 
+// Tajweed parser
+// Mapping complet des classes tajweed de l'API qurancdn → couleurs Mushaf standard
 const TAJWID_CLASS_COLORS={
+  // Madd (مد) ── bleu/cyan selon durée
   "madda_normal":        tjc=>tjc.m,   // Madd naturel (2 harakats)
   "madda_permissible":   tjc=>tjc.mr,  // Madd permissible (2, 4 ou 6h)
   "madda_necessary":     tjc=>tjc.ml,  // Madd lazim (6h obligatoire)
   "madda_obligatory":    tjc=>tjc.mo,  // Madd wajib muttasil (4-5h)
   "madda_wajib":         tjc=>tjc.mo,
+  // Ghunna / Idgham (غنة، إدغام) ── vert
   "ghunnah":             tjc=>tjc.g,
   "idgham_with_ghunnah": tjc=>tjc.g,
   "idgham_ghunnah":      tjc=>tjc.g,
@@ -312,21 +584,28 @@ const TAJWID_CLASS_COLORS={
   "idgham_mutaqaribayn": tjc=>tjc.idg,
   "idgham_without_ghunnah": tjc=>tjc.idg,
   "idgham_shafawi":      tjc=>tjc.g,
+  // Qalqala (قلقلة) ── violet
   "qalaqah":             tjc=>tjc.q,
+  // Ikhfa / Iqlab (إخفاء، إقلاب) ── orange / rouge
   "ikhafa":              tjc=>tjc.ikh,
   "ikhafa_shafawi":      tjc=>tjc.ikh,
   "ikhafa_with_ghunnah": tjc=>tjc.ikh,
   "iqlab":               tjc=>tjc.iql,
+  // Lam shamsiyya (لام شمسية) ── bleu clair
   "laam_shamsiyah":      tjc=>tjc.ls,
+  // Ham Wasl / Sakt ── gris (affiché mais sans couleur forte)
   "ham_wasl":            ()=>null,
   "silent":              ()=>null,
   "sakt":                tjc=>tjc.sl,
 };
 
+// HifzVerseText — affiche le verset en mode Hifz
+// Les derniers mots (selon level 1-5) sont masqués, les visibles gardent TajwidSpan
 function HifzVerseText({ar, level, tjc, showTj, vmark, onRevealWord}) {
   const clean=(ar||"").replace(/<[^>]*>/g,"");
   const words=clean.split(/\s+/).filter(Boolean);
   const total=words.length;
+  // level 1=20% caché, 2=40%, 3=60%, 4=80%, 5=100%
   const hiddenCount=Math.round(total*(level/5));
   const visibleCount=total-hiddenCount;
   
@@ -356,6 +635,7 @@ function HifzVerseText({ar, level, tjc, showTj, vmark, onRevealWord}) {
             {w}
           </span>
         );
+        // Mot visible — on reconstruis avec TajwidSpan si le tajweed était dans ar
         return <span key={i} style={{display:"inline"}}><TajwidSpan text={w} enabled={showTj} tjc={tjc}/>{" "}</span>;
       })}
       <span style={{fontFamily:"'Amiri',serif",fontSize:".72rem",color:"#c9a84c",margin:"0 4px",verticalAlign:"middle"}}>﴿{vmark}﴾</span>
@@ -363,21 +643,26 @@ function HifzVerseText({ar, level, tjc, showTj, vmark, onRevealWord}) {
   );
 }
 
+// TajwidSpan — rend le HTML tajweed de l'API qurancdn avec les couleurs du Mushaf standard
 function TajwidSpan({text,enabled,tjc}) {
   const raw=text||"";
+  // Strip anciens tags de marquage [m]...[/m] si présents
   const clean=raw.replace(/\[[a-z]+\](.*?)\[\/[a-z]+\]/g,"$1");
 
   if(!enabled){
     return <bdi style={{direction:"rtl"}}>{clean.replace(/<[^>]*>/g,"")}</bdi>;
   }
 
+  // Cas 1 : pas de HTML tajweed → texte brut sans coloration
   if(!clean.includes("<tajweed")){
     return <bdi style={{direction:"rtl",letterSpacing:0}}>{clean.replace(/<[^>]*>/g,"")}</bdi>;
   }
 
+  // Cas 2 : HTML tajweed de l'API — parser propre
   const parts=[];
   let i=0,key=0;
   while(i<clean.length){
+    // Texte ordinaire entre les tags
     if(clean[i]!=="<"){
       let j=i;
       while(j<clean.length&&clean[j]!=="<")j++;
@@ -386,6 +671,7 @@ function TajwidSpan({text,enabled,tjc}) {
       i=j;
       continue;
     }
+    // Tag ouvert
     const closeAngle=clean.indexOf(">",i);
     if(closeAngle===-1){
       parts.push(<React.Fragment key={key++}>{clean.slice(i)}</React.Fragment>);
@@ -394,10 +680,12 @@ function TajwidSpan({text,enabled,tjc}) {
     const tagContent=clean.slice(i+1,closeAngle).trim();
 
     if(tagContent.startsWith("tajweed")){
+      // Extraire la classe — supporte class="x" et class=x
       const clsMatch=tagContent.match(/class=["']?([a-z_]+)["']?/);
       const cls=clsMatch?clsMatch[1]:null;
       const colorFn=cls?TAJWID_CLASS_COLORS[cls]:null;
       const color=colorFn?colorFn(tjc):null;
+      // Trouver le tag fermant
       const closeTag=clean.indexOf("</tajweed>",closeAngle+1);
       const inner=closeTag!==-1?clean.slice(closeAngle+1,closeTag):clean.slice(closeAngle+1);
       if(color){
@@ -415,12 +703,16 @@ function TajwidSpan({text,enabled,tjc}) {
       i=closeAngle+1;
     }
     else{
+      // Tag inconnu — skip
       i=closeAngle+1;
     }
   }
   return <bdi style={{direction:"rtl",letterSpacing:0,lineHeight:"inherit"}}>{parts}</bdi>;
 }
 
+// MushafPage
+// Vraies URL par édition — plusieurs fallbacks pour fiabilité
+// URLs Mushaf — proxy Vercel en premier (pas de CORS), puis CDN directs en fallback
 const EDITION_IMGS = {
   hafs: pg => [
     `/api/mushaf?page=${pg}&edition=hafs`,           // proxy Vercel — toujours disponible
@@ -440,6 +732,7 @@ const EDITION_IMGS = {
   ],
 };
 
+// Charge l'URL réelle depuis l'API qurancdn (contourne les problèmes CORS des CDN directs)
 const fetchMushafPageUrl=async(pg, editionId)=>{
   try{
     const r=await fetch(`https://api.qurancdn.com/api/qdc/pages/${pg}?book_name=${editionId==="warsh"?"warsh":"hafs"}`);
@@ -482,6 +775,7 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
         const ok=await tryUrl(url);
         if(ok&&!cancelled){setImgSrc(ok);setImgState("ok");return;}
       }
+      // Fallback API qurancdn
       if(!cancelled){
         try{
           const r=await fetch(`https://api.qurancdn.com/api/qdc/pages/${page||1}`);
@@ -598,6 +892,7 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
   );
 }
 
+// CSS builder
 function buildCSS(t,tjc,arFont,tn,ramadan){
 ramadan=ramadan||false;
 const bg=ramadan&&tn==="dark"?"#0a0518":t.bg;
@@ -620,7 +915,7 @@ ${t.arabesque ? (
 ::-webkit-scrollbar-track{background:${t.s1};}
 ::-webkit-scrollbar-thumb{background:${t.b2};border-radius:99px;}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:${tn==="dark"?".018":".035"};background-image:repeating-linear-gradient(0deg,transparent,transparent 40px,${acc} 40px,${acc} 41px),repeating-linear-gradient(90deg,transparent,transparent 40px,${acc} 40px,${acc} 41px),repeating-linear-gradient(45deg,transparent,transparent 28px,${acc} 28px,${acc} 29px),repeating-linear-gradient(-45deg,transparent,transparent 28px,${acc} 28px,${acc} 29px);}
-${ramadan?"body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle,"+acc+"33 1px,transparent 1px);background-size:30px 30px;opacity:.4;}":""}
+${ramadan?`body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle,${acc}33 1px,transparent 1px);background-size:30px 30px;opacity:.4;}`:""}
 body>*{position:relative;z-index:1;}
 .wrap{animation:pageIn .25s ease;}
 .wrap.transitioning{animation:pageOut .12s ease forwards;}
@@ -636,6 +931,7 @@ body>*{position:relative;z-index:1;}
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 @keyframes sandDrip{0%{transform:translateY(0);opacity:1}100%{transform:translateY(6px);opacity:0}}
 @keyframes hoverLift{from{transform:translateY(0) scale(1)}to{transform:translateY(-3px) scale(1.01)}}
+/* ── Topbar ── */
 .topbar{position:sticky;top:0;z-index:60;background:${t.navBg};border-bottom:1px solid ${t.b1};backdrop-filter:blur(16px);}
 .tb{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 16px;}
 .logo{display:flex;align-items:baseline;gap:8px;}
@@ -646,21 +942,26 @@ body>*{position:relative;z-index:1;}
 .ib{background:transparent;border:1px solid ${t.b2};color:${t.tx2};padding:5px 10px;border-radius:8px;font-size:.68rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:4px;}
 .ib:hover{border-color:${acc};color:${acc};}
 .ib.pri{background:${acc};border-color:${acc};color:#fff;font-weight:600;}
+/* ── Hero ── */
 .hero{background:${hero};border-bottom:1px solid ${t.b1};padding:16px 16px 14px;position:relative;overflow:hidden;}
 .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 10% 50%,${acc}08 0%,transparent 60%),radial-gradient(ellipse at 90% 50%,${acc}08 0%,transparent 60%);pointer-events:none;}
 .hero-i{max-width:1200px;margin:0 auto;position:relative;}
+/* ── Bottom nav ── */
 .bnav{position:fixed;bottom:0;left:0;right:0;z-index:60;background:${t.navBg}ee;border-top:1px solid ${t.b1};display:flex;align-items:stretch;height:62px;backdrop-filter:blur(16px);}
 .bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:transparent;color:${t.tx3};font-size:.58rem;font-weight:500;cursor:pointer;transition:all .25s;padding:6px 2px;position:relative;}
 .bn:hover{color:${t.tx2};transform:translateY(-2px);}
 .bn.on{color:${acc};}
 .bn.on::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:linear-gradient(90deg,${acc},${acc2});border-radius:0 0 99px 99px;box-shadow:0 0 6px ${acc};}
 .bn-lbl{font-size:.52rem;font-weight:500;}
+/* ── Layout ── */
 .wrap{max-width:1200px;margin:0 auto;padding:14px 16px 100px;}
 .two{display:grid;grid-template-columns:300px 1fr;gap:12px;align-items:start;}
+/* ── Cards — hover effect ── */
 .card{background:${t.cardBg};border:1px solid ${t.b1};border-radius:14px;overflow:hidden;transition:box-shadow .25s,border-color .25s;}
 .card:hover{box-shadow:0 4px 24px ${acc}18;border-color:${acc}44;}
 .ch{padding:10px 14px;border-bottom:1px solid ${t.b1};display:flex;align-items:center;justify-content:space-between;}
 .ct{font-size:.63rem;text-transform:uppercase;letter-spacing:1.5px;color:${t.tx3};font-weight:600;}
+/* ── Left panel ── */
 .lp{display:flex;flex-direction:column;max-height:calc(100vh - 200px);position:sticky;top:58px;}
 .ltabs{display:flex;border-bottom:1px solid ${t.b1};}
 .lt{flex:1;padding:9px 4px;border:none;background:transparent;color:${t.tx2};font-size:.68rem;font-weight:500;border-bottom:2px solid transparent;cursor:pointer;transition:all .15s;}
@@ -669,6 +970,7 @@ body>*{position:relative;z-index:1;}
 .sinp{width:100%;background:${t.inputBg};border:1px solid ${t.b2};border-radius:8px;padding:7px 10px;color:${t.tx};font-size:.76rem;outline:none;transition:border-color .2s;}
 .sinp:focus{border-color:${acc};}.sinp::placeholder{color:${t.tx3};}
 .slist{flex:1;overflow-y:auto;}
+/* ── Surah rows — hover ── */
 .srow{padding:8px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:background .15s,border-left-color .15s;border-left:3px solid transparent;position:relative;overflow:hidden;touch-action:pan-y;user-select:none;}
 .srow:hover{background:${t.s2};}
 .srow:hover .srow-hint{opacity:1;}
@@ -684,6 +986,7 @@ body>*{position:relative;z-index:1;}
 .sar{font-family:'Amiri',serif;font-size:.9rem;color:${acc};}
 .mbar{width:36px;height:3px;background:${t.b2};border-radius:99px;overflow:hidden;margin-top:3px;}
 .mfill{height:100%;background:${t.gr};border-radius:99px;}
+/* ── Juz grid ── */
 .jg{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:7px;}
 .jc{background:${t.s2};border:1px solid ${t.b1};border-radius:7px;padding:6px 3px;text-align:center;cursor:pointer;transition:all .2s;}
 .jc:hover{border-color:${acc};transform:translateY(-2px);box-shadow:0 4px 12px ${acc}22;}
@@ -692,6 +995,7 @@ body>*{position:relative;z-index:1;}
 .jl{font-size:.48rem;color:${t.tx3};text-transform:uppercase;}
 .jb{height:3px;background:${t.b1};border-radius:99px;overflow:hidden;margin-top:3px;}
 .jf{height:100%;background:${t.gr};border-radius:99px;}
+/* ── Verse viewer ── */
 .rp{position:sticky;top:58px;}
 .vhd{padding:12px 14px;border-bottom:1px solid ${t.b1};}
 .v-ar-title{font-family:${arFont};font-size:1.9rem;color:${acc};direction:rtl;text-align:right;line-height:1.5;margin-bottom:4px;}
@@ -708,12 +1012,14 @@ body>*{position:relative;z-index:1;}
 .tj-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 .arow{padding:6px 12px;border-bottom:1px solid ${t.b1};background:${t.s2};display:flex;align-items:center;gap:7px;}
 .vscroll{max-height:calc(100vh - 380px);overflow-y:auto;}
+/* ── Verse items — hover ── */
 .vitem{padding:12px 14px;border-bottom:1px solid ${t.b1};transition:background .15s,transform .15s;animation:fadeIn .3s ease;}
 .vitem:hover{background:${t.s2};transform:translateX(2px);}
 .vitem.mem{background:${t.grD};border-left:3px solid ${t.gr};animation:memGlow .6s ease;}
 .vitem.pl{background:rgba(201,168,76,.08);border-left:3px solid ${acc};position:relative;}
 .vitem.pl::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,${acc2},${acc},${acc2});animation:pulse .9s ease infinite;}
 .vitem.due{border-left:3px solid ${t.rd};background:rgba(239,68,68,.05);}
+/* ── Immersive ── */
 .immersive{position:fixed;inset:0;z-index:100;background:${tn==="dark"?"#04060a":"#faf6ef"};display:flex;flex-direction:column;overflow:hidden;}
 .immersive-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid ${t.b1};}
 .immersive-title{font-family:'Amiri',serif;font-size:1.3rem;color:${acc};}
@@ -738,6 +1044,7 @@ body>*{position:relative;z-index:1;}
 .vbtn:hover{border-color:${acc};color:${acc};transform:translateY(-1px);}
 .vbtn.mem{background:${t.grD};border-color:${t.gr};color:${t.gr};}
 .vbtn.snd{border-color:${t.bl};color:${t.bl};}
+/* ── Stats ── */
 .sp{display:flex;flex-direction:column;gap:12px;}
 .sg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
 .sc{background:${t.cardBg};border:1px solid ${t.b1};border-radius:13px;padding:13px;transition:transform .2s,box-shadow .2s,border-color .2s;}
@@ -763,6 +1070,7 @@ body>*{position:relative;z-index:1;}
 .cd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;padding:12px;}
 .cdc{background:${t.s2};border:1px solid ${t.b1};border-radius:10px;padding:11px;cursor:pointer;transition:all .2s;}
 .cdc:hover{border-color:${acc};transform:translateY(-2px);box-shadow:0 4px 12px ${acc}22;}
+/* ── Khatma ── */
 .khatma-wrap{display:flex;flex-direction:column;gap:14px;padding-bottom:20px;}
 .kh-active{background:${t.cardBg};border:1px solid ${t.b1};border-radius:14px;padding:18px;overflow:visible;}
 .kp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;}
@@ -788,6 +1096,7 @@ body>*{position:relative;z-index:1;}
 .khs-v{font-size:1.3rem;font-weight:700;color:${acc};}
 .khs-l{font-size:.6rem;color:${t.tx3};text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
 .streak-fire{font-size:1.8rem;}
+/* ── Settings ── */
 .settings-wrap{display:flex;flex-direction:column;gap:14px;max-width:600px;margin:0 auto;}
 .settings-section{background:${t.cardBg};border:1px solid ${t.b1};border-radius:14px;overflow:hidden;transition:box-shadow .2s;}
 .settings-section:hover{box-shadow:0 4px 20px ${acc}14;}
@@ -810,6 +1119,7 @@ body>*{position:relative;z-index:1;}
 .toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:white;border-radius:50%;transition:transform .2s;}
 .toggle.on{background:${acc};}
 .toggle.on::after{transform:translateX(18px);}
+/* ── Modal ── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);}
 .modal{background:${t.s1};border:1px solid ${acc};border-radius:18px;padding:26px;max-width:380px;width:92%;}
 .modal h2{font-family:'Amiri',serif;font-size:1.7rem;color:${acc};margin-bottom:5px;}
@@ -819,12 +1129,15 @@ body>*{position:relative;z-index:1;}
 .modal input:focus{border-color:${acc};}
 .mbtn{width:100%;padding:11px;background:${acc};border:none;border-radius:8px;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer;transition:opacity .2s,transform .15s;}
 .mbtn:hover{opacity:.92;transform:translateY(-1px);}
+/* ── Hourglass KPI ── */
 .hg-kpi{display:flex;align-items:center;gap:8px;padding:8px 12px;background:${t.s2};border-radius:12px;border:1px solid ${t.b1};transition:all .2s;cursor:default;}
 .hg-kpi:hover{border-color:${acc}44;background:${t.s3};transform:translateY(-2px);box-shadow:0 4px 16px ${acc}18;}
 .hg-kpi-v{font-size:1.1rem;font-weight:800;color:${acc};line-height:1;font-variant-numeric:tabular-nums;}
 .hg-kpi-l{font-size:.48rem;color:${t.tx3};text-transform:uppercase;letter-spacing:1.5px;margin-top:1px;}
+/* ── Badge cards ── */
 .badge-card{padding:12px;border-radius:12px;text-align:center;transition:all .25s;}
 .badge-card:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 8px 24px rgba(0,0,0,.15);}
+/* ── Misc ── */
 .empty{text-align:center;padding:36px 14px;color:${t.tx3};font-size:.8rem;}
 .big-ar{font-family:${arFont};font-size:2rem;color:${acc};margin-bottom:8px;}
 @media(max-width:860px){
@@ -833,6 +1146,7 @@ body>*{position:relative;z-index:1;}
 }
 `;}
 
+// Main App
 export default function App() {
   const [tn,setTn]=useState(()=>ld("qtheme2","dark")); // qtheme2 = new key with new themes
   const t=THEMES[tn]||THEMES.dark;
@@ -858,6 +1172,7 @@ export default function App() {
   const [playing,setPlaying]=useState(null);
   const [audioPlaying,setAudioPlaying]=useState(false); // état réactif pour l'UI
   const [audioPct,setAudioPct]=useState(0);
+  // Tilawa (تلاوة — lecture guidée)
   const [karaokeMode,setKaraokeMode]=useState(false);
   const [wordTimings,setWordTimings]=useState({}); // {sn_vn: [{text,start,end}]}
   const [activeWordIdx,setActiveWordIdx]=useState(-1);
@@ -876,6 +1191,7 @@ export default function App() {
   const [reviewMode,setReviewMode]=useState(false);
   const [hifzMode,setHifzMode]=useState(false);
   const [hifzLevel,setHifzLevel]=useState({});
+  // Reconnaissance vocale
   const [speechMode,setSpeechMode]=useState(false);
   const [speechListening,setSpeechListening]=useState(false);
   const [speechResult,setSpeechResult]=useState(""); // ce que l'utilisateur a dit
@@ -887,6 +1203,8 @@ export default function App() {
   const [spaced,setSpaced]=useState(()=>ld("qspaced",{}))
   const [tafsirData,setTafsirData]=useState({}) // {sn_vn: text}
   const [tafsirLoading,setTafsirLoading]=useState({});
+  // SM-2: {key: {interval, repetitions, ef, nextDate, lastDate}}
+  // ef = easiness factor (2.5 default), interval en jours
   const [badges,setBadges]=useState(()=>ld("qbadges",[]));
   const [autoNight,setAutoNight]=useState(()=>ld("qautonight",false));
   const [playbackRate,setPlaybackRate]=useState(1);
@@ -896,69 +1214,11 @@ export default function App() {
   const [editingNote,setEditingNote]=useState(null);
   const [noteText,setNoteText]=useState("");
   const [shareVerse,setShareVerse]=useState(null);
-  const [shareGenerating,setShareGenerating]=useState(false);
-
-  const generateShareImage=async(verse)=>{
-    setShareGenerating(true);
-    try{
-      const canvas=document.createElement("canvas");
-      canvas.width=1080;canvas.height=1080;
-      const ctx=canvas.getContext("2d");
-      const grad=ctx.createLinearGradient(0,0,1080,1080);
-      grad.addColorStop(0,"#0a0f14");
-      grad.addColorStop(1,"#141a0a");
-      ctx.fillStyle=grad;ctx.fillRect(0,0,1080,1080);
-      ctx.strokeStyle="#c9a84c";ctx.lineWidth=6;
-      ctx.strokeRect(30,30,1020,1020);
-      ctx.strokeStyle="rgba(201,168,76,0.3)";ctx.lineWidth=2;
-      ctx.strokeRect(45,45,990,990);
-      ctx.fillStyle="#c9a84c";
-      ctx.font="bold 42px serif";
-      ctx.textAlign="center";
-      ctx.fillText(verse.surah+" · "+verse.surahAr,540,130);
-      ctx.fillStyle="rgba(201,168,76,0.6)";
-      ctx.font="28px serif";
-      ctx.fillText("﴿"+verse.vn+"﴾",540,185);
-      const arText=(verse.ar||"").replace(/<[^>]*>/g,"");
-      ctx.fillStyle="#f0e8d0";
-      ctx.font="52px 'Amiri',serif";
-      ctx.direction="rtl";
-      const words=arText.split(" ");
-      const lineHeight=80;let line="";let y=350;
-      for(const w of words){
-        const test=line?line+" "+w:w;
-        if(ctx.measureText(test).width>900&&line){ctx.fillText(line,540,y);line=w;y+=lineHeight;}
-        else line=test;
-      }
-      if(line){ctx.fillText(line,540,y);y+=lineHeight;}
-      ctx.direction="ltr";
-      ctx.fillStyle="rgba(200,185,150,0.7)";
-      ctx.font="italic 28px sans-serif";
-      ctx.textAlign="center";
-      const frWords=(verse.fr||"").split(" ");
-      let frLine="";let fy=y+60;
-      for(const w of frWords){
-        const test=frLine?frLine+" "+w:w;
-        if(ctx.measureText(test).width>900&&frLine){ctx.fillText(frLine,540,fy);frLine=w;fy+=40;}
-        else frLine=test;
-      }
-      if(frLine)ctx.fillText(frLine,540,fy);
-      ctx.fillStyle="rgba(201,168,76,0.4)";
-      ctx.font="24px sans-serif";
-      ctx.fillText("Al-Hifz · alhifz.vercel.app",540,1020);
-      const link=document.createElement("a");
-      link.download=`alhifz-${verse.surah}-v${verse.vn}.png`;
-      link.href=canvas.toDataURL("image/png");
-      link.click();
-    }catch(e){console.error(e);}
-    setShareGenerating(false);
-  };
   const [newListName,setNewListName]=useState("");
   const [selList,setSelList]=useState(null);
   const [mushafFullscreen,setMushafFullscreen]=useState(false);
   const [mushafEdition,setMushafEdition]=useState("hafs");
   const [immersive,setImmersive]=useState(false);
-  const [heroExpanded,setHeroExpanded]=useState(false);
   const [focusMode,setFocusMode]=useState(false);
   const [focusIdx,setFocusIdx]=useState(0);
   const touchStartX=useRef(null);
@@ -984,6 +1244,7 @@ export default function App() {
   const [isOffline,setIsOffline]=useState(()=>!navigator.onLine);
   const [showInstallBanner,setShowInstallBanner]=useState(false);
   const installPromptRef=useRef(null);
+  // Plan IA
   const [showAIPlan,setShowAIPlan]=useState(false);
   const [aiPlanLoading,setAiPlanLoading]=useState(false);
   const [aiPlanResult,setAiPlanResult]=useState("");
@@ -994,7 +1255,6 @@ export default function App() {
   const [revFlags,setRevFlags]=useState(()=>ld("qrevflags",{})); // {surahN: "active"|"mastered"|"paused"}
   const [revSessions,setRevSessions]=useState(()=>ld("qrevsessions",[])); // [{date,sn,score,mode}]
   const [revFilter,setRevFilter]=useState("all");
-  const [openMenu,setOpenMenu]=useState(null); // key sn_vn pour le menu "..."
   const [swipeState,setSwipeState]=useState({});
   const swipeTouchStart=useRef({});
   const [verses,setVerses]=useState([]);
@@ -1003,6 +1263,7 @@ export default function App() {
   const preloadRef=useRef(new Audio()); // préchargement du verset suivant
   const vpRef=useRef(null);
 
+  // Persist
   useEffect(()=>sv("qreadhist",readHistory),[readHistory]);
   useEffect(()=>sv("qbookmark",bookmark),[bookmark]);
   useEffect(()=>sv("qspaced",spaced),[spaced]);
@@ -1025,6 +1286,7 @@ export default function App() {
 
   useEffect(()=>{
     const t=setTimeout(()=>setSplash(false),2200);
+    // Migrate: clear old qv3 cache entries (had wrong tajweed data)
     try{
       Object.keys(localStorage).filter(k=>k.startsWith("qv3_")||k.startsWith("qv4_")).forEach(k=>localStorage.removeItem(k));
     }catch{}
@@ -1058,7 +1320,10 @@ export default function App() {
     const baseline=settings.baselineVerses||0;
     const start=new Date(settings.startDate),now=new Date();
     const dp=Math.max(1,Math.floor((now-start)/86400000));
+    // Versets mémorisés APRÈS l'inscription (hors baseline déclaré)
     const earnedMem=Math.max(0,totalMem-baseline);
+    // Rythme réel = nouveaux versets / jours depuis début
+    // Si earnedMem=0 on utilise l'objectif défini dans les réglages
     const rate=earnedMem>0 ? earnedMem/dp : parseInt(settings.dailyGoal)||5;
     const eff=Math.max(rate,1);
     const days=remaining>0?Math.ceil(remaining/eff):0;
@@ -1070,6 +1335,7 @@ export default function App() {
     };
   },[settings,totalMem,remaining]);
 
+  // hourglass pct: 0=début(plein), 1=fin(vide)
   const hourglassPct=useMemo(()=>{
     if(!settings||daysLeft<=0)return daysLeft<=0?1:0;
     const start=new Date(settings.startDate),now=new Date();
@@ -1115,12 +1381,16 @@ export default function App() {
     addToHistory(first.sn,first.vn);
   };
 
+
+
+  // Auto-scroll + chargement Tilawa
   useEffect(()=>{
     if(playing===null){
       setActiveWordIdx(-1);
       if(karaokeRaf.current){cancelAnimationFrame(karaokeRaf.current);karaokeRaf.current=null;}
       return;
     }
+    // Auto-scroll
     const el=document.getElementById(`v-${selS?.n}-${playing}`);
     if(el){
       const scroller=el.closest(".vscroll");
@@ -1130,10 +1400,12 @@ export default function App() {
         scroller.scrollBy({top:elRect.top-boxRect.top-boxRect.height/3,behavior:"smooth"});
       } else el.scrollIntoView({behavior:"smooth",block:"center"});
     }
+    // Tilawa — charger les mots et lancer le RAF
     if(karaokeMode&&selS){
       loadWordTimings(selS.n,playing).then(words=>{
         const audio=audioRef.current;
         if(words.length&&audio){
+          // Attendre que la durée soit connue
           const onMeta=()=>{ startKaraokeLoop(words,audio.duration); };
           if(audio.duration) startKaraokeLoop(words,audio.duration);
           else{ audio.addEventListener("loadedmetadata",onMeta,{once:true}); }
@@ -1171,6 +1443,7 @@ export default function App() {
     if(newBadges.length>0)setBadges(p=>[...p,...newBadges]);
   },[mem,memStreak]);
 
+  // SM-2 — calcule quels versets sont dus aujourd'hui
   const sm2Due=useMemo(()=>{
     const today2=new Date().toISOString().split("T")[0];
     return Object.entries(spaced).filter(([k,v])=>{
@@ -1180,7 +1453,9 @@ export default function App() {
   },[spaced]);
   const spacedDue=sm2Due; // alias pour compatibilité
 
+  // SM-2 update function
   const sm2Update=(sn,vn,quality)=>{
+    // quality: 0=blackout, 1=wrong, 2=hard, 3=ok, 4=good, 5=perfect
     const key=`${sn}_${vn}`;
     setSpaced(prev=>{
       const card=prev[key]||{interval:1,repetitions:0,ef:2.5};
@@ -1194,6 +1469,7 @@ export default function App() {
         repetitions=0;
         interval=1;
       }
+      // Update EF: EF' = EF + (0.1 - (5-q)*(0.08+(5-q)*0.02))
       ef=Math.max(1.3, ef + 0.1 - (5-quality)*(0.08+(5-quality)*0.02));
       const nextDate=new Date();
       nextDate.setDate(nextDate.getDate()+interval);
@@ -1205,8 +1481,10 @@ export default function App() {
       }};
     });
   };
+  // markSpaced: garde compatibilité, utilise SM-2 quality=4 (good)
   const markSpaced=(sn,vn,quality=4)=>sm2Update(sn,vn,quality);
 
+  // Hifz helper: masque progressivement les mots d'un verset
   const getHifzText=(text,level)=>{
     if(!level||level===0)return text;
     const clean=(text||"").replace(/<[^>]*>/g,"");
@@ -1214,10 +1492,12 @@ export default function App() {
     const total=words.length;
     const hiddenCount=Math.round(total*(level/5));
     const indices=new Set();
+    // Cacher depuis la fin progressivement
     for(let i=total-1;i>=total-hiddenCount;i--)indices.add(i);
     return words.map((w,i)=>indices.has(i)?<span key={i} style={{background:"#1a1a1a",color:"#1a1a1a",borderRadius:3,cursor:"pointer",userSelect:"none",transition:"all .2s"}} onClick={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color="inherit";}}>{"█".repeat(Math.max(2,Math.round(w.length*0.8)))}</span>:<span key={i}>{w} </span>);
   };
 
+  // FIX 1: doSelect — scroll uniquement sur mobile (<860px) — corrige le "saut" de page
   const doSelect=s=>{
     setSelS(s);setPlaying(null);
     setMushafPage(SURAH_PAGE[s.n]||1);
@@ -1236,6 +1516,7 @@ export default function App() {
     if(wasMemorized) delete c[vk];
     else {
       c[vk]=true;
+      // Déclencher l'animation calligraphique
       if(verseAr){
         const clean=verseAr.replace(/<[^>]*>/g,"").slice(0,60);
         setCalligAnim(clean);
@@ -1249,11 +1530,13 @@ export default function App() {
   const doPlay=vn=>{
     if(!selS||!audioRef.current)return;
     const audio=audioRef.current;
+    // Toggle pause/play si même verset
     if(playing===vn){
       if(!audio.paused){audio.pause();} 
       else{audio.play().catch(()=>{});}
       return;
     }
+    // Nouveau verset — vérifier si préchargé
     setPlaylistActive(false); // on sort du mode playlist
     const url=buildUrl(selS.n,vn);
     const pre=preloadRef.current;
@@ -1266,12 +1549,15 @@ export default function App() {
     setPlaying(vn);
     audio.load();
     audio.play().catch(()=>{
+      // fallback cdn
       audio.src=`https://cdn.islamic.network/quran/audio/128/${rec.id}/${String(selS.n).padStart(3,"0")}${String(vn).padStart(3,"0")}.mp3`;
       audio.load();
       audio.play().catch(()=>setPlaying(null));
     });
   };
 
+  // Moteur audio unifié — préchargement + zéro latence
+  // Charge le tafsir Ibn Kathir (FR) depuis tafsir.app
   const loadTafsir=useCallback(async(sn,vn)=>{
     const key=`${sn}_${vn}`;
     if(tafsirData[key]||tafsirLoading[key]) return;
@@ -1292,6 +1578,7 @@ export default function App() {
     return `https://everyayah.com/data/${rec.everyayah||"Alafasy_128kbps"}/${s}${v}.mp3`;
   };
 
+  // Charge les timestamps par mot pour la Tilawa
   const loadWordTimings=useCallback(async(sn,vn)=>{
     const key=`${sn}_${vn}`;
     if(wordTimings[key])return wordTimings[key];
@@ -1301,11 +1588,14 @@ export default function App() {
       const words=(d.verses?.[0]?.words||[])
         .filter(w=>w.char_type_name==="word")
         .map((w,i)=>({text:w.text_uthmani||w.text||"",idx:i}));
+      // Les timestamps exacts nécessitent l'audio — on utilise une estimation
+      // basée sur la durée totale divisée par le nombre de mots (suffisant pour le highlight)
       setWordTimings(p=>({...p,[key]:words}));
       return words;
     }catch{return[];}
   },[wordTimings]);
 
+  // RAF loop pour le highlight Tilawa (basé sur currentTime)
   const startKaraokeLoop=useCallback((words,duration)=>{
     if(karaokeRaf.current) cancelAnimationFrame(karaokeRaf.current);
     if(!words.length||!duration) return;
@@ -1320,6 +1610,7 @@ export default function App() {
     karaokeRaf.current=requestAnimationFrame(tick);
   },[]);
 
+  // Précharge le verset N+1 dès que N commence à jouer
   useEffect(()=>{
     if(!playlistActive||playing===null)return;
     const curIdx=playlist.findIndex(p=>p.vn===playing);
@@ -1330,17 +1621,21 @@ export default function App() {
     if(pre.src!==url){pre.src=url;pre.load();}
   },[playing,playlistActive,playlist,rec]);
 
+  // handleEnded unifié — playlist prioritaire, sinon loop
   useEffect(()=>{
     const audio=audioRef.current;
     if(!audio)return;
     const handleEnded=()=>{
+      // Mode playlist
       if(playlistActive){
         const curIdx=playlist.findIndex(p=>p.vn===playing);
         if(curIdx>=0&&curIdx<playlist.length-1){
           const next=playlist[curIdx+1];
           const pre=preloadRef.current;
           const url=buildUrl(next.sn,next.vn);
+          // Swap instantané si déjà préchargé, sinon chargement normal
           if(pre.src===url&&pre.readyState>=2){
+            // l'audio préchargé est prêt — on le bascule directement
             audio.src=url;
           } else {
             audio.src=url;
@@ -1351,6 +1646,7 @@ export default function App() {
           setPlaylistIdx(curIdx+1);
           addToHistory(next.sn,next.vn);
         } else {
+          // fin de la playlist
           setPlaylistActive(false);
           setPlaying(null);
           setAudioPlaying(false);
@@ -1358,6 +1654,7 @@ export default function App() {
         }
         return;
       }
+      // Mode loop verset unique
       if(loopCount>1&&loopCurrent<loopCount){
         setLoopCurrent(p=>p+1);
         audio.currentTime=0;
@@ -1371,16 +1668,21 @@ export default function App() {
     };
     audio.addEventListener("ended",handleEnded);
     return()=>audio.removeEventListener("ended",handleEnded);
+  // dépendances minimales pour éviter les ré-attachements inutiles
   },[playlistActive,playlist,playing,loopCount,loopCurrent,rec]);
 
+  // Chargement versets — TOUJOURS depuis l'API pour avoir le tajweed HTML correct
+  // Q[s.n] utilisé uniquement comme fallback traduction hors ligne
   useEffect(()=>{
     if(!selS){setVerses([]);setLoadState("idle");return;}
     const cacheKey=`qv5_${selS.n}`; // v4 = tajweed HTML + traduction fusionnée
+    // Check cache first
     try{
       const cached=localStorage.getItem(cacheKey);
       if(cached){setVerses(JSON.parse(cached));setLoadState("done");return;}
     }catch{}
     setVerses([]);setLoadState("loading");
+    // Fetch tajweed Arabic + French translation in parallel
     const arFetch=fetch(`https://api.qurancdn.com/api/qdc/verses/by_chapter/${selS.n}?language=fr&words=false&per_page=300&fields=text_uthmani_tajweed,text_uthmani,translations&translations=31`)
       .then(r=>r.json());
     const frFetch=fetch(`https://api.alquran.cloud/v1/surah/${selS.n}/fr.hamidullah`)
@@ -1388,21 +1690,26 @@ export default function App() {
     Promise.all([arFetch,frFetch]).then(([arData,frData])=>{
       const arAyahs=arData?.verses||[];
       const frAyahs=frData?.data?.ayahs||[];
+      // Local Q fallback for translation
       const localQ=Q[selS.n]||[];
       if(!arAyahs.length){
+        // Full offline fallback
         if(localQ.length){setVerses(localQ);setLoadState("done");}
         else setLoadState("error");
         return;
       }
       const result=arAyahs.map((a,i)=>({
         n:a.verse_number,
+        // tajweed HTML from API — crucial for correct coloring
         ar:a.text_uthmani_tajweed||a.text_uthmani||"",
+        // translation: API > local fallback
         fr:(a.translations?.[0]?.text||frAyahs[i]?.text||localQ[i]?.fr||"").replace(/<[^>]*>/g,""),
         tf:localQ[i]?.tf||"",
       }));
       setVerses(result);setLoadState("done");
       try{localStorage.setItem(cacheKey,JSON.stringify(result));}catch{}
     }).catch(()=>{
+      // Offline: use local Q data
       if(Q[selS.n]?.length){setVerses(Q[selS.n]);setLoadState("done");}
       else setLoadState("error");
     });
@@ -1411,6 +1718,7 @@ export default function App() {
   const filtered=useMemo(()=>{const q=search.toLowerCase().trim();if(!q)return SURAHS;return SURAHS.filter(s=>s.name.toLowerCase().includes(q)||s.ar.includes(q)||String(s.n).includes(q));},[search]);
   const juzList=[...new Set(SURAHS.map(s=>s.juz))].sort((a,b)=>a-b);
 
+  // Fonction commune touch + mouse pour le swipe des sourates
   const handleSwipeEnd=(sn,s)=>{
     const x=swipeState[sn]?.x||0;
     if(x<-130){
@@ -1433,6 +1741,7 @@ export default function App() {
   const toggleFav=(sn,vn,ar,fr,surah)=>{const key=`${sn}_${vn}`;setFavorites(p=>p.find(f=>f.key===key)?p.filter(f=>f.key!==key):[...p,{key,sn,vn,ar,fr,surah}]);};
   const isFav=(sn,vn)=>favorites.some(f=>f.key===`${sn}_${vn}`);
   const saveNote=(sn,vn,text)=>{const k=`${sn}_${vn}`;if(text.trim())setNotes(p=>({...p,[k]:text.trim()}));else setNotes(p=>{const n={...p};delete n[k];return n;});setEditingNote(null);};
+  // Génération plan mémorisation via Anthropic API
   const generateAIPlan=async()=>{
     setAiPlanLoading(true);setAiPlanResult("");
     const goalLabels={juz30:"le Juz 30 (37 sourates)",juz29:"les Juz 29-30",halfquran:"la moitié du Coran (15 juz)",fullquran:"le Coran complet"};
@@ -1479,19 +1788,23 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
   const createList=name=>{if(!name.trim())return;const nl={id:Date.now(),name:name.trim(),items:[]};setLists(p=>[...p,nl]);setNewListName("");return nl;};
   const removeFromList=(listId,sn,vn)=>setLists(p=>p.map(l=>l.id===listId?{...l,items:l.items.filter(i=>!(i.sn===sn&&i.vn===vn))}:l));
 
+  // Fonctions reconnaissance vocale
   const speechSupported=typeof window!=="undefined"&&("SpeechRecognition" in window||"webkitSpeechRecognition" in window);
 
+  // ── Moteur de récitation inline amélioré ─────────────────────────────────
   const [speechCountdown,setSpeechCountdown]=useState(0); // 3,2,1,0
   const [continuousMode,setContinuousMode]=useState(false);
   const [continuousIdx,setContinuousIdx]=useState(0);
   const countdownRef=useRef(null);
 
+  // Compare deux mots arabes en ignorant les diacritiques
   const arabicMatch=(a,b)=>{
     const clean=s=>s.replace(/[ًٌٍَُِّْٰ]/g,"").replace(/[أإآ]/g,"ا").replace(/[ىة]/g,"ي").trim();
     const ca=clean(a),cb=clean(b);
     return ca===cb||ca.includes(cb)||cb.includes(ca);
   };
 
+  // Analyse mot par mot — retourne [{word, status: ok|wrong|missing}]
   const analyzeRecitation=(targetAr,spoken)=>{
     const target=(targetAr||"").replace(/<[^>]*>/g,"").trim().split(/\s+/).filter(Boolean);
     const said=(spoken||"").trim().split(/\s+/).filter(Boolean);
@@ -1499,6 +1812,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
     return target.map(tw=>{
       if(si>=said.length) return {word:tw,status:"missing"};
       if(arabicMatch(tw,said[si])){si++;return {word:tw,status:"ok"};}
+      // Cherche en avance (mot sauté)
       const ahead=said.slice(si,si+3).findIndex(w=>arabicMatch(tw,w));
       if(ahead>=0){si+=ahead+1;return {word:tw,status:"ok"};}
       return {word:tw,status:"wrong"};
@@ -1510,6 +1824,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
     setSpeechVerseTarget({ar:verseAr,vn});
     setSpeechResult("");
     setSpeechScore(null);
+    // Compte à rebours 3→0
     setSpeechCountdown(3);
     let cd=3;
     countdownRef.current=setInterval(()=>{
@@ -1517,6 +1832,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
       setSpeechCountdown(cd);
       if(cd<=0){
         clearInterval(countdownRef.current);
+        // Démarrer la reconnaissance
         const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
         const recognition=new SR();
         recognition.lang="ar-SA";
@@ -1526,6 +1842,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
         recognitionRef.current=recognition;
         setSpeechListening(true);
         recognition.onresult=e=>{
+          // Sépare les résultats finaux des résultats intermédiaires
           let finalTranscript="";
           let interimTranscript="";
           for(let i=0;i<e.results.length;i++){
@@ -1533,7 +1850,9 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
             if(e.results[i].isFinal) finalTranscript+=t+" ";
             else interimTranscript+=t;
           }
+          // Afficher en direct ce qui est dit (interim)
           if(interimTranscript) setSpeechResult(interimTranscript);
+          // Quand on a un résultat final, analyser
           if(finalTranscript.trim()){
             const transcript=finalTranscript.trim();
             setSpeechResult(transcript);
@@ -1569,6 +1888,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
     setSpeechCountdown(0);
   };
 
+  // Mode récitation continue
   const startContinuousRecitation=(startVn=0)=>{
     if(!speechSupported||!verses.length)return;
     setContinuousMode(true);
@@ -1579,6 +1899,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
     const next=continuousIdx+1;
     if(next>=verses.length){setContinuousMode(false);return;}
     setContinuousIdx(next);
+    // Jouer l'audio du verset suivant puis écouter
     const v=verses[next];
     if(v){
       doPlay(v.n);
@@ -1604,8 +1925,10 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
   const acc2=ramadanTheme?"#e8c87a":t.acc2;
   const acc3=ramadanTheme?"#f5e0a0":t.acc3;
 
+  // Ramadan info calculée avant return pour éviter les IIFEs dans le JSX
   const riInfo=getRamadanInfo();
 
+  // Verset du jour — seed basé sur la date, tiré parmi les mémorisés ou Juz 30 si rien
   const versetDuJour=useMemo(()=>{
     const seed=parseInt(today().replace(/-/g,""))%9999;
     const memList=[];
@@ -1616,6 +1939,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
         if(localV) memList.push({...localV,sn:s.n,surah:s.name,surahAr:s.ar});
       });
     });
+    // Fallback: versets embarqués du Juz 30
     const fallbackList=[];
     [112,113,114,97,103,108].forEach(sn=>{
       (Q[sn]||[]).forEach(v=>fallbackList.push({...v,sn,surah:SURAHS.find(s=>s.n===sn)?.name||"",surahAr:SURAHS.find(s=>s.n===sn)?.ar||""}));
@@ -1623,18 +1947,23 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
     const pool=memList.length>=3?memList:fallbackList;
     return pool.length?pool[seed%pool.length]:null;
   },[mem]);
+  // filtered2 pour l'onglet révision
   const filtered2=SURAHS.filter(s=>{
     if(revFilter==="memorized")return sPct(s)===100;
     if(revFilter==="active")return revFlags[String(s.n)]==="active";
     if(revFilter==="none")return sMem(s)===0&&!revFlags[String(s.n)];
     return true;
   });
-  const versesThisRamadan=riInfo.isActive?Object.keys(hist).filter(d=>d>=riInfo.start.toISOString().split("T")[0]&&d<=riInfo.end.toISOString().split("T")[0]).reduce((s,d,i,arr)=>{const prev=arr[i-1]?hist[arr[i-1]]:0;return s+Math.max(0,(hist[d]||0)-prev);},0):0;
+  const versesThisRamadan=riInfo.isActive
+    ?Object.keys(hist).filter(d=>d>=riInfo.start.toISOString().split("T")[0]&&d<=riInfo.end.toISOString().split("T")[0])
+       .reduce((s,d,i,arr)=>{const prev=arr[i-1]?hist[arr[i-1]]:0;return s+Math.max(0,(hist[d]||0)-prev);},0)
+    :0;
 
   return (
     <>
       <style>{buildCSS(t,tjc,arFont,tn,ramadanTheme)}</style>
 
+      {/* Modal Plan IA */}
       {showAIPlan&&(
         <div className="overlay" onClick={()=>setShowAIPlan(false)}>
           <div style={{background:t.s1,border:`1px solid ${t.acc}`,borderRadius:18,padding:24,maxWidth:520,width:"92%",maxHeight:"85vh",display:"flex",flexDirection:"column",gap:14}} onClick={e=>e.stopPropagation()}>
@@ -1686,7 +2015,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
             )}
             {aiPlanResult&&(
               <div style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column",gap:10}}>
-                <div style={{padding:"12px 14px",background:t.s2,borderRadius:10,border:`1px solid ${t.b1}`,fontSize:".75rem",color:t.tx,lineHeight:1.8,fontFamily:"'DM Sans',sans-serif",overflowY:"auto",maxHeight:"50vh",whiteSpace:"pre-wrap"}}>
+                <div style={{padding:"12px 14px",background:t.s2,borderRadius:10,border:`1px solid ${t.b1}`,fontSize:".75rem",color:t.tx,lineHeight:1.8,whiteSpace:"pre-wrap",fontFamily:"'DM Sans',sans-serif"}}>
                   {aiPlanResult}
                 </div>
                 <div style={{display:"flex",gap:8}}>
@@ -1699,6 +2028,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
         </div>
       )}
 
+      {/* Splash */}
       {splash&&(
         <div style={{position:"fixed",inset:0,zIndex:300,background:tn==="dark"?"#07090d":"#f0f7f0",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",animation:"fadeOut 0.5s ease 1.8s forwards"}}>
           <style>{`@keyframes fadeOut{to{opacity:0;pointer-events:none;}}`}</style>
@@ -1715,6 +2045,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
         </div>
       )}
 
+      {/* Test */}
       {testMode&&(
         <div style={{position:"fixed",inset:0,zIndex:100,background:tn==="dark"?"#04060a":"#faf6ef",display:"flex",flexDirection:"column",overflow:"hidden"}}>
           <div style={{padding:"14px 16px",borderBottom:`1px solid ${t.b1}`,display:"flex",alignItems:"center",gap:10,background:t.navBg}}>
@@ -1752,6 +2083,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
         </div>
       )}
 
+      {/* Setup */}
       {setup&&(
         <div className="overlay">
           <div className="modal">
@@ -1777,20 +2109,22 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
         </div>
       )}
 
+      {/* Note modal */}
       {editingNote&&(<div className="overlay" onClick={()=>setEditingNote(null)}><div className="modal" onClick={e=>e.stopPropagation()}><h2>Note personnelle</h2><p style={{fontSize:".72rem",color:t.tx3,marginBottom:12}}>{editingNote.replace("_"," · verset ")}</p><textarea value={noteText} onChange={e=>setNoteText(e.target.value)} placeholder="Écris ta note…" style={{width:"100%",minHeight:100,background:t.inputBg,border:`1px solid ${t.b2}`,borderRadius:8,padding:"10px 12px",color:t.tx,fontSize:".85rem",resize:"vertical",outline:"none",marginBottom:12}}/><div style={{display:"flex",gap:8}}><button className="mbtn" style={{flex:1}} onClick={()=>{const[sn,vn]=editingNote.split("_");saveNote(sn,vn,noteText);}}>Sauvegarder</button>{notes[editingNote]&&(<button className="tbtn" style={{borderColor:t.rd,color:t.rd}} onClick={()=>{const[sn,vn]=editingNote.split("_");saveNote(sn,vn,"");}}>Supprimer</button>)}</div></div></div>)}
 
-      {shareVerse&&(<div className="overlay" onClick={()=>setShareVerse(null)}><div className="modal" onClick={e=>e.stopPropagation()}><h2 style={{fontFamily:"'Amiri',serif",color:acc,marginBottom:4}}>{shareVerse.surahAr}</h2><p style={{fontSize:".68rem",color:t.tx3,marginBottom:14}}>{shareVerse.surah} · verset {shareVerse.vn}</p><div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,border:`2px solid ${acc}`,borderRadius:14,padding:"20px 18px",marginBottom:14,textAlign:"center"}}><div style={{fontFamily:"'Amiri Quran',serif",fontSize:"1.5rem",direction:"rtl",lineHeight:2.2,color:t.tx,marginBottom:10}}>{shareVerse.ar.replace(/<[^>]*>/g,"")}</div><div style={{fontSize:".75rem",color:t.tx2,fontStyle:"italic",lineHeight:1.6}}>{shareVerse.fr}</div><div style={{marginTop:10,fontSize:".6rem",color:t.tx3}}>— {shareVerse.surah} ({shareVerse.sn}:{shareVerse.vn}) · Al-Hifz</div></div><div style={{display:"flex",gap:8,marginTop:4}}>
-              <button className="mbtn" style={{flex:1}} onClick={()=>{const txt=`${shareVerse.ar.replace(/<[^>]*>/g,"")}\n\n${shareVerse.fr}\n\n— ${shareVerse.surah} (${shareVerse.sn}:${shareVerse.vn})`;navigator.clipboard?.writeText(txt).catch(()=>{});setShareVerse(null);}}>Copier</button>
-              <button className="mbtn" style={{flex:1,background:`linear-gradient(135deg,${acc},${acc2})`,border:"none",color:"#000"}} onClick={()=>generateShareImage(shareVerse)} disabled={shareGenerating}>{shareGenerating?"…":"🖼 Image"}</button>
-            </div></div></div>)}
+      {/* Share modal */}
+      {shareVerse&&(<div className="overlay" onClick={()=>setShareVerse(null)}><div className="modal" onClick={e=>e.stopPropagation()}><h2 style={{fontFamily:"'Amiri',serif",color:acc,marginBottom:4}}>{shareVerse.surahAr}</h2><p style={{fontSize:".68rem",color:t.tx3,marginBottom:14}}>{shareVerse.surah} · verset {shareVerse.vn}</p><div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,border:`2px solid ${acc}`,borderRadius:14,padding:"20px 18px",marginBottom:14,textAlign:"center"}}><div style={{fontFamily:"'Amiri Quran',serif",fontSize:"1.5rem",direction:"rtl",lineHeight:2.2,color:t.tx,marginBottom:10}}>{shareVerse.ar.replace(/<[^>]*>/g,"")}</div><div style={{fontSize:".75rem",color:t.tx2,fontStyle:"italic",lineHeight:1.6}}>{shareVerse.fr}</div><div style={{marginTop:10,fontSize:".6rem",color:t.tx3}}>— {shareVerse.surah} ({shareVerse.sn}:{shareVerse.vn}) · Al-Hifz</div></div><button className="mbtn" onClick={()=>{const txt=`${shareVerse.ar.replace(/<[^>]*>/g,"")}\n\n${shareVerse.fr}\n\n— ${shareVerse.surah} (${shareVerse.sn}:${shareVerse.vn})`;navigator.clipboard?.writeText(txt).catch(()=>{});setShareVerse(null);}}>Copier le verset</button></div></div>)}
 
+      {/* Weekly report */}
       {showWeeklyReport&&(<div className="overlay" onClick={()=>setShowWeeklyReport(false)}><div className="modal" onClick={e=>e.stopPropagation()}><h2 style={{marginBottom:4}}>Rapport hebdomadaire</h2><p style={{marginBottom:16}}>{weeklyReport.totalWeek} versets · {weeklyReport.activeDays}/7 jours actifs</p><div style={{display:"flex",alignItems:"flex-end",gap:6,height:80,marginBottom:12}}>{weeklyReport.days.map((d,i)=>{const maxG=Math.max(...weeklyReport.days.map(x=>x.gained),1);const isToday=d.date===today();return(<div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}><div style={{fontSize:".52rem",color:acc}}>{d.gained||""}</div><div style={{width:"100%",height:60,display:"flex",alignItems:"flex-end"}}><div style={{width:"100%",height:`${Math.max(Math.round(d.gained/maxG*100),4)}%`,background:isToday?acc:`${acc}66`,borderRadius:"3px 3px 0 0",minHeight:3}}/></div><div style={{fontSize:".52rem",color:isToday?acc:t.tx3,fontWeight:isToday?700:400}}>{d.label}</div></div>);})}</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>{[{v:weeklyReport.totalWeek,l:"Versets",c:acc},{v:weeklyReport.activeDays,l:"Jours actifs",c:t.gr},{v:weeklyReport.best?.gained||0,l:"Meilleur jour",c:t.bl}].map((k,i)=>(<div key={i} style={{background:t.s2,borderRadius:10,padding:"10px",textAlign:"center"}}><div style={{fontSize:"1.4rem",fontWeight:700,color:k.c}}>{k.v}</div><div style={{fontSize:".58rem",color:t.tx3}}>{k.l}</div></div>))}</div><div style={{textAlign:"center",color:weeklyReport.totalWeek>0?t.gr:t.tx3,fontSize:".75rem",marginBottom:14,fontWeight:600}}>{weeklyReport.activeDays>=5?"Excellente semaine ! 🌟":weeklyReport.activeDays>=3?"Bonne progression, continue !":"Essaie de mémoriser chaque jour."}</div><button className="mbtn" onClick={()=>setShowWeeklyReport(false)}>Fermer</button></div></div>)}
 
+      {/* Offline banner */}
       {isOffline&&(
         <div style={{background:`${t.rd}CC`,color:"#fff",padding:"6px 16px",textAlign:"center",fontSize:".7rem",fontWeight:600,backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",gap:8,position:"sticky",top:0,zIndex:61}}>
           <span>●</span> Mode hors ligne — Coran embarqué et mémorisations disponibles
         </div>
       )}
+      {/* Install banner */}
       {showInstallBanner&&(
         <div style={{background:`linear-gradient(135deg,${t.acc}ee,${t.acc2}ee)`,padding:"8px 16px",display:"flex",alignItems:"center",gap:10,position:"sticky",top:0,zIndex:61,backdropFilter:"blur(8px)"}}>
           <span style={{fontSize:".75rem",fontWeight:700,color:"#fff",flex:1}}>Installer Al-Hifz sur ton écran d'accueil</span>
@@ -1799,6 +2133,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
         </div>
       )}
 
+      {/* Topbar */}
       <div className="topbar">
         <div className="tb">
           <div className="logo"><span className="logo-h">Al-Hifz</span><span className="logo-ar">القرآن</span><span className="logo-sub">mémorisation</span></div>
@@ -1810,6 +2145,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
         </div>
       </div>
 
+      {/* Hero */}
       <div className="hero">
         <svg style={{position:"absolute",top:0,left:0,width:"100%",height:12,display:"block"}} preserveAspectRatio="none" viewBox="0 0 800 12">
           <defs><linearGradient id="bord" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="transparent"/><stop offset=".15" stopColor={acc}/><stop offset=".5" stopColor={acc3}/><stop offset=".85" stopColor={acc}/><stop offset="1" stopColor="transparent"/></linearGradient></defs>
@@ -1821,6 +2157,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
         <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse at 50% 100%,${acc}0e 0%,transparent 70%)`,pointerEvents:"none"}}/>
 
         <div className="hero-i" style={{paddingTop:6}}>
+          {/* Title row */}
           <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,marginBottom:14}}>
             <svg width="80" height="10" viewBox="0 0 80 10"><line x1="0" y1="5" x2="55" y2="5" stroke={acc} strokeWidth=".8" opacity=".4"/><circle cx="62" cy="5" r="2.5" fill="none" stroke={acc} strokeWidth=".8" opacity=".6"/><circle cx="72" cy="5" r="1.5" fill={acc} opacity=".5"/><circle cx="79" cy="5" r=".8" fill={acc} opacity=".3"/></svg>
             <div style={{textAlign:"center"}}>
@@ -1830,7 +2167,9 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
             <svg width="80" height="10" viewBox="0 0 80 10" style={{transform:"scaleX(-1)"}}><line x1="0" y1="5" x2="55" y2="5" stroke={acc} strokeWidth=".8" opacity=".4"/><circle cx="62" cy="5" r="2.5" fill="none" stroke={acc} strokeWidth=".8" opacity=".6"/><circle cx="72" cy="5" r="1.5" fill={acc} opacity=".5"/><circle cx="79" cy="5" r=".8" fill={acc} opacity=".3"/></svg>
           </div>
 
+          {/* Main stats */}
           <div style={{display:"flex",gap:14,alignItems:"stretch"}}>
+            {/* Circular progress */}
             <div style={{flexShrink:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
               <div style={{position:"relative",width:88,height:88}}>
                 <svg width="88" height="88" viewBox="0 0 88 88">
@@ -1848,6 +2187,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
               </div>
             </div>
 
+            {/* KPIs */}
             <div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",gap:8}}>
               <div>
                 <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
@@ -1861,19 +2201,24 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
                 </div>
               </div>
 
+              {/* KPI grid with hourglass for "avant fin" */}
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px 10px"}}>
+                {/* Rythme */}
                 <div style={{display:"flex",alignItems:"center",gap:5}}>
                   <span style={{fontSize:".7rem",color:t.bl,opacity:.6}}>◈</span>
                   <div><div style={{fontSize:".85rem",fontWeight:700,color:t.bl,lineHeight:1.1,fontVariantNumeric:"tabular-nums"}}>{vpd}/j</div><div style={{fontSize:".48rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px"}}>Rythme</div></div>
                 </div>
+                {/* Avant fin — losange comme les autres KPIs */}
                 <div style={{display:"flex",alignItems:"center",gap:5}}>
                   <span style={{fontSize:".7rem",color:"#f97316",opacity:.6}}>◆</span>
                   <div><div style={{fontSize:".85rem",fontWeight:700,color:daysLeft<=0?t.gr:"#f97316",lineHeight:1.1,fontVariantNumeric:"tabular-nums"}}>{daysLeft>0?`${daysLeft}j`:"Fini!"}</div><div style={{fontSize:".48rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px"}}>Avant fin</div></div>
                 </div>
+                {/* Sourates */}
                 <div style={{display:"flex",alignItems:"center",gap:5}}>
                   <span style={{fontSize:".7rem",color:t.gr,opacity:.6}}>✦</span>
                   <div><div style={{fontSize:".85rem",fontWeight:700,color:t.gr,lineHeight:1.1}}>{SURAHS.filter(s=>sPct(s)===100).length}</div><div style={{fontSize:".48rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px"}}>Sourates</div></div>
                 </div>
+                {/* Restants */}
                 <div style={{display:"flex",alignItems:"center",gap:5}}>
                   <span style={{fontSize:".7rem",color:t.tx2,opacity:.6}}>◆</span>
                   <div><div style={{fontSize:".85rem",fontWeight:700,color:t.tx2,lineHeight:1.1,fontVariantNumeric:"tabular-nums"}}>{remaining.toLocaleString()}</div><div style={{fontSize:".48rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px"}}>Restants</div></div>
@@ -1882,22 +2227,26 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
             </div>
           </div>
 
+          {/* ETA + sablier élégant */}
           <div style={{marginTop:10,padding:"8px 12px",borderTop:`1px solid ${acc}20`,display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,background:`${acc}06`,borderRadius:"0 0 10px 10px"}}>
             <div style={{display:"flex",alignItems:"center",gap:8}}>
               <svg width="28" height="8" viewBox="0 0 28 8"><polygon points="4,4 8,1 12,4 8,7" fill="none" stroke={acc} strokeWidth=".8" opacity=".5"/><line x1="0" y1="4" x2="3" y2="4" stroke={acc} strokeWidth=".8" opacity=".3"/><line x1="13" y1="4" x2="28" y2="4" stroke={acc} strokeWidth=".5" opacity=".2"/></svg>
               <span style={{fontSize:".63rem",color:t.tx2,fontStyle:"italic"}}>{remaining>0?`Fin estimée · ${eta}`:"🎉 Coran complet !"}</span>
               <svg width="28" height="8" viewBox="0 0 28 8" style={{transform:"scaleX(-1)"}}><polygon points="4,4 8,1 12,4 8,7" fill="none" stroke={acc} strokeWidth=".8" opacity=".5"/><line x1="0" y1="4" x2="3" y2="4" stroke={acc} strokeWidth=".3" opacity=".3"/><line x1="13" y1="4" x2="28" y2="4" stroke={acc} strokeWidth=".5" opacity=".2"/></svg>
             </div>
+            {/* Sablier miniature — élégant, discret */}
             <div title={`${Math.round(hourglassPct*100)}% du temps écoulé`} style={{display:"flex",alignItems:"center",gap:5,padding:"3px 8px",borderRadius:8,border:`1px solid ${acc}25`,background:`${acc}08`,flexShrink:0}}>
               <HourglassIcon pct={hourglassPct} color={daysLeft<=0?"#22c55e":acc} size={16}/>
               <span style={{fontSize:".55rem",color:daysLeft<=0?t.gr:t.tx3,letterSpacing:".5px",fontVariantNumeric:"tabular-nums"}}>{Math.round(hourglassPct*100)}%</span>
             </div>
           </div>
 
+          {/* Rappel si pas de mémorisation aujourd'hui */}
           { !(hist[today()]||0) && (<div style={{marginTop:7,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${t.bl}15`,borderRadius:8,border:`1px solid ${t.bl}30`,cursor:"pointer",transition:"transform .2s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-1px)"} onMouseLeave={e=>e.currentTarget.style.transform=""} onClick={()=>{const s=SURAHS.find(x=>sPct(x)<100);if(s)doSelect(s);}}><div style={{width:6,height:6,borderRadius:"50%",background:t.bl,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".65rem",color:t.bl,fontWeight:600}}>Aucune mémorisation aujourd'hui — on commence ?</span><span style={{fontSize:".6rem",color:t.bl,marginLeft:"auto",opacity:.7}}>→</span></div>)}
           {spacedDue.length>0&&(<div style={{marginTop:7,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${t.rd}15`,borderRadius:8,border:`1px solid ${t.rd}30`,cursor:"pointer",transition:"transform .2s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-1px)"} onMouseLeave={e=>e.currentTarget.style.transform=""} onClick={()=>setPage("stats")}><div style={{width:6,height:6,borderRadius:"50%",background:t.rd,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".65rem",color:t.rd,fontWeight:600}}>{spacedDue.length} verset{spacedDue.length>1?"s":""} à réviser aujourd'hui</span><span style={{fontSize:".6rem",color:t.rd,marginLeft:"auto",opacity:.7}}>Voir →</span></div>)}
           {bookmark&&(<div style={{marginTop:7,display:"flex",alignItems:"center",gap:8,padding:"6px 10px",background:`${acc}10`,borderRadius:8,cursor:"pointer",border:`1px solid ${acc}25`,transition:"transform .2s,box-shadow .2s"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow=`0 4px 12px ${acc}22`;}} onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";}} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>x.n===bookmark.sn);if(s)doSelect(s);}}><span style={{fontSize:".75rem",color:acc}}>◈</span><span style={{fontSize:".68rem",color:t.tx,fontWeight:600,flex:1}}>Reprendre : {bookmark.name}</span><span style={{fontSize:".58rem",color:t.tx3}}>→</span></div>)}
 
+          {/* Verset du jour */}
           {versetDuJour&&(
             <div style={{marginTop:8,padding:"10px 14px",background:`linear-gradient(135deg,${acc}12,${acc}06)`,borderRadius:10,border:`1px solid ${acc}30`,cursor:"pointer",transition:"all .2s"}}
               onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow=`0 4px 16px ${acc}22`;}}
@@ -1910,13 +2259,37 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
               <div style={{fontFamily:"'Amiri Quran',serif",fontSize:"1.2rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx,marginBottom:4}}>
                 {(versetDuJour.ar||"").replace(/<[^>]*>/g,"")}
               </div>
-              {versetDuJour.fr&&<div style={{fontSize:".65rem",color:t.tx2,fontStyle:"italic",lineHeight:1.5}}>{versetDuJour.fr}</div>}
+              {versetDuJour.fr&&<div style={{fontSize:".65rem",color:t.tx2,fontStyle:"italic",lineHeight:1.5,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{versetDuJour.fr}</div>}
             </div>
           )}
-        <svg style={{position:"absolute",bottom:0,left:0,width:"100%",height:10,display:"block"}} preserveAspectRatio="none" viewBox="0 0 800 10"><path d="M0,5 Q25,9 50,5 Q75,1 100,5 Q125,9 150,5 Q175,1 200,5 Q225,9 250,5 Q275,1 300,5 Q325,9 350,5 Q375,1 400,5 Q425,9 450,5 Q475,1 500,5 Q525,9 550,5 Q575,1 600,5 Q625,9 650,5 Q675,1 700,5 Q725,9 750,5 Q775,1 800,5" stroke={acc} strokeWidth=".8" fill="none" opacity=".3"/></svg>
+        </div>
+          {/* Défi Ramadan */}
+          {riInfo.isActive
+            ?(<div style={{marginTop:8,padding:"8px 12px",background:"linear-gradient(135deg,rgba(201,168,76,.12),rgba(201,168,76,.05))",borderRadius:10,border:`1px solid ${acc}33`}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}>
+                  <span style={{fontSize:".72rem",fontWeight:700,color:acc}}>🌙 Défi Ramadan — Jour {riInfo.dayIn}/30</span>
+                  <span style={{fontSize:".65rem",color:t.tx3}}>{riInfo.daysLeft}j restants</span>
+                </div>
+                <div style={{height:6,background:t.b1,borderRadius:99,overflow:"hidden",marginBottom:5}}>
+                  <div style={{height:"100%",width:`${riInfo.dayIn/30*100}%`,background:`linear-gradient(90deg,${acc},${acc2})`,borderRadius:99}}/>
+                </div>
+                <div style={{display:"flex",justifyContent:"space-between",fontSize:".62rem",color:t.tx3}}>
+                  <span>{versesThisRamadan} versets ce Ramadan</span>
+                  <span style={{color:acc,fontWeight:600}}>{Math.round(riInfo.dayIn/30*100)}% du mois</span>
+                </div>
+              </div>)
+            :(<div style={{marginTop:8,padding:"7px 12px",background:`${acc}08`,borderRadius:8,border:`1px solid ${acc}20`,display:"flex",alignItems:"center",gap:8}}>
+                <span style={{fontSize:".75rem",color:acc}}>🌙</span>
+                <span style={{fontSize:".65rem",color:t.tx2,flex:1}}>Ramadan dans <span style={{color:acc,fontWeight:700}}>{riInfo.daysLeft} jours</span></span>
+                <button onClick={()=>setPage("khatma")} style={{background:`${acc}18`,border:`1px solid ${acc}33`,color:acc,borderRadius:6,padding:"3px 8px",fontSize:".6rem",cursor:"pointer",fontWeight:600}}>Préparer →</button>
+              </div>)
+          }
+
+                <svg style={{position:"absolute",bottom:0,left:0,width:"100%",height:10,display:"block"}} preserveAspectRatio="none" viewBox="0 0 800 10"><path d="M0,5 Q25,9 50,5 Q75,1 100,5 Q125,9 150,5 Q175,1 200,5 Q225,9 250,5 Q275,1 300,5 Q325,9 350,5 Q375,1 400,5 Q425,9 450,5 Q475,1 500,5 Q525,9 550,5 Q575,1 600,5 Q625,9 650,5 Q675,1 700,5 Q725,9 750,5 Q775,1 800,5" stroke={acc} strokeWidth=".8" fill="none" opacity=".3"/></svg>
       </div>
 
       <div className={`wrap${pageTransition?" transitioning":""}`}>
+        {/* CORAN */}
         {page==="quran"&&(
           <div className="two">
             <div className="lp card">
@@ -1932,6 +2305,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
                     <span>604 pages · cliquer pour ouvrir</span>
                     <span style={{color:t.gr}}>{Object.keys(pageRead).filter(k=>pageRead[k]).length} lues</span>
                   </div>
+                  {/* Mini grid of pages in left panel */}
                   <div style={{padding:"8px",display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:3,overflowY:"auto"}}>
                     {Array.from({length:604},(_,i)=>i+1).map(pg=>{
                       const isRead=pageRead[String(pg)];
@@ -1941,7 +2315,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
                         <div key={pg}
                           title={surahEntry?`Sourate ${surahEntry[0]} — page ${pg}`:`Page ${pg}`}
                           style={{height:28,borderRadius:5,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:".55rem",fontWeight:700,
-                            border:`1px solid ${isCur?t.acc:surahEntry?(t.acc+"55"):isRead?t.gr:t.b1}`,
+                            border:`1px solid ${isCur?t.acc:surahEntry?`${t.acc}55`:isRead?t.gr:t.b1}`,
                             background:isRead?`${t.gr}18`:isCur?`${t.acc}20`:surahEntry?`${t.acc}08`:t.s2,
                             color:isCur?t.acc:isRead?t.gr:t.tx3,transition:"all .12s"}}
                           onMouseEnter={e=>{e.currentTarget.style.borderColor=t.acc;e.currentTarget.style.transform="scale(1.1)";}}
@@ -1998,13 +2372,6 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
               )}
               {ltab==="list"&&(
                 <div className="slist">
-                  {filtered.length===0&&(
-                    <div style={{textAlign:"center",padding:"30px 20px",color:t.tx3}}>
-                      <div style={{fontSize:"1.5rem",marginBottom:8}}>🔍</div>
-                      <div style={{fontSize:".75rem",fontWeight:600,marginBottom:4}}>Aucune sourate trouvée</div>
-                      <div style={{fontSize:".65rem"}}>Essaie un autre nom ou numéro</div>
-                    </div>
-                  )}
                   {filtered.map(s=>{
                     const p=sPct(s),emb=!!Q[s.n];
                     const sw=swipeState[s.n]||{x:0,swiping:false};
@@ -2058,6 +2425,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
                             }
                           </div>
                         )}
+                        {/* Hint glissière visible au hover desktop */}
                         <div className="srow-hint">← glisser</div>
                         <div className={`snum ${p===100?"done":""}`} onClick={e=>{e.stopPropagation();toggleAll(s);}}>
                           {p===100?<Icons.Check size={10} color={t.gr}/>:s.n}
@@ -2105,6 +2473,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
               )}
             </div>
 
+            {/* Verse panel */}
             <div ref={vpRef} id="verse-panel" className="rp">
               {!selS?(
                 <div className="card empty">
@@ -2164,6 +2533,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
                     </div>
                   </div>)}
 
+                  {/* Audio */}
                   <div style={{padding:"10px 14px",background:t.s1,borderBottom:`1px solid ${t.b1}`,display:"flex",flexDirection:"column",gap:8}}>
                     <div style={{display:"flex",alignItems:"center",gap:8}}>
                       <span style={{fontSize:"1rem",flexShrink:0}}>🎙️</span>
@@ -2188,6 +2558,8 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
                     </div>
                   </div>
 
+
+
                   {showTj&&(<div className="tj-legend">
                     {[
                       [tjc.m,"Madd naturel"],[tjc.mr,"Madd permissible"],[tjc.mo,"Madd wajib"],
@@ -2198,6 +2570,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
 
                   {playing!==null&&(<div className="arow"><button className="vbtn snd" style={{flexShrink:0}} onClick={()=>doPlay(playing)}>{audioPlaying?"⏸":"▶ "+playing}</button><span style={{fontSize:".62rem",color:t.tx2,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{selS?.name} · v.{playing} · {rec.name}</span><button className="tbtn" style={{flexShrink:0}} onClick={()=>{setPlaying(null);if(audioRef.current){audioRef.current.pause();audioRef.current.src="";}}}>✕</button></div>)}
 
+                  {/* Banner mode récitation continue */}
                   {continuousMode&&(
                     <div style={{padding:"10px 14px",background:"linear-gradient(135deg,rgba(233,30,99,.12),rgba(233,30,99,.06))",borderBottom:`1px solid rgba(233,30,99,.3)`,display:"flex",alignItems:"center",gap:10}}>
                       <div style={{width:8,height:8,borderRadius:"50%",background:"#e91e63",animation:"pulse .8s infinite",flexShrink:0}}/>
@@ -2269,64 +2642,104 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
                               </div>
                             )}
                             <div className="vacts">
-                              <button className={`vbtn ${isMem?"mem":""}`} onClick={()=>toggleV(selS.n,v.n,v.ar)}>
-                                {isMem?<><Icons.Check size={10}/>Mémorisé</>:<>+ Mémoriser</>}
-                              </button>
-                              <button className="vbtn snd" onClick={()=>{setLoopCurrent(1);doPlay(v.n);addToHistory(selS.n,v.n);}}>
-                                <Icons.Play size={10}/>{isPl?"Stop":"Écouter"}
-                              </button>
+                              <button className={`vbtn ${isMem?"mem":""}`} onClick={()=>toggleV(selS.n,v.n,v.ar)}>{isMem?<><Icons.Check size={10}/>Mémorisé</>:<>+ Mémoriser</>}</button>
+                              <button className="vbtn snd" onClick={()=>{setLoopCurrent(1);doPlay(v.n);addToHistory(selS.n,v.n);}}><Icons.Play size={10}/>{isPl?"Stop":"Écouter"}</button>
+                              <button className={`vbtn ${isFav(selS.n,v.n)?"mem":""}`} onClick={()=>toggleFav(selS.n,v.n,v.ar,v.fr,selS.name)}><Icons.Heart size={10} filled={isFav(selS.n,v.n)}/>{isFav(selS.n,v.n)?"Favori ✓":"Favori"}</button>
+                              <button className={`vbtn ${notes[`${selS.n}_${v.n}`]?"on":""}`} style={notes[`${selS.n}_${v.n}`]?{borderColor:t.pu,color:t.pu}:{}} onClick={()=>{setEditingNote(`${selS.n}_${v.n}`);setNoteText(notes[`${selS.n}_${v.n}`]||"");}}>Note{notes[`${selS.n}_${v.n}`]?" ✓":""}</button>
+                              <button className="vbtn" onClick={()=>setShareVerse({sn:selS.n,vn:v.n,ar:v.ar,fr:v.fr,surah:selS.name,surahAr:selS.ar})}><Icons.Share size={10}/>Partager</button>
                               {speechSupported&&(
-                              <button className="vbtn"
+                              <button
+                                className="vbtn"
                                 style={{
-                                  borderColor:speechListening&&speechVerseTarget?.vn===v.n?"#e91e63":
-                                             speechCountdown>0&&speechVerseTarget?.vn===v.n?"#ff9800":
-                                             speechScore?.pct>=80&&speechVerseTarget?.vn===v.n?t.gr:
-                                             speechScore&&speechVerseTarget?.vn===v.n?t.rd:t.b2,
-                                  color:speechListening&&speechVerseTarget?.vn===v.n?"#e91e63":
-                                        speechCountdown>0&&speechVerseTarget?.vn===v.n?"#ff9800":
-                                        speechScore?.pct>=80&&speechVerseTarget?.vn===v.n?t.gr:
-                                        speechScore&&speechVerseTarget?.vn===v.n?t.rd:t.tx3,
-                                  position:"relative",overflow:"hidden",fontWeight:600,
+                                  borderColor: speechListening&&speechVerseTarget?.vn===v.n?"#e91e63":
+                                               speechCountdown>0&&speechVerseTarget?.vn===v.n?"#ff9800":
+                                               speechScore?.pct>=80&&speechVerseTarget?.vn===v.n?t.gr:
+                                               speechScore&&speechVerseTarget?.vn===v.n?t.rd:t.b2,
+                                  color: speechListening&&speechVerseTarget?.vn===v.n?"#e91e63":
+                                         speechCountdown>0&&speechVerseTarget?.vn===v.n?"#ff9800":
+                                         speechScore?.pct>=80&&speechVerseTarget?.vn===v.n?t.gr:
+                                         speechScore&&speechVerseTarget?.vn===v.n?t.rd:t.tx3,
+                                  background: speechListening&&speechVerseTarget?.vn===v.n?"rgba(233,30,99,.08)":"transparent",
+                                  fontWeight:600,
+                                  minWidth:80,
+                                  position:"relative",
+                                  overflow:"hidden",
                                 }}
                                 onClick={()=>{
                                   if(speechListening&&speechVerseTarget?.vn===v.n) stopListening();
-                                  else if(speechCountdown>0){clearInterval(countdownRef.current);setSpeechCountdown(0);}
-                                  else{setSpeechScore(null);startListening(v.ar,v.n);}
+                                  else if(speechCountdown>0) {clearInterval(countdownRef.current);setSpeechCountdown(0);}
+                                  else {setSpeechScore(null);startListening(v.ar,v.n);}
                                 }}>
+                                {/* Cercle countdown SVG */}
                                 {speechCountdown>0&&speechVerseTarget?.vn===v.n&&(
                                   <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none"}} viewBox="0 0 100 100">
                                     <circle cx="50" cy="50" r="48" fill="none" stroke="#ff9800" strokeWidth="3" strokeDasharray={`${(3-speechCountdown)/3*301} 301`} strokeLinecap="round" transform="rotate(-90 50 50)" opacity=".6"/>
                                   </svg>
                                 )}
-                                {speechListening&&speechVerseTarget?.vn===v.n
-                                  ?(<>{speechResult?<span style={{fontFamily:"'Amiri',serif",direction:"rtl",fontSize:".9rem"}}>{speechResult}</span>:<><span style={{animation:"pulse .6s infinite",display:"inline-block"}}>●</span> Écoute…</>}</>)
-                                  :speechCountdown>0&&speechVerseTarget?.vn===v.n?`${speechCountdown}…`
-                                  :speechScore?.pct>=80&&speechVerseTarget?.vn===v.n?`✓ ${speechScore.pct}%`
-                                  :speechScore&&speechVerseTarget?.vn===v.n?`↺ ${speechScore.pct}%`
-                                  :"🎤 Réciter"
+                                 {speechListening&&speechVerseTarget?.vn===v.n
+                                   ? (<>
+                                       {speechResult
+                                         ?<span style={{fontFamily:"'Amiri',serif",direction:"rtl",fontSize:".9rem",color:"#e91e63",display:"block",textAlign:"center"}}>{speechResult}</span>
+                                         :<><span style={{animation:"pulse .6s infinite",display:"inline-block"}}>●</span> Écoute…</>
+                                       }
+                                     </>)
+                                  : speechCountdown>0&&speechVerseTarget?.vn===v.n
+                                    ? `${speechCountdown}…`
+                                    : speechScore?.pct>=80&&speechVerseTarget?.vn===v.n
+                                      ? `✓ ${speechScore.pct}%`
+                                      : speechScore&&speechVerseTarget?.vn===v.n
+                                        ? `↺ ${speechScore.pct}%`
+                                        : "🎤 Réciter"
                                 }
-                              </button>)}
-                              <div style={{position:"relative",display:"inline-block"}}>
-                                <button className="vbtn" onClick={()=>setOpenMenu(openMenu===`${selS.n}_${v.n}`?null:`${selS.n}_${v.n}`)}>•••</button>
-                                {openMenu===`${selS.n}_${v.n}`&&(
-                                  <div style={{position:"absolute",bottom:"100%",right:0,background:t.s1,border:`1px solid ${t.b2}`,borderRadius:10,padding:6,zIndex:50,display:"flex",flexDirection:"column",gap:4,minWidth:140,boxShadow:`0 4px 20px rgba(0,0,0,.3)`}}>
-                                    <button className={`vbtn ${isFav(selS.n,v.n)?"mem":""}`} style={{width:"100%",textAlign:"left"}} onClick={()=>{toggleFav(selS.n,v.n,v.ar,v.fr,selS.name);setOpenMenu(null);}}>
-                                      {isFav(selS.n,v.n)?"♥ Favori":"♡ Ajouter aux favoris"}
-                                    </button>
-                                    <button className={"vbtn "+(notes[selS.n+"_"+v.n]?"on":"")} style={{width:"100%",textAlign:"left"}} onClick={()=>{setEditingNote(selS.n+"_"+v.n);setOpenMenu(null);}}>
-                                      ✏️ {notes[`${selS.n}_${v.n}`]?"Modifier note":"Ajouter note"}
-                                    </button>
-                                    <button className="vbtn" style={{width:"100%",textAlign:"left"}} onClick={()=>{setShareVerse({sn:selS.n,vn:v.n,ar:v.ar,fr:v.fr,surah:selS.name,surahAr:selS.ar});setOpenMenu(null);}}>
-                                      ↗ Partager
-                                    </button>
-                                    {isMem&&(
-                                      <button className={`vbtn ${isDue?"":"snd"}`} style={isDue?{borderColor:t.rd,color:t.rd,width:"100%",textAlign:"left"}:{width:"100%",textAlign:"left"}} onClick={()=>{markSpaced(selS.n,v.n);setOpenMenu(null);}}>
-                                        {isDue?"⚡ Réviser maintenant":"◈ Marquer révisé"}
+                              </button>
+                            )}
+                              {/* Feedback inline mot par mot */}
+                              {speechScore&&speechVerseTarget?.vn===v.n&&(
+                                <div style={{width:"100%",marginTop:8,padding:"12px 14px",background:t.s2,borderRadius:10,border:`1px solid ${speechScore.pct>=80?t.gr:speechScore.pct>=50?`${t.acc}`:t.rd}44`,animation:"fadeIn .25s ease"}}>
+                                  {/* Barre de score */}
+                                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                                    <div style={{flex:1,height:6,background:t.b1,borderRadius:99,overflow:"hidden"}}>
+                                      <div style={{height:"100%",width:`${speechScore.pct}%`,background:speechScore.pct>=80?t.gr:speechScore.pct>=50?t.acc:t.rd,borderRadius:99,transition:"width .5s"}}/>
+                                    </div>
+                                    <span style={{fontSize:".75rem",fontWeight:800,color:speechScore.pct>=80?t.gr:speechScore.pct>=50?t.acc:t.rd,minWidth:36,textAlign:"right"}}>{speechScore.pct}%</span>
+                                    <button style={{background:"none",border:"none",color:t.tx3,cursor:"pointer",fontSize:".85rem",padding:"0 2px"}} onClick={()=>setSpeechScore(null)}>✕</button>
+                                  </div>
+                                  {/* Texte arabe coloré mot par mot */}
+                                  {/* Transcription en direct */}
+                                  <div style={{padding:"6px 10px",background:t.s3,borderRadius:7,marginBottom:8,direction:"rtl",textAlign:"right"}}>
+                                    <div style={{fontSize:".55rem",color:t.tx3,marginBottom:2,textAlign:"left",direction:"ltr",fontVariantCaps:"all-small-caps",letterSpacing:"1px"}}>Tu as récité</div>
+                                    <div style={{fontFamily:"'Amiri',serif",fontSize:"1.05rem",color:t.tx,lineHeight:1.8}}>{speechResult||"—"}</div>
+                                  </div>
+                                  {speechScore.analysis&&(
+                                    <div style={{direction:"rtl",textAlign:"right",fontFamily:"'Amiri Quran',serif",fontSize:"1.3rem",lineHeight:2.2,marginBottom:8}}>
+                                      {speechScore.analysis.map((w,wi)=>(
+                                        <span key={wi} style={{
+                                          color:w.status==="ok"?t.gr:w.status==="wrong"?"#e91e63":"#888",
+                                          fontWeight:w.status==="wrong"?700:400,
+                                          textDecoration:w.status==="wrong"?"underline":"none",
+                                          cursor:w.status==="wrong"?"pointer":"default",
+                                          display:"inline",
+                                        }}
+                                        title={w.status==="wrong"?"Appuie pour écouter":""}
+                                        onClick={()=>{ if(w.status==="wrong") doPlay(v.n); }}>
+                                          {w.word}{" "}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                  {/* Actions */}
+                                  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                                    <button className="vbtn" style={{borderColor:"#e91e63",color:"#e91e63"}} onClick={()=>{setSpeechScore(null);startListening(v.ar,v.n);}}>↺ Réessayer</button>
+                                    <button className="vbtn snd" onClick={()=>doPlay(v.n)}>▶ Écouter</button>
+                                    {speechScore.pct>=50&&(
+                                      <button className="vbtn" style={{borderColor:t.gr,color:t.gr}} onClick={()=>{markSpaced(selS.n,v.n,speechScore.pct>=85?5:speechScore.pct>=70?4:3);setSpeechScore(null);}}>
+                                        ✓ Sauvegarder {speechScore.pct>=85?"⭐⭐":"⭐"}
                                       </button>
                                     )}
                                   </div>
-                                )}
-                              </div>
+                                </div>
+                              )}
+                              {isMem&&(<button className={`vbtn ${isDue?"":"snd"}`} style={isDue?{borderColor:t.rd,color:t.rd}:{}} onClick={()=>markSpaced(selS.n,v.n)}>{isDue?"Révision due":"Révisé"}</button>)}
                             </div>
                           </div>
                         </React.Fragment>
@@ -2339,6 +2752,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
           </div>
         )}
 
+        {/* MUSHAF */}
         {page==="mushaf"&&(
           <div style={{display:"flex",flexDirection:"column",gap:12}}>
             <div className="card">
@@ -2372,9 +2786,11 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
           </div>
         )}
 
+        {/* PAGES */}
         {page==="pages"&&(
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
 
+            {/* Stats rapides */}
             <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
               {[
                 {l:"En révision",v:Object.values(revFlags).filter(f=>f==="active").length,c:t.acc,icon:"◈"},
@@ -2389,6 +2805,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
               ))}
             </div>
 
+            {/* Sourates en révision active — affichage prioritaire */}
             {Object.entries(revFlags).filter(([,f])=>f==="active").length>0&&(
               <div className="card">
                 <div className="ch">
@@ -2414,9 +2831,11 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
                           <div style={{fontSize:".6rem",color:t.tx3,marginTop:2,fontFamily:"'Amiri',serif"}}>{s.ar} · Juz {s.juz} · {s.v}v</div>
                         </div>
                       </div>
+                      {/* Progress bar */}
                       <div style={{height:5,background:t.b1,borderRadius:99,overflow:"hidden",marginBottom:8}}>
-                        <div style={{height:"100%",width:`${memPct}%`,background:memPct===100?t.gr:"linear-gradient(90deg,"+t.acc+","+t.acc2+")",borderRadius:99,boxShadow:memPct===100?`0 0 6px ${t.gr}66`:`0 0 4px ${t.acc}44`}}/>
+                        <div style={{height:"100%",width:`${memPct}%`,background:memPct===100?t.gr:`linear-gradient(90deg,${t.acc},${t.acc2})`,borderRadius:99,boxShadow:memPct===100?`0 0 6px ${t.gr}66`:`0 0 4px ${t.acc}44`}}/>
                       </div>
+                      {/* Actions */}
                       <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
                         <button className="vbtn" style={{borderColor:t.bl,color:t.bl}} onClick={()=>{doSelect(s);setPage("quran");}}>Ouvrir</button>
                         {sMem(s)>=2&&(<button className="vbtn" style={{borderColor:t.pu,color:t.pu}} onClick={()=>startTest(s,selS?.n===s.n?verses:(Q[s.n]||[]))}>Test mémoire</button>)}
@@ -2431,6 +2850,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
               </div>
             )}
 
+            {/* Ajouter des sourates à réviser */}
             <div className="card">
               <div className="ch">
                 <span className="ct">Toutes les sourates</span>
@@ -2473,6 +2893,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
                   </div>
             </div>
 
+            {/* Sourates maîtrisées */}
             {Object.entries(revFlags).filter(([,f])=>f==="mastered").length>0&&(
               <div className="card">
                 <div className="ch"><span className="ct">Maîtrisées</span><span style={{fontSize:".65rem",color:t.gr,fontWeight:700}}>{Object.entries(revFlags).filter(([,f])=>f==="mastered").length} sourates</span></div>
@@ -2488,6 +2909,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
               </div>
             )}
 
+            {/* Heatmap progrès */}
             <div className="card">
               <div className="ch"><span className="ct">Activité de mémorisation</span><span style={{fontSize:".62rem",color:t.tx3}}>14 derniers jours</span></div>
               <div style={{padding:"10px 14px"}}>
@@ -2513,10 +2935,12 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
           </div>
         )}
 
+        {/* KHATMA */}
         {page==="khatma"&&(
           <div style={{display:"flex",flexDirection:"column",gap:16}}>
             {!activeKhatma?(
               <>
+                {/* Hero d'intro */}
                 <div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,borderRadius:16,padding:"24px 20px",border:`1px solid ${t.b1}`,textAlign:"center",position:"relative",overflow:"hidden"}}>
                   <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse at 50% 0%,${t.acc}12,transparent 60%)`,pointerEvents:"none"}}/>
                   <div style={{fontFamily:"'Amiri',serif",fontSize:"2.5rem",color:t.acc,marginBottom:4,textShadow:`0 0 20px ${t.acc}44`}}>ختمة القرآن</div>
@@ -2531,6 +2955,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
                   </div>
                 </div>
 
+                {/* Formulaire création */}
                 <div className="card">
                   <div className="ch"><span className="ct">Nouvelle Khatma</span></div>
                   <div style={{padding:16}}>
@@ -2554,6 +2979,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
                             }}
                             onMouseEnter={e=>{if(!sel){e.currentTarget.style.borderColor=t.acc+"66";e.currentTarget.style.transform="translateX(3px)";}}}
                             onMouseLeave={e=>{if(!sel){e.currentTarget.style.borderColor=t.b1;e.currentTarget.style.transform="";}}}>
+                            {/* Bullet élégant */}
                             <div style={{width:36,height:36,borderRadius:"50%",border:`1.5px solid ${sel?t.acc:t.b2}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,background:sel?`${t.acc}15`:"transparent",transition:"all .18s"}}>
                               {sel
                                 ?<svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,10.5 12,3.5" stroke={t.acc} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -2583,6 +3009,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
                   </div>
                 </div>
 
+                {/* Khatmas précédentes */}
                 {khatmas.length>0&&(
                   <div className="card">
                     <div className="ch"><span className="ct">Khatmas précédentes</span></div>
@@ -2605,6 +3032,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
             ):(
               /* Active Khatma view */
               <div style={{display:"flex",flexDirection:"column",gap:14}}>
+                {/* Header card */}
                 <div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,borderRadius:16,padding:"20px 18px",border:`1px solid ${t.b1}`,position:"relative",overflow:"hidden"}}>
                   <div style={{position:"absolute",top:0,right:0,width:120,height:120,background:`radial-gradient(circle,${t.acc}10,transparent 70%)`,borderRadius:"0 16px 0 0",pointerEvents:"none"}}/>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
@@ -2614,6 +3042,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
                     </div>
                     <button onClick={()=>setActiveKhatma(null)} style={{background:"transparent",border:`1px solid ${t.rd}44`,color:t.rd,borderRadius:8,padding:"5px 10px",fontSize:".65rem",cursor:"pointer",transition:"all .2s"}} onMouseEnter={e=>{e.currentTarget.style.background=`${t.rd}12`;}} onMouseLeave={e=>{e.currentTarget.style.background="transparent";}}>Terminer</button>
                   </div>
+                  {/* Big progress */}
                   <div style={{marginBottom:10}}>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
                       <span style={{fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px"}}>Progression</span>
@@ -2625,6 +3054,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
                       </div>
                     </div>
                   </div>
+                  {/* KPIs */}
                   <div className="kh-stats">
                     <div className="khs"><div className="khs-v">{Object.values(activeKhatma.log).filter(Boolean).length}</div><div className="khs-l">Jours ✓</div></div>
                     <div className="khs"><div style={{fontSize:"1.4rem"}}>🔥</div><div className="khs-v">{khatmaStreak(activeKhatma)}j</div><div className="khs-l">Série ◈</div></div>
@@ -2632,6 +3062,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
                   </div>
                 </div>
 
+                {/* Calendrier */}
                 <div className="card">
                   <div className="ch"><span className="ct">Calendrier</span><span style={{fontSize:".65rem",color:t.tx3}}>{activeKhatma.totalDays} jours · page/jour ≈ {Math.ceil(604/activeKhatma.totalDays)}</span></div>
                   <div style={{padding:"10px 12px"}}>
@@ -2653,6 +3084,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
                   </div>
                 </div>
 
+                {/* Progression Coran */}
                 <div className="card">
                   <div className="ch"><span className="ct">Progression du Coran</span></div>
                   <div style={{padding:"12px 16px",display:"flex",flexDirection:"column",gap:10}}>
@@ -2669,8 +3101,10 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
           </div>
         )}
 
+        {/* COMMUNAUTÉ */}
         {page==="communaute"&&(
           <div style={{display:"flex",flexDirection:"column",gap:12}}>
+            {/* Favoris */}
             <div className="card">
               <div className="ch"><span className="ct">Versets favoris</span><span style={{fontSize:".65rem",color:t.tx3}}>{favorites.length} versets</span></div>
               {favorites.length===0?(<div className="empty"><div style={{fontSize:"1.8rem",marginBottom:8}}>💚</div>Marque des versets avec ♥ pour les retrouver ici</div>):(
@@ -2690,6 +3124,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
                 ))}</div>
               )}
             </div>
+            {/* Listes */}
             <div className="card">
               <div className="ch"><span className="ct">Mes listes</span></div>
               <div style={{padding:12}}>
@@ -2717,6 +3152,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
                 )}
               </div>
             </div>
+            {/* Historique */}
             {readHistory.length>0&&(
               <div className="card">
                 <div className="ch"><span className="ct">Historique de lecture</span><button className="tbtn" style={{borderColor:t.rd,color:t.rd,fontSize:".6rem"}} onClick={()=>setReadHistory([])}>Effacer</button></div>
@@ -2734,8 +3170,10 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
           </div>
         )}
 
+        {/* STATS */}
         {page==="stats"&&(
           <div className="sp">
+            {/* ── Constellation ── */}
             <div className="card" style={{overflow:"hidden"}}>
               <div className="ch"><span className="ct">Constellation du Coran</span><span style={{fontSize:".62rem",color:t.tx3}}>{SURAHS.filter(s=>sPct(s)===100).length} / 114 sourates allumées</span></div>
               <div style={{padding:"8px 4px 4px",position:"relative"}}>
@@ -2750,12 +3188,16 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
                       <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
                     </filter>
                   </defs>
+                  {/* Fond étoilé */}
                   {Array.from({length:40},(_,i)=>(
                     <circle key={`star-${i}`} cx={(i*97+13)%380} cy={(i*61+7)%260} r={0.3+((i*37)%10)*0.05} fill="white" opacity={0.15+((i*23)%30)*0.01}/>
                   ))}
+                  {/* Croissant de lune — guide de disposition */}
                   <path d="M 40 200 Q 120 20 200 15 Q 280 10 340 80 Q 370 130 340 190" fill="none" stroke={t.acc} strokeWidth="0.3" strokeDasharray="3,6" opacity="0.2"/>
+                  {/* Les 114 sourates disposées en arc */}
                   {SURAHS.map((s,i)=>{
                     const total=114;
+                    // Disposition en S-curve élégante
                     const row=Math.floor(i/19);
                     const col=i%19;
                     const x=22+col*18.5+(row%2)*9;
@@ -2764,23 +3206,27 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
                     const isComplete=pct2===100;
                     const hasProgress=pct2>0;
                     const isRevision=revFlags[String(s.n)]==="active";
+                    // Taille proportionnelle au nombre de versets
                     const baseR=1.5+Math.min(s.v/20,3);
                     const r=isComplete?baseR+1.5:baseR;
                     return (
                       <g key={s.n} style={{cursor:"pointer"}}
                         onClick={()=>{doSelect(s);setPage("quran");}}>
+                        {/* Halo pour les sourates complètes */}
                         {isComplete&&(
                           <circle cx={x} cy={y} r={r+3} fill="url(#starGlow)" opacity="0.4">
                             <animate attributeName="r" values={`${r+2};${r+5};${r+2}`} dur={`${2+i%3}s`} repeatCount="indefinite"/>
                             <animate attributeName="opacity" values="0.4;0.15;0.4" dur={`${2+i%3}s`} repeatCount="indefinite"/>
                           </circle>
                         )}
+                        {/* Point principal */}
                         <circle cx={x} cy={y} r={r}
                           fill={isComplete?"#c9a84c":hasProgress?`rgba(201,168,76,${pct2/100*0.6+0.1})`:"rgba(255,255,255,0.08)"}
                           stroke={isRevision?"#e91e63":isComplete?"#f5dc8c":hasProgress?`rgba(201,168,76,0.5)`:"rgba(255,255,255,0.15)"}
                           strokeWidth={isComplete?0.8:0.4}
                           filter={isComplete?"url(#glow2)":undefined}
                         />
+                        {/* Numéro pour les complètes seulement */}
                         {isComplete&&s.v<=10&&(
                           <text x={x} y={y+0.5} textAnchor="middle" dominantBaseline="middle" fontSize="2.5" fill="#0a0800" fontWeight="bold" style={{pointerEvents:"none"}}>{s.n}</text>
                         )}
@@ -2788,6 +3234,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
                     );
                   })}
                 </svg>
+                {/* Légende */}
                 <div style={{display:"flex",gap:12,padding:"4px 12px 8px",justifyContent:"center",flexWrap:"wrap"}}>
                   {[[t.acc,"Mémorisée"],["rgba(201,168,76,0.4)","En cours"],["rgba(255,255,255,0.15)","À commencer"],["#e91e63","En révision"]].map(([c,l])=>(
                     <div key={l} style={{display:"flex",alignItems:"center",gap:4}}>
@@ -2814,6 +3261,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
               ))}
             </div>
 
+            {/* Graphique */}
             <div className="card">
               <div className="ch">
                 <span className="ct">Progression</span>
@@ -2850,6 +3298,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
               </div>
             </div>
 
+            {/* Badges */}
             <div className="card">
               <div className="ch"><span className="ct">Badges</span><span style={{fontSize:".65rem",color:t.acc,fontWeight:700}}>{badges.length} / {BADGE_DEFS.length}</span></div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(120px,1fr))",gap:8,padding:12}}>
@@ -2864,6 +3313,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
               </div>
             </div>
 
+            {/* Top sourates */}
             {topS.length>0&&(
               <div className="card">
                 <div className="ch"><span className="ct">Progression par sourate</span></div>
@@ -2880,6 +3330,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
               </div>
             )}
 
+            {/* Révision espacée */}
             {spacedDue.length>0&&(
               <div className="card" style={{border:`1px solid ${t.rd}44`}}>
                 <div className="ch" style={{background:`${t.rd}10`}}><span className="ct" style={{color:t.rd}}>Révision du jour — {spacedDue.length} versets</span></div>
@@ -2894,6 +3345,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
               </div>
             )}
 
+            {/* Countdown cards */}
             {cdS.length>0&&(
               <div className="card">
                 <div className="ch"><span className="ct">Prochaines sourates à terminer</span></div>
@@ -2912,6 +3364,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
           </div>
         )}
 
+        {/* SETTINGS */}
         {page==="settings"&&(
           <div className="settings-wrap">
             <div className="settings-section">
@@ -3015,8 +3468,10 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
         )}
       </div>{/* end .wrap */}
 
+      {/* Mode Concentration */}
       {focusMode&&selS&&verses.length>0&&(
         <div style={{position:"fixed",inset:0,zIndex:150,background:"#050505",display:"flex",flexDirection:"column",overflow:"hidden"}}>
+          {/* Header minimal */}
           <div style={{padding:"12px 18px",display:"flex",alignItems:"center",justifyContent:"space-between",borderBottom:"1px solid #1a1a1a"}}>
             <div>
               <div style={{fontFamily:"'Amiri',serif",fontSize:"1rem",color:"#c9a84c"}}>{selS.ar} · v.{verses[focusIdx]?.n}</div>
@@ -3027,18 +3482,23 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
               <button onClick={()=>setFocusMode(false)} style={{background:"none",border:"1px solid #333",color:"#666",borderRadius:8,padding:"5px 12px",cursor:"pointer",fontSize:".75rem"}}>✕</button>
             </div>
           </div>
+          {/* Verset central */}
           <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px 20px",gap:20}}>
+            {/* Numéro verset */}
             <div style={{width:40,height:40,borderRadius:"50%",border:"1.5px solid rgba(201,168,76,.3)",display:"flex",alignItems:"center",justifyContent:"center",color:"rgba(201,168,76,.5)",fontSize:".75rem"}}>
               {verses[focusIdx]?.n}
             </div>
+            {/* Texte arabe — grand, centré */}
             <div style={{fontFamily:"'Amiri Quran',serif",fontSize:"clamp(1.6rem,5vw,2.6rem)",direction:"rtl",textAlign:"center",lineHeight:2.5,color:"#f0e8d0",maxWidth:600,transition:"opacity .3s"}}>
               {(verses[focusIdx]?.ar||"").replace(/<[^>]*>/g,"")}
             </div>
+            {/* Traduction */}
             {showTr&&verses[focusIdx]?.fr&&(
               <div style={{fontSize:"clamp(.75rem,2.5vw,1rem)",color:"#888",fontStyle:"italic",textAlign:"center",lineHeight:1.8,maxWidth:500}}>
                 {verses[focusIdx]?.fr}
               </div>
             )}
+            {/* Indicateur mémorisé */}
             <div style={{display:"flex",alignItems:"center",gap:6}}>
               {!!(mem[String(selS.n)]||{})[String(verses[focusIdx]?.n)]
                 ?<span style={{fontSize:".7rem",color:"#22c55e",background:"rgba(34,197,94,.1)",padding:"3px 10px",borderRadius:99,border:"1px solid rgba(34,197,94,.2)"}}>✓ Mémorisé</span>
@@ -3046,8 +3506,10 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
               }
             </div>
           </div>
+          {/* Navigation bottom */}
           <div style={{padding:"16px 24px",borderTop:"1px solid #111",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
             <button onClick={()=>setFocusIdx(i=>Math.max(0,i-1))} disabled={focusIdx===0} style={{flex:1,padding:"12px",background:"#111",border:"1px solid #222",color:focusIdx===0?"#333":"#888",borderRadius:10,cursor:focusIdx===0?"default":"pointer",fontSize:"1rem",transition:"all .2s"}}>◄</button>
+            {/* Barre de progression */}
             <div style={{flex:3,height:4,background:"#1a1a1a",borderRadius:99,overflow:"hidden"}}>
               <div style={{height:"100%",width:`${(focusIdx+1)/verses.length*100}%`,background:"#c9a84c",borderRadius:99,transition:"width .3s"}}/>
             </div>
@@ -3056,6 +3518,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
         </div>
       )}
 
+      {/* Immersive mode */}
       {immersive&&selS&&(
         <div className="immersive">
           <div className="immersive-header">
@@ -3093,6 +3556,8 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
         </div>
       )}
 
+      {/* Mini audio player flottant */}
+      {/* Animation calligraphie */}
       {calligAnim&&<CalligraphyBurst text={calligAnim} onDone={()=>setCalligAnim(null)}/>}
 
       {playing!==null&&selS&&!focusMode&&!immersive&&(
@@ -3120,8 +3585,10 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
         </div>
       )}
 
+      {/* Scroll to top */}
       <button onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{position:"fixed",bottom:76,right:14,zIndex:50,width:38,height:38,borderRadius:"50%",background:t.s2,border:`1px solid ${t.b2}`,color:t.tx2,fontSize:"1rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 8px rgba(0,0,0,.15)",transition:"all .2s",opacity:0.7}} onMouseEnter={e=>{e.currentTarget.style.opacity="1";e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.borderColor=t.acc;e.currentTarget.style.color=t.acc;}} onMouseLeave={e=>{e.currentTarget.style.opacity="0.7";e.currentTarget.style.transform="";e.currentTarget.style.borderColor=t.b2;e.currentTarget.style.color=t.tx2;}}>↑</button>
 
+      {/* Bottom nav */}
       <div className="bnav">
         {[
           {id:"quran",icon:<Icons.Book size={19}/>,label:"Coran"},
@@ -3139,6 +3606,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
         ))}
       </div>
 
+      {/* Audio element */}
       <audio ref={audioRef} style={{display:"none"}}
         onPlay={()=>setAudioPlaying(true)}
         onPause={()=>setAudioPlaying(false)}
