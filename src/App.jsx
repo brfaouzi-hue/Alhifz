@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";import { supabase } from './supabase'
 
 const SURAHS = [
   {n:1,name:"Al-Fatiha",ar:"الفاتحة",v:7,juz:1,type:"Mecquoise"},
@@ -644,7 +644,29 @@ function HifzVerseText({ar, level, tjc, showTj, vmark, onRevealWord}) {
 }
 
 // TajwidSpan — rend le HTML tajweed de l'API qurancdn avec les couleurs du Mushaf standard
-function TajwidSpan({text,enabled,tjc}) {
+function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,authLoading,authError,onLogin,onSignup}){
+  return (
+    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#0a0a0a",padding:20}}>
+      <div style={{width:"100%",maxWidth:360,background:"#111",borderRadius:16,padding:32,border:"1px solid #222"}}>
+        <div style={{textAlign:"center",marginBottom:24}}>
+          <div style={{fontSize:"2rem",marginBottom:8}}>📖</div>
+          <div style={{fontSize:"1.4rem",fontWeight:700,color:"#c9a84c"}}>Al-Hifz</div>
+          <div style={{fontSize:".75rem",color:"#666",marginTop:4}}>Mémorisation du Coran</div>
+        </div>
+        <div style={{display:"flex",marginBottom:20,borderRadius:8,overflow:"hidden",border:"1px solid #222"}}>
+          <button onClick={()=>setAuthPage("login")} style={{flex:1,padding:"10px",background:authPage==="login"?"#c9a84c":"transparent",color:authPage==="login"?"#000":"#888",border:"none",cursor:"pointer",fontWeight:600,fontSize:".8rem"}}>Connexion</button>
+          <button onClick={()=>setAuthPage("signup")} style={{flex:1,padding:"10px",background:authPage==="signup"?"#c9a84c":"transparent",color:authPage==="signup"?"#000":"#888",border:"none",cursor:"pointer",fontWeight:600,fontSize:".8rem"}}>Inscription</button>
+        </div>
+        <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" type="email" style={{width:"100%",padding:"12px",background:"#1a1a1a",border:"1px solid #333",borderRadius:8,color:"#fff",fontSize:".85rem",marginBottom:12,boxSizing:"border-box"}}/>
+        <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Mot de passe" type="password" style={{width:"100%",padding:"12px",background:"#1a1a1a",border:"1px solid #333",borderRadius:8,color:"#fff",fontSize:".85rem",marginBottom:16,boxSizing:"border-box"}}/>
+        {authError&&<div style={{color:"#ef4444",fontSize:".75rem",marginBottom:12,textAlign:"center"}}>{authError}</div>}
+        <button onClick={authPage==="login"?onLogin:onSignup} disabled={authLoading} style={{width:"100%",padding:"13px",background:"#c9a84c",border:"none",borderRadius:8,color:"#000",fontWeight:700,fontSize:".9rem",cursor:"pointer"}}>
+          {authLoading?"...":(authPage==="login"?"Se connecter":"Créer un compte")}
+        </button>
+      </div>
+    </div>
+  );
+}function TajwidSpan({text,enabled,tjc}) {
   const raw=text||"";
   // Strip anciens tags de marquage [m]...[/m] si présents
   const clean=raw.replace(/\[[a-z]+\](.*?)\[\/[a-z]+\]/g,"$1");
@@ -1157,7 +1179,14 @@ export default function App() {
   const [settings,setSettings]=useState(()=>ld("qset6",null));
   const [hist,setHist]=useState(()=>ld("qhist6",{}));
   const [setup,setSetup]=useState(()=>!ld("qset6",null));
-  const [page,setPage]=useState("quran");
+const [user, setUser] = useState(null);
+const [authReady, setAuthReady] = useState(false);
+const [authPage, setAuthPage] = useState("login");
+const [email, setEmail] = useState("");
+const [password, setPassword] = useState("");
+const [authLoading, setAuthLoading] = useState(false);
+const [authError, setAuthError] = useState("");
+ const [page,setPage]=useState("quran");
   const [pageTransition,setPageTransition]=useState(false);
   const [ltab,setLtab]=useState("list");
   const [selS,setSelS]=useState(null);
@@ -1283,7 +1312,29 @@ export default function App() {
   useEffect(()=>sv("qpages",pageRead),[pageRead]);
   useEffect(()=>sv("qrevflags",revFlags),[revFlags]);
   useEffect(()=>sv("qrevsessions",revSessions),[revSessions]);
-
+useEffect(()=>{
+supabase.auth.getSession().then(({data:{session}})=>{
+    setUser(session?.user??null);
+    setAuthReady(true);
+  });
+  const {data:{subscription}}=supabase.auth.onAuthStateChange((_,session)=>{
+    setUser(session?.user??null);
+  });
+  return ()=>subscription.unsubscribe();
+},[]);
+const handleLogin=async()=>{
+  setAuthLoading(true);setAuthError("");
+  const{error}=await supabase.auth.signInWithPassword({email,password});
+  if(error)setAuthError(error.message);
+  setAuthLoading(false);
+};
+const handleSignup=async()=>{
+  setAuthLoading(true);setAuthError("");
+  const{error}=await supabase.auth.signUp({email,password});
+  if(error)setAuthError(error.message);
+  else setAuthError("Vérifie ton email pour confirmer ton compte ✓");
+  setAuthLoading(false);
+};
   useEffect(()=>{
     const t=setTimeout(()=>setSplash(false),2200);
     // Migrate: clear old qv3 cache entries (had wrong tajweed data)
@@ -1958,8 +2009,9 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
     ?Object.keys(hist).filter(d=>d>=riInfo.start.toISOString().split("T")[0]&&d<=riInfo.end.toISOString().split("T")[0])
        .reduce((s,d,i,arr)=>{const prev=arr[i-1]?hist[arr[i-1]]:0;return s+Math.max(0,(hist[d]||0)-prev);},0)
     :0;
-
-  return (
+if(!authReady)return null;
+if(!user)return <AuthScreen authPage={authPage} setAuthPage={setAuthPage} email={email} setEmail={setEmail} password={password} setPassword={setPassword} authLoading={authLoading} authError={authError} onLogin={handleLogin} onSignup={handleSignup}/>;
+return (
     <>
       <style>{buildCSS(t,tjc,arFont,tn,ramadanTheme)}</style>
 
