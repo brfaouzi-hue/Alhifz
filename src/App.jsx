@@ -3421,6 +3421,15 @@ return (
         {page==="settings"&&(
           <div className="settings-wrap">
             <div className="settings-section">
+  <div className="ss-hd">Compte</div>
+  <div style={{padding:"12px 0"}}>
+    <div style={{fontSize:".8rem",color:"#888",marginBottom:12}}>Connecté en tant que :</div>
+    <button onClick={()=>supabase.auth.signOut()} style={{width:"100%",padding:"13px",background:"transparent",border:"1px solid rgba(239,68,68,.4)",borderRadius:12,color:"#ef4444",fontWeight:700,fontSize:".85rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+      🚪 Se déconnecter
+    </button>
+  </div>
+</div>
+            <div className="settings-section">
               <div className="ss-hd">Objectif & profil</div>
               <div className="set-row">
                 <div><div className="set-lbl">Versets par jour</div><div className="set-sub">Objectif de nouvelles mémorisations</div></div>
