@@ -3581,7 +3581,7 @@ return (
             </div>
             <div style={{display:"flex",gap:8}}>
               <button className="tbtn" onClick={()=>{if(verses.length>0)startPlaylist(selS.n,verses,1);}}>{playlistActive&&playlist[0]?.sn===selS.n?"■ Stop":"▶ Tout"}</button>
-              <button className="tbtn" onClick={()=>setImmersive(false)}>✕ Fermer<<button className="tbtn" onClick={()=>supabase.auth.signOut()} style={{color:"#ef4444",borderColor:"#ef4444"}}>Déconnexion</button>
+              <button className="tbtn" onClick={()=>setImmersive(false)}>✕ Fermer</button>
             </div>
           </div>
           <div className="immersive-scroll">
