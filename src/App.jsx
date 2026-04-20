@@ -646,22 +646,23 @@ function HifzVerseText({ar, level, tjc, showTj, vmark, onRevealWord}) {
 // TajwidSpan — rend le HTML tajweed de l'API qurancdn avec les couleurs du Mushaf standard
 function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,authLoading,authError,onLogin,onSignup}){
   return (
-    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#0a0a0a",padding:20}}>
-      <div style={{width:"100%",maxWidth:360,background:"#111",borderRadius:16,padding:32,border:"1px solid #222"}}>
-        <div style={{textAlign:"center",marginBottom:24}}>
-          <div style={{fontSize:"2rem",marginBottom:8}}>📖</div>
-          <div style={{fontSize:"1.4rem",fontWeight:700,color:"#c9a84c"}}>Al-Hifz</div>
-          <div style={{fontSize:".75rem",color:"#666",marginTop:4}}>Mémorisation du Coran</div>
+    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"linear-gradient(135deg,#0a0f0a 0%,#0d1a0f 50%,#0a0f0a 100%)",padding:20,position:"relative",overflow:"hidden"}}>
+      <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",opacity:.04,fontSize:"clamp(8rem,20vw,18rem)",fontFamily:"'Amiri Quran',serif",color:"#4ade80",pointerEvents:"none",userSelect:"none",direction:"rtl"}}>بسم الله</div>
+      <div style={{width:"100%",maxWidth:380,background:"rgba(255,255,255,.03)",backdropFilter:"blur(20px)",borderRadius:24,padding:36,border:"1px solid rgba(74,222,128,.15)",boxShadow:"0 8px 48px rgba(0,0,0,.6),0 0 80px rgba(74,222,128,.05)"}}>
+        <div style={{textAlign:"center",marginBottom:28}}>
+          <div style={{fontFamily:"'Amiri Quran',serif",fontSize:"2rem",color:"#4ade80",marginBottom:6,direction:"rtl",letterSpacing:2}}>الحفظ</div>
+          <div style={{fontSize:"1.5rem",fontWeight:800,color:"#fff",letterSpacing:1}}>Al-Hifz</div>
+          <div style={{fontSize:".72rem",color:"rgba(74,222,128,.6)",marginTop:4,letterSpacing:2,textTransform:"uppercase"}}>Mémorisation du Coran</div>
         </div>
-        <div style={{display:"flex",marginBottom:20,borderRadius:8,overflow:"hidden",border:"1px solid #222"}}>
-          <button onClick={()=>setAuthPage("login")} style={{flex:1,padding:"10px",background:authPage==="login"?"#c9a84c":"transparent",color:authPage==="login"?"#000":"#888",border:"none",cursor:"pointer",fontWeight:600,fontSize:".8rem"}}>Connexion</button>
-          <button onClick={()=>setAuthPage("signup")} style={{flex:1,padding:"10px",background:authPage==="signup"?"#c9a84c":"transparent",color:authPage==="signup"?"#000":"#888",border:"none",cursor:"pointer",fontWeight:600,fontSize:".8rem"}}>Inscription</button>
+        <div style={{display:"flex",marginBottom:20,borderRadius:12,overflow:"hidden",background:"rgba(255,255,255,.05)",padding:3,gap:3}}>
+          <button onClick={()=>setAuthPage("login")} style={{flex:1,padding:"10px",background:authPage==="login"?"#4ade80":"transparent",color:authPage==="login"?"#000":"rgba(255,255,255,.5)",border:"none",cursor:"pointer",fontWeight:700,fontSize:".8rem",borderRadius:10,transition:"all .2s"}}>Connexion</button>
+          <button onClick={()=>setAuthPage("signup")} style={{flex:1,padding:"10px",background:authPage==="signup"?"#4ade80":"transparent",color:authPage==="signup"?"#000":"rgba(255,255,255,.5)",border:"none",cursor:"pointer",fontWeight:700,fontSize:".8rem",borderRadius:10,transition:"all .2s"}}>Inscription</button>
         </div>
-        <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" type="email" style={{width:"100%",padding:"12px",background:"#1a1a1a",border:"1px solid #333",borderRadius:8,color:"#fff",fontSize:".85rem",marginBottom:12,boxSizing:"border-box"}}/>
-        <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Mot de passe" type="password" style={{width:"100%",padding:"12px",background:"#1a1a1a",border:"1px solid #333",borderRadius:8,color:"#fff",fontSize:".85rem",marginBottom:16,boxSizing:"border-box"}}/>
-        {authError&&<div style={{color:"#ef4444",fontSize:".75rem",marginBottom:12,textAlign:"center"}}>{authError}</div>}
-        <button onClick={authPage==="login"?onLogin:onSignup} disabled={authLoading} style={{width:"100%",padding:"13px",background:"#c9a84c",border:"none",borderRadius:8,color:"#000",fontWeight:700,fontSize:".9rem",cursor:"pointer"}}>
-          {authLoading?"...":(authPage==="login"?"Se connecter":"Créer un compte")}
+        <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" type="email" style={{width:"100%",padding:"13px 16px",background:"rgba(255,255,255,.06)",border:"1px solid rgba(74,222,128,.2)",borderRadius:12,color:"#fff",fontSize:".85rem",marginBottom:12,boxSizing:"border-box",outline:"none"}}/>
+        <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Mot de passe" type="password" style={{width:"100%",padding:"13px 16px",background:"rgba(255,255,255,.06)",border:"1px solid rgba(74,222,128,.2)",borderRadius:12,color:"#fff",fontSize:".85rem",marginBottom:20,boxSizing:"border-box",outline:"none"}}/>
+        {authError&&<div style={{color:authError.includes("✓")?"#4ade80":"#ef4444",fontSize:".75rem",marginBottom:12,textAlign:"center",padding:"8px",background:authError.includes("✓")?"rgba(74,222,128,.1)":"rgba(239,68,68,.1)",borderRadius:8}}>{authError}</div>}
+        <button onClick={authPage==="login"?onLogin:onSignup} disabled={authLoading} style={{width:"100%",padding:"14px",background:"linear-gradient(135deg,#4ade80,#22c55e)",border:"none",borderRadius:12,color:"#000",fontWeight:800,fontSize:".95rem",cursor:"pointer",boxShadow:"0 4px 20px rgba(74,222,128,.3)"}}>
+          {authLoading?"...":(authPage==="login"?"Se connecter →":"Créer mon compte →")}
         </button>
       </div>
     </div>
