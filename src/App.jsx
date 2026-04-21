@@ -670,16 +670,26 @@ function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,au
       </div>
     </div>
   );
-  function WordByWord({sn,vn,ar,t}){
+ function WordByWord({sn,vn,ar,t}){
   const [words,setWords]=useState(null);
   const [tooltip,setTooltip]=useState(null);
-  useEffect(()=>{
+  const [loaded,setLoaded]=useState(false);
+
+  const loadWords=()=>{
+    if(loaded)return;
+    setLoaded(true);
     fetch(`https://api.quran.com/api/v4/verses/by_key/${sn}:${vn}?words=true&word_fields=text_uthmani,translation&language=fr`)
       .then(r=>r.json())
       .then(d=>setWords(d?.verse?.words||null))
       .catch(()=>setWords(null));
-  },[sn,vn]);
-  if(!words)return <bdi style={{direction:"rtl"}}>{ar}</bdi>;
+  };
+
+  if(!words)return (
+    <bdi style={{direction:"rtl"}} onMouseEnter={loadWords}>
+      {ar}
+    </bdi>
+  );
+
   return (
     <bdi style={{direction:"rtl",lineHeight:2.5}}>
       {words.filter(w=>w.char_type_name==="word").map((w,i)=>(
