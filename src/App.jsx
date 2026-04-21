@@ -644,7 +644,7 @@ function HifzVerseText({ar, level, tjc, showTj, vmark, onRevealWord}) {
 }
 
 // TajwidSpan — rend le HTML tajweed de l'API qurancdn avec les couleurs du Mushaf standard
-function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,authLoading,authError,onLogin,onSignup,onReset})  return (
+function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,authLoading,authError,onLogin,onSignup,onReset}){  return (
     <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"linear-gradient(135deg,#0a0f0a 0%,#0d1a0f 50%,#0a0f0a 100%)",padding:20,position:"relative",overflow:"hidden"}}>
       <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",opacity:.04,fontSize:"clamp(8rem,20vw,18rem)",fontFamily:"'Amiri Quran',serif",color:"#4ade80",pointerEvents:"none",userSelect:"none",direction:"rtl"}}>بسم الله</div>
       <div style={{width:"100%",maxWidth:380,background:"rgba(255,255,255,.03)",backdropFilter:"blur(20px)",borderRadius:24,padding:36,border:"1px solid rgba(74,222,128,.15)",boxShadow:"0 8px 48px rgba(0,0,0,.6),0 0 80px rgba(74,222,128,.05)"}}>
