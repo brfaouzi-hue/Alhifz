@@ -307,7 +307,7 @@ const RECITERS = [
 
 const MUSHAF_EDITIONS = [
   {id:"tajwid_hafs",name:"Tajwid Hafs",desc:"Couleurs tajwid — Hafs",coverBg:"linear-gradient(135deg,#1a472a,#2d6a4f)",coverIcon:"☪",coverSub:"حفص — تجويد",archiveId:"al-quran-al-karim-tajwid-hafs"},
-  {id:"tajwid_fr",name:"Tajwid + Français",desc:"Tajwid avec traduction française",coverBg:"linear-gradient(135deg,#1565c0,#0d47a1)",coverIcon:"🇫🇷",coverSub:"تجويد + فرنسي",archiveId:"${ed.archiveId}"},
+  {id:"tajwid_fr",name:"Tajwid + Français",desc:"Tajwid avec traduction française",coverBg:"linear-gradient(135deg,#1565c0,#0d47a1)",coverIcon:"🇫🇷",coverSub:"تجويد + فرنسي",archiveId:"Quran01ss"},
 ];
 
 const KHATMA_PRESETS = [
