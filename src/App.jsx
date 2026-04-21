@@ -877,7 +877,8 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
               <button onClick={()=>setMode("text")} style={{padding:"7px 16px",background:AC,border:"none",borderRadius:8,color:"#0d1800",fontWeight:700,fontSize:".75rem",cursor:"pointer"}}>Lire en Tajwid →</button>
             </div>
           )}
-          {imgState==="ok"&&<img src={imgSrc} alt={`p.${page}`} style={{width:"100%",maxWidth:660,display:"block",borderRadius:6,boxShadow:"0 4px 24px rgba(0,0,0,.7)",margin:"0 auto",aspectRatio:"1/1.41"}}/>}
+          {{imgState==="ok"&&<img src={imgSrc} alt={`p.${page}`} style={{width:"100%",maxWidth:660,display:"block",borderRadius:6,boxShadow:"0 4px 24px rgba(0,0,0,.7)",margin:"0 auto",aspectRatio:"1/1.41"}}/>}
+{imgState==="error"&&<iframe src={`https://quran.com/page/${page}`} style={{width:"100%",height:"80vh",border:"none",borderRadius:6}} title={`Mushaf page ${page}`}/>}
         </div>
       )}
       {mode==="text"&&(
