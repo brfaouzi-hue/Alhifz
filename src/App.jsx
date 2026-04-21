@@ -1346,7 +1346,7 @@ const saveProgress=useCallback(async(uid,newMem,newFavs,newNotes,newSpaced)=>{
 },[]);
 useEffect(()=>{
   if(user&&authReady)saveProgress(user.id,mem,favorites,notes,spaced);
-},[mem,favs,notes,spaced]);
+},[mem,favorites,notes,spaced]);
 const handleLogin=async()=>{
   setAuthLoading(true);setAuthError("");
   const{error}=await supabase.auth.signInWithPassword({email,password});
