@@ -711,10 +711,12 @@ function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,au
 function WbwModal({sn,vn,t}){
   const [words,setWords]=useState(null);
   useEffect(()=>{
+    let cancelled=false;
     fetch(`https://api.quran.com/api/v4/verses/by_key/${sn}:${vn}?words=true&word_fields=text_uthmani,translation&language=fr`)
       .then(r=>r.json())
-      .then(d=>setWords(d?.verse?.words?.filter(w=>w.char_type_name==="word")||null))
-      .catch(()=>setWords([]));
+      .then(d=>{if(!cancelled)setWords(d?.verse?.words?.filter(w=>w.char_type_name==="word")||null);})
+      .catch(()=>{if(!cancelled)setWords([]);});
+    return()=>{cancelled=true;};
   },[sn,vn]);
   if(!words)return <div style={{textAlign:"center",padding:20,color:t.tx3}}>Chargement…</div>;
   return (
