@@ -1313,13 +1313,7 @@ const [authError, setAuthError] = useState("");
   useEffect(()=>sv("qpages",pageRead),[pageRead]);
   useEffect(()=>sv("qrevflags",revFlags),[revFlags]);
   useEffect(()=>sv("qrevsessions",revSessions),[revSessions]);
-useEffect(()=>{
-supabase.auth.getSession().then(({data:{session}})=>{
-    const u=session?.user??null;
-setUser(u);
-if(u)loadProgress(u.id);
-setAuthReady(true);
-  });const loadProgress=useCallback(async(uid)=>{
+const loadProgress=useCallback(async(uid)=>{
   const{data}=await supabase.from('user_progress').select('*').eq('user_id',uid).single();
   if(data){
     if(data.mem)setMem(data.mem);
@@ -1339,10 +1333,19 @@ const saveProgress=useCallback(async(uid,newMem,newFavs,newNotes,newSpaced)=>{
     updated_at:new Date().toISOString()
   },{onConflict:'user_id'});
 },[]);
-  const {data:{subscription}}=supabase.auth.onAuthStateChange((_,session)=>{
+
+useEffect(()=>{
+  supabase.auth.getSession().then(({data:{session}})=>{
+    const u=session?.user??null;
+    setUser(u);
+    if(u)loadProgress(u.id);
+    setAuthReady(true);
+  });
+  const{data:{subscription}}=supabase.auth.onAuthStateChange((_,session)=>{
     setUser(session?.user??null);
   });
   return ()=>subscription.unsubscribe();
+
 },[]);
 useEffect(()=>{
   if(user&&authReady)saveProgress(user.id,mem,favorites,notes,spaced);
