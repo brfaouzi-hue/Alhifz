@@ -677,6 +677,7 @@ function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,au
       </div>
     </div>
   );
+}
  function WordByWord({sn,vn,ar,t}){
   const [words,setWords]=useState(null);
   const [tooltip,setTooltip]=useState(null);
