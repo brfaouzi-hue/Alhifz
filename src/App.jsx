@@ -708,6 +708,27 @@ function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,au
     </bdi>
   );
 }
+function WbwModal({sn,vn,t}){
+  const [words,setWords]=useState(null);
+  useEffect(()=>{
+    fetch(`https://api.quran.com/api/v4/verses/by_key/${sn}:${vn}?words=true&word_fields=text_uthmani,translation&language=fr`)
+      .then(r=>r.json())
+      .then(d=>setWords(d?.verse?.words?.filter(w=>w.char_type_name==="word")||null))
+      .catch(()=>setWords([]));
+  },[sn,vn]);
+  if(!words)return <div style={{textAlign:"center",padding:20,color:t.tx3}}>Chargement…</div>;
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:8}}>
+      {words.map((w,i)=>(
+        <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",background:"rgba(255,255,255,.04)",borderRadius:10,border:`1px solid ${t.b1}`}}>
+          <div style={{fontFamily:"'Amiri Quran',serif",fontSize:"1.4rem",color:"#fff",direction:"rtl"}}>{w.text_uthmani}</div>
+          <div style={{fontSize:".75rem",color:t.acc,textAlign:"center",flex:1,padding:"0 12px"}}>{w.translation?.text||""}</div>
+          <button onClick={()=>new Audio(`https://audio.qurancdn.com/${w.audio_url}`).play()} style={{background:`${t.acc}22`,border:`1px solid ${t.acc}44`,borderRadius:8,padding:"6px 10px",color:t.acc,cursor:"pointer",fontSize:".7rem"}}>▶</button>
+        </div>
+      ))}
+    </div>
+  );
+}
 }function TajwidSpan({text,enabled,tjc}) {
   const raw=text||"";
   // Strip anciens tags de marquage [m]...[/m] si présents
@@ -1261,6 +1282,8 @@ const [authError, setAuthError] = useState("");
   const [editingNote,setEditingNote]=useState(null);
   const [noteText,setNoteText]=useState("");
   const [shareVerse,setShareVerse]=useState(null);
+  const [wbwVerse,setWbwVerse]=useState(null);
+const [wbwWords,setWbwWords]=useState(null);
   const [newListName,setNewListName]=useState("");
   const [selList,setSelList]=useState(null);
   const [mushafFullscreen,setMushafFullscreen]=useState(false);
@@ -2752,7 +2775,7 @@ return (
                               <button className="vbtn snd" onClick={()=>{setLoopCurrent(1);doPlay(v.n);addToHistory(selS.n,v.n);}}><Icons.Play size={10}/>{isPl?"Stop":"Écouter"}</button>
                               <button className={`vbtn ${isFav(selS.n,v.n)?"mem":""}`} onClick={()=>toggleFav(selS.n,v.n,v.ar,v.fr,selS.name)}><Icons.Heart size={10} filled={isFav(selS.n,v.n)}/>{isFav(selS.n,v.n)?"Favori ✓":"Favori"}</button>
                               <button className={`vbtn ${notes[`${selS.n}_${v.n}`]?"on":""}`} style={notes[`${selS.n}_${v.n}`]?{borderColor:t.pu,color:t.pu}:{}} onClick={()=>{setEditingNote(`${selS.n}_${v.n}`);setNoteText(notes[`${selS.n}_${v.n}`]||"");}}>Note{notes[`${selS.n}_${v.n}`]?" ✓":""}</button>
-                              <button className="vbtn" onClick={()=>setShareVerse({sn:selS.n,vn:v.n,ar:v.ar,fr:v.fr,surah:selS.name,surahAr:selS.ar})}><Icons.Share size={10}/>Partager</button>
+                              <button className="vbtn" onClick={()=>setShareVerse({sn:selS.n,vn:v.n,ar:v.ar,fr:v.fr,surah:selS.name,surahAr:selS.ar})}><Icons.Share size={10}/>Partager</button><button className="vbtn" onClick={()=>setWbwVerse({sn:selS.n,vn:v.n})}>📖 Mot à mot</button>
                               {speechSupported&&(
                               <button
                                 className="vbtn"
@@ -3674,6 +3697,17 @@ return (
 
       {/* Mini audio player flottant */}
       {/* Animation calligraphie */}
+      {wbwVerse&&(
+  <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.85)",display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>{setWbwVerse(null);setWbwWords(null);}}>
+    <div style={{width:"100%",maxWidth:600,background:"#111",borderRadius:"20px 20px 0 0",padding:24,maxHeight:"70vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+        <div style={{fontSize:".8rem",color:t.acc,fontWeight:700}}>📖 Mot à mot — {wbwVerse.sn}:{wbwVerse.vn}</div>
+        <button onClick={()=>{setWbwVerse(null);setWbwWords(null);}} style={{background:"none",border:"none",color:t.tx3,fontSize:"1.2rem",cursor:"pointer"}}>✕</button>
+      </div>
+      <WbwModal sn={wbwVerse.sn} vn={wbwVerse.vn} t={t}/>
+    </div>
+  </div>
+)}
       {calligAnim&&<CalligraphyBurst text={calligAnim} onDone={()=>setCalligAnim(null)}/>}
 
       {playing!==null&&selS&&!focusMode&&!immersive&&(
