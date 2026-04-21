@@ -2726,8 +2726,7 @@ return (
                                         <span className="vmark"> ﴿{v.n}﴾</span>
                                       </bdi>
                                     )
-                                    :(<><WordByWord sn={selS.n} vn={v.n} ar={v.ar} t={t}/><span className="vmark"> ﴿{v.n}﴾</span></>)
-                                }
+                                    :(<><TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/><span className="vmark"> ﴿{v.n}﴾</span></>)                                }
                               </div>
                             </div>
                             {showTr&&v.fr&&(!reviewMode||isRevealed)&&<div className="vfr">{v.fr}</div>}
