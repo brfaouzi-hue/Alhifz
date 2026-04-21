@@ -907,7 +907,7 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
           )}
           {(imgState==="error"||imgState==="ok")&&(
   <iframe
-src={`https://archive.org/embed/${ed.archiveId}`}
+src={`https://archive.org/embed/${ed.archiveId||"al-quran-al-karim-tajwid-hafs"}`}
     style={{width:"100%",height:"75vh",border:"none",borderRadius:8}}
     title={`Mushaf page ${page}`}
     allowFullScreen
