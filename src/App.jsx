@@ -1284,7 +1284,8 @@ const [authError, setAuthError] = useState("");
   const [editingNote,setEditingNote]=useState(null);
   const [noteText,setNoteText]=useState("");
   const [shareVerse,setShareVerse]=useState(null);
-  const [wbwVerse,setWbwVerse]=useState(null);
+ const wbwVerseRef=useRef(null);
+const [wbwOpen,setWbwOpen]=useState(false);
 const [wbwWords,setWbwWords]=useState(null);
   const [newListName,setNewListName]=useState("");
   const [selList,setSelList]=useState(null);
@@ -2777,8 +2778,7 @@ return (
                               <button className="vbtn snd" onClick={()=>{setLoopCurrent(1);doPlay(v.n);addToHistory(selS.n,v.n);}}><Icons.Play size={10}/>{isPl?"Stop":"Écouter"}</button>
                               <button className={`vbtn ${isFav(selS.n,v.n)?"mem":""}`} onClick={()=>toggleFav(selS.n,v.n,v.ar,v.fr,selS.name)}><Icons.Heart size={10} filled={isFav(selS.n,v.n)}/>{isFav(selS.n,v.n)?"Favori ✓":"Favori"}</button>
                               <button className={`vbtn ${notes[`${selS.n}_${v.n}`]?"on":""}`} style={notes[`${selS.n}_${v.n}`]?{borderColor:t.pu,color:t.pu}:{}} onClick={()=>{setEditingNote(`${selS.n}_${v.n}`);setNoteText(notes[`${selS.n}_${v.n}`]||"");}}>Note{notes[`${selS.n}_${v.n}`]?" ✓":""}</button>
-                              <button className="vbtn" onClick={()=>setShareVerse({sn:selS.n,vn:v.n,ar:v.ar,fr:v.fr,surah:selS.name,surahAr:selS.ar})}><Icons.Share size={10}/>Partager</button><button className="vbtn" onClick={()=>setWbwVerse({sn:selS.n,vn:v.n})}>📖 Mot à mot</button>
-                              {speechSupported&&(
+<button className="vbtn" onClick={()=>setShareVerse({sn:selS.n,vn:v.n,ar:v.ar,fr:v.fr,surah:selS.name,surahAr:selS.ar})}><Icons.Share size={10}/>Partager</button><button className="vbtn" onClick={()=>{wbwVerseRef.current={sn:selS.n,vn:v.n};setWbwOpen(true);}}>📖 Mot à mot</button>                              {speechSupported&&(
                               <button
                                 className="vbtn"
                                 style={{
@@ -3699,14 +3699,14 @@ return (
 
       {/* Mini audio player flottant */}
       {/* Animation calligraphie */}
-      {wbwVerse&&(
-  <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.85)",display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>{setWbwVerse(null);setWbwWords(null);}}>
+      {wbwOpen&&wbwVerseRef.current&&(
+  <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.85)",display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>{setWbwOpen(false)setWbwWords(null);}}>
     <div style={{width:"100%",maxWidth:600,background:"#111",borderRadius:"20px 20px 0 0",padding:24,maxHeight:"70vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
         <div style={{fontSize:".8rem",color:t.acc,fontWeight:700}}>📖 Mot à mot — {wbwVerse.sn}:{wbwVerse.vn}</div>
-        <button onClick={()=>{setWbwVerse(null);setWbwWords(null);}} style={{background:"none",border:"none",color:t.tx3,fontSize:"1.2rem",cursor:"pointer"}}>✕</button>
+        <button onClick={()=>{setWbwOpen(false)setWbwWords(null);}} style={{background:"none",border:"none",color:t.tx3,fontSize:"1.2rem",cursor:"pointer"}}>✕</button>
       </div>
-      <WbwModal sn={wbwVerse.sn} vn={wbwVerse.vn} t={t}/>
+      <WbwModal sn={wbwVerseRef.current.sn} vn={wbwVerseRef.current.vn} t={t}/>
     </div>
   </div>
 )}
