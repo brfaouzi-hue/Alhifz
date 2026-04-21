@@ -3704,7 +3704,7 @@ return (
     <div style={{width:"100%",maxWidth:600,background:"#111",borderRadius:"20px 20px 0 0",padding:24,maxHeight:"70vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
         <div style={{fontSize:".8rem",color:t.acc,fontWeight:700}}>📖 Mot à mot — {wbwVerse.sn}:{wbwVerse.vn}</div>
-        <button onClick={()=>{setWbwOpen(false)setWbwWords(null);}} style={{background:"none",border:"none",color:t.tx3,fontSize:"1.2rem",cursor:"pointer"}}>✕</button>
+        <button onClick={()=>{setWbwOpen(false);}} style={{background:"none",border:"none",color:t.tx3,fontSize:"1.2rem",cursor:"pointer"}}>✕</button>
       </div>
       <WbwModal sn={wbwVerseRef.current.sn} vn={wbwVerseRef.current.vn} t={t}/>
     </div>
