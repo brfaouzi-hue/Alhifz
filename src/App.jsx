@@ -1907,63 +1907,51 @@ const handleReset=async()=>{
       :aiPlanParams.level==="intermediaire"
       ?"• Mémorise par groupes de 3-5 versets\n• Technique de la chaîne (rattacher chaque verset au suivant)\n• Récite à voix haute en marchant\n• Vise mémorisation + compréhension du sens"
       :"• Mémorisation par pages entières\n• Récitation en prière pour ancrer la mémoire\n• Enseigne à un proche pour solidifier\n• Vise Tajwid parfait sur chaque verset";
-    const plan=`✦ PLAN DE MÉMORISATION PERSONNALISÉ
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-📊 TON PROFIL
-• Objectif : ${goalLabels[aiPlanParams.goal]||aiPlanParams.goal}
-• Versets mémorisés : ${totalMem} / ${TOTAL_VERSES}
-• Versets restants : ${remaining}
-• Temps disponible : ${timeAvail} min/jour
-• Niveau : ${aiPlanParams.level}
-• Sourates complètes : ${completedSurahs}
-
-${feasible?"✅ OBJECTIF RÉALISABLE — Tu peux y arriver !":"⚠️ OBJECTIF AMBITIEUX — Voici un plan ajusté"}
-${feasible
-  ?`Avec ${vPerDay} versets/jour (${timeNeeded} min), tu atteindras ton objectif en ${aiPlanParams.months} mois.`
-  :`Avec ${timeAvail} min/jour tu peux mémoriser ~${adjustedVpd} versets/jour.
-Durée estimée réaliste : ${adjustedMonths} mois.
-Pour respecter ${aiPlanParams.months} mois, vise ${timeNeeded} min/jour.`}
-
-📅 PLANNING SEMAINE PAR SEMAINE
-
-Semaine 1 — Mise en route
-• Objectif : ${adjustedVpd} versets/jour
-• Sourate : ${nextSurahs[0]||"Al-Fatiha"}
-• Révision : 10 min de muraja'a quotidienne
-• Conseil : Mémorise après Fajr — la mémoire est plus réceptive.
-
-Semaine 2 — Consolidation
-• Sourate : ${nextSurahs[1]||"Al-Ikhlas"}
-• Révision : relire semaine 1 chaque soir
-• Objectif cumulé : ${adjustedVpd*14} versets
-
-Semaine 3 — Accélération  
-• Sourate : ${nextSurahs[2]||"Al-Falaq"}
-• Teste ta mémorisation : récite sans regarder
-• Objectif cumulé : ${adjustedVpd*21} versets
-
-Semaine 4 — Bilan du mois
-• Sourate : ${nextSurahs[3]||"An-Nas"}
-• Session de révision complète
-• Objectif cumulé : ${adjustedVpd*30} versets
-
-📚 SOURATES RECOMMANDÉES
-${nextSurahs.map((s,i)=>`${i+1}. ${s}`).join("\n")}
-
-🔄 PLANNING DE RÉVISION (MURAJA'A)
-• Quotidienne : relire les 3 derniers jours
-• Hebdomadaire : réviser la semaine entière (vendredi)
-• Mensuelle : réciter tout le mémorisé sans aide
-
-💡 TECHNIQUES POUR TON NIVEAU
-${techniques}
-
-🌟 MOTIVATION
-Le Prophète ﷺ a dit : «Le meilleur d'entre vous est celui qui apprend le Coran et l'enseigne.» — Al-Bukhari
-
-${adjustedVpd} versets/jour = ${adjustedVpd*365} versets en un an. La constance vaut mieux que l'intensité. بارك الله فيك`;
-    setAiPlanResult(plan);
+    const feasibleText=feasible
+      ?`Avec ${vPerDay} versets/jour (${timeNeeded} min), tu atteindras ton objectif en ${aiPlanParams.months} mois.`
+      :`Avec ${timeAvail} min/jour tu peux memoriser ~${adjustedVpd} versets/jour.\nDuree estimee realiste : ${adjustedMonths} mois.\nPour respecter ${aiPlanParams.months} mois, vise ${timeNeeded} min/jour.`;
+    const surahList=nextSurahs.map((s,i)=>`${i+1}. ${s}`).join("\n");
+    const plan="\u2756 PLAN DE MEMORISATION PERSONNALISE\n"
+      +"\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\n"
+      +"\ud83d\udcca TON PROFIL\n"
+      +"\u2022 Objectif : "+(goalLabels[aiPlanParams.goal]||aiPlanParams.goal)+"\n"
+      +"\u2022 Versets memorises : "+totalMem+" / "+TOTAL_VERSES+"\n"
+      +"\u2022 Versets restants : "+remaining+"\n"
+      +"\u2022 Temps disponible : "+timeAvail+" min/jour\n"
+      +"\u2022 Niveau : "+aiPlanParams.level+"\n"
+      +"\u2022 Sourates completes : "+completedSurahs+"\n\n"
+      +(feasible?"\u2705 OBJECTIF REALISABLE - Tu peux y arriver !":"\u26a0\ufe0f OBJECTIF AMBITIEUX - Voici un plan ajuste")+"\n"
+      +feasibleText+"\n\n"
+      +"\ud83d\udcc5 PLANNING SEMAINE PAR SEMAINE\n\n"
+      +"Semaine 1 - Mise en route\n"
+      +"\u2022 Objectif : "+adjustedVpd+" versets/jour\n"
+      +"\u2022 Sourate : "+(nextSurahs[0]||"Al-Fatiha")+"\n"
+      +"\u2022 Revision : 10 min de muraja'a quotidienne\n"
+      +"\u2022 Conseil : Memorise apres Fajr - la memoire est plus receptive.\n\n"
+      +"Semaine 2 - Consolidation\n"
+      +"\u2022 Sourate : "+(nextSurahs[1]||"Al-Ikhlas")+"\n"
+      +"\u2022 Revision : relire semaine 1 chaque soir\n"
+      +"\u2022 Objectif cumule : "+(adjustedVpd*14)+" versets\n\n"
+      +"Semaine 3 - Acceleration\n"
+      +"\u2022 Sourate : "+(nextSurahs[2]||"Al-Falaq")+"\n"
+      +"\u2022 Teste ta memorisation : recite sans regarder\n"
+      +"\u2022 Objectif cumule : "+(adjustedVpd*21)+" versets\n\n"
+      +"Semaine 4 - Bilan du mois\n"
+      +"\u2022 Sourate : "+(nextSurahs[3]||"An-Nas")+"\n"
+      +"\u2022 Session de revision complete\n"
+      +"\u2022 Objectif cumule : "+(adjustedVpd*30)+" versets\n\n"
+      +"\ud83d\udcda SOURATES RECOMMANDEES\n"
+      +surahList+"\n\n"
+      +"\ud83d\udd04 PLANNING DE REVISION (MURAJA'A)\n"
+      +"\u2022 Quotidienne : relire les 3 derniers jours\n"
+      +"\u2022 Hebdomadaire : reviser la semaine entiere (vendredi)\n"
+      +"\u2022 Mensuelle : reciter tout le memorise sans aide\n\n"
+      +"\ud83d\udca1 TECHNIQUES POUR TON NIVEAU\n"
+      +techniques+"\n\n"
+      +"\ud83c\udf1f MOTIVATION\n"
+      +"Le Prophete \ufdfa a dit : \u00abLe meilleur d'entre vous est celui qui apprend le Coran et l'enseigne.\u00bb - Al-Bukhari\n\n"
+      +adjustedVpd+" versets/jour = "+(adjustedVpd*365)+" versets en un an. La constance vaut mieux que l'intensite. \u0628\u0627\u0631\u0643 \u0627\u0644\u0644\u0647 \u0641\u064a\u0643";
+        setAiPlanResult(plan);
     setAiPlanLoading(false);
   };
 
