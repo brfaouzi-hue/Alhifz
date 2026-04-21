@@ -783,16 +783,15 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
     const staticUrls=urlsFn(page||1);
     let cancelled=false;
 
-    const tryUrl=url=>new Promise(res=>{
-      const img=new Image();
-      img.onload=()=>res(url);
-      img.onerror=()=>res(null);
-      img.src=url;
-    });
-
-    const loadImage=async()=>{
-      for(const url of staticUrls){
-        if(cancelled)return;
+   const loadImage=async()=>{
+  const url=staticUrls[0];
+  if(url&&!cancelled){
+    setImgSrc(url);
+    setImgState("ok");
+  } else {
+    setImgState("error");
+  }
+};
         const ok=await tryUrl(url);
         if(ok&&!cancelled){setImgSrc(ok);setImgState("ok");return;}
       }
