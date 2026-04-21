@@ -792,23 +792,6 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
     setImgState("error");
   }
 };
-        const ok=await tryUrl(url);
-        if(ok&&!cancelled){setImgSrc(ok);setImgState("ok");return;}
-      }
-      // Fallback API qurancdn
-      if(!cancelled){
-        try{
-          const r=await fetch(`https://api.qurancdn.com/api/qdc/pages/${page||1}`);
-          const d=await r.json();
-          const apiUrl=d?.page?.image_url||d?.image_url;
-          if(apiUrl&&!cancelled){
-            const ok=await tryUrl(apiUrl);
-            if(ok&&!cancelled){setImgSrc(ok);setImgState("ok");return;}
-          }
-        }catch{}
-      }
-      if(!cancelled)setImgState("error");
-    };
     loadImage();
     return()=>{cancelled=true;};
 
