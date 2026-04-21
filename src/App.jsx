@@ -434,6 +434,12 @@ const THEMES={
     navBg:"#080600",cardBg:"#100c00",inputBg:"#181200",
     hero:"linear-gradient(160deg,#100c00,#201800)",
     arabesque:true},
+  // Émeraude — thème vert profond comme l'écran de login
+  emerald:{bg:"#050f08",s1:"#081510",s2:"#0d1f15",s3:"#122a1c",b1:"#193d28",b2:"#1f4d33",
+    acc:"#4ade80",acc2:"#22c55e",acc3:"#86efac",gr:"#4ade80",grD:"rgba(74,222,128,.12)",
+    tx:"#e8fff2",tx2:"#86efac",tx3:"#4a7a5a",rd:"#f87171",bl:"#60a5fa",pu:"#c084fc",
+    navBg:"#050f08",cardBg:"#081510",inputBg:"#0d1f15",
+    hero:"linear-gradient(160deg,#081510,#122a1c)"},
 };
 
 // Métadonnées des thèmes pour l'UI de sélection
@@ -443,6 +449,7 @@ const THEME_META={
   andalous:{label:"Andalousie",sub:"Alhambra — or et terre",preview:["#0d0a06","#d4892a","#4e9c6a"]},
   ottoman:{label:"Ottomane",sub:"İznik — rouge impérial",preview:["#04080f","#c8102e","#2ecc71"]},
   abbasid:{label:"Abbasside",sub:"Bagdad — or sur noir",preview:["#080600","#f0c040","#50c878"]},
+  emerald:{label:"Émeraude",sub:"Vert profond — login",preview:["#050f08","#4ade80","#22c55e"]},
 };
 const TJC_DARK={
   m:"#4FC3F7",      // Madd naturel (2h) — bleu clair comme Mushaf
@@ -1878,44 +1885,86 @@ const handleReset=async()=>{
   // Génération plan mémorisation via Anthropic API
   const generateAIPlan=async()=>{
     setAiPlanLoading(true);setAiPlanResult("");
-    const goalLabels={juz30:"le Juz 30 (37 sourates)",juz29:"les Juz 29-30",halfquran:"la moitié du Coran (15 juz)",fullquran:"le Coran complet"};
+    await new Promise(r=>setTimeout(r,800));
+    const goalVerses={juz30:564,juz29:1127,halfquran:3118,fullquran:6236};
+    const goalLabels={juz30:"Juz 30 (37 sourates — 564 versets)",juz29:"Juz 29-30 (1127 versets)",halfquran:"Demi-Coran (3118 versets)",fullquran:"Coran complet (6236 versets)"};
+    const remaining=Math.max(0,(goalVerses[aiPlanParams.goal]||6236)-totalMem);
+    const totalDays=parseInt(aiPlanParams.months)*30;
+    const vPerDay=Math.ceil(remaining/totalDays);
+    const mPerVerse=aiPlanParams.level==="debutant"?8:aiPlanParams.level==="intermediaire"?5:3;
+    const timeNeeded=vPerDay*mPerVerse;
+    const timeAvail=parseInt(aiPlanParams.dailyTime);
+    const feasible=timeNeeded<=timeAvail;
+    const adjustedVpd=feasible?vPerDay:Math.max(1,Math.floor(timeAvail/mPerVerse));
+    const adjustedMonths=adjustedVpd>0?Math.ceil(remaining/(adjustedVpd*30)):999;
     const completedSurahs=SURAHS.filter(s=>sMem(s)===s.v).map(s=>s.name).join(", ")||"aucune pour l'instant";
-    const prompt=`Tu es un coach expert en mémorisation coranique (hifz). Génère un plan de mémorisation personnalisé en français.
+    const nextSurahs=aiPlanParams.goal==="juz30"
+      ?["An-Naba (40v)","An-Naziat (46v)","Abasa (42v)","At-Takwir (29v)","Al-Infitar (19v)","Al-Mutaffifin (36v)","Al-Inshiqaq (25v)","Al-Buruj (22v)"]
+      :aiPlanParams.level==="debutant"
+      ?["Al-Fatiha (7v)","Al-Ikhlas (4v)","Al-Falaq (5v)","An-Nas (6v)","Al-Kawthar (3v)","Al-Asr (3v)","Al-Fil (5v)","Al-Humaza (9v)"]
+      :["Al-Mulk (30v)","Al-Kahf (110v)","Ya-Sin (83v)","Ar-Rahman (78v)","Al-Waqia (96v)"];
+    const techniques=aiPlanParams.level==="debutant"
+      ?"• Écoute le verset 10x avant de le mémoriser\n• Mémorise mot par mot, puis phrase par phrase\n• Écris le verset à la main pour renforcer la mémoire\n• Utilise la répétition espacée dans l'app"
+      :aiPlanParams.level==="intermediaire"
+      ?"• Mémorise par groupes de 3-5 versets\n• Technique de la chaîne (rattacher chaque verset au suivant)\n• Récite à voix haute en marchant\n• Vise mémorisation + compréhension du sens"
+      :"• Mémorisation par pages entières\n• Récitation en prière pour ancrer la mémoire\n• Enseigne à un proche pour solidifier\n• Vise Tajwid parfait sur chaque verset";
+    const plan=`✦ PLAN DE MÉMORISATION PERSONNALISÉ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Profil de l'utilisateur :
-- Objectif : mémoriser ${goalLabels[aiPlanParams.goal]||aiPlanParams.goal}
-- Délai souhaité : ${aiPlanParams.months} mois
-- Niveau : ${aiPlanParams.level}
-- Temps disponible par jour : ${aiPlanParams.dailyTime} minutes
-- Versets déjà mémorisés : ${totalMem} / ${TOTAL_VERSES}
-- Sourates complètes : ${completedSurahs}
-- Rythme actuel : ${vpd} versets/jour
+📊 TON PROFIL
+• Objectif : ${goalLabels[aiPlanParams.goal]||aiPlanParams.goal}
+• Versets mémorisés : ${totalMem} / ${TOTAL_VERSES}
+• Versets restants : ${remaining}
+• Temps disponible : ${timeAvail} min/jour
+• Niveau : ${aiPlanParams.level}
+• Sourates complètes : ${completedSurahs}
 
-Génère un plan structuré avec :
-1. Analyse de la faisabilité de l'objectif
-2. Planning semaine par semaine (les 4 premières semaines détaillées)
-3. Sourates recommandées dans l'ordre avec leur durée estimée
-4. Techniques de mémorisation adaptées au niveau
-5. Planning de révision (muraja'a) intégré
-6. Conseils spécifiques et motivations islamiques
+${feasible?"✅ OBJECTIF RÉALISABLE — Tu peux y arriver !":"⚠️ OBJECTIF AMBITIEUX — Voici un plan ajusté"}
+${feasible
+  ?`Avec ${vPerDay} versets/jour (${timeNeeded} min), tu atteindras ton objectif en ${aiPlanParams.months} mois.`
+  :`Avec ${timeAvail} min/jour tu peux mémoriser ~${adjustedVpd} versets/jour.
+Durée estimée réaliste : ${adjustedMonths} mois.
+Pour respecter ${aiPlanParams.months} mois, vise ${timeNeeded} min/jour.`}
 
-Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mémorisation.`;
-    try{
-      const resp=await fetch("https://api.anthropic.com/v1/messages",{
-        method:"POST",
-        headers:{"Content-Type":"application/json","anthropic-dangerous-direct-browser-access":"true"},
-        body:JSON.stringify({
-          model:"claude-sonnet-4-20250514",
-          max_tokens:2000,
-          messages:[{role:"user",content:prompt}]
-        })
-      });
-      const data=await resp.json();
-      const text=data.content?.[0]?.text||"Erreur de génération";
-      setAiPlanResult(text);
-    }catch(e){
-      setAiPlanResult("Connexion requise pour générer le plan IA.");
-    }
+📅 PLANNING SEMAINE PAR SEMAINE
+
+Semaine 1 — Mise en route
+• Objectif : ${adjustedVpd} versets/jour
+• Sourate : ${nextSurahs[0]||"Al-Fatiha"}
+• Révision : 10 min de muraja'a quotidienne
+• Conseil : Mémorise après Fajr — la mémoire est plus réceptive.
+
+Semaine 2 — Consolidation
+• Sourate : ${nextSurahs[1]||"Al-Ikhlas"}
+• Révision : relire semaine 1 chaque soir
+• Objectif cumulé : ${adjustedVpd*14} versets
+
+Semaine 3 — Accélération  
+• Sourate : ${nextSurahs[2]||"Al-Falaq"}
+• Teste ta mémorisation : récite sans regarder
+• Objectif cumulé : ${adjustedVpd*21} versets
+
+Semaine 4 — Bilan du mois
+• Sourate : ${nextSurahs[3]||"An-Nas"}
+• Session de révision complète
+• Objectif cumulé : ${adjustedVpd*30} versets
+
+📚 SOURATES RECOMMANDÉES
+${nextSurahs.map((s,i)=>`${i+1}. ${s}`).join("\n")}
+
+🔄 PLANNING DE RÉVISION (MURAJA'A)
+• Quotidienne : relire les 3 derniers jours
+• Hebdomadaire : réviser la semaine entière (vendredi)
+• Mensuelle : réciter tout le mémorisé sans aide
+
+💡 TECHNIQUES POUR TON NIVEAU
+${techniques}
+
+🌟 MOTIVATION
+Le Prophète ﷺ a dit : «Le meilleur d'entre vous est celui qui apprend le Coran et l'enseigne.» — Al-Bukhari
+
+${adjustedVpd} versets/jour = ${adjustedVpd*365} versets en un an. La constance vaut mieux que l'intensité. بارك الله فيك`;
+    setAiPlanResult(plan);
     setAiPlanLoading(false);
   };
 
@@ -2303,7 +2352,7 @@ return (
             <button className="tbtn" style={{borderColor:acc,color:acc,fontSize:".6rem"}} onClick={()=>setShowWeeklyReport(true)}>Semaine</button>
             <button className="tbtn" style={{borderColor:t.pu,color:t.pu,fontSize:".6rem"}} onClick={()=>setShowAIPlan(true)}>✦ Plan IA</button>
             <button className="tbtn" style={{borderColor:t.gr,color:t.gr,fontSize:".6rem"}} onClick={()=>setTimerOpen(true)}>⏱</button>
-            <button className="ib" title={THEME_META[tn]?.label||tn} onClick={()=>{const keys=Object.keys(THEMES);setTn(keys[(keys.indexOf(tn)+1)%keys.length]);}}>{tn==="dark"||tn==="andalous"||tn==="ottoman"||tn==="abbasid"?<Icons.Sun size={14}/>:<Icons.Moon size={14}/>}</button>
+            <button className="ib" title={THEME_META[tn]?.label||tn} onClick={()=>{const keys=Object.keys(THEMES);setTn(keys[(keys.indexOf(tn)+1)%keys.length]);}}>{tn==="dark"||tn==="andalous"||tn==="ottoman"||tn==="abbasid"||tn==="emerald"?<Icons.Sun size={14}/>:<Icons.Moon size={14}/>}</button>
           </div>
         </div>
       </div>
