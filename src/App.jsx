@@ -1311,6 +1311,11 @@ const [wbwWords,setWbwWords]=useState(null);
   const [testScore,setTestScore]=useState({correct:0,wrong:0,total:0});
   const [testDone,setTestDone]=useState(false);
   const [splash,setSplash]=useState(true);
+  const [timerOpen,setTimerOpen]=useState(false);
+  const [timerDuration,setTimerDuration]=useState(20);
+  const [timerLeft,setTimerLeft]=useState(null);
+  const [timerRunning,setTimerRunning]=useState(false);
+  const timerRef=useRef(null);
   const [isOffline,setIsOffline]=useState(()=>!navigator.onLine);
   const [showInstallBanner,setShowInstallBanner]=useState(false);
   const installPromptRef=useRef(null);
@@ -1407,7 +1412,7 @@ const handleReset=async()=>{
   if(!email){setAuthError("Entre ton email d'abord");return;}
   setAuthLoading(true);setAuthError("");
   const{error}=await supabase.auth.resetPasswordForEmail(email,{
-    redirectTo:'https://alhifz.vercel.app'
+    redirectTo:'https://alhifz.vercel.app/reset'
   });
   if(error)setAuthError(error.message);
   else setAuthError("Email envoyé ! Vérifie ta boîte mail ✓");
@@ -1898,7 +1903,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
     try{
       const resp=await fetch("https://api.anthropic.com/v1/messages",{
         method:"POST",
-        headers:{"Content-Type":"application/json"},
+        headers:{"Content-Type":"application/json","anthropic-dangerous-direct-browser-access":"true"},
         body:JSON.stringify({
           model:"claude-sonnet-4-20250514",
           max_tokens:2000,
@@ -1915,6 +1920,33 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
   };
 
   const createList=name=>{if(!name.trim())return;const nl={id:Date.now(),name:name.trim(),items:[]};setLists(p=>[...p,nl]);setNewListName("");return nl;};
+
+  const startTimer=()=>{
+    if(timerRef.current)clearInterval(timerRef.current);
+    setTimerLeft(timerDuration*60);
+    setTimerRunning(true);
+    timerRef.current=setInterval(()=>{
+      setTimerLeft(p=>{
+        if(p<=1){
+          clearInterval(timerRef.current);
+          setTimerRunning(false);
+          try{new Audio("https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3").play();}catch{}
+          return 0;
+        }
+        return p-1;
+      });
+    },1000);
+  };
+  const pauseTimer=()=>{
+    clearInterval(timerRef.current);
+    setTimerRunning(false);
+  };
+  const resetTimer=()=>{
+    clearInterval(timerRef.current);
+    setTimerRunning(false);
+    setTimerLeft(null);
+  };
+  const fmtTime=s=>s==null?`${timerDuration}:00`:`${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
   const removeFromList=(listId,sn,vn)=>setLists(p=>p.map(l=>l.id===listId?{...l,items:l.items.filter(i=>!(i.sn===sn&&i.vn===vn))}:l));
 
   // Fonctions reconnaissance vocale
@@ -2270,6 +2302,7 @@ return (
           <div className="tb-r">
             <button className="tbtn" style={{borderColor:acc,color:acc,fontSize:".6rem"}} onClick={()=>setShowWeeklyReport(true)}>Semaine</button>
             <button className="tbtn" style={{borderColor:t.pu,color:t.pu,fontSize:".6rem"}} onClick={()=>setShowAIPlan(true)}>✦ Plan IA</button>
+            <button className="tbtn" style={{borderColor:t.gr,color:t.gr,fontSize:".6rem"}} onClick={()=>setTimerOpen(true)}>⏱</button>
             <button className="ib" title={THEME_META[tn]?.label||tn} onClick={()=>{const keys=Object.keys(THEMES);setTn(keys[(keys.indexOf(tn)+1)%keys.length]);}}>{tn==="dark"||tn==="andalous"||tn==="ottoman"||tn==="abbasid"?<Icons.Sun size={14}/>:<Icons.Moon size={14}/>}</button>
           </div>
         </div>
@@ -3708,6 +3741,43 @@ return (
   </div>
 )}
       {calligAnim&&<CalligraphyBurst text={calligAnim} onDone={()=>setCalligAnim(null)}/>}
+
+      {timerOpen&&(
+        <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.85)",display:"flex",alignItems:"center",justifyContent:"center"}} onClick={()=>setTimerOpen(false)}>
+          <div style={{background:t.s1,border:`1px solid ${t.acc}33`,borderRadius:20,padding:32,width:"90%",maxWidth:340,textAlign:"center"}} onClick={e=>e.stopPropagation()}>
+            <div style={{fontSize:".7rem",color:t.tx3,textTransform:"uppercase",letterSpacing:2,marginBottom:16}}>⏱ Séance de révision</div>
+            <div style={{fontSize:"4rem",fontWeight:800,color:timerLeft===0?t.gr:timerRunning?t.acc:t.tx,fontVariantNumeric:"tabular-nums",letterSpacing:2,marginBottom:24,fontFamily:"monospace"}}>
+              {fmtTime(timerLeft)}
+            </div>
+            {!timerRunning&&timerLeft===null&&(
+              <div style={{display:"flex",gap:8,justifyContent:"center",marginBottom:20,flexWrap:"wrap"}}>
+                {[5,10,15,20,30,45,60].map(m=>(
+                  <button key={m} onClick={()=>setTimerDuration(m)} style={{padding:"6px 12px",borderRadius:8,border:`1.5px solid ${timerDuration===m?t.acc:t.b2}`,background:timerDuration===m?`${t.acc}20`:t.s2,color:timerDuration===m?t.acc:t.tx2,fontSize:".75rem",cursor:"pointer",fontWeight:timerDuration===m?700:400}}>{m}min</button>
+                ))}
+              </div>
+            )}
+            <div style={{display:"flex",gap:10,justifyContent:"center"}}>
+              {!timerRunning&&timerLeft===null&&(
+                <button onClick={startTimer} style={{flex:1,padding:"13px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:12,color:"#000",fontWeight:800,fontSize:".9rem",cursor:"pointer"}}>▶ Démarrer</button>
+              )}
+              {timerRunning&&(
+                <button onClick={pauseTimer} style={{flex:1,padding:"13px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:12,color:t.tx,fontWeight:700,fontSize:".9rem",cursor:"pointer"}}>⏸ Pause</button>
+              )}
+              {!timerRunning&&timerLeft!==null&&timerLeft>0&&(
+                <button onClick={startTimer} style={{flex:1,padding:"13px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:12,color:"#000",fontWeight:800,fontSize:".9rem",cursor:"pointer"}}>▶ Reprendre</button>
+              )}
+              {timerLeft!==null&&(
+                <button onClick={resetTimer} style={{padding:"13px 16px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:12,color:t.tx2,fontWeight:700,fontSize:".9rem",cursor:"pointer"}}>↺</button>
+              )}
+            </div>
+            {timerLeft===0&&(
+              <div style={{marginTop:16,padding:"10px",background:`${t.gr}15`,borderRadius:10,color:t.gr,fontSize:".8rem",fontWeight:600}}>
+                ✓ Séance terminée ! بارك الله فيك
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {playing!==null&&selS&&!focusMode&&!immersive&&(
         <div style={{position:"fixed",bottom:70,left:12,right:12,zIndex:55,background:t.navBg,border:`1px solid ${t.acc}44`,borderRadius:14,padding:"9px 14px",display:"flex",alignItems:"center",gap:10,boxShadow:`0 -2px 20px rgba(0,0,0,.25)`,backdropFilter:"blur(12px)"}}>
