@@ -644,8 +644,7 @@ function HifzVerseText({ar, level, tjc, showTj, vmark, onRevealWord}) {
 }
 
 // TajwidSpan — rend le HTML tajweed de l'API qurancdn avec les couleurs du Mushaf standard
-function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,authLoading,authError,onLogin,onSignup}){
-  return (
+function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,authLoading,authError,onLogin,onSignup,onReset})  return (
     <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"linear-gradient(135deg,#0a0f0a 0%,#0d1a0f 50%,#0a0f0a 100%)",padding:20,position:"relative",overflow:"hidden"}}>
       <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",opacity:.04,fontSize:"clamp(8rem,20vw,18rem)",fontFamily:"'Amiri Quran',serif",color:"#4ade80",pointerEvents:"none",userSelect:"none",direction:"rtl"}}>بسم الله</div>
       <div style={{width:"100%",maxWidth:380,background:"rgba(255,255,255,.03)",backdropFilter:"blur(20px)",borderRadius:24,padding:36,border:"1px solid rgba(74,222,128,.15)",boxShadow:"0 8px 48px rgba(0,0,0,.6),0 0 80px rgba(74,222,128,.05)"}}>
@@ -663,7 +662,11 @@ function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,au
         {authError&&<div style={{color:authError.includes("✓")?"#4ade80":"#ef4444",fontSize:".75rem",marginBottom:12,textAlign:"center",padding:"8px",background:authError.includes("✓")?"rgba(74,222,128,.1)":"rgba(239,68,68,.1)",borderRadius:8}}>{authError}</div>}
         <button onClick={authPage==="login"?onLogin:onSignup} disabled={authLoading} style={{width:"100%",padding:"14px",background:"linear-gradient(135deg,#4ade80,#22c55e)",border:"none",borderRadius:12,color:"#000",fontWeight:800,fontSize:".95rem",cursor:"pointer",boxShadow:"0 4px 20px rgba(74,222,128,.3)"}}>
           {authLoading?"...":(authPage==="login"?"Se connecter →":"Créer mon compte →")}
-        </button>
+        </button>{authPage==="login"&&(
+  <button onClick={onReset} style={{width:"100%",marginTop:10,padding:"10px",background:"transparent",border:"none",color:"rgba(74,222,128,.6)",fontSize:".75rem",cursor:"pointer",textDecoration:"underline"}}>
+    Mot de passe oublié ?
+  </button>
+)}
       </div>
     </div>
   );
@@ -1363,6 +1366,16 @@ const handleSignup=async()=>{
   else setAuthError("Vérifie ton email pour confirmer ton compte ✓");
   setAuthLoading(false);
 };
+const handleReset=async()=>{
+  if(!email){setAuthError("Entre ton email d'abord");return;}
+  setAuthLoading(true);setAuthError("");
+  const{error}=await supabase.auth.resetPasswordForEmail(email,{
+    redirectTo:'https://alhifz.vercel.app'
+  });
+  if(error)setAuthError(error.message);
+  else setAuthError("Email envoyé ! Vérifie ta boîte mail ✓");
+  setAuthLoading(false);
+};
   useEffect(()=>{
     const t=setTimeout(()=>setSplash(false),2200);
     // Migrate: clear old qv3 cache entries (had wrong tajweed data)
@@ -2038,7 +2051,7 @@ Sois précis, pratique et bienveillant. Inclus des hadiths pertinents sur la mé
        .reduce((s,d,i,arr)=>{const prev=arr[i-1]?hist[arr[i-1]]:0;return s+Math.max(0,(hist[d]||0)-prev);},0)
     :0;
 if(!authReady)return null;
-if(!user)return <AuthScreen authPage={authPage} setAuthPage={setAuthPage} email={email} setEmail={setEmail} password={password} setPassword={setPassword} authLoading={authLoading} authError={authError} onLogin={handleLogin} onSignup={handleSignup}/>;
+if(!user)return <AuthScreen authPage={authPage} setAuthPage={setAuthPage} email={email} setEmail={setEmail} password={password} setPassword={setPassword} authLoading={authLoading} authError={authError} onLogin={handleLogin} onSignup={handleSignup} onReset={handleReset}/>;
 return (
     <>
       <style>{buildCSS(t,tjc,arFont,tn,ramadanTheme)}</style>
