@@ -907,16 +907,14 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
               <div style={{fontFamily:"'Amiri',serif",fontSize:"1rem",opacity:.8}}>جاري التحميل…</div>
             </div>
           )}
-          {imgState==="error"&&(
-            <div style={{textAlign:"center",padding:24,maxWidth:300}}>
-              <div style={{width:44,height:44,borderRadius:"50%",border:"1.5px solid rgba(201,168,76,.3)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 14px",fontSize:"1.4rem",color:"rgba(201,168,76,.5)"}}>📵</div>
-              <div style={{fontSize:".8rem",color:"#888",marginBottom:6}}>Image indisponible</div>
-              <div style={{fontSize:".68rem",color:"#555",lineHeight:1.6,marginBottom:14}}>Connexion requise pour charger le Mushaf.<br/>Le mode Tajwid fonctionne hors ligne.</div>
-              <button onClick={()=>setMode("text")} style={{padding:"7px 16px",background:AC,border:"none",borderRadius:8,color:"#0d1800",fontWeight:700,fontSize:".75rem",cursor:"pointer"}}>Lire en Tajwid →</button>
-            </div>
-          )}
-          {imgState==="ok"&&<img src={imgSrc} alt={`p.${page}`} style={{width:"100%",maxWidth:660,display:"block",borderRadius:6,boxShadow:"0 4px 24px rgba(0,0,0,.7)",margin:"0 auto",aspectRatio:"1/1.41"}}/>}
-
+          {(imgState==="error"||imgState==="ok")&&(
+  <iframe
+    src={`https://archive.org/embed/al-quran-al-karim-tajwid-hafs?ui=embed&page=${page}`}
+    style={{width:"100%",height:"75vh",border:"none",borderRadius:8}}
+    title={`Mushaf page ${page}`}
+    allowFullScreen
+  />
+)}
         </div>
       )}
       {mode==="text"&&(
