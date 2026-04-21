@@ -785,7 +785,6 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
 
     const tryUrl=url=>new Promise(res=>{
       const img=new Image();
-      img.crossOrigin="anonymous";
       img.onload=()=>res(url);
       img.onerror=()=>res(null);
       img.src=url;
@@ -874,7 +873,7 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
             </div>
           )}
           {imgState==="ok"&&<img src={imgSrc} alt={`p.${page}`} style={{width:"100%",maxWidth:660,display:"block",borderRadius:6,boxShadow:"0 4px 24px rgba(0,0,0,.7)",margin:"0 auto",aspectRatio:"1/1.41"}}/>}
-{imgState==="error"&&<iframe src={`https://quran.com/page/${page}`} style={{width:"100%",height:"80vh",border:"none",borderRadius:6}} title={`Mushaf page ${page}`}/>}
+
         </div>
       )}
       {mode==="text"&&(
