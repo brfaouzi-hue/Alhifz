@@ -306,10 +306,8 @@ const RECITERS = [
 ];
 
 const MUSHAF_EDITIONS = [
-  {id:"hafs",name:"Hafs — Médine",desc:"Lecture la plus répandue",coverBg:"linear-gradient(135deg,#1a472a,#2d6a4f)",coverIcon:"☪",coverSub:"حفص عن عاصم",url:(pg)=>`https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/kfgqpc/${String(pg).padStart(3,"0")}.png`,fallback:(pg)=>`https://cdn.islamic.network/quran/images/high-resolution/${pg}.jpg`},
-  {id:"tajweed",name:"Mushaf Tajweed",desc:"Couleurs tajwid intégrées",coverBg:"linear-gradient(135deg,#7b1fa2,#4a148c)",coverIcon:"🎨",coverSub:"مصحف التجويد",url:(pg)=>`https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/easyquran.com/hafs-tajweed/${String(pg).padStart(3,"0")}.png`,fallback:(pg)=>`https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/kfgqpc/${String(pg).padStart(3,"0")}.png`},
-  {id:"warsh",name:"Warsh — Maghreb",desc:"Afrique du Nord & Ouest",coverBg:"linear-gradient(135deg,#b71c1c,#7f0000)",coverIcon:"🌙",coverSub:"ورش عن نافع",url:(pg)=>`https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/kfgqpc/${String(pg).padStart(3,"0")}.png`,fallback:(pg)=>`https://cdn.islamic.network/quran/images/high-resolution/${pg}.jpg`},
-  {id:"indopak",name:"IndoPak — Nastaliq",desc:"Style calligraphique Asie du Sud",coverBg:"linear-gradient(135deg,#1565c0,#0d47a1)",coverIcon:"📖",coverSub:"نستعلیق",url:(pg)=>`https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/kfgqpc/${String(pg).padStart(3,"0")}.png`,fallback:(pg)=>`https://cdn.islamic.network/quran/images/high-resolution/${pg}.jpg`},
+  {id:"tajwid_hafs",name:"Tajwid Hafs",desc:"Couleurs tajwid — Hafs",coverBg:"linear-gradient(135deg,#1a472a,#2d6a4f)",coverIcon:"☪",coverSub:"حفص — تجويد",archiveId:"al-quran-al-karim-tajwid-hafs"},
+  {id:"tajwid_fr",name:"Tajwid + Français",desc:"Tajwid avec traduction française",coverBg:"linear-gradient(135deg,#1565c0,#0d47a1)",coverIcon:"🇫🇷",coverSub:"تجويد + فرنسي",archiveId:"${ed.archiveId}"},
 ];
 
 const KHATMA_PRESETS = [
@@ -909,7 +907,7 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
           )}
           {(imgState==="error"||imgState==="ok")&&(
   <iframe
-    src={`https://archive.org/embed/Quran01ss?ui=embed&page=${page}`}
+    src={`https://archive.org/embed/${ed.archiveId}?ui=embed&page=${page}`}
     style={{width:"100%",height:"75vh",border:"none",borderRadius:8}}
     title={`Mushaf page ${page}`}
     allowFullScreen
