@@ -740,24 +740,20 @@ function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,au
 // Vraies URL par édition — plusieurs fallbacks pour fiabilité
 // URLs Mushaf — proxy Vercel en premier (pas de CORS), puis CDN directs en fallback
 const EDITION_IMGS = {
-  hafs: pg => [
-    `/api/mushaf?page=${pg}&edition=hafs`,           // proxy Vercel — toujours disponible
-    `https://static.qurancdn.com/images/quran/pages/v4/en/hafs/${pg}.png`,
+ hafs: pg => [
+    `https://static.qurancdn.com/images/quran/pages/v4/en/hafs/page${String(pg).padStart(3,"0")}.png`,
     `https://cdn.islamic.network/quran/images/high-resolution/${pg}.jpg`,
   ],
-  tajweed: pg => [], // mode texte uniquement
+  tajweed: pg => [],
   warsh: pg => [
-    `/api/mushaf?page=${pg}&edition=warsh`,
-    `https://static.qurancdn.com/images/quran/pages/v4/en/warsh/${pg}.png`,
+    `https://static.qurancdn.com/images/quran/pages/v4/en/warsh/page${String(pg).padStart(3,"0")}.png`,
     `https://cdn.islamic.network/quran/images/high-resolution/${pg}.jpg`,
   ],
   indopak: pg => [
-    `/api/mushaf?page=${pg}&edition=indopak`,
-    `https://static.qurancdn.com/images/quran/pages/v4/en/indopak/${pg}.png`,
+    `https://static.qurancdn.com/images/quran/pages/v4/en/indopak/page${String(pg).padStart(3,"0")}.png`,
     `https://cdn.islamic.network/quran/images/high-resolution/${pg}.jpg`,
   ],
 };
-
 // Charge l'URL réelle depuis l'API qurancdn (contourne les problèmes CORS des CDN directs)
 const fetchMushafPageUrl=async(pg, editionId)=>{
   try{
