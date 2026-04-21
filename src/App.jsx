@@ -1323,7 +1323,7 @@ setAuthReady(true);
   const{data}=await supabase.from('user_progress').select('*').eq('user_id',uid).single();
   if(data){
     if(data.mem)setMem(data.mem);
-    if(data.favs)setFavs(data.favs);
+    if(data.favs)setFavorites(data.favs);
     if(data.notes)setNotes(data.notes);
     if(data.spaced)setSpaced(data.spaced);
   }
@@ -1345,7 +1345,7 @@ const saveProgress=useCallback(async(uid,newMem,newFavs,newNotes,newSpaced)=>{
   return ()=>subscription.unsubscribe();
 },[]);
 useEffect(()=>{
-  if(user&&authReady)saveProgress(user.id,mem,favs,notes,spaced);
+  if(user&&authReady)saveProgress(user.id,mem,favorites,notes,spaced);
 },[mem,favs,notes,spaced]);
 const handleLogin=async()=>{
   setAuthLoading(true);setAuthError("");
