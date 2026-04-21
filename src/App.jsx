@@ -3451,6 +3451,7 @@ return (
   <div className="ss-hd">Compte</div>
   <div style={{padding:"12px 0"}}>
     <div style={{fontSize:".8rem",color:"#888",marginBottom:12}}>Connecté en tant que :</div>
+<div style={{fontSize:".85rem",color:"#c9a84c",fontWeight:600,marginBottom:12,padding:"8px 12px",background:"rgba(201,168,76,.08)",borderRadius:8,border:"1px solid rgba(201,168,76,.15)"}}>{user?.email}</div>
     <button onClick={()=>supabase.auth.signOut()} style={{width:"100%",padding:"13px",background:"transparent",border:"1px solid rgba(239,68,68,.4)",borderRadius:12,color:"#ef4444",fontWeight:700,fontSize:".85rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
       🚪 Se déconnecter
     </button>
