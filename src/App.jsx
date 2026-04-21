@@ -670,6 +670,34 @@ function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,au
       </div>
     </div>
   );
+  function WordByWord({sn,vn,ar,t}){
+  const [words,setWords]=useState(null);
+  const [tooltip,setTooltip]=useState(null);
+  useEffect(()=>{
+    fetch(`https://api.quran.com/api/v4/verses/by_key/${sn}:${vn}?words=true&word_fields=text_uthmani,translation&language=fr`)
+      .then(r=>r.json())
+      .then(d=>setWords(d?.verse?.words||null))
+      .catch(()=>setWords(null));
+  },[sn,vn]);
+  if(!words)return <bdi style={{direction:"rtl"}}>{ar}</bdi>;
+  return (
+    <bdi style={{direction:"rtl",lineHeight:2.5}}>
+      {words.filter(w=>w.char_type_name==="word").map((w,i)=>(
+        <span key={i} style={{position:"relative",display:"inline-block",margin:"0 2px",cursor:"pointer",padding:"2px 4px",borderRadius:4,transition:"background .15s"}}
+          onMouseEnter={e=>{setTooltip(i);e.currentTarget.style.background="rgba(201,168,76,.15)";}}
+          onMouseLeave={e=>{setTooltip(null);e.currentTarget.style.background="transparent";}}
+          onClick={()=>{const a=new Audio(`https://audio.qurancdn.com/${w.audio_url}`);a.play();}}>
+          {w.text_uthmani}
+          {tooltip===i&&(
+            <span style={{position:"absolute",bottom:"110%",left:"50%",transform:"translateX(-50%)",background:"#1a1a1a",color:"#c9a84c",padding:"4px 8px",borderRadius:6,fontSize:".65rem",whiteSpace:"nowrap",zIndex:99,border:"1px solid rgba(201,168,76,.3)",pointerEvents:"none"}}>
+              {w.translation?.text||""}
+            </span>
+          )}
+        </span>
+      ))}
+    </bdi>
+  );
+}
 }function TajwidSpan({text,enabled,tjc}) {
   const raw=text||"";
   // Strip anciens tags de marquage [m]...[/m] si présents
@@ -2688,7 +2716,7 @@ return (
                                         <span className="vmark"> ﴿{v.n}﴾</span>
                                       </bdi>
                                     )
-                                    :(<><TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/><span className="vmark"> ﴿{v.n}﴾</span></>)
+                                    :(<><WordByWord sn={selS.n} vn={v.n} ar={v.ar} t={t}/><span className="vmark"> ﴿{v.n}﴾</span></>)
                                 }
                               </div>
                             </div>
