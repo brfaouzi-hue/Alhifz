@@ -823,6 +823,7 @@ const fetchMushafPageUrl=async(pg, editionId)=>{
 };
 function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onNext,onPrev}) {
   const ed = edition||MUSHAF_EDITIONS[0];
+  console.log('edition archiveId:', ed.archiveId, ed.id);
   const isTextOnly = ed.id==="tajweed";
   const [mode,setMode]=useState(isTextOnly?"text":"image");
   const [imgSrc,setImgSrc]=useState("");
