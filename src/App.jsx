@@ -1315,14 +1315,38 @@ const [authError, setAuthError] = useState("");
   useEffect(()=>sv("qrevsessions",revSessions),[revSessions]);
 useEffect(()=>{
 supabase.auth.getSession().then(({data:{session}})=>{
-    setUser(session?.user??null);
-    setAuthReady(true);
-  });
+    const u=session?.user??null;
+setUser(u);
+if(u)loadProgress(u.id);
+setAuthReady(true);
+  });const loadProgress=useCallback(async(uid)=>{
+  const{data}=await supabase.from('user_progress').select('*').eq('user_id',uid).single();
+  if(data){
+    if(data.mem)setMem(data.mem);
+    if(data.favs)setFavs(data.favs);
+    if(data.notes)setNotes(data.notes);
+    if(data.spaced)setSpaced(data.spaced);
+  }
+},[]);
+
+const saveProgress=useCallback(async(uid,newMem,newFavs,newNotes,newSpaced)=>{
+  await supabase.from('user_progress').upsert({
+    user_id:uid,
+    mem:newMem,
+    favs:newFavs,
+    notes:newNotes,
+    spaced:newSpaced,
+    updated_at:new Date().toISOString()
+  },{onConflict:'user_id'});
+},[]);
   const {data:{subscription}}=supabase.auth.onAuthStateChange((_,session)=>{
     setUser(session?.user??null);
   });
   return ()=>subscription.unsubscribe();
 },[]);
+useEffect(()=>{
+  if(user&&authReady)saveProgress(user.id,mem,favs,notes,spaced);
+},[mem,favs,notes,spaced]);
 const handleLogin=async()=>{
   setAuthLoading(true);setAuthError("");
   const{error}=await supabase.auth.signInWithPassword({email,password});
