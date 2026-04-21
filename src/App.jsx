@@ -305,6 +305,8 @@ const RECITERS = [
   {id:"aymansowaid",everyayah:"Ayman_Sowaid_64kbps",name:"Ayman Suwaid",ar:"أيمن سويد"},
 ];
 
+const SURAH_PDF_PAGES=[10,11,59,86,115,137,160,186,196,217,230,244,258,264,271,276,291,302,314,321,331,341,351,359,368,376,386,394,405,413,420,424,427,437,443,449,455,462,467,476,486,492,498,504,508,512,516,519,522,525,529,532,535,537,540,543,546,551,554,558,560,562,566,569,571,573,575,577,579,581,583,586,588,590,591,592,593,595,596,597,599,600,601,602,603,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604];
+
 const MUSHAF_EDITIONS = [
   {id:"tajwid_hafs",name:"Tajwid Hafs",desc:"Couleurs tajwid — Hafs",coverBg:"linear-gradient(135deg,#1a472a,#2d6a4f)",coverIcon:"☪",coverSub:"حفص — تجويد",archiveId:"al-quran-al-karim-tajwid-hafs"},
   {id:"tajwid_fr",name:"Tajwid + Français",desc:"Tajwid avec traduction française",coverBg:"linear-gradient(135deg,#1565c0,#0d47a1)",coverIcon:"🇫🇷",coverSub:"تجويد + فرنسي",archiveId:"Quran01ss"},
@@ -736,7 +738,7 @@ function WbwModal({sn,vn,t}){
     </div>
   );
 }
-}function TajwidSpan({text,enabled,tjc}) {
+function TajwidSpan({text,enabled,tjc}) {
   const raw=text||"";
   // Strip anciens tags de marquage [m]...[/m] si présents
   const clean=raw.replace(/\[[a-z]+\](.*?)\[\/[a-z]+\]/g,"$1");
@@ -830,7 +832,6 @@ const fetchMushafPageUrl=async(pg, editionId)=>{
 };
 function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onNext,onPrev}) {
   const ed = edition||MUSHAF_EDITIONS[0];
-  console.log('edition archiveId:', ed.archiveId, ed.id);
   const isTextOnly = ed.id==="tajweed";
   const [mode,setMode]=useState(isTextOnly?"text":"image");
   const [imgSrc,setImgSrc]=useState("");
@@ -1418,9 +1419,7 @@ const handleSignup=async()=>{
 const handleReset=async()=>{
   if(!email){setAuthError("Entre ton email d'abord");return;}
   setAuthLoading(true);setAuthError("");
-  const{error}=await supabase.auth.resetPasswordForEmail(email,{
-    redirectTo:'https://alhifz.vercel.app/reset'
-  });
+  const{error}=await supabase.auth.resetPasswordForEmail(email);
   if(error)setAuthError(error.message);
   else setAuthError("Email envoyé ! Vérifie ta boîte mail ✓");
   setAuthLoading(false);
@@ -2352,6 +2351,7 @@ return (
             <button className="tbtn" style={{borderColor:acc,color:acc,fontSize:".6rem"}} onClick={()=>setShowWeeklyReport(true)}>Semaine</button>
             <button className="tbtn" style={{borderColor:t.pu,color:t.pu,fontSize:".6rem"}} onClick={()=>setShowAIPlan(true)}>✦ Plan IA</button>
             <button className="tbtn" style={{borderColor:t.gr,color:t.gr,fontSize:".6rem"}} onClick={()=>setTimerOpen(true)}>⏱</button>
+            {user&&<button onClick={()=>setPage("settings")} title={user.email} style={{width:28,height:28,borderRadius:"50%",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".75rem",fontWeight:800,color:"#000",flexShrink:0}}>{(user.email||"?")[0].toUpperCase()}</button>}
             <button className="ib" title={THEME_META[tn]?.label||tn} onClick={()=>{const keys=Object.keys(THEMES);setTn(keys[(keys.indexOf(tn)+1)%keys.length]);}}>{tn==="dark"||tn==="andalous"||tn==="ottoman"||tn==="abbasid"||tn==="emerald"?<Icons.Sun size={14}/>:<Icons.Moon size={14}/>}</button>
           </div>
         </div>
@@ -2983,12 +2983,23 @@ return (
               </div>
             </div>
             <div className="card">
-              <div className="ch">
-                <span className="ct">Page {mushafPage||1} / 604</span>
-                <div style={{display:"flex",gap:6}}>
-                  <button className="tbtn" onClick={()=>setMushafPage(p=>Math.max(1,(p||1)-1))}>← Précédente</button>
-                  <button className={`tbtn ${pageRead[String(mushafPage||1)]?"on":""}`} onClick={()=>togglePage(mushafPage||1)}>{pageRead[String(mushafPage||1)]?"Lue ✓":"Marquer lue"}</button>
-                  <button className="tbtn" onClick={()=>setMushafPage(p=>Math.min(604,(p||1)+1))}>Suivante →</button>
+              <div className="ch" style={{flexDirection:"column",gap:8,alignItems:"stretch"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <span className="ct">Page {mushafPage||1} / 604</span>
+                  <div style={{display:"flex",gap:6}}>
+                    <button className="tbtn" onClick={()=>setMushafPage(p=>Math.max(1,(p||1)-1))}>← Précédente</button>
+                    <button className={`tbtn ${pageRead[String(mushafPage||1)]?"on":""}`} onClick={()=>togglePage(mushafPage||1)}>{pageRead[String(mushafPage||1)]?"Lue ✓":"Marquer lue"}</button>
+                    <button className="tbtn" onClick={()=>setMushafPage(p=>Math.min(604,(p||1)+1))}>Suivante →</button>
+                  </div>
+                </div>
+                <div style={{display:"flex",alignItems:"center",gap:6}}>
+                  <span style={{fontSize:".65rem",color:t.tx3,flexShrink:0}}>Aller à :</span>
+                  <select onChange={e=>setMushafPage(Number(e.target.value))} value="" style={{flex:1,padding:"6px 10px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:8,color:t.tx,fontSize:".72rem",cursor:"pointer"}}>
+                    <option value="" disabled>— Choisir une sourate —</option>
+                    {SURAHS.map((s,i)=>(
+                      <option key={s.n} value={SURAH_PDF_PAGES[i]||1}>{s.n}. {s.name} — {s.ar}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <MushafPage page={mushafPage||1} t={t} tjc={tjc} arFont={arFont} edition={MUSHAF_EDITIONS.find(e=>e.id===mushafEdition)||MUSHAF_EDITIONS[0]} fullscreen={mushafFullscreen} onToggleFullscreen={()=>setMushafFullscreen(f=>!f)} onNext={()=>setMushafPage(p=>Math.min(604,(p||1)+1))} onPrev={()=>setMushafPage(p=>Math.max(1,(p||1)-1))}/>
@@ -3782,7 +3793,7 @@ return (
   <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.85)",display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>{setWbwOpen(false);}}>
     <div style={{width:"100%",maxWidth:600,background:"#111",borderRadius:"20px 20px 0 0",padding:24,maxHeight:"70vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-        <div style={{fontSize:".8rem",color:t.acc,fontWeight:700}}>📖 Mot à mot — {wbwVerse.sn}:{wbwVerse.vn}</div>
+        <div style={{fontSize:".8rem",color:t.acc,fontWeight:700}}>📖 Mot à mot — {wbwVerseRef.current.sn}:{wbwVerseRef.current.vn}</div>
         <button onClick={()=>{setWbwOpen(false);}} style={{background:"none",border:"none",color:t.tx3,fontSize:"1.2rem",cursor:"pointer"}}>✕</button>
       </div>
       <WbwModal sn={wbwVerseRef.current.sn} vn={wbwVerseRef.current.vn} t={t}/>
