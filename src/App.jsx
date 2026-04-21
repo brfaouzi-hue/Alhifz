@@ -859,8 +859,7 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
         </div>
       )}
       {mode==="text"&&(
-        <div style={{flex:1,overflowY:"auto",padding:"14px 16px",background:"#FAFAF4"}}>
-          {textState==="loading"&&(<div style={{textAlign:"center",padding:40,color:"#7a6a40"}}><div style={{width:26,height:26,border:"3px solid #c9a84c",borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite",margin:"0 auto 10px"}}/><div style={{fontFamily:"'Amiri',serif",fontSize:".9rem"}}>جاري التحميل…</div></div>)}
+<div style={{flex:1,overflowY:"auto",padding:"24px 20px",background:"#f5f0e8",backgroundImage:"radial-gradient(ellipse at top,#f0e8d4,#f5f0e8)"}}>          {textState==="loading"&&(<div style={{textAlign:"center",padding:40,color:"#7a6a40"}}><div style={{width:26,height:26,border:"3px solid #c9a84c",borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite",margin:"0 auto 10px"}}/><div style={{fontFamily:"'Amiri',serif",fontSize:".9rem"}}>جاري التحميل…</div></div>)}
           {textState==="error"&&(<div style={{textAlign:"center",padding:28,color:"#c62828",fontSize:".8rem"}}><div style={{fontSize:"1.8rem",marginBottom:8}}>⚠</div>Connexion requise.<br/><button onClick={()=>{try{localStorage.removeItem(`mpage9_${page}`);}catch{}setTextState("idle");setTimeout(()=>setTextState("loading"),50);}} style={{marginTop:10,padding:"5px 12px",border:"1px solid #c9a84c",background:"transparent",color:"#c9a84c",borderRadius:7,cursor:"pointer",fontSize:".7rem"}}>↺ Réessayer</button></div>)}
           {textState==="ok"&&groups.map((g,gi)=>(
             <div key={gi} style={{marginBottom:16}}>
@@ -871,8 +870,7 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
                   {g.s!==1&&g.s!==9&&(<div style={{fontFamily:"'Amiri Quran',serif",fontSize:"1.35rem",color:"#1a3a1a",marginTop:8,direction:"rtl",background:"#f5f0dc",padding:"7px 14px",borderRadius:8}}>بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>)}
                 </div>
               )}
-              <div style={{direction:"rtl",textAlign:"justify",fontFamily:arFont||"'Amiri Quran',serif",fontSize:"1.5rem",lineHeight:"2.8",color:"#1a0a00",wordSpacing:2}}>
-                {g.vs.map((v,vi)=>(
+<div style={{direction:"rtl",textAlign:"justify",fontFamily:arFont||"'Amiri Quran',serif",fontSize:"1.8rem",lineHeight:"3.2",color:"#1a0a00",wordSpacing:4,padding:"0 8px",borderBottom:"1px solid rgba(201,168,76,.2)",paddingBottom:16,marginBottom:8}}>                {g.vs.map((v,vi)=>(
                   <span key={vi}>
                     <TajwidSpan text={v.ar} enabled={true} tjc={effectiveTjc}/>
                     <span style={{fontFamily:"'Amiri',serif",fontSize:".72rem",color:"#c9a84c",margin:"0 4px",verticalAlign:"middle"}}>﴿{v.n}﴾</span>
