@@ -972,7 +972,8 @@ const acc3=ramadan?"#f5e0a0":t.acc3;
 return `
 @import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Lateef:wght@400&family=Noto+Naskh+Arabic:wght@400;600&family=Noto+Nastaliq+Urdu:wght@400;700&family=Reem+Kufi:wght@400;700&family=Cairo:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{background:${bg};color:${t.tx};font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:calc(80px + env(safe-area-inset-bottom));transition:background .4s,color .4s;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);}
+*{box-sizing:border-box;}html{overflow-x:hidden;}
+body{background:${bg};color:${t.tx};font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:80px;transition:background .4s,color .4s;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);}
 :root{--sat:env(safe-area-inset-top);--sab:env(safe-area-inset-bottom);--sal:env(safe-area-inset-left);--sar:env(safe-area-inset-right);}
 ${t.arabesque ? (
 "body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.04;" +
@@ -1024,7 +1025,7 @@ body>*{position:relative;z-index:1;}
 .bn.on::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:linear-gradient(90deg,${acc},${acc2});border-radius:0 0 99px 99px;box-shadow:0 0 6px ${acc};}
 .bn-lbl{font-size:.52rem;font-weight:500;}
 /* ── Layout ── */
-.wrap{max-width:1200px;margin:0 auto;padding:14px 16px calc(110px + env(safe-area-inset-bottom));}
+.wrap{max-width:1200px;margin:0 auto;padding:14px 16px calc(100px + env(safe-area-inset-bottom));}
 .two{display:grid;grid-template-columns:300px 1fr;gap:12px;align-items:start;}
 /* ── Cards — hover effect ── */
 .card{background:${t.cardBg};border:1px solid ${t.b1};border-radius:14px;overflow:hidden;transition:box-shadow .25s,border-color .25s;}
@@ -1353,6 +1354,22 @@ const [wbwWords,setWbwWords]=useState(null);
   const [testScore,setTestScore]=useState({correct:0,wrong:0,total:0});
   const [testDone,setTestDone]=useState(false);
   const [splash,setSplash]=useState(true);
+  // Streak
+  const [memStreak,setMemStreak]=useState(()=>ld("qstreak",0));
+  const [streakLastDay,setStreakLastDay]=useState(()=>ld("qstreakday",""));
+  const [streakRecord,setStreakRecord]=useState(()=>ld("qstreakrecord",0));
+  // Quiz
+  const [quizOpen,setQuizOpen]=useState(false);
+  const [quizMode,setQuizMode]=useState("surah"); // "surah" | "complete"
+  const [quizQ,setQuizQ]=useState(null);
+  const [quizChoices,setQuizChoices]=useState([]);
+  const [quizAnswer,setQuizAnswer]=useState(null);
+  const [quizScore,setQuizScore]=useState({correct:0,total:0});
+  // Notifications
+  const [notifEnabled,setNotifEnabled]=useState(()=>ld("qnotif",false));
+  const [notifHour,setNotifHour]=useState(()=>ld("qnotifhour","08:00"));
+  // Mushaf audio
+  const [mushafAudioActive,setMushafAudioActive]=useState(false);
   const [timerOpen,setTimerOpen]=useState(false);
   const [timerDuration,setTimerDuration]=useState(20);
   const [timerLeft,setTimerLeft]=useState(null);
@@ -1684,8 +1701,12 @@ const handleReset=async()=>{
     }
   };
 
-  const toggleV=(sn,vn,verseAr="")=>setMem(p=>{
-    const k=String(sn),vk=String(vn),c={...p[k]||{}};
+  const toggleV=(sn,vn,verseAr="")=>{
+    const k=String(sn),vk=String(vn);
+    const isNew=!(mem[k]||{})[vk];
+    if(isNew)updateStreak();
+    setMem(p=>{
+    const c={...p[k]||{}};
     const wasMemorized=!!c[vk];
     if(wasMemorized) delete c[vk];
     else {
@@ -1699,6 +1720,7 @@ const handleReset=async()=>{
     }
     return{...p,[k]:c};
   });
+  };
   const toggleAll=s=>{const k=String(s.n),done=sMem(s)===s.v;setMem(p=>{if(done){const n={...p};delete n[k];return n;}const a={};for(let i=1;i<=s.v;i++)a[String(i)]=true;return{...p,[k]:a};});};
 
   const doPlay=vn=>{
@@ -1987,6 +2009,58 @@ const handleReset=async()=>{
       +adjustedVpd+" versets/jour = "+(adjustedVpd*365)+" versets en un an. La constance vaut mieux que l'intensite. \u0628\u0627\u0631\u0643 \u0627\u0644\u0644\u0647 \u0641\u064a\u0643";
         setAiPlanResult(plan);
     setAiPlanLoading(false);
+  };
+
+
+  // Update streak when memorizing
+  const updateStreak=useCallback(()=>{
+    const td=today();
+    setStreakLastDay(prev=>{
+      if(prev===td)return prev;
+      sv("qstreakday",td);
+      setMemStreak(s=>{
+        const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
+        const ystr=yesterday.toISOString().split("T")[0];
+        const newS=prev===ystr?s+1:1;
+        sv("qstreak",newS);
+        setStreakRecord(r=>{const nr=Math.max(r,newS);sv("qstreakrecord",nr);return nr;});
+        return newS;
+      });
+      return td;
+    });
+  },[]);
+
+  // Quiz generation
+  const generateQuiz=useCallback(()=>{
+    const allVerses=[];
+    SURAHS.forEach(s=>{
+      const vs=Q[s.n]||[];
+      vs.forEach(v=>allVerses.push({...v,sn:s.n,surah:s.name,surahAr:s.ar}));
+    });
+    if(allVerses.length===0)return;
+    const q=allVerses[Math.floor(Math.random()*allVerses.length)];
+    // Generate 4 surah choices
+    const correct=SURAHS.find(s=>s.n===q.sn);
+    const wrong=SURAHS.filter(s=>s.n!==q.sn).sort(()=>Math.random()-.5).slice(0,3);
+    const choices=[correct,...wrong].sort(()=>Math.random()-.5);
+    setQuizQ(q);
+    setQuizChoices(choices);
+    setQuizAnswer(null);
+  },[]);
+
+  // Notifications
+  const requestNotifications=async()=>{
+    if(!("Notification" in window)){alert("Notifications non supportées sur ce navigateur.");return;}
+    const perm=await Notification.requestPermission();
+    if(perm==="granted"){
+      setNotifEnabled(true);sv("qnotif",true);
+      new Notification("Al-Hifz 📖",{body:"Notifications activées ! Tu seras rappelé chaque jour.",icon:"/icon-192.png"});
+    }
+  };
+  const sendTestNotif=()=>{
+    if(Notification.permission==="granted"){
+      new Notification("Al-Hifz 📖",{body:`🔥 Streak: ${memStreak}j — Continue ta mémorisation aujourd'hui !`,icon:"/icon-192.png"});
+    }
   };
 
   const createList=name=>{if(!name.trim())return;const nl={id:Date.now(),name:name.trim(),items:[]};setLists(p=>[...p,nl]);setNewListName("");return nl;};
@@ -2373,6 +2447,10 @@ return (
             <button className="tbtn" style={{borderColor:t.pu,color:t.pu,fontSize:".6rem"}} onClick={()=>setShowAIPlan(true)}>✦ Plan IA</button>
             <button className="tbtn" style={{borderColor:t.gr,color:t.gr,fontSize:".6rem"}} onClick={()=>setTimerOpen(true)}>⏱</button>
             <button className="ib" title={THEME_META[tn]?.label||tn} onClick={()=>{const keys=Object.keys(THEMES);setTn(keys[(keys.indexOf(tn)+1)%keys.length]);}}>{tn==="dark"||tn==="andalous"||tn==="ottoman"||tn==="abbasid"||tn==="emerald"?<Icons.Sun size={14}/>:<Icons.Moon size={14}/>}</button>
+            {memStreak>0&&<div style={{display:"flex",alignItems:"center",gap:2,padding:"3px 7px",background:"rgba(249,115,22,.15)",borderRadius:8,border:"1px solid rgba(249,115,22,.3)",flexShrink:0}}>
+              <span style={{fontSize:".85rem",lineHeight:1}}>🔥</span>
+              <span style={{fontSize:".65rem",fontWeight:800,color:"#f97316"}}>{memStreak}</span>
+            </div>}
             {user&&<button onClick={()=>setPage("settings")} title={user.email} style={{width:30,height:30,borderRadius:"50%",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".8rem",fontWeight:800,color:"#000",flexShrink:0,boxShadow:`0 0 8px ${t.acc}66`}}>{(user.email||"?")[0].toUpperCase()}</button>}
           </div>
         </div>
@@ -2528,6 +2606,16 @@ return (
                 <button onClick={()=>setPage("khatma")} style={{background:`${acc}18`,border:`1px solid ${acc}33`,color:acc,borderRadius:6,padding:"3px 8px",fontSize:".6rem",cursor:"pointer",fontWeight:600}}>Préparer →</button>
               </div>):null
           }
+            {/* Streak card */}
+            {memStreak>0&&(
+              <div style={{marginTop:8,padding:"8px 12px",background:"rgba(249,115,22,.08)",borderRadius:10,border:"1px solid rgba(249,115,22,.2)",display:"flex",alignItems:"center",gap:10}}>
+                <span style={{fontSize:"1.5rem"}}>🔥</span>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:".75rem",fontWeight:700,color:"#f97316"}}>{memStreak} jour{memStreak>1?"s":""} de suite</div>
+                  <div style={{fontSize:".6rem",color:t.tx3}}>Record : {streakRecord}j · Continue comme ça !</div>
+                </div>
+              </div>
+            )}
 
                 <svg style={{position:"absolute",bottom:0,left:0,width:"100%",height:10,display:"block"}} preserveAspectRatio="none" viewBox="0 0 800 10"><path d="M0,5 Q25,9 50,5 Q75,1 100,5 Q125,9 150,5 Q175,1 200,5 Q225,9 250,5 Q275,1 300,5 Q325,9 350,5 Q375,1 400,5 Q425,9 450,5 Q475,1 500,5 Q525,9 550,5 Q575,1 600,5 Q625,9 650,5 Q675,1 700,5 Q725,9 750,5 Q775,1 800,5" stroke={acc} strokeWidth=".8" fill="none" opacity=".3"/></svg>
       </div>
@@ -3419,6 +3507,122 @@ return (
           </div>
         )}
 
+        {/* QUIZ */}
+        {page==="quiz"&&(
+          <div style={{display:"flex",flexDirection:"column",gap:14}}>
+            <div className="card">
+              <div className="ch">
+                <span className="ct">🎯 Quiz de mémorisation</span>
+                <div style={{display:"flex",gap:6,alignItems:"center"}}>
+                  <span style={{fontSize:".65rem",color:t.tx3}}>{quizScore.correct}/{quizScore.total}</span>
+                  <button className="tbtn" onClick={()=>setQuizScore({correct:0,total:0})}>Reset</button>
+                </div>
+              </div>
+              <div style={{padding:12}}>
+                <div style={{display:"flex",gap:6,marginBottom:14}}>
+                  {[["surah","Quelle sourate ?"],["complete","Complète le verset"]].map(([m,l])=>(
+                    <button key={m} onClick={()=>{setQuizMode(m);setQuizQ(null);setQuizAnswer(null);}} style={{flex:1,padding:"8px",borderRadius:10,border:`1.5px solid ${quizMode===m?t.acc:t.b2}`,background:quizMode===m?`${t.acc}15`:t.s2,color:quizMode===m?t.acc:t.tx2,fontSize:".72rem",cursor:"pointer",fontWeight:quizMode===m?700:400}}>{l}</button>
+                  ))}
+                </div>
+
+                {!quizQ&&(
+                  <div style={{textAlign:"center",padding:"30px 20px"}}>
+                    <div style={{fontSize:"3rem",marginBottom:12}}>🎯</div>
+                    <div style={{fontSize:".85rem",color:t.tx,fontWeight:600,marginBottom:6}}>Teste ta mémorisation</div>
+                    <div style={{fontSize:".7rem",color:t.tx3,marginBottom:20}}>{quizMode==="surah"?"Un verset s'affiche, devine la sourate":"Le début d'un verset s'affiche, complète-le"}</div>
+                    <button onClick={()=>{generateQuiz();}} style={{padding:"12px 28px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:12,color:"#000",fontWeight:800,fontSize:".85rem",cursor:"pointer"}}>▶ Commencer</button>
+                  </div>
+                )}
+
+                {quizQ&&(
+                  <div style={{display:"flex",flexDirection:"column",gap:12}}>
+                    {quizMode==="surah"&&(
+                      <>
+                        <div style={{background:t.s2,borderRadius:12,padding:"16px",border:`1px solid ${t.b1}`}}>
+                          <div style={{fontSize:".6rem",color:t.tx3,marginBottom:8,textTransform:"uppercase",letterSpacing:1}}>Verset {quizQ.n}</div>
+                          <div style={{fontFamily:"'Amiri Quran',serif",fontSize:"1.6rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx}}>{quizQ.ar?.replace(/<[^>]*>/g,"")}</div>
+                          {quizAnswer&&quizQ.fr&&<div style={{fontSize:".72rem",color:t.tx2,marginTop:8,fontStyle:"italic"}}>{quizQ.fr}</div>}
+                        </div>
+                        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+                          {quizChoices.map(s=>{
+                            const isCorrect=s.n===quizQ.sn;
+                            const isChosen=quizAnswer===s.n;
+                            const bg=quizAnswer?isCorrect?`${t.gr}20`:isChosen?`${t.rd}20`:t.s2:t.s2;
+                            const border=quizAnswer?isCorrect?`2px solid ${t.gr}`:isChosen?`2px solid ${t.rd}`:`1px solid ${t.b1}`:`1px solid ${t.b2}`;
+                            return(
+                              <button key={s.n} onClick={()=>{
+                                if(quizAnswer)return;
+                                setQuizAnswer(s.n);
+                                setQuizScore(p=>({correct:p.correct+(s.n===quizQ.sn?1:0),total:p.total+1}));
+                              }} style={{padding:"10px 8px",borderRadius:10,border,background:bg,cursor:quizAnswer?"default":"pointer",transition:"all .2s",textAlign:"left"}}>
+                                <div style={{fontSize:".72rem",fontWeight:600,color:quizAnswer?isCorrect?t.gr:isChosen?t.rd:t.tx2:t.tx}}>{s.name}</div>
+                                <div style={{fontFamily:"'Amiri',serif",fontSize:".85rem",color:quizAnswer?isCorrect?t.gr:isChosen?t.rd:t.tx3:t.tx3,direction:"rtl",textAlign:"right"}}>{s.ar}</div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                        {quizAnswer&&(
+                          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                            <div style={{textAlign:"center",padding:"10px",background:quizAnswer===quizQ.sn?`${t.gr}15`:`${t.rd}15`,borderRadius:10,border:`1px solid ${quizAnswer===quizQ.sn?t.gr:t.rd}`,color:quizAnswer===quizQ.sn?t.gr:t.rd,fontWeight:700,fontSize:".8rem"}}>
+                              {quizAnswer===quizQ.sn?"✓ Bonne réponse ! 🌟":`✗ C'était ${SURAHS.find(s=>s.n===quizQ.sn)?.name}`}
+                            </div>
+                            <button onClick={generateQuiz} style={{padding:"11px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:10,color:"#000",fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>Question suivante →</button>
+                          </div>
+                        )}
+                      </>
+                    )}
+                    {quizMode==="complete"&&(
+                      <>
+                        <div style={{background:t.s2,borderRadius:12,padding:"16px",border:`1px solid ${t.b1}`}}>
+                          <div style={{fontSize:".6rem",color:t.tx3,marginBottom:8,textTransform:"uppercase",letterSpacing:1}}>{SURAHS.find(s=>s.n===quizQ.sn)?.name} · v.{quizQ.n}</div>
+                          <div style={{fontFamily:"'Amiri Quran',serif",fontSize:"1.4rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx}}>
+                            {(quizQ.ar?.replace(/<[^>]*>/g,"")||"").split(" ").slice(0,3).join(" ")}
+                            <span style={{color:t.tx3}}> …</span>
+                          </div>
+                          {quizQ.fr&&<div style={{fontSize:".7rem",color:t.tx3,marginTop:6,fontStyle:"italic"}}>{quizQ.fr?.split(" ").slice(0,6).join(" ")}…</div>}
+                        </div>
+                        {!quizAnswer?(
+                          <button onClick={()=>{setQuizAnswer("shown");}} style={{padding:"11px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:10,color:t.tx2,fontWeight:600,fontSize:".8rem",cursor:"pointer"}}>👁 Révéler la suite</button>
+                        ):(
+                          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                            <div style={{background:t.s2,borderRadius:12,padding:"16px",border:`1px solid ${t.acc}44`}}>
+                              <div style={{fontFamily:"'Amiri Quran',serif",fontSize:"1.4rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.acc}}>{quizQ.ar?.replace(/<[^>]*>/g,"")}</div>
+                              {quizQ.fr&&<div style={{fontSize:".72rem",color:t.tx2,marginTop:8,fontStyle:"italic"}}>{quizQ.fr}</div>}
+                            </div>
+                            <div style={{display:"flex",gap:8}}>
+                              <button onClick={()=>{setQuizScore(p=>({...p,correct:p.correct+1,total:p.total+1}));generateQuiz();}} style={{flex:1,padding:"11px",background:`${t.gr}20`,border:`1px solid ${t.gr}`,borderRadius:10,color:t.gr,fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>✓ Je savais</button>
+                              <button onClick={()=>{setQuizScore(p=>({...p,total:p.total+1}));generateQuiz();}} style={{flex:1,padding:"11px",background:`${t.rd}15`,border:`1px solid ${t.rd}`,borderRadius:10,color:t.rd,fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>✗ À revoir</button>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Score card */}
+            {quizScore.total>0&&(
+              <div className="card">
+                <div className="ch"><span className="ct">📊 Session en cours</span></div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,padding:12}}>
+                  {[
+                    {v:quizScore.correct,l:"Correctes",c:t.gr},
+                    {v:quizScore.total-quizScore.correct,l:"À revoir",c:t.rd},
+                    {v:quizScore.total>0?Math.round(quizScore.correct/quizScore.total*100)+"%":"—",l:"Score",c:t.acc},
+                  ].map((k,i)=>(
+                    <div key={i} style={{textAlign:"center",padding:"12px 8px",background:t.s2,borderRadius:10,border:`1px solid ${t.b1}`}}>
+                      <div style={{fontSize:"1.4rem",fontWeight:800,color:k.c}}>{k.v}</div>
+                      <div style={{fontSize:".55rem",color:t.tx3,marginTop:2}}>{k.l}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* STATS */}
         {page==="stats"&&(
           <div className="sp">
@@ -3626,7 +3830,31 @@ return (
     </button>
   </div>
 </div>
-            <div className="settings-section">
+                          <div className="settings-section">
+                <div className="ss-hd">🔔 Notifications</div>
+                <div style={{padding:"8px 0",display:"flex",flexDirection:"column",gap:10}}>
+                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 0",borderBottom:`1px solid ${t.b1}`}}>
+                    <div>
+                      <div style={{fontSize:".8rem",color:t.tx,fontWeight:600}}>Rappel quotidien</div>
+                      <div style={{fontSize:".65rem",color:t.tx3,marginTop:2}}>Recevoir un rappel chaque jour</div>
+                    </div>
+                    <button onClick={notifEnabled?()=>{setNotifEnabled(false);sv("qnotif",false);}:requestNotifications} style={{padding:"6px 14px",borderRadius:20,border:`1.5px solid ${notifEnabled?t.gr:t.b2}`,background:notifEnabled?`${t.gr}20`:t.s2,color:notifEnabled?t.gr:t.tx2,fontSize:".72rem",cursor:"pointer",fontWeight:600}}>
+                      {notifEnabled?"✓ Activé":"Activer"}
+                    </button>
+                  </div>
+                  {notifEnabled&&(
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                      <div style={{fontSize:".75rem",color:t.tx2}}>Tester la notification</div>
+                      <button onClick={sendTestNotif} className="tbtn">Envoyer un test</button>
+                    </div>
+                  )}
+                  <div style={{fontSize:".65rem",color:t.tx3,fontStyle:"italic"}}>
+                    {Notification?.permission==="granted"?"✓ Permission accordée":Notification?.permission==="denied"?"✗ Permission refusée — va dans les réglages iPhone":"En attente de permission"}
+                  </div>
+                </div>
+              </div>
+
+<div className="settings-section">
               <div className="ss-hd">Objectif & profil</div>
               <div className="set-row">
                 <div><div className="set-lbl">Versets par jour</div><div className="set-sub">Objectif de nouvelles mémorisations</div></div>
@@ -3945,6 +4173,7 @@ return (
           {id:"pages",icon:<Icons.Brain size={19}/>,label:"Révision",badge:spacedDue.length},
           {id:"khatma",icon:<Icons.Star size={19}/>,label:"Khatma"},
           {id:"communaute",icon:<Icons.Heart size={19}/>,label:"Favoris",badge:favorites.length},
+          {id:"quiz",icon:<Icons.Check size={19}/>,label:"Quiz"},
           {id:"stats",icon:<Icons.Chart size={19}/>,label:"Stats"},
           {id:"settings",icon:<Icons.Settings size={19}/>,label:"Réglages"},
         ].map(tab=>(
