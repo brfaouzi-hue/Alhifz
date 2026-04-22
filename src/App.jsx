@@ -1229,6 +1229,14 @@ export default function App() {
   const [setup,setSetup]=useState(()=>!ld("qset6",null));
 const [user, setUser] = useState(null);
 const [authReady, setAuthReady] = useState(false);
+
+  // iOS viewport-fit=cover
+  useEffect(()=>{
+    const meta=document.querySelector('meta[name="viewport"]');
+    if(meta&&!meta.content.includes('viewport-fit')){
+      meta.content=meta.content+', viewport-fit=cover';
+    }
+  },[]);
 const [authPage, setAuthPage] = useState("login");
 const [email, setEmail] = useState("");
 const [password, setPassword] = useState("");
@@ -2340,8 +2348,8 @@ return (
           <div className="tb-r">
             <button className="tbtn" style={{borderColor:t.pu,color:t.pu,fontSize:".6rem"}} onClick={()=>setShowAIPlan(true)}>✦ Plan IA</button>
             <button className="tbtn" style={{borderColor:t.gr,color:t.gr,fontSize:".6rem"}} onClick={()=>setTimerOpen(true)}>⏱</button>
-            {user&&<button onClick={()=>setPage("settings")} title={user.email} style={{width:28,height:28,borderRadius:"50%",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".75rem",fontWeight:800,color:"#000",flexShrink:0}}>{(user.email||"?")[0].toUpperCase()}</button>}
             <button className="ib" title={THEME_META[tn]?.label||tn} onClick={()=>{const keys=Object.keys(THEMES);setTn(keys[(keys.indexOf(tn)+1)%keys.length]);}}>{tn==="dark"||tn==="andalous"||tn==="ottoman"||tn==="abbasid"||tn==="emerald"?<Icons.Sun size={14}/>:<Icons.Moon size={14}/>}</button>
+            {user&&<button onClick={()=>setPage("settings")} title={user.email} style={{width:30,height:30,borderRadius:"50%",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".8rem",fontWeight:800,color:"#000",flexShrink:0,boxShadow:`0 0 8px ${t.acc}66`}}>{(user.email||"?")[0].toUpperCase()}</button>}
           </div>
         </div>
       </div>
@@ -2423,7 +2431,7 @@ return (
                 {/* Avant fin — losange comme les autres KPIs */}
                 <div style={{display:"flex",alignItems:"center",gap:5}}>
                   <span style={{fontSize:".7rem",color:"#f97316",opacity:.6}}>◆</span>
-                  <div><div style={{fontSize:".85rem",fontWeight:700,color:daysLeft<=0?t.gr:"#f97316",lineHeight:1.1,fontVariantNumeric:"tabular-nums"}}>{daysLeft>0?`${daysLeft}j`:"Fini!"}</div><div style={{fontSize:".48rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px"}}>Avant fin</div></div>
+                  <div><div style={{fontSize:".85rem",fontWeight:700,color:daysLeft<=0?t.gr:"#f97316",lineHeight:1.1,fontVariantNumeric:"tabular-nums"}}>{daysLeft>0?(daysLeft>365?`~${(daysLeft/365).toFixed(1)}ans`:`${daysLeft}j`):"Fini! 🎉"}</div><div style={{fontSize:".48rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px"}}>Avant fin</div></div>
                 </div>
                 {/* Sourates */}
                 <div style={{display:"flex",alignItems:"center",gap:5}}>
@@ -3872,14 +3880,17 @@ return (
         {[
           {id:"quran",icon:<Icons.Book size={19}/>,label:"Coran"},
           {id:"mushaf",icon:<Icons.Scroll size={19}/>,label:"Mushaf"},
-          {id:"pages",icon:<Icons.Brain size={19}/>,label:"Révision"},
+          {id:"pages",icon:<Icons.Brain size={19}/>,label:"Révision",badge:spacedDue.length},
           {id:"khatma",icon:<Icons.Star size={19}/>,label:"Khatma"},
-          {id:"communaute",icon:<Icons.Heart size={19}/>,label:"Favoris"},
+          {id:"communaute",icon:<Icons.Heart size={19}/>,label:"Favoris",badge:favorites.length},
           {id:"stats",icon:<Icons.Chart size={19}/>,label:"Stats"},
           {id:"settings",icon:<Icons.Settings size={19}/>,label:"Réglages"},
         ].map(tab=>(
           <button key={tab.id} className={`bn ${page===tab.id?"on":""}`} onClick={()=>{if(tab.id===page)return;setPageTransition(true);setTimeout(()=>{setPage(tab.id);setPageTransition(false);},120);}}>
-            {tab.icon}
+            <div style={{position:"relative",display:"inline-flex"}}>
+              {tab.icon}
+              {tab.badge>0&&<span style={{position:"absolute",top:-4,right:-6,background:t.rd,color:"#fff",borderRadius:99,fontSize:".42rem",fontWeight:800,minWidth:14,height:14,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 3px",lineHeight:1}}>{tab.badge>99?"99+":tab.badge}</span>}
+            </div>
             <span className="bn-lbl">{tab.label}</span>
           </button>
         ))}
