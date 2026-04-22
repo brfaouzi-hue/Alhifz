@@ -1230,12 +1230,34 @@ export default function App() {
 const [user, setUser] = useState(null);
 const [authReady, setAuthReady] = useState(false);
 
-  // iOS viewport-fit=cover
+  // iOS viewport-fit=cover + PWA setup
   useEffect(()=>{
+    // viewport-fit for iPhone notch
     const meta=document.querySelector('meta[name="viewport"]');
     if(meta&&!meta.content.includes('viewport-fit')){
       meta.content=meta.content+', viewport-fit=cover';
     }
+    // PWA manifest link
+    if(!document.querySelector('link[rel="manifest"]')){
+      const link=document.createElement('link');
+      link.rel='manifest';
+      link.href='/manifest.json';
+      document.head.appendChild(link);
+    }
+    // Apple PWA meta tags
+    const appleItems=[
+      {name:'apple-mobile-web-app-capable',content:'yes'},
+      {name:'apple-mobile-web-app-status-bar-style',content:'black-translucent'},
+      {name:'apple-mobile-web-app-title',content:'Al-Hifz'},
+      {name:'theme-color',content:'#050f08'},
+    ];
+    appleItems.forEach(({name,content})=>{
+      if(!document.querySelector(`meta[name="${name}"]`)){
+        const m=document.createElement('meta');
+        m.name=name;m.content=content;
+        document.head.appendChild(m);
+      }
+    });
   },[]);
 const [authPage, setAuthPage] = useState("login");
 const [email, setEmail] = useState("");
@@ -1253,6 +1275,8 @@ const [authError, setAuthError] = useState("");
   const [showTf,setShowTf]=useState(false);
   const [showPage,setShowPage]=useState(false);
   const [mushafPage,setMushafPage]=useState(null);
+  const [mushafSurahModal,setMushafSurahModal]=useState(false);
+  const [mushafSurahSearch,setMushafSurahSearch]=useState("");
   const [rec,setRec]=useState(RECITERS[0]);
   const [playing,setPlaying]=useState(null);
   const [audioPlaying,setAudioPlaying]=useState(false); // état réactif pour l'UI
@@ -3000,15 +3024,11 @@ return (
                     <button className="tbtn" onClick={()=>setMushafPage(p=>Math.min(604,(p||1)+1))}>Suivante →</button>
                   </div>
                 </div>
-                <div style={{display:"flex",alignItems:"center",gap:6}}>
-                  <span style={{fontSize:".65rem",color:t.tx3,flexShrink:0}}>Aller à :</span>
-                  <select onChange={e=>setMushafPage(Number(e.target.value))} value="" style={{flex:1,padding:"6px 10px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:8,color:t.tx,fontSize:".72rem",cursor:"pointer"}}>
-                    <option value="" disabled>— Choisir une sourate —</option>
-                    {SURAHS.map((s,i)=>(
-                      <option key={s.n} value={SURAH_PDF_PAGES[i]||1}>{s.n}. {s.name} — {s.ar}</option>
-                    ))}
-                  </select>
-                </div>
+                <button onClick={()=>{setMushafSurahModal(true);setMushafSurahSearch("");}} style={{width:"100%",padding:"9px 14px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:10,color:t.tx2,fontSize:".75rem",cursor:"pointer",display:"flex",alignItems:"center",gap:8,transition:"all .2s"}} onMouseEnter={e=>{e.currentTarget.style.borderColor=t.acc;e.currentTarget.style.color=t.tx;}} onMouseLeave={e=>{e.currentTarget.style.borderColor=t.b2;e.currentTarget.style.color=t.tx2;}}>
+                  <span style={{fontSize:"1rem"}}>📖</span>
+                  <span style={{flex:1,textAlign:"left"}}>Aller à une sourate…</span>
+                  <span style={{fontSize:".7rem",opacity:.5}}>▼</span>
+                </button>
               </div>
               <MushafPage page={mushafPage||1} t={t} tjc={tjc} arFont={arFont} edition={MUSHAF_EDITIONS.find(e=>e.id===mushafEdition)||MUSHAF_EDITIONS[0]} fullscreen={mushafFullscreen} onToggleFullscreen={()=>setMushafFullscreen(f=>!f)} onNext={()=>setMushafPage(p=>Math.min(604,(p||1)+1))} onPrev={()=>setMushafPage(p=>Math.max(1,(p||1)-1))}/>
             </div>
@@ -3808,6 +3828,48 @@ return (
     </div>
   </div>
 )}
+      {mushafSurahModal&&(
+        <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.8)",display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>setMushafSurahModal(false)}>
+          <div style={{width:"100%",maxWidth:600,background:t.s1,borderRadius:"20px 20px 0 0",maxHeight:"80vh",display:"flex",flexDirection:"column",overflow:"hidden",border:`1px solid ${t.b2}`}} onClick={e=>e.stopPropagation()}>
+            <div style={{padding:"16px 20px 12px",borderBottom:`1px solid ${t.b1}`}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+                <span style={{fontSize:".9rem",fontWeight:700,color:t.tx}}>📖 Choisir une sourate</span>
+                <button onClick={()=>setMushafSurahModal(false)} style={{background:"none",border:"none",color:t.tx3,fontSize:"1.2rem",cursor:"pointer"}}>✕</button>
+              </div>
+              <input
+                autoFocus
+                value={mushafSurahSearch}
+                onChange={e=>setMushafSurahSearch(e.target.value)}
+                placeholder="Rechercher une sourate…"
+                style={{width:"100%",padding:"10px 14px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:10,color:t.tx,fontSize:".8rem",outline:"none",boxSizing:"border-box"}}
+              />
+            </div>
+            <div style={{overflowY:"auto",flex:1,padding:"8px 0"}}>
+              {SURAHS.filter(s=>
+                !mushafSurahSearch||
+                s.name.toLowerCase().includes(mushafSurahSearch.toLowerCase())||
+                s.ar.includes(mushafSurahSearch)||
+                String(s.n).includes(mushafSurahSearch)
+              ).map((s,_,arr)=>{
+                const origIdx=SURAHS.indexOf(s);
+                const pg=SURAH_PDF_PAGES[origIdx]||1;
+                const isActive=(mushafPage||1)===pg;
+                return(
+                  <div key={s.n} onClick={()=>{setMushafPage(pg);setMushafSurahModal(false);}} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 20px",cursor:"pointer",background:isActive?`${t.acc}15`:"transparent",borderLeft:isActive?`3px solid ${t.acc}`:"3px solid transparent",transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=`${t.acc}10`} onMouseLeave={e=>e.currentTarget.style.background=isActive?`${t.acc}15`:"transparent"}>
+                    <div style={{width:32,height:32,borderRadius:8,background:isActive?t.acc:t.s2,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".65rem",fontWeight:700,color:isActive?"#000":t.tx3,flexShrink:0}}>{s.n}</div>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:".8rem",fontWeight:600,color:isActive?t.acc:t.tx}}>{s.name}</div>
+                      <div style={{fontSize:".6rem",color:t.tx3}}>{s.type} · {s.v} versets · Juz {s.juz}</div>
+                    </div>
+                    <div style={{fontFamily:"'Amiri',serif",fontSize:"1.1rem",color:isActive?t.acc:t.tx2,direction:"rtl"}}>{s.ar}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
       {calligAnim&&<CalligraphyBurst text={calligAnim} onDone={()=>setCalligAnim(null)}/>}
 
       {timerOpen&&(
