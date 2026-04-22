@@ -1355,9 +1355,7 @@ const [wbwWords,setWbwWords]=useState(null);
   const [testDone,setTestDone]=useState(false);
   const [splash,setSplash]=useState(true);
   // Streak
-  const [memStreak,setMemStreak]=useState(()=>ld("qstreak",0));
-  const [streakLastDay,setStreakLastDay]=useState(()=>ld("qstreakday",""));
-  const [streakRecord,setStreakRecord]=useState(()=>ld("qstreakrecord",0));
+
   // Quiz
   const [quizOpen,setQuizOpen]=useState(false);
   const [quizMode,setQuizMode]=useState("surah"); // "surah" | "complete"
@@ -2012,23 +2010,8 @@ const handleReset=async()=>{
   };
 
 
-  // Update streak when memorizing
-  const updateStreak=useCallback(()=>{
-    const td=today();
-    setStreakLastDay(prev=>{
-      if(prev===td)return prev;
-      sv("qstreakday",td);
-      setMemStreak(s=>{
-        const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
-        const ystr=yesterday.toISOString().split("T")[0];
-        const newS=prev===ystr?s+1:1;
-        sv("qstreak",newS);
-        setStreakRecord(r=>{const nr=Math.max(r,newS);sv("qstreakrecord",nr);return nr;});
-        return newS;
-      });
-      return td;
-    });
-  },[]);
+  // updateStreak is handled via hist/useMemo - no-op needed
+  const updateStreak=useCallback(()=>{},[]);
 
   // Quiz generation
   const generateQuiz=useCallback(()=>{
@@ -2059,7 +2042,7 @@ const handleReset=async()=>{
   };
   const sendTestNotif=()=>{
     if(Notification.permission==="granted"){
-      new Notification("Al-Hifz 📖",{body:`🔥 Streak: ${memStreak}j — Continue ta mémorisation aujourd'hui !`,icon:"/icon-192.png"});
+      new Notification("Al-Hifz 📖",{body:`🔥 Al-Hifz — Continue ta mémorisation aujourd'hui !`,icon:"/icon-192.png"});
     }
   };
 
@@ -2607,7 +2590,7 @@ return (
                 <span style={{fontSize:"1.5rem"}}>🔥</span>
                 <div style={{flex:1}}>
                   <div style={{fontSize:".75rem",fontWeight:700,color:"#f97316"}}>{memStreak} jour{memStreak>1?"s":""} de suite</div>
-                  <div style={{fontSize:".6rem",color:t.tx3}}>Record : {streakRecord}j · Continue comme ça !</div>
+                  <div style={{fontSize:".6rem",color:t.tx3}}>Continue comme ça !</div>
                 </div>
               </div>
             )}
