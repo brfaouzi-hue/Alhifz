@@ -972,7 +972,8 @@ const acc3=ramadan?"#f5e0a0":t.acc3;
 return `
 @import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Lateef:wght@400&family=Noto+Naskh+Arabic:wght@400;600&family=Noto+Nastaliq+Urdu:wght@400;700&family=Reem+Kufi:wght@400;700&family=Cairo:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{background:${bg};color:${t.tx};font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:80px;transition:background .4s,color .4s;}
+body{background:${bg};color:${t.tx};font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:80px;transition:background .4s,color .4s;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);}
+:root{--sat:env(safe-area-inset-top);--sab:env(safe-area-inset-bottom);--sal:env(safe-area-inset-left);--sar:env(safe-area-inset-right);}
 ${t.arabesque ? (
 "body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.04;" +
 "background-image:radial-gradient(circle at 25% 25%," + acc + "44 0%,transparent 50%)," +
@@ -1002,7 +1003,7 @@ body>*{position:relative;z-index:1;}
 @keyframes hoverLift{from{transform:translateY(0) scale(1)}to{transform:translateY(-3px) scale(1.01)}}
 /* ── Topbar ── */
 .topbar{position:sticky;top:0;z-index:60;background:${t.navBg};border-bottom:1px solid ${t.b1};backdrop-filter:blur(16px);}
-.tb{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 16px;}
+.tb{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 16px;padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));}
 .logo{display:flex;align-items:baseline;gap:8px;}
 .logo-h{font-family:'Amiri',serif;font-size:1.4rem;color:${acc};text-shadow:0 0 20px ${acc}44;}
 .logo-ar{font-family:'Amiri Quran',serif;font-size:1.1rem;color:${acc2};}
@@ -1012,18 +1013,18 @@ body>*{position:relative;z-index:1;}
 .ib:hover{border-color:${acc};color:${acc};}
 .ib.pri{background:${acc};border-color:${acc};color:#fff;font-weight:600;}
 /* ── Hero ── */
-.hero{background:${hero};border-bottom:1px solid ${t.b1};padding:16px 16px 14px;position:relative;overflow:hidden;}
+.hero{background:${hero};border-bottom:1px solid ${t.b1};padding:16px 16px 14px;padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));position:relative;overflow:hidden;}
 .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 10% 50%,${acc}08 0%,transparent 60%),radial-gradient(ellipse at 90% 50%,${acc}08 0%,transparent 60%);pointer-events:none;}
 .hero-i{max-width:1200px;margin:0 auto;position:relative;}
 /* ── Bottom nav ── */
-.bnav{position:fixed;bottom:0;left:0;right:0;z-index:60;background:${t.navBg}ee;border-top:1px solid ${t.b1};display:flex;align-items:stretch;height:62px;backdrop-filter:blur(16px);}
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:60;background:${t.navBg}ee;border-top:1px solid ${t.b1};display:flex;align-items:stretch;height:calc(62px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);backdrop-filter:blur(16px);}
 .bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:transparent;color:${t.tx3};font-size:.58rem;font-weight:500;cursor:pointer;transition:all .25s;padding:6px 2px;position:relative;}
 .bn:hover{color:${t.tx2};transform:translateY(-2px);}
 .bn.on{color:${acc};}
 .bn.on::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:linear-gradient(90deg,${acc},${acc2});border-radius:0 0 99px 99px;box-shadow:0 0 6px ${acc};}
 .bn-lbl{font-size:.52rem;font-weight:500;}
 /* ── Layout ── */
-.wrap{max-width:1200px;margin:0 auto;padding:14px 16px 100px;}
+.wrap{max-width:1200px;margin:0 auto;padding:14px 16px calc(100px + env(safe-area-inset-bottom));}
 .two{display:grid;grid-template-columns:300px 1fr;gap:12px;align-items:start;}
 /* ── Cards — hover effect ── */
 .card{background:${t.cardBg};border:1px solid ${t.b1};border-radius:14px;overflow:hidden;transition:box-shadow .25s,border-color .25s;}
@@ -2337,7 +2338,6 @@ return (
         <div className="tb">
           <div className="logo"><span className="logo-h">Al-Hifz</span><span className="logo-ar">القرآن</span><span className="logo-sub">mémorisation</span></div>
           <div className="tb-r">
-            <button className="tbtn" style={{borderColor:acc,color:acc,fontSize:".6rem"}} onClick={()=>setShowWeeklyReport(true)}>Semaine</button>
             <button className="tbtn" style={{borderColor:t.pu,color:t.pu,fontSize:".6rem"}} onClick={()=>setShowAIPlan(true)}>✦ Plan IA</button>
             <button className="tbtn" style={{borderColor:t.gr,color:t.gr,fontSize:".6rem"}} onClick={()=>setTimerOpen(true)}>⏱</button>
             {user&&<button onClick={()=>setPage("settings")} title={user.email} style={{width:28,height:28,borderRadius:"50%",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".75rem",fontWeight:800,color:"#000",flexShrink:0}}>{(user.email||"?")[0].toUpperCase()}</button>}
@@ -2391,14 +2391,25 @@ return (
             {/* KPIs */}
             <div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",gap:8}}>
               <div>
-                <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
-                  <span style={{fontSize:".58rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1.5px"}}>Versets mémorisés</span>
-                  <span style={{fontSize:".65rem",color:acc,fontWeight:700,fontVariantNumeric:"tabular-nums"}}>{totalMem.toLocaleString()} <span style={{color:t.tx3,fontWeight:400}}>/ {TOTAL_VERSES}</span></span>
-                </div>
-                <div style={{height:10,background:t.b1,borderRadius:99,overflow:"hidden",boxShadow:"inset 0 2px 4px rgba(0,0,0,.25)"}}>
-                  <div style={{height:"100%",width:`${pct}%`,borderRadius:99,background:`linear-gradient(90deg,${acc},${acc2},${acc3})`,boxShadow:`0 0 10px ${acc}99`,transition:"width 1.2s cubic-bezier(.4,0,.2,1)",position:"relative"}}>
-                    <div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent)",backgroundSize:"200% 100%",animation:"shimmer 2.5s infinite",borderRadius:99}}/>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+                  <span style={{fontSize:".58rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1.5px"}}>Progression</span>
+                  <div style={{display:"flex",alignItems:"center",gap:6}}>
+                    <span style={{fontSize:".7rem",color:acc,fontWeight:800,fontVariantNumeric:"tabular-nums"}}>{pct}%</span>
+                    <span style={{fontSize:".58rem",color:t.tx3}}>{totalMem.toLocaleString()} / {TOTAL_VERSES}</span>
                   </div>
+                </div>
+                <div style={{position:"relative",height:12,background:t.b1,borderRadius:99,overflow:"hidden",boxShadow:"inset 0 2px 6px rgba(0,0,0,.3)"}}>
+                  <div style={{height:"100%",width:`${pct}%`,borderRadius:99,background:`linear-gradient(90deg,${acc},${acc2},${acc3})`,boxShadow:`0 0 12px ${acc}aa`,transition:"width 1.2s cubic-bezier(.4,0,.2,1)",position:"relative",minWidth:pct>0?"12px":"0"}}>
+                    <div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent)",backgroundSize:"200% 100%",animation:"shimmer 2.5s infinite",borderRadius:99}}/>
+                  </div>
+                  {pct>2&&<div style={{position:"absolute",top:"50%",transform:"translateY(-50%)",left:`calc(${pct}% - 6px)`,width:12,height:12,borderRadius:"50%",background:"#fff",boxShadow:`0 0 8px ${acc}`,opacity:.9}}/>}
+                </div>
+                <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}>
+                  <span style={{fontSize:".52rem",color:t.tx3}}>0</span>
+                  {[25,50,75].map(m=>(
+                    <span key={m} style={{fontSize:".52rem",color:pct>=m?acc:t.tx3,fontWeight:pct>=m?700:400,transition:"color .5s"}}>{m}%</span>
+                  ))}
+                  <span style={{fontSize:".52rem",color:pct>=100?t.gr:t.tx3,fontWeight:pct>=100?700:400}}>✓</span>
                 </div>
               </div>
 
@@ -2479,11 +2490,11 @@ return (
                   <span style={{color:acc,fontWeight:600}}>{Math.round(riInfo.dayIn/30*100)}% du mois</span>
                 </div>
               </div>)
-            :(<div style={{marginTop:8,padding:"7px 12px",background:`${acc}08`,borderRadius:8,border:`1px solid ${acc}20`,display:"flex",alignItems:"center",gap:8}}>
+            :riInfo.daysLeft<=60?(<div style={{marginTop:8,padding:"7px 12px",background:`${acc}08`,borderRadius:8,border:`1px solid ${acc}20`,display:"flex",alignItems:"center",gap:8}}>
                 <span style={{fontSize:".75rem",color:acc}}>🌙</span>
                 <span style={{fontSize:".65rem",color:t.tx2,flex:1}}>Ramadan dans <span style={{color:acc,fontWeight:700}}>{riInfo.daysLeft} jours</span></span>
                 <button onClick={()=>setPage("khatma")} style={{background:`${acc}18`,border:`1px solid ${acc}33`,color:acc,borderRadius:6,padding:"3px 8px",fontSize:".6rem",cursor:"pointer",fontWeight:600}}>Préparer →</button>
-              </div>)
+              </div>):null
           }
 
                 <svg style={{position:"absolute",bottom:0,left:0,width:"100%",height:10,display:"block"}} preserveAspectRatio="none" viewBox="0 0 800 10"><path d="M0,5 Q25,9 50,5 Q75,1 100,5 Q125,9 150,5 Q175,1 200,5 Q225,9 250,5 Q275,1 300,5 Q325,9 350,5 Q375,1 400,5 Q425,9 450,5 Q475,1 500,5 Q525,9 550,5 Q575,1 600,5 Q625,9 650,5 Q675,1 700,5 Q725,9 750,5 Q775,1 800,5" stroke={acc} strokeWidth=".8" fill="none" opacity=".3"/></svg>
