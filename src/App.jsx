@@ -1766,21 +1766,39 @@ const handleReset=async()=>{
   };
 
   // Moteur audio unifié — préchargement + zéro latence
-  // Charge le tafsir Ibn Kathir (FR) depuis tafsir.app
+  // Charge le tafsir Ibn Kathir (FR)
+  const tafsirLoadingRef=useRef({});
   const loadTafsir=useCallback(async(sn,vn)=>{
     const key=`${sn}_${vn}`;
-    if(tafsirData[key]||tafsirLoading[key]) return;
+    if(tafsirLoadingRef.current[key]) return;
+    setTafsirData(prev=>{if(prev[key])return prev;return prev;});
+    // Vérifie si déjà chargé
+    if(tafsirData[key]) return;
+    tafsirLoadingRef.current[key]=true;
     setTafsirLoading(p=>({...p,[key]:true}));
     try{
-      const r=await fetch(`https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/fr-tafsir-ibn-kathir/${sn}/${vn}.json`);
+      // API principale : quran.com tafsir (id=169 = Ibn Kathir FR)
+      const r=await fetch(`https://api.quran.com/api/v4/tafsirs/169/by_ayah/${sn}:${vn}?language=fr`);
       if(r.ok){
         const d=await r.json();
-        const text=(d.text||d.tafsir||"").replace(/<[^>]*>/g,"").slice(0,600);
-        if(text) setTafsirData(p=>({...p,[key]:text}));
+        const text=(d?.tafsir?.text||"").replace(/<[^>]*>/g,"").replace(/&amp;/g,"&").replace(/&nbsp;/g," ").trim().slice(0,800);
+        if(text){setTafsirData(p=>({...p,[key]:text}));setTafsirLoading(p=>({...p,[key]:false}));tafsirLoadingRef.current[key]=false;return;}
       }
     }catch{}
+    try{
+      // Fallback : jsdelivr
+      const r2=await fetch(`https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/fr-tafsir-ibn-kathir/${sn}/${vn}.json`);
+      if(r2.ok){
+        const d=await r2.json();
+        const text=(d.text||d.tafsir||"").replace(/<[^>]*>/g,"").trim().slice(0,800);
+        if(text){setTafsirData(p=>({...p,[key]:text}));setTafsirLoading(p=>({...p,[key]:false}));tafsirLoadingRef.current[key]=false;return;}
+      }
+    }catch{}
+    // Si tout échoue
+    setTafsirData(p=>({...p,[key]:"Tafsir non disponible pour ce verset."}));
     setTafsirLoading(p=>({...p,[key]:false}));
-  },[tafsirData,tafsirLoading]);
+    tafsirLoadingRef.current[key]=false;
+  },[tafsirData]);
 
   const buildUrl=(sn,vn)=>{
     const s=String(sn).padStart(3,"0");const v=String(vn).padStart(3,"0");
@@ -3182,19 +3200,19 @@ return (
 
         {/* PAGES */}
         {page==="pages"&&(
-          <div style={{display:"flex",flexDirection:"column",gap:14}}>
+          <div style={{display:"flex",flexDirection:"column",gap:14,overflow:"hidden"}}>
 
             {/* Stats rapides */}
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,overflow:"hidden"}}>
               {[
                 {l:"En révision",v:Object.values(revFlags).filter(f=>f==="active").length,c:t.acc,icon:"◈"},
                 {l:"Maîtrisées",v:Object.values(revFlags).filter(f=>f==="mastered").length,c:t.gr,icon:"✦"},
                 {l:"En pause",v:Object.values(revFlags).filter(f=>f==="paused").length,c:t.tx3,icon:"◆"},
               ].map((k,i)=>(
-                <div key={i} style={{background:t.cardBg,border:`1px solid ${t.b1}`,borderRadius:12,padding:"12px 10px",textAlign:"center",transition:"transform .2s,box-shadow .2s"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow=`0 6px 18px ${k.c}22`;}} onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";}}>
-                  <div style={{fontSize:"1.1rem",color:k.c,marginBottom:2}}>{k.icon}</div>
-                  <div style={{fontSize:"1.3rem",fontWeight:800,color:k.c}}>{k.v}</div>
-                  <div style={{fontSize:".55rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:2}}>{k.l}</div>
+                <div key={i} style={{background:t.cardBg,border:`1px solid ${t.b1}`,borderRadius:12,padding:"10px 6px",textAlign:"center",minWidth:0,overflow:"hidden"}}>
+                  <div style={{fontSize:"1rem",color:k.c,marginBottom:2}}>{k.icon}</div>
+                  <div style={{fontSize:"1.2rem",fontWeight:800,color:k.c}}>{k.v}</div>
+                  <div style={{fontSize:".5rem",color:t.tx3,textTransform:"uppercase",letterSpacing:".5px",marginTop:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{k.l}</div>
                 </div>
               ))}
             </div>
