@@ -3486,7 +3486,6 @@ return (
                 </div>
               </div>
             )}
-          </div>
 
           {/* ═══ KHATMA COLLECTIVE ═══ */}
           <div className="card" style={{marginTop:4}}>
@@ -3510,10 +3509,8 @@ return (
                 </div>
               </div>
             )}
-
             {activeColKhatma?(
               <div style={{padding:"14px 16px",display:"flex",flexDirection:"column",gap:14}}>
-                {/* Header */}
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                   <div>
                     <div style={{fontWeight:700,color:t.tx,fontSize:".9rem"}}>{activeColKhatma.name}</div>
@@ -3524,11 +3521,9 @@ return (
                     <div style={{fontSize:".58rem",color:t.tx3}}>{colJuzCovered.length}/30 juz</div>
                   </div>
                 </div>
-                {/* Barre globale */}
                 <div style={{height:8,background:t.b1,borderRadius:99,overflow:"hidden"}}>
                   <div style={{height:"100%",width:`${colPct}%`,background:colPct===100?t.gr:`linear-gradient(90deg,${t.acc},${t.acc2})`,borderRadius:99,transition:"width .6s",boxShadow:`0 0 8px ${t.acc}55`}}/>
                 </div>
-                {/* Grille 30 juz */}
                 <div>
                   <div style={{fontSize:".6rem",color:t.tx3,marginBottom:8}}>Coche les juz que TU as lus — les autres membres font de même</div>
                   <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:5}}>
@@ -3536,10 +3531,9 @@ return (
                       const myUid=user?.id||"local";
                       const myMember=activeColKhatma.members.find(m=>m.uid===myUid);
                       const isMine=myMember?.juzDone.includes(juz);
-                      const coveredBy=activeColKhatma.members.filter(m=>m.juzDone.includes(juz));
-                      const isCovered=coveredBy.length>0;
+                      const isCovered=activeColKhatma.members.some(m=>m.juzDone.includes(juz));
                       return(
-                        <div key={juz} onClick={()=>markColJuz(juz)} style={{aspectRatio:"1",borderRadius:8,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",border:`2px solid ${isMine?t.acc:isCovered?t.gr+"66":t.b2}`,background:isMine?`${t.acc}20`:isCovered?`${t.gr}12`:t.s2,transition:"all .15s",position:"relative"}} onMouseEnter={e=>e.currentTarget.style.transform="scale(1.08)"} onMouseLeave={e=>e.currentTarget.style.transform=""}>
+                        <div key={juz} onClick={()=>markColJuz(juz)} style={{aspectRatio:"1",borderRadius:8,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",border:`2px solid ${isMine?t.acc:isCovered?t.gr+"66":t.b2}`,background:isMine?`${t.acc}20`:isCovered?`${t.gr}12`:t.s2,transition:"all .15s"}} onMouseEnter={e=>e.currentTarget.style.transform="scale(1.08)"} onMouseLeave={e=>e.currentTarget.style.transform=""}>
                           <span style={{fontSize:".62rem",fontWeight:700,color:isMine?t.acc:isCovered?t.gr:t.tx3}}>{juz}</span>
                           {isCovered&&!isMine&&<span style={{fontSize:".42rem",color:t.gr,lineHeight:1}}>✓</span>}
                           {isMine&&<span style={{fontSize:".42rem",color:t.acc,lineHeight:1}}>●</span>}
@@ -3553,7 +3547,6 @@ return (
                     ))}
                   </div>
                 </div>
-                {/* Membres */}
                 <div>
                   <div style={{fontSize:".65rem",color:t.tx3,marginBottom:8,textTransform:"uppercase",letterSpacing:"1px"}}>Membres</div>
                   <div style={{display:"flex",flexDirection:"column",gap:6}}>
@@ -3585,7 +3578,7 @@ return (
               </div>
             )}
           </div>
-        </div>
+          </div>
         )}
 
         {/* COMMUNAUTÉ */}
