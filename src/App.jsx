@@ -972,7 +972,7 @@ const acc3=ramadan?"#f5e0a0":t.acc3;
 return `
 @import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Lateef:wght@400&family=Noto+Naskh+Arabic:wght@400;600&family=Noto+Nastaliq+Urdu:wght@400;700&family=Reem+Kufi:wght@400;700&family=Cairo:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-*{box-sizing:border-box;}html{overflow-x:hidden;}
+*{box-sizing:border-box;}html{overflow-x:hidden;max-width:100vw;}body{overflow-x:hidden;}
 body{background:${bg};color:${t.tx};font-family:'DM Sans',sans-serif;min-height:100vh;min-height:100dvh;padding-bottom:80px;transition:background .4s,color .4s;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);}
 :root{--sat:env(safe-area-inset-top);--sab:env(safe-area-inset-bottom);--sal:env(safe-area-inset-left);--sar:env(safe-area-inset-right);}
 ${t.arabesque ? (
@@ -1003,13 +1003,13 @@ body>*{position:relative;z-index:1;}
 @keyframes sandDrip{0%{transform:translateY(0);opacity:1}100%{transform:translateY(6px);opacity:0}}
 @keyframes hoverLift{from{transform:translateY(0) scale(1)}to{transform:translateY(-3px) scale(1.01)}}
 /* ── Topbar ── */
-.topbar{position:sticky;top:0;z-index:60;background:${t.navBg};border-bottom:1px solid ${t.b1};backdrop-filter:blur(16px);}
-.tb{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 16px;padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));}
-.logo{display:flex;align-items:baseline;gap:8px;}
-.logo-h{font-family:'Amiri',serif;font-size:1.4rem;color:${acc};text-shadow:0 0 20px ${acc}44;}
-.logo-ar{font-family:'Amiri Quran',serif;font-size:1.1rem;color:${acc2};}
-.logo-sub{font-size:.55rem;color:${t.tx3};letter-spacing:2px;text-transform:uppercase;}
-.tb-r{display:flex;gap:6px;align-items:center;}
+.topbar{position:sticky;top:0;z-index:60;background:${t.navBg};border-bottom:1px solid ${t.b1};backdrop-filter:blur(16px);overflow:hidden;}
+.tb{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 12px;padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right));gap:8px;}
+.logo{display:flex;align-items:baseline;gap:6px;flex-shrink:0;white-space:nowrap;min-width:0;}
+.logo-h{font-family:'Amiri',serif;font-size:1.3rem;color:${acc};text-shadow:0 0 20px ${acc}44;white-space:nowrap;}
+.logo-ar{font-family:'Amiri Quran',serif;font-size:1rem;color:${acc2};white-space:nowrap;}
+.logo-sub{font-size:.5rem;color:${t.tx3};letter-spacing:2px;text-transform:uppercase;white-space:nowrap;}
+.tb-r{display:flex;gap:5px;align-items:center;flex-shrink:0;}
 .ib{background:transparent;border:1px solid ${t.b2};color:${t.tx2};padding:5px 10px;border-radius:8px;font-size:.68rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:4px;}
 .ib:hover{border-color:${acc};color:${acc};}
 .ib.pri{background:${acc};border-color:${acc};color:#fff;font-weight:600;}
@@ -1215,11 +1215,10 @@ body>*{position:relative;z-index:1;}
   .two{grid-template-columns:1fr;}.rp,.lp{position:static;max-height:none;}.vscroll{max-height:none;}
   .sg{grid-template-columns:repeat(2,1fr);}.two-h{grid-template-columns:1fr;}
 }
-@supports(height:100dvh){
-  .vscroll{max-height:calc(100dvh - 380px);}
-  @media(max-width:860px){.vscroll{max-height:none;}}
-}
-@media(max-width:860px){
+@media(max-width:480px){
+  .logo-ar{display:none;}
+  .logo-sub{display:none;}
+  .logo-h{font-size:1.2rem;}
   .wrap{padding-bottom:calc(130px + env(safe-area-inset-bottom));}
 }
 `;}
@@ -2517,8 +2516,8 @@ return (
         </div>
       </div>
 
-      {/* Hero */}
-      <div className="hero">
+      {/* Hero — visible uniquement sur l'onglet Coran */}
+      {page==="quran"&&<div className="hero">
         <svg style={{position:"absolute",top:0,left:0,width:"100%",height:12,display:"block"}} preserveAspectRatio="none" viewBox="0 0 800 12">
           <defs><linearGradient id="bord" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="transparent"/><stop offset=".15" stopColor={acc}/><stop offset=".5" stopColor={acc3}/><stop offset=".85" stopColor={acc}/><stop offset="1" stopColor="transparent"/></linearGradient></defs>
           <rect y="0" width="800" height="1.5" fill="url(#bord)"/>
@@ -2674,7 +2673,7 @@ return (
             )}
 
                 <svg style={{position:"absolute",bottom:0,left:0,width:"100%",height:10,display:"block"}} preserveAspectRatio="none" viewBox="0 0 800 10"><path d="M0,5 Q25,9 50,5 Q75,1 100,5 Q125,9 150,5 Q175,1 200,5 Q225,9 250,5 Q275,1 300,5 Q325,9 350,5 Q375,1 400,5 Q425,9 450,5 Q475,1 500,5 Q525,9 550,5 Q575,1 600,5 Q625,9 650,5 Q675,1 700,5 Q725,9 750,5 Q775,1 800,5" stroke={acc} strokeWidth=".8" fill="none" opacity=".3"/></svg>
-      </div>
+      </div>}
 
       <div className={`wrap${pageTransition?" transitioning":""}`}>
         {/* CORAN */}
