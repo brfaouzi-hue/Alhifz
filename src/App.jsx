@@ -2523,44 +2523,36 @@ return (
                 </div>
               </div>
 
-              {/* KPI grid with hourglass for "avant fin" */}
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px 10px"}}>
-                {/* Rythme */}
-                <div style={{display:"flex",alignItems:"center",gap:5}}>
-                  <span style={{fontSize:".7rem",color:t.bl,opacity:.6}}>◈</span>
-                  <div><div style={{fontSize:".85rem",fontWeight:700,color:t.bl,lineHeight:1.1,fontVariantNumeric:"tabular-nums"}}>{vpd}/j</div><div style={{fontSize:".48rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px"}}>Rythme</div></div>
+              {/* KPI grid — icônes SVG tendance */}
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px 8px"}}>
+                {/* Rythme — cerveau/éclair */}
+                <div style={{display:"flex",alignItems:"center",gap:6,padding:"6px 8px",background:t.s3,borderRadius:8}}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={t.bl} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity=".8"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-5 0v-15A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 8A2.5 2.5 0 0 1 17 10.5v9a2.5 2.5 0 0 1-5 0v-9A2.5 2.5 0 0 1 14.5 8Z"/><path d="M5 15a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z"/></svg>
+                  <div><div style={{fontSize:".82rem",fontWeight:700,color:t.bl,lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{vpd}<span style={{fontSize:".55rem",fontWeight:500}}> v/j</span></div><div style={{fontSize:".46rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Rythme</div></div>
                 </div>
-                {/* Avant fin — losange comme les autres KPIs */}
-                <div style={{display:"flex",alignItems:"center",gap:5}}>
-                  <span style={{fontSize:".7rem",color:"#f97316",opacity:.6}}>◆</span>
-                  <div><div style={{fontSize:".85rem",fontWeight:700,color:daysLeft<=0?t.gr:"#f97316",lineHeight:1.1,fontVariantNumeric:"tabular-nums"}}>{daysLeft>0?(daysLeft>365?`~${(daysLeft/365).toFixed(1)}ans`:`${daysLeft}j`):"Fini! 🎉"}</div><div style={{fontSize:".48rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px"}}>Avant fin</div></div>
+                {/* Avant fin — horloge */}
+                <div style={{display:"flex",alignItems:"center",gap:6,padding:"6px 8px",background:t.s3,borderRadius:8}}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round" opacity=".8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+                  <div><div style={{fontSize:".82rem",fontWeight:700,color:daysLeft<=0?t.gr:"#f97316",lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{daysLeft>0?(daysLeft>365?`~${(daysLeft/365).toFixed(1)}a`:`${daysLeft}j`):"Fini!"}</div><div style={{fontSize:".46rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Avant fin</div></div>
                 </div>
-                {/* Sourates */}
-                <div style={{display:"flex",alignItems:"center",gap:5}}>
-                  <span style={{fontSize:".7rem",color:t.gr,opacity:.6}}>✦</span>
-                  <div><div style={{fontSize:".85rem",fontWeight:700,color:t.gr,lineHeight:1.1}}>{SURAHS.filter(s=>sPct(s)===100).length}</div><div style={{fontSize:".48rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px"}}>Sourates</div></div>
+                {/* Sourates — livre ouvert */}
+                <div style={{display:"flex",alignItems:"center",gap:6,padding:"6px 8px",background:t.s3,borderRadius:8}}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={t.gr} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity=".8"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                  <div><div style={{fontSize:".82rem",fontWeight:700,color:t.gr,lineHeight:1}}>{SURAHS.filter(s=>sPct(s)===100).length}</div><div style={{fontSize:".46rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Sourates</div></div>
                 </div>
-                {/* Restants */}
-                <div style={{display:"flex",alignItems:"center",gap:5}}>
-                  <span style={{fontSize:".7rem",color:t.tx2,opacity:.6}}>◆</span>
-                  <div><div style={{fontSize:".85rem",fontWeight:700,color:t.tx2,lineHeight:1.1,fontVariantNumeric:"tabular-nums"}}>{remaining.toLocaleString()}</div><div style={{fontSize:".48rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px"}}>Restants</div></div>
+                {/* Restants — cible */}
+                <div style={{display:"flex",alignItems:"center",gap:6,padding:"6px 8px",background:t.s3,borderRadius:8}}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={t.tx2} strokeWidth="1.5" strokeLinecap="round" opacity=".8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill={t.tx2}/></svg>
+                  <div><div style={{fontSize:".82rem",fontWeight:700,color:t.tx2,lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{remaining.toLocaleString()}</div><div style={{fontSize:".46rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Restants</div></div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* ETA + sablier élégant */}
-          <div style={{marginTop:10,padding:"8px 12px",borderTop:`1px solid ${acc}20`,display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,background:`${acc}06`,borderRadius:"0 0 10px 10px"}}>
-            <div style={{display:"flex",alignItems:"center",gap:8}}>
-              <svg width="28" height="8" viewBox="0 0 28 8"><polygon points="4,4 8,1 12,4 8,7" fill="none" stroke={acc} strokeWidth=".8" opacity=".5"/><line x1="0" y1="4" x2="3" y2="4" stroke={acc} strokeWidth=".8" opacity=".3"/><line x1="13" y1="4" x2="28" y2="4" stroke={acc} strokeWidth=".5" opacity=".2"/></svg>
-              <span style={{fontSize:".63rem",color:t.tx2,fontStyle:"italic"}}>{remaining>0?`Fin estimée · ${eta}`:"🎉 Coran complet !"}</span>
-              <svg width="28" height="8" viewBox="0 0 28 8" style={{transform:"scaleX(-1)"}}><polygon points="4,4 8,1 12,4 8,7" fill="none" stroke={acc} strokeWidth=".8" opacity=".5"/><line x1="0" y1="4" x2="3" y2="4" stroke={acc} strokeWidth=".3" opacity=".3"/><line x1="13" y1="4" x2="28" y2="4" stroke={acc} strokeWidth=".5" opacity=".2"/></svg>
-            </div>
-            {/* Sablier miniature — élégant, discret */}
-            <div title={`${Math.round(hourglassPct*100)}% du temps écoulé`} style={{display:"flex",alignItems:"center",gap:5,padding:"3px 8px",borderRadius:8,border:`1px solid ${acc}25`,background:`${acc}08`,flexShrink:0}}>
-              <HourglassIcon pct={hourglassPct} color={daysLeft<=0?"#22c55e":acc} size={16}/>
-              <span style={{fontSize:".55rem",color:daysLeft<=0?t.gr:t.tx3,letterSpacing:".5px",fontVariantNumeric:"tabular-nums"}}>{Math.round(hourglassPct*100)}%</span>
-            </div>
+          {/* ETA */}
+          <div style={{marginTop:8,padding:"6px 12px",borderTop:`1px solid ${acc}15`,display:"flex",alignItems:"center",justifyContent:"center",gap:6,background:`${acc}04`,borderRadius:"0 0 10px 10px"}}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={acc} strokeWidth="1.5" strokeLinecap="round" opacity=".5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            <span style={{fontSize:".62rem",color:t.tx3,fontStyle:"italic"}}>{remaining>0?`Fin estimée · ${eta}`:"🎉 Coran complet !"}</span>
           </div>
 
           {/* Rappel si pas de mémorisation aujourd'hui */}
@@ -2574,8 +2566,11 @@ return (
               onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow=`0 4px 16px ${acc}22`;}}
               onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";}}
               onClick={()=>{const s=SURAHS.find(x=>x.n===versetDuJour.sn);if(s){doSelect(s);setPage("quran");}}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}>
-                <span style={{fontSize:".58rem",color:acc,textTransform:"uppercase",letterSpacing:"1.5px",fontWeight:700}}>Verset du jour</span>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+                <div>
+                  <span style={{fontSize:".58rem",color:acc,textTransform:"uppercase",letterSpacing:"1.5px",fontWeight:700}}>Verset du jour</span>
+                  <div style={{fontSize:".5rem",color:t.tx3,opacity:.7,marginTop:1}}>Tiré de tes versets mémorisés · active la mémoire à long terme</div>
+                </div>
                 <span style={{fontSize:".6rem",color:t.tx3}}>{versetDuJour.surah} · v.{versetDuJour.n}</span>
               </div>
               <div style={{fontFamily:"'Amiri Quran',serif",fontSize:"1.2rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx,marginBottom:4}}>
