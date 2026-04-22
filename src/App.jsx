@@ -1292,12 +1292,19 @@ const [authError, setAuthError] = useState("");
   const [kPreset,setKPreset]=useState(null);
   const [kCustomDays,setKCustomDays]=useState("30");
   const [kName,setKName]=useState("Ma Khatma");
+  // Khatma collective
+  const [collectiveKhatmas,setCollectiveKhatmas]=useState(()=>ld("qcolkhatmas",[]));
+  const [showCollective,setShowCollective]=useState(false);
+  const [newColKhatmaName,setNewColKhatmaName]=useState("Notre Khatma");
+  const [joinCode,setJoinCode]=useState("");
+  const [activeColKhatma,setActiveColKhatma]=useState(()=>ld("qactcolkhatma",null));
   const [goal,setGoal]=useState("5");
   const [baselineInput,setBaselineInput]=useState("0"); // versets déjà connus à l'inscription
   const [startDate,setStartDate]=useState(new Date().toISOString().split("T")[0]);
   const [arabicSize,setArabicSize]=useState(()=>ld("qasize",1.65));
   const [loopCount,setLoopCount]=useState(3);
   const [loopCurrent,setLoopCurrent]=useState(0);
+  const [loopInfinite,setLoopInfinite]=useState(false);
   const [reviewMode,setReviewMode]=useState(false);
   const [hifzMode,setHifzMode]=useState(false);
   const [hifzLevel,setHifzLevel]=useState({});
@@ -1411,6 +1418,8 @@ const [wbwWords,setWbwWords]=useState(null);
   useEffect(()=>sv("qfont",fontId),[fontId]);
   useEffect(()=>sv("qkhatmas",khatmas),[khatmas]);
   useEffect(()=>sv("qakthatma",activeKhatma),[activeKhatma]);
+  useEffect(()=>sv("qcolkhatmas",collectiveKhatmas),[collectiveKhatmas]);
+  useEffect(()=>sv("qactcolkhatma",activeColKhatma),[activeColKhatma]);
   useEffect(()=>sv("qramadan",ramadanTheme),[ramadanTheme]);
   useEffect(()=>sv("qpages",pageRead),[pageRead]);
   useEffect(()=>sv("qrevflags",revFlags),[revFlags]);
@@ -1849,8 +1858,8 @@ const handleReset=async()=>{
         return;
       }
       // Mode loop verset unique
-      if(loopCount>1&&loopCurrent<loopCount){
-        setLoopCurrent(p=>p+1);
+      if(loopInfinite||(loopCount>1&&loopCurrent<loopCount)){
+        if(!loopInfinite)setLoopCurrent(p=>p+1);
         audio.currentTime=0;
         audio.play().catch(()=>{});
       } else {
@@ -1863,7 +1872,7 @@ const handleReset=async()=>{
     audio.addEventListener("ended",handleEnded);
     return()=>audio.removeEventListener("ended",handleEnded);
   // dépendances minimales pour éviter les ré-attachements inutiles
-  },[playlistActive,playlist,playing,loopCount,loopCurrent,rec]);
+  },[playlistActive,playlist,playing,loopCount,loopCurrent,loopInfinite,rec]);
 
   // Chargement versets — TOUJOURS depuis l'API pour avoir le tajweed HTML correct
   // Q[s.n] utilisé uniquement comme fallback traduction hors ligne
@@ -1928,6 +1937,49 @@ const handleReset=async()=>{
   };
 
   const createKhatma=()=>{if(!kPreset)return;const days=kPreset.id==="custom"?parseInt(kCustomDays)||30:kPreset.days;const nk={id:Date.now(),name:kName,preset:kPreset.id,totalDays:days,startDate:today(),log:{},pages:604};setKhatmas(p=>[...p,nk]);setActiveKhatma(nk);setKPreset(null);};
+
+  // Khatma collective — entièrement locale (partagée via code)
+  const generateCode=()=>Math.random().toString(36).substring(2,8).toUpperCase();
+  const createCollectiveKhatma=()=>{
+    const code=generateCode();
+    const myName=(user?.email||"Moi").split("@")[0];
+    const nk={
+      id:Date.now(),code,name:newColKhatmaName,
+      createdAt:today(),
+      members:[{name:myName,uid:user?.id||"local",juzDone:[],lastSeen:today()}],
+      totalJuz:30,
+    };
+    setCollectiveKhatmas(p=>[...p,nk]);
+    setActiveColKhatma(nk);
+    setShowCollective(false);
+  };
+  const joinCollectiveKhatma=()=>{
+    const found=collectiveKhatmas.find(k=>k.code===joinCode.trim().toUpperCase());
+    if(!found){alert("Code introuvable. Vérifie le code avec ton groupe.");return;}
+    const myName=(user?.email||"Moi").split("@")[0];
+    const alreadyIn=found.members.some(m=>m.uid===(user?.id||"local"));
+    if(!alreadyIn){
+      const updated={...found,members:[...found.members,{name:myName,uid:user?.id||"local",juzDone:[],lastSeen:today()}]};
+      setCollectiveKhatmas(p=>p.map(k=>k.id===found.id?updated:k));
+      setActiveColKhatma(updated);
+    } else {
+      setActiveColKhatma(found);
+    }
+    setJoinCode("");setShowCollective(false);
+  };
+  const markColJuz=(juzN)=>{
+    if(!activeColKhatma)return;
+    const myUid=user?.id||"local";
+    const updated={...activeColKhatma,members:activeColKhatma.members.map(m=>{
+      if(m.uid!==myUid)return m;
+      const done=m.juzDone.includes(juzN)?m.juzDone.filter(j=>j!==juzN):[...m.juzDone,juzN];
+      return{...m,juzDone:done,lastSeen:today()};
+    })};
+    setCollectiveKhatmas(p=>p.map(k=>k.id===activeColKhatma.id?updated:k));
+    setActiveColKhatma(updated);
+  };
+  const colJuzCovered=activeColKhatma?[...new Set(activeColKhatma.members.flatMap(m=>m.juzDone))]:[];
+  const colPct=activeColKhatma?Math.round(colJuzCovered.length/30*100):0;
   const markKhatmaDay=(k,d)=>{const updated={...k,log:{...k.log,[d]:!(k.log[d])}};setKhatmas(p=>p.map(x=>x.id===k.id?updated:x));if(activeKhatma?.id===k.id)setActiveKhatma(updated);};
   const getKhatmaDays=k=>{const days=[];const start=new Date(k.startDate);for(let i=0;i<k.totalDays;i++){const d=new Date(start);d.setDate(d.getDate()+i);days.push(d.toISOString().split("T")[0]);}return days;};
   const khatmaStreak=k=>{const days=getKhatmaDays(k).filter(d=>d<=today()).reverse();let streak=0;for(const d of days){if(k.log[d])streak++;else break;}return streak;};
@@ -2258,8 +2310,8 @@ return (
           <div style={{background:t.s1,border:`1px solid ${t.acc}`,borderRadius:18,padding:24,maxWidth:520,width:"92%",maxHeight:"85vh",display:"flex",flexDirection:"column",gap:14}} onClick={e=>e.stopPropagation()}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
               <div>
-                <h2 style={{fontFamily:"'Amiri',serif",fontSize:"1.5rem",color:t.acc,marginBottom:2}}>Plan IA personnalisé</h2>
-                <p style={{fontSize:".65rem",color:t.tx3}}>Généré par Claude · adapté à ton profil</p>
+                <h2 style={{fontFamily:"'Amiri',serif",fontSize:"1.5rem",color:t.acc,marginBottom:2}}>Mon Parcours de mémorisation</h2>
+                <p style={{fontSize:".65rem",color:t.tx3}}>Plan adapté à ton profil · mis à jour en temps réel</p>
               </div>
               <button onClick={()=>setShowAIPlan(false)} style={{background:"none",border:"none",color:t.tx3,fontSize:"1.3rem",cursor:"pointer"}}>✕</button>
             </div>
@@ -2292,12 +2344,12 @@ return (
                   </div>
                 </div>
                 <button onClick={generateAIPlan} disabled={aiPlanLoading} style={{width:"100%",padding:"12px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:10,color:"#fff",fontSize:".85rem",fontWeight:700,cursor:"pointer",opacity:aiPlanLoading?.6:1,transition:"opacity .2s"}}>
-                  {aiPlanLoading?"Génération en cours…":"✦ Générer mon plan"}
+                  {aiPlanLoading?"Calcul en cours…":"✦ Générer mon parcours"}
                 </button>
                 {aiPlanLoading&&(
                   <div style={{textAlign:"center",color:t.tx3,fontSize:".7rem"}}>
                     <div style={{width:24,height:24,border:`2px solid ${t.acc}`,borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite",margin:"0 auto 8px"}}/>
-                    Claude analyse ton profil…
+                    Analyse de ton profil en cours…
                   </div>
                 )}
               </div>
@@ -2422,13 +2474,32 @@ return (
         </div>
       )}
 
+      {/* Timer flottant en haut quand actif */}
+      {timerRunning&&timerLeft!==null&&timerLeft>0&&(
+        <div style={{position:"fixed",top:0,left:0,right:0,zIndex:250,background:`linear-gradient(135deg,${t.acc}ee,${t.acc2}ee)`,backdropFilter:"blur(12px)",padding:"6px 16px",display:"flex",alignItems:"center",gap:10,boxShadow:`0 2px 16px ${t.acc}44`}}>
+          <span style={{fontSize:".7rem",fontWeight:700,color:"#000",opacity:.7}}>⏱ Séance</span>
+          <div style={{flex:1,height:3,background:"rgba(0,0,0,.2)",borderRadius:99,overflow:"hidden"}}>
+            <div style={{height:"100%",width:`${100-(timerLeft/(timerDuration*60)*100)}%`,background:"rgba(0,0,0,.4)",borderRadius:99,transition:"width 1s linear"}}/>
+          </div>
+          <span style={{fontFamily:"monospace",fontWeight:900,fontSize:"1rem",color:"#000",letterSpacing:1,minWidth:52,textAlign:"center"}}>{fmtTime(timerLeft)}</span>
+          <button onClick={pauseTimer} style={{background:"rgba(0,0,0,.15)",border:"1px solid rgba(0,0,0,.2)",borderRadius:7,padding:"3px 10px",color:"#000",cursor:"pointer",fontSize:".7rem",fontWeight:700}}>⏸</button>
+          <button onClick={()=>setTimerOpen(true)} style={{background:"rgba(0,0,0,.1)",border:"1px solid rgba(0,0,0,.15)",borderRadius:7,padding:"3px 10px",color:"#000",cursor:"pointer",fontSize:".7rem"}}>↗</button>
+        </div>
+      )}
+      {timerLeft===0&&(
+        <div style={{position:"fixed",top:0,left:0,right:0,zIndex:250,background:"linear-gradient(135deg,#2e7d32ee,#43a047ee)",backdropFilter:"blur(12px)",padding:"6px 16px",display:"flex",alignItems:"center",gap:10}}>
+          <span style={{fontSize:".75rem",fontWeight:700,color:"#fff",flex:1}}>✓ Séance terminée · بارك الله فيك</span>
+          <button onClick={resetTimer} style={{background:"rgba(255,255,255,.2)",border:"1px solid rgba(255,255,255,.3)",borderRadius:7,padding:"3px 10px",color:"#fff",cursor:"pointer",fontSize:".7rem",fontWeight:700}}>✕</button>
+        </div>
+      )}
+
       {/* Topbar */}
-      <div className="topbar">
+      <div className="topbar" style={{marginTop:(timerRunning&&timerLeft!==null&&timerLeft>0)||timerLeft===0?36:0,transition:"margin-top .2s"}}>
         <div className="tb">
           <div className="logo"><span className="logo-h">Al-Hifz</span><span className="logo-ar">القرآن</span><span className="logo-sub">mémorisation</span></div>
           <div className="tb-r">
-            <button className="tbtn" style={{borderColor:t.pu,color:t.pu,fontSize:".6rem"}} onClick={()=>setShowAIPlan(true)}>✦ Plan IA</button>
-            <button className="tbtn" style={{borderColor:t.gr,color:t.gr,fontSize:".6rem"}} onClick={()=>setTimerOpen(true)}>⏱</button>
+            <button className="tbtn" style={{borderColor:t.pu,color:t.pu,fontSize:".6rem"}} onClick={()=>setShowAIPlan(true)}>✦ Mon Parcours</button>
+            <button className="tbtn" style={{borderColor:timerRunning?t.acc:t.gr,color:timerRunning?t.acc:t.gr,fontSize:".6rem",fontWeight:timerRunning?800:400}} onClick={()=>setTimerOpen(true)}>{timerRunning&&timerLeft?fmtTime(timerLeft):"⏱"}</button>
             <button className="ib" title={THEME_META[tn]?.label||tn} onClick={()=>{const keys=Object.keys(THEMES);setTn(keys[(keys.indexOf(tn)+1)%keys.length]);}}>{tn==="dark"||tn==="andalous"||tn==="ottoman"||tn==="abbasid"||tn==="emerald"?<Icons.Sun size={14}/>:<Icons.Moon size={14}/>}</button>
             {memStreak>0&&<div style={{display:"flex",alignItems:"center",gap:2,padding:"3px 7px",background:"rgba(249,115,22,.15)",borderRadius:8,border:"1px solid rgba(249,115,22,.3)",flexShrink:0}}>
               <span style={{fontSize:".85rem",lineHeight:1}}>🔥</span>
@@ -2860,8 +2931,10 @@ return (
                     </div>
                     <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
                       <span style={{fontSize:".6rem",color:t.tx3}}>Répét.</span>
-                      {[1,3,5,10].map(n=>(<button key={n} className={`tbtn ${loopCount===n?"on":""}`} onClick={()=>setLoopCount(n)} style={{minWidth:26,padding:"3px 6px"}}>{n}×</button>))}
-                      {loopCurrent>1&&<span style={{fontSize:".6rem",color:t.acc,fontWeight:700}}>{loopCurrent}/{loopCount}</span>}
+                      {[1,3,5,10].map(n=>(<button key={n} className={`tbtn ${loopCount===n&&!loopInfinite?"on":""}`} onClick={()=>{setLoopCount(n);setLoopInfinite(false);}} style={{minWidth:26,padding:"3px 6px"}}>{n}×</button>))}
+                      <button className={`tbtn ${loopInfinite?"on":""}`} onClick={()=>setLoopInfinite(p=>!p)} style={{minWidth:26,padding:"3px 8px",fontWeight:700,fontSize:".8rem",borderColor:loopInfinite?t.acc:t.b2,color:loopInfinite?t.acc:t.tx3}}>∞</button>
+                      {!loopInfinite&&loopCurrent>1&&<span style={{fontSize:".6rem",color:t.acc,fontWeight:700}}>{loopCurrent}/{loopCount}</span>}
+                      {loopInfinite&&playing!==null&&<span style={{fontSize:".6rem",color:t.acc,fontWeight:700,animation:"pulse 1s infinite"}}>∞ en boucle</span>}
                       <span style={{fontSize:".6rem",color:t.tx3,marginLeft:4}}>Vitesse</span>
                       {[0.75,1,1.25,1.5].map(s=>(<button key={s} className={`tbtn ${playbackRate===s?"on":""}`} onClick={()=>setPlaybackRate(s)} style={{minWidth:32,padding:"3px 5px"}}>{s}×</button>))}
                       <button className="tbtn" style={{marginLeft:"auto",borderColor:bookmark?.sn===selS.n?t.acc:t.b2,color:bookmark?.sn===selS.n?t.acc:t.tx3,fontWeight:bookmark?.sn===selS.n?700:400}} onClick={()=>setBookmark(bookmark?.sn===selS.n?null:{sn:selS.n,name:selS.name})}>{bookmark?.sn===selS.n?"● Signet":"○ Signet"}</button>
@@ -3414,6 +3487,105 @@ return (
               </div>
             )}
           </div>
+
+          {/* ═══ KHATMA COLLECTIVE ═══ */}
+          <div className="card" style={{marginTop:4}}>
+            <div className="ch">
+              <span className="ct">🤝 Khatma collective</span>
+              <button className="tbtn" style={{borderColor:t.acc,color:t.acc,fontSize:".6rem"}} onClick={()=>setShowCollective(p=>!p)}>{showCollective?"Fermer":"+ Nouvelle"}</button>
+            </div>
+            {showCollective&&(
+              <div style={{padding:"14px 16px",borderBottom:`1px solid ${t.b1}`,display:"flex",flexDirection:"column",gap:12}}>
+                <div>
+                  <div style={{fontSize:".65rem",color:t.tx3,marginBottom:6,textTransform:"uppercase",letterSpacing:"1px"}}>Créer une khatma de groupe</div>
+                  <div style={{display:"flex",gap:8}}>
+                    <input className="sinp" style={{flex:1}} placeholder="Nom du groupe…" value={newColKhatmaName} onChange={e=>setNewColKhatmaName(e.target.value)}/>
+                    <button className="tbtn" style={{borderColor:t.acc,color:t.acc,flexShrink:0}} onClick={createCollectiveKhatma}>Créer</button>
+                  </div>
+                </div>
+                <div style={{display:"flex",alignItems:"center",gap:8}}><div style={{flex:1,height:1,background:t.b1}}/><span style={{fontSize:".6rem",color:t.tx3}}>ou rejoindre</span><div style={{flex:1,height:1,background:t.b1}}/></div>
+                <div style={{display:"flex",gap:8}}>
+                  <input className="sinp" style={{flex:1,textTransform:"uppercase",letterSpacing:2}} placeholder="Code du groupe…" value={joinCode} onChange={e=>setJoinCode(e.target.value)} maxLength={6}/>
+                  <button className="tbtn" style={{borderColor:t.gr,color:t.gr,flexShrink:0}} onClick={joinCollectiveKhatma}>Rejoindre</button>
+                </div>
+              </div>
+            )}
+
+            {activeColKhatma?(
+              <div style={{padding:"14px 16px",display:"flex",flexDirection:"column",gap:14}}>
+                {/* Header */}
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                  <div>
+                    <div style={{fontWeight:700,color:t.tx,fontSize:".9rem"}}>{activeColKhatma.name}</div>
+                    <div style={{fontSize:".62rem",color:t.tx3,marginTop:2}}>{activeColKhatma.members.length} membre{activeColKhatma.members.length>1?"s":""} · Code : <span style={{fontFamily:"monospace",color:t.acc,fontWeight:700,letterSpacing:2}}>{activeColKhatma.code}</span></div>
+                  </div>
+                  <div style={{textAlign:"right"}}>
+                    <div style={{fontSize:"1.3rem",fontWeight:800,color:colPct===100?t.gr:t.acc}}>{colPct}%</div>
+                    <div style={{fontSize:".58rem",color:t.tx3}}>{colJuzCovered.length}/30 juz</div>
+                  </div>
+                </div>
+                {/* Barre globale */}
+                <div style={{height:8,background:t.b1,borderRadius:99,overflow:"hidden"}}>
+                  <div style={{height:"100%",width:`${colPct}%`,background:colPct===100?t.gr:`linear-gradient(90deg,${t.acc},${t.acc2})`,borderRadius:99,transition:"width .6s",boxShadow:`0 0 8px ${t.acc}55`}}/>
+                </div>
+                {/* Grille 30 juz */}
+                <div>
+                  <div style={{fontSize:".6rem",color:t.tx3,marginBottom:8}}>Coche les juz que TU as lus — les autres membres font de même</div>
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:5}}>
+                    {Array.from({length:30},(_,i)=>i+1).map(juz=>{
+                      const myUid=user?.id||"local";
+                      const myMember=activeColKhatma.members.find(m=>m.uid===myUid);
+                      const isMine=myMember?.juzDone.includes(juz);
+                      const coveredBy=activeColKhatma.members.filter(m=>m.juzDone.includes(juz));
+                      const isCovered=coveredBy.length>0;
+                      return(
+                        <div key={juz} onClick={()=>markColJuz(juz)} style={{aspectRatio:"1",borderRadius:8,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",border:`2px solid ${isMine?t.acc:isCovered?t.gr+"66":t.b2}`,background:isMine?`${t.acc}20`:isCovered?`${t.gr}12`:t.s2,transition:"all .15s",position:"relative"}} onMouseEnter={e=>e.currentTarget.style.transform="scale(1.08)"} onMouseLeave={e=>e.currentTarget.style.transform=""}>
+                          <span style={{fontSize:".62rem",fontWeight:700,color:isMine?t.acc:isCovered?t.gr:t.tx3}}>{juz}</span>
+                          {isCovered&&!isMine&&<span style={{fontSize:".42rem",color:t.gr,lineHeight:1}}>✓</span>}
+                          {isMine&&<span style={{fontSize:".42rem",color:t.acc,lineHeight:1}}>●</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div style={{display:"flex",gap:12,marginTop:8,flexWrap:"wrap"}}>
+                    {[[t.acc,"Tes juz"],[t.gr,"Autre membre"],["transparent","Non couvert"]].map(([c,l])=>(
+                      <div key={l} style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:8,height:8,borderRadius:3,background:c,border:`1.5px solid ${c==="transparent"?t.b2:c}`}}/><span style={{fontSize:".58rem",color:t.tx3}}>{l}</span></div>
+                    ))}
+                  </div>
+                </div>
+                {/* Membres */}
+                <div>
+                  <div style={{fontSize:".65rem",color:t.tx3,marginBottom:8,textTransform:"uppercase",letterSpacing:"1px"}}>Membres</div>
+                  <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                    {activeColKhatma.members.map((m,i)=>(
+                      <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 12px",background:t.s2,borderRadius:10,border:`1px solid ${t.b1}`}}>
+                        <div style={{width:28,height:28,borderRadius:"50%",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".7rem",fontWeight:700,color:"#000",flexShrink:0}}>{m.name[0].toUpperCase()}</div>
+                        <div style={{flex:1,minWidth:0}}>
+                          <div style={{fontSize:".75rem",fontWeight:600,color:t.tx,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.name}{m.uid===(user?.id||"local")&&" (moi)"}</div>
+                          <div style={{fontSize:".58rem",color:t.tx3}}>{m.juzDone.length} juz lus · vu {m.lastSeen===today()?"aujourd'hui":m.lastSeen}</div>
+                        </div>
+                        <div style={{fontSize:".75rem",fontWeight:700,color:t.acc,flexShrink:0}}>{Math.round(m.juzDone.length/30*100)}%</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {colPct===100&&(
+                  <div style={{padding:"14px",background:`${t.gr}15`,borderRadius:12,border:`1px solid ${t.gr}44`,textAlign:"center"}}>
+                    <div style={{fontSize:"1.5rem",marginBottom:4}}>🌿</div>
+                    <div style={{fontFamily:"'Amiri',serif",fontSize:"1rem",color:t.gr}}>Khatma complète !</div>
+                    <div style={{fontSize:".7rem",color:t.tx2,marginTop:4}}>بارك الله فيكم جميعاً</div>
+                  </div>
+                )}
+                <button onClick={()=>{const other=collectiveKhatmas.filter(k=>k.id!==activeColKhatma.id);setActiveColKhatma(other[0]||null);}} style={{background:"none",border:`1px solid ${t.b2}`,borderRadius:8,padding:"7px",color:t.tx3,fontSize:".65rem",cursor:"pointer"}}>Voir d'autres khatmas</button>
+              </div>
+            ):(
+              <div style={{padding:"20px 16px",textAlign:"center",color:t.tx3,fontSize:".75rem"}}>
+                <div style={{fontSize:"1.8rem",marginBottom:8}}>🤝</div>
+                Crée ou rejoins une khatma collective pour lire le Coran à plusieurs. Chaque membre couvre des juz différents jusqu'à la khatma complète.
+              </div>
+            )}
+          </div>
+        </div>
         )}
 
         {/* COMMUNAUTÉ */}
