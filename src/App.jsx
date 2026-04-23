@@ -741,68 +741,48 @@ function WbwModal({sn,vn,t}){
 }
 function TajwidSpan({text,enabled,tjc}) {
   const raw=text||"";
-  // Strip anciens tags de marquage [m]...[/m] si présents
+  // Strip anciens tags de marquage [m]...[/m]
   const clean=raw.replace(/\[[a-z]+\](.*?)\[\/[a-z]+\]/g,"$1");
 
   if(!enabled){
     return <bdi style={{direction:"rtl"}}>{clean.replace(/<[^>]*>/g,"")}</bdi>;
   }
-
-  // Cas 1 : pas de HTML tajweed → texte brut sans coloration
   if(!clean.includes("<tajweed")){
     return <bdi style={{direction:"rtl",letterSpacing:0}}>{clean.replace(/<[^>]*>/g,"")}</bdi>;
   }
 
-  // Cas 2 : HTML tajweed de l'API — parser propre
-  const parts=[];
-  let i=0,key=0;
-  while(i<clean.length){
-    // Texte ordinaire entre les tags
-    if(clean[i]!=="<"){
-      let j=i;
-      while(j<clean.length&&clean[j]!=="<")j++;
-      const chunk=clean.slice(i,j);
-      if(chunk) parts.push(<React.Fragment key={key++}>{chunk}</React.Fragment>);
-      i=j;
-      continue;
-    }
-    // Tag ouvert
-    const closeAngle=clean.indexOf(">",i);
-    if(closeAngle===-1){
-      parts.push(<React.Fragment key={key++}>{clean.slice(i)}</React.Fragment>);
-      break;
-    }
-    const tagContent=clean.slice(i+1,closeAngle).trim();
-
-    if(tagContent.startsWith("tajweed")){
-      // Extraire la classe — supporte class="x" et class=x
-      const clsMatch=tagContent.match(/class=["']?([a-z_]+)["']?/);
-      const cls=clsMatch?clsMatch[1]:null;
-      const colorFn=cls?TAJWID_CLASS_COLORS[cls]:null;
-      const color=colorFn?colorFn(tjc):null;
-      // Trouver le tag fermant
-      const closeTag=clean.indexOf("</tajweed>",closeAngle+1);
-      const inner=closeTag!==-1?clean.slice(closeAngle+1,closeTag):clean.slice(closeAngle+1);
-      if(color){
-        parts.push(
-          <bdi key={key++} style={{color,fontWeight:"bold",letterSpacing:0}} title={cls?.replace(/_/g," ")}>
-            {inner}
-          </bdi>
-        );
-      } else {
-        parts.push(<React.Fragment key={key++}>{inner}</React.Fragment>);
+  // Parser robuste via DOMParser — gère tous les cas (imbriqués, sans guillemets, auto-fermants)
+  try{
+    const wrapped=`<span>${clean}</span>`;
+    const doc=new DOMParser().parseFromString(wrapped,"text/html");
+    const root=doc.querySelector("span");
+    if(!root) throw new Error("parse fail");
+    let key=0;
+    const renderNode=(node)=>{
+      if(node.nodeType===3){ // texte
+        return node.textContent?<React.Fragment key={key++}>{node.textContent}</React.Fragment>:null;
       }
-      i=closeTag!==-1?closeTag+"</tajweed>".length:clean.length;
-    }
-    else if(tagContent.startsWith("/tajweed")||tagContent.startsWith("/")){
-      i=closeAngle+1;
-    }
-    else{
-      // Tag inconnu — skip
-      i=closeAngle+1;
-    }
+      if(node.nodeType===1){
+        const tag=node.tagName.toLowerCase();
+        const children=Array.from(node.childNodes).map(renderNode).filter(Boolean);
+        if(tag==="tajweed"){
+          const cls=node.getAttribute("class")||"";
+          const colorFn=TAJWID_CLASS_COLORS[cls];
+          const color=colorFn?colorFn(tjc):null;
+          if(color) return <bdi key={key++} style={{color,fontWeight:"bold",letterSpacing:0}} title={cls.replace(/_/g," ")}>{children}</bdi>;
+          return <React.Fragment key={key++}>{children}</React.Fragment>;
+        }
+        // Tout autre tag HTML — on prend juste le texte
+        return <React.Fragment key={key++}>{children}</React.Fragment>;
+      }
+      return null;
+    };
+    const parts=Array.from(root.childNodes).map(renderNode).filter(Boolean);
+    return <bdi style={{direction:"rtl",letterSpacing:0,lineHeight:"inherit"}}>{parts}</bdi>;
+  }catch{
+    // Fallback sécurisé : texte brut sans couleurs
+    return <bdi style={{direction:"rtl",letterSpacing:0}}>{clean.replace(/<[^>]*>/g,"")}</bdi>;
   }
-  return <bdi style={{direction:"rtl",letterSpacing:0,lineHeight:"inherit"}}>{parts}</bdi>;
 }
 
 // MushafPage
@@ -840,6 +820,7 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
   const [verses,setVerses]=useState([]);
   const [textState,setTextState]=useState("idle");
   const touchStart=useRef(null);
+  const touchStartY=useRef(null);
   const effectiveTjc=tjc||TJC_DARK;
   const AC="#c9a84c";
 
@@ -882,8 +863,15 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
   const groups=[];let cur=null;
   for(const v of verses){if(!cur||cur.s!==v.s){cur={s:v.s,sName:v.sName,sAr:v.sAr,vs:[]};groups.push(cur);}cur.vs.push(v);}
 
-  const onTS=e=>{touchStart.current=e.touches[0].clientX;};
-  const onTE=e=>{if(!touchStart.current)return;const dx=e.changedTouches[0].clientX-touchStart.current;if(Math.abs(dx)>50){dx<0?onNext?.():onPrev?.();}touchStart.current=null;};
+  const onTS=e=>{touchStart.current=e.touches[0].clientX;touchStartY.current=e.touches[0].clientY;};
+  const onTE=e=>{
+    if(!touchStart.current)return;
+    const dx=e.changedTouches[0].clientX-touchStart.current;
+    const dy=Math.abs(e.changedTouches[0].clientY-(touchStartY.current||0));
+    // Ne changer de page que si swipe horizontal > 120px ET déplacement vertical < 60px
+    if(Math.abs(dx)>120&&dy<60){dx<0?onNext?.():onPrev?.();}
+    touchStart.current=null;touchStartY.current=null;
+  };
 
   const outer=fullscreen
     ?{position:"fixed",inset:0,zIndex:200,background:"#0d1800",display:"flex",flexDirection:"column",overflow:"hidden"}
@@ -1340,6 +1328,8 @@ const [authError, setAuthError] = useState("");
  const wbwVerseRef=useRef(null);
 const [wbwOpen,setWbwOpen]=useState(false);
 const [wbwWords,setWbwWords]=useState(null);
+// Lecture partielle
+const [partialVerse,setPartialVerse]=useState(null); // {sn,vn,words:[],from:0,to:N}
   const [newListName,setNewListName]=useState("");
   const [selList,setSelList]=useState(null);
   const [mushafFullscreen,setMushafFullscreen]=useState(false);
@@ -1773,31 +1763,42 @@ const handleReset=async()=>{
     if(tafsirLoadingRef.current[key]||tafsirData[key]) return;
     tafsirLoadingRef.current[key]=true;
     setTafsirLoading(p=>({...p,[key]:true}));
-    const setText=(text)=>{
+    const done=(text)=>{
       setTafsirData(p=>({...p,[key]:text}));
       setTafsirLoading(p=>({...p,[key]:false}));
       tafsirLoadingRef.current[key]=false;
     };
+    // Source 1 : quran.com — tafsir id=31 = Ibn Kathir FR
     try{
-      // Source 1 : jsdelivr spa5k — tafsir Ibn Kathir FR (le plus complet)
+      const r=await fetch(`https://api.quran.com/api/v4/tafsirs/31/by_ayah/${sn}:${vn}`);
+      if(r.ok){
+        const d=await r.json();
+        const raw=d?.tafsir?.text||d?.data?.text||"";
+        const text=raw.replace(/<[^>]*>/g,"").replace(/&amp;/g,"&").replace(/&nbsp;/g," ").replace(/\s+/g," ").trim();
+        if(text.length>30){done(text.slice(0,900));return;}
+      }
+    }catch{}
+    // Source 2 : jsdelivr spa5k — Ibn Kathir FR direct
+    try{
       const r=await fetch(`https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/fr-tafsir-ibn-kathir/${sn}/${vn}.json`);
       if(r.ok){
         const d=await r.json();
-        const raw=d.text||d.tafsir||"";
-        const text=raw.replace(/<[^>]*>/g,"").replace(/&amp;/g,"&").replace(/&nbsp;/g," ").replace(/\s+/g," ").trim().slice(0,900);
-        if(text&&text.length>20){setText(text);return;}
+        const raw=d?.text||d?.tafsir||"";
+        const text=raw.replace(/<[^>]*>/g,"").replace(/\s+/g," ").trim();
+        if(text.length>30){done(text.slice(0,900));return;}
       }
     }catch{}
+    // Source 3 : raw GitHub (contourne le cache jsdelivr)
     try{
-      // Source 2 : API alquran.cloud — tafsir FR jalalayn (fallback)
-      const r2=await fetch(`https://api.alquran.cloud/v1/ayah/${sn}:${vn}/fr.hamidullah`);
-      if(r2.ok){
-        const d=await r2.json();
-        const text=(d?.data?.text||"").trim();
-        if(text&&text.length>10){setText("(Traduction) "+text);return;}
+      const r=await fetch(`https://raw.githubusercontent.com/spa5k/tafsir_api/main/tafsir/fr-tafsir-ibn-kathir/${sn}/${vn}.json`);
+      if(r.ok){
+        const d=await r.json();
+        const raw=d?.text||d?.tafsir||"";
+        const text=raw.replace(/<[^>]*>/g,"").replace(/\s+/g," ").trim();
+        if(text.length>30){done(text.slice(0,900));return;}
       }
     }catch{}
-    setText("Tafsir non disponible pour ce verset.");
+    done("Tafsir Ibn Kathir non disponible pour ce verset.");
   },[tafsirData]);
 
   const buildUrl=(sn,vn)=>{
@@ -2474,6 +2475,70 @@ return (
         </div>
       )}
 
+      {/* Modal Lecture partielle */}
+      {partialVerse&&(
+        <div className="overlay" onClick={()=>setPartialVerse(null)}>
+          <div className="modal" onClick={e=>e.stopPropagation()} style={{maxWidth:480}}>
+            <h2 style={{fontFamily:"'Amiri',serif",color:acc,marginBottom:4}}>✂ Lecture partielle</h2>
+            <p style={{fontSize:".68rem",color:t.tx3,marginBottom:16}}>Sélectionne les mots à lire — idéal pour mémoriser bout à bout</p>
+            {/* Aperçu du segment sélectionné */}
+            <div style={{background:t.s2,borderRadius:12,padding:"14px 16px",border:`1px solid ${t.b1}`,marginBottom:14,direction:"rtl",textAlign:"right"}}>
+              <div style={{fontFamily:"'Amiri Quran',serif",fontSize:"1.3rem",lineHeight:2.2,color:t.tx}}>
+                {partialVerse.words.map((w,i)=>(
+                  <span key={i} style={{
+                    color:i>=partialVerse.from&&i<=partialVerse.to?acc:t.tx3+"55",
+                    fontWeight:i>=partialVerse.from&&i<=partialVerse.to?700:400,
+                    cursor:"pointer",
+                    transition:"all .15s",
+                    padding:"0 2px",
+                  }}
+                  onClick={()=>{
+                    if(i<partialVerse.from) setPartialVerse(p=>({...p,from:i}));
+                    else if(i>partialVerse.to) setPartialVerse(p=>({...p,to:i}));
+                    else if(i===partialVerse.from&&i<partialVerse.to) setPartialVerse(p=>({...p,from:i+1}));
+                    else if(i===partialVerse.to&&i>partialVerse.from) setPartialVerse(p=>({...p,to:i-1}));
+                  }}
+                  >{w}{" "}</span>
+                ))}
+              </div>
+              <div style={{fontSize:".65rem",color:t.tx3,marginTop:8,textAlign:"left",direction:"ltr"}}>
+                Mots {partialVerse.from+1} à {partialVerse.to+1} sur {partialVerse.words.length}
+              </div>
+            </div>
+            {/* Sliders début / fin */}
+            <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:16}}>
+              <div>
+                <label style={{fontSize:".62rem",color:t.tx3,display:"block",marginBottom:4}}>Début — mot {partialVerse.from+1}</label>
+                <input type="range" min={0} max={partialVerse.to} value={partialVerse.from}
+                  onChange={e=>setPartialVerse(p=>({...p,from:+e.target.value}))}
+                  style={{width:"100%",accentColor:acc}}/>
+              </div>
+              <div>
+                <label style={{fontSize:".62rem",color:t.tx3,display:"block",marginBottom:4}}>Fin — mot {partialVerse.to+1}</label>
+                <input type="range" min={partialVerse.from} max={partialVerse.words.length-1} value={partialVerse.to}
+                  onChange={e=>setPartialVerse(p=>({...p,to:+e.target.value}))}
+                  style={{width:"100%",accentColor:acc}}/>
+              </div>
+            </div>
+            {/* Actions */}
+            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+              <button className="mbtn" style={{flex:1}} onClick={()=>{
+                // Répéter en boucle ce segment audio (on joue le verset entier — l'audio partiel n'est pas disponible)
+                doPlay(partialVerse.vn);
+                setPartialVerse(null);
+              }}>▶ Écouter</button>
+              <button className="tbtn" style={{flex:1,borderColor:t.pu,color:t.pu}} onClick={()=>{
+                // Copier le segment sélectionné
+                const seg=partialVerse.words.slice(partialVerse.from,partialVerse.to+1).join(" ");
+                navigator.clipboard?.writeText(seg);
+                setPartialVerse(null);
+              }}>📋 Copier</button>
+              <button className="tbtn" onClick={()=>setPartialVerse(null)} style={{borderColor:t.b2,color:t.tx3}}>Fermer</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Note modal */}
       {editingNote&&(<div className="overlay" onClick={()=>setEditingNote(null)}><div className="modal" onClick={e=>e.stopPropagation()}><h2>Note personnelle</h2><p style={{fontSize:".72rem",color:t.tx3,marginBottom:12}}>{editingNote.replace("_"," · verset ")}</p><textarea value={noteText} onChange={e=>setNoteText(e.target.value)} placeholder="Écris ta note…" style={{width:"100%",minHeight:100,background:t.inputBg,border:`1px solid ${t.b2}`,borderRadius:8,padding:"10px 12px",color:t.tx,fontSize:".85rem",resize:"vertical",outline:"none",marginBottom:12}}/><div style={{display:"flex",gap:8}}><button className="mbtn" style={{flex:1}} onClick={()=>{const[sn,vn]=editingNote.split("_");saveNote(sn,vn,noteText);}}>Sauvegarder</button>{notes[editingNote]&&(<button className="tbtn" style={{borderColor:t.rd,color:t.rd}} onClick={()=>{const[sn,vn]=editingNote.split("_");saveNote(sn,vn,"");}}>Supprimer</button>)}</div></div></div>)}
 
@@ -3051,6 +3116,7 @@ return (
                               <button className={`vbtn ${isMem?"mem":""}`} onClick={()=>toggleV(selS.n,v.n,v.ar)}>{isMem?<><Icons.Check size={10}/>Mémorisé</>:<>+ Mémoriser</>}</button>
                               <button className="vbtn snd" onClick={()=>{setLoopCurrent(1);doPlay(v.n);addToHistory(selS.n,v.n);}}><Icons.Play size={10}/>{isPl?"Stop":"Écouter"}</button>
                               <button className={`vbtn ${isFav(selS.n,v.n)?"mem":""}`} onClick={()=>toggleFav(selS.n,v.n,v.ar,v.fr,selS.name)}><Icons.Heart size={10} filled={isFav(selS.n,v.n)}/>{isFav(selS.n,v.n)?"Favori ✓":"Favori"}</button>
+                              {(()=>{const words=(v.ar||"").replace(/<[^>]*>/g,"").split(/\s+/).filter(Boolean);return words.length>4&&(<button className="vbtn" style={{borderColor:t.bl,color:t.bl}} onClick={()=>setPartialVerse({sn:selS.n,vn:v.n,words,from:0,to:words.length-1,fr:v.fr})}>✂ Partiel</button>);})()}
                               <button className={`vbtn ${notes[`${selS.n}_${v.n}`]?"on":""}`} style={notes[`${selS.n}_${v.n}`]?{borderColor:t.pu,color:t.pu}:{}} onClick={()=>{setEditingNote(`${selS.n}_${v.n}`);setNoteText(notes[`${selS.n}_${v.n}`]||"");}}>Note{notes[`${selS.n}_${v.n}`]?" ✓":""}</button>
 <button className="vbtn" onClick={()=>setShareVerse({sn:selS.n,vn:v.n,ar:v.ar,fr:v.fr,surah:selS.name,surahAr:selS.ar})}><Icons.Share size={10}/>Partager</button><button className="vbtn" onClick={()=>{wbwVerseRef.current={sn:selS.n,vn:v.n};setWbwOpen(true);}}>📖 Mot à mot</button>                              {speechSupported&&(
                               <button
