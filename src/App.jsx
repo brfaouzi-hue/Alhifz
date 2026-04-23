@@ -1259,15 +1259,16 @@ const [email, setEmail] = useState("");
 const [password, setPassword] = useState("");
 const [authLoading, setAuthLoading] = useState(false);
 const [authError, setAuthError] = useState("");
- const [page,setPage]=useState("quran");
+ const [page,setPage]=useState("home");
   const [pageTransition,setPageTransition]=useState(false);
   const [ltab,setLtab]=useState("list");
   const [selS,setSelS]=useState(null);
   const [selJuz,setSelJuz]=useState(null);
   const [search,setSearch]=useState("");
-  const [showTr,setShowTr]=useState(true);
-  const [showTj,setShowTj]=useState(true);
+  const [showTr,setShowTr]=useState(false);
+  const [showTj,setShowTj]=useState(false);
   const [showTf,setShowTf]=useState(false);
+  const [versetDuJourDismissed,setVersetDuJourDismissed]=useState(()=>ld("qvdjdis","")===today());
   const [showPage,setShowPage]=useState(false);
   const [mushafPage,setMushafPage]=useState(null);
   const [mushafSurahModal,setMushafSurahModal]=useState(false);
@@ -1317,7 +1318,16 @@ const [authError, setAuthError] = useState("");
   // SM-2: {key: {interval, repetitions, ef, nextDate, lastDate}}
   // ef = easiness factor (2.5 default), interval en jours
   const [badges,setBadges]=useState(()=>ld("qbadges",[]));
+  const [badgePopup,setBadgePopup]=useState(null); // {id, icon, label}
   const [autoNight,setAutoNight]=useState(()=>ld("qautonight",false));
+  // Stats Tarteel-style
+  const [engagementTime,setEngagementTime]=useState(()=>ld("qengtime",0)); // secondes totales
+  const [recitTime,setRecitTime]=useState(()=>ld("qrecittime",0)); // secondes récitation
+  const [versesRecited,setVersesRecited]=useState(()=>ld("qvrecited",0));
+  const sessionStartRef=useRef(Date.now());
+  const lastEngRef=useRef(Date.now());
+  // Messages d'encouragement pages lues
+  const [encouragementMsg,setEncouragementMsg]=useState(null);
   const [playbackRate,setPlaybackRate]=useState(1);
   const [favorites,setFavorites]=useState(()=>ld("qfavs",[]));
   const [notes,setNotes]=useState(()=>ld("qnotes",{}));
@@ -1363,10 +1373,13 @@ const partialPlayRef=useRef(null); // {stopAt: ratio 0-1}
   // Quiz
   const [quizOpen,setQuizOpen]=useState(false);
   const [quizMode,setQuizMode]=useState("surah"); // "surah" | "complete"
+  const [quizFilter,setQuizFilter]=useState("memorized"); // "memorized" | "all" | surah number
+  const [quizFilterSurah,setQuizFilterSurah]=useState(null); // sourate spécifique
   const [quizQ,setQuizQ]=useState(null);
   const [quizChoices,setQuizChoices]=useState([]);
   const [quizAnswer,setQuizAnswer]=useState(null);
-  const [quizScore,setQuizScore]=useState({correct:0,total:0});
+  const [quizScore,setQuizScore]=useState({correct:0,total:0,wrongs:[]});
+  const [quizShowWrong,setQuizShowWrong]=useState(null); // affiche le détail d'une erreur
   // Notifications
   const [notifEnabled,setNotifEnabled]=useState(()=>ld("qnotif",false));
   const [notifHour,setNotifHour]=useState(()=>ld("qnotifhour","08:00"));
@@ -1404,6 +1417,9 @@ const partialPlayRef=useRef(null); // {stopAt: ratio 0-1}
   useEffect(()=>sv("qbookmark",bookmark),[bookmark]);
   useEffect(()=>sv("qspaced",spaced),[spaced]);
   useEffect(()=>sv("qbadges",badges),[badges]);
+  useEffect(()=>sv("qengtime",engagementTime),[engagementTime]);
+  useEffect(()=>sv("qrecittime",recitTime),[recitTime]);
+  useEffect(()=>sv("qvrecited",versesRecited),[versesRecited]);
   useEffect(()=>sv("qautonight",autoNight),[autoNight]);
   useEffect(()=>sv("qfavs",favorites),[favorites]);
   useEffect(()=>sv("qnotes",notes),[notes]);
@@ -1466,7 +1482,7 @@ const handleLogin=async()=>{
 };
 const handleSignup=async()=>{
   setAuthLoading(true);setAuthError("");
-  const{error}=await supabase.auth.signUp({email,password});
+  const{error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:"https://alhifz.vercel.app"}});
   if(error)setAuthError(error.message);
   else setAuthError("Vérifie ton email pour confirmer ton compte ✓");
   setAuthLoading(false);
@@ -1474,7 +1490,7 @@ const handleSignup=async()=>{
 const handleReset=async()=>{
   if(!email){setAuthError("Entre ton email d'abord");return;}
   setAuthLoading(true);setAuthError("");
-  const{error}=await supabase.auth.resetPasswordForEmail(email);
+  const{error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:"https://alhifz.vercel.app"});
   if(error)setAuthError(error.message);
   else setAuthError("Email envoyé ! Vérifie ta boîte mail ✓");
   setAuthLoading(false);
@@ -1546,6 +1562,7 @@ const handleReset=async()=>{
   const addToHistory=(sn,vn)=>{
     const entry={sn,vn,ts:Date.now(),surah:SURAHS.find(s=>s.n===sn)?.name||""};
     setReadHistory(p=>{const filtered=p.filter(h=>!(h.sn===sn&&h.vn===vn));return[entry,...filtered].slice(0,50);});
+    setVersesRecited(p=>p+1);
   };
 
   const searchVerses=useCallback(async(q)=>{
@@ -1627,6 +1644,29 @@ const handleReset=async()=>{
 
   const memStreak=useMemo(()=>{let s=0,d=new Date();while(true){const key=d.toISOString().split("T")[0];if(!hist[key])break;s++;d.setDate(d.getDate()-1);}return s;},[hist]);
 
+  // Tracking temps d'engagement — toutes les 30s
+  useEffect(()=>{
+    const interval=setInterval(()=>{
+      const now=Date.now();
+      const delta=Math.round((now-lastEngRef.current)/1000);
+      if(delta>0&&delta<120){ // max 2min par tick pour éviter les faux positifs (écran éteint)
+        setEngagementTime(p=>p+delta);
+      }
+      lastEngRef.current=now;
+    },30000);
+    return()=>clearInterval(interval);
+  },[]);
+
+  // Tracking temps de récitation audio
+  useEffect(()=>{
+    if(!audioPlaying)return;
+    const interval=setInterval(()=>{
+      setRecitTime(p=>p+1);
+    },1000);
+    return()=>clearInterval(interval);
+  },[audioPlaying]);
+
+  // Badge popup + messages encouragement pages
   useEffect(()=>{
     const newBadges=[];const completedSurahs=SURAHS.filter(s=>sMem(s)===s.v);
     const add=(id,cond)=>{if(cond&&!badges.includes(id))newBadges.push(id);};
@@ -1635,8 +1675,38 @@ const handleReset=async()=>{
     add("juz30",SURAHS.filter(s=>s.juz===30).every(s=>sMem(s)===s.v));add("juz29",SURAHS.filter(s=>s.juz===29).every(s=>sMem(s)===s.v));
     add("fatiha",sMem(SURAHS[0])===SURAHS[0].v);add("ikhlas",sMem(SURAHS[111])===SURAHS[111].v);
     add("streak_3",memStreak>=3);add("streak_7",memStreak>=7);add("streak_30",memStreak>=30);
-    if(newBadges.length>0)setBadges(p=>[...p,...newBadges]);
+    if(newBadges.length>0){
+      setBadges(p=>[...p,...newBadges]);
+      const bd=BADGE_DEFS.find(b=>b.id===newBadges[0]);
+      if(bd){setBadgePopup(bd);setTimeout(()=>setBadgePopup(null),4000);}
+    }
   },[mem,memStreak]);
+
+  // Messages d'encouragement quand on lit des pages (Khatma)
+  useEffect(()=>{
+    const pagesRead=Object.keys(pageRead).filter(k=>pageRead[k]).length;
+    const milestones=[5,10,20,50,100,200,300,400,500,604];
+    const msgs={
+      5:"MashaAllah ! 5 pages lues 🌱 Le voyage commence",
+      10:"10 pages ! بارك الله فيك — continue ainsi",
+      20:"20 pages déjà ! Tu construis une belle habitude 📖",
+      50:"50 pages ! Mi-chemin du premier juz. اللهم بارك",
+      100:"100 pages ! Sous-hân Allah — tu avances avec constance 🌟",
+      200:"200 pages ! Un tiers du Coran lu. La baraka est avec toi 🤲",
+      300:"300 pages — la moitié du Coran ! Quel honneur 🌙",
+      400:"400 pages lues ! Persévérance et dévotion. جزاك الله خيرا",
+      500:"500 pages ! Tu approches de la Khatma complète 👑",
+      604:"🎉 Khatma complète ! بارك الله فيك — ختمت القرآن الكريم",
+    };
+    if(milestones.includes(pagesRead)&&msgs[pagesRead]){
+      const key=`enc_${pagesRead}`;
+      if(!ld(key,false)){
+        setEncouragementMsg({pages:pagesRead,msg:msgs[pagesRead]});
+        sv(key,true);
+        setTimeout(()=>setEncouragementMsg(null),5000);
+      }
+    }
+  },[pageRead]);
 
   // SM-2 — calcule quels versets sont dus aujourd'hui
   const sm2Due=useMemo(()=>{
@@ -2012,6 +2082,15 @@ const handleReset=async()=>{
   const getKhatmaDays=k=>{const days=[];const start=new Date(k.startDate);for(let i=0;i<k.totalDays;i++){const d=new Date(start);d.setDate(d.getDate()+i);days.push(d.toISOString().split("T")[0]);}return days;};
   const khatmaStreak=k=>{const days=getKhatmaDays(k).filter(d=>d<=today()).reverse();let streak=0;for(const d of days){if(k.log[d])streak++;else break;}return streak;};
   const togglePage=p=>setPageRead(prev=>({...prev,[String(p)]:!prev[String(p)]}));
+  const goToPage=p=>{
+    setMushafPage(p);
+    // Si khatma active — mémoriser la dernière page lue
+    if(activeKhatma){
+      const updated={...activeKhatma,lastPage:p};
+      setKhatmas(prev=>prev.map(k=>k.id===activeKhatma.id?updated:k));
+      setActiveKhatma(updated);
+    }
+  };
   const toggleFav=(sn,vn,ar,fr,surah)=>{const key=`${sn}_${vn}`;setFavorites(p=>p.find(f=>f.key===key)?p.filter(f=>f.key!==key):[...p,{key,sn,vn,ar,fr,surah}]);};
   const isFav=(sn,vn)=>favorites.some(f=>f.key===`${sn}_${vn}`);
   const saveNote=(sn,vn,text)=>{const k=`${sn}_${vn}`;if(text.trim())setNotes(p=>({...p,[k]:text.trim()}));else setNotes(p=>{const n={...p};delete n[k];return n;});setEditingNote(null);};
@@ -2094,22 +2173,37 @@ const handleReset=async()=>{
   const updateStreak=useCallback(()=>{},[]);
 
   // Quiz generation
-  const generateQuiz=useCallback(()=>{
-    const allVerses=[];
-    SURAHS.forEach(s=>{
-      const vs=Q[s.n]||[];
-      vs.forEach(v=>allVerses.push({...v,sn:s.n,surah:s.name,surahAr:s.ar}));
-    });
-    if(allVerses.length===0)return;
-    const q=allVerses[Math.floor(Math.random()*allVerses.length)];
-    // Generate 4 surah choices
+  const generateQuiz=useCallback((filterSurah=null,filterMode="memorized")=>{
+    // Pool de versets selon le filtre
+    let pool=[];
+    if(filterSurah){
+      const vs=Q[filterSurah]||[];
+      vs.forEach(v=>pool.push({...v,sn:filterSurah,surah:SURAHS.find(s=>s.n===filterSurah)?.name||"",surahAr:SURAHS.find(s=>s.n===filterSurah)?.ar||""}));
+    } else if(filterMode==="memorized"){
+      // Uniquement les versets que l'utilisateur a mémorisés
+      SURAHS.forEach(s=>{
+        const memKeys=Object.keys(mem[String(s.n)]||{});
+        memKeys.forEach(vk=>{
+          const v=Q[s.n]?.find(x=>String(x.n)===vk);
+          if(v) pool.push({...v,sn:s.n,surah:s.name,surahAr:s.ar});
+        });
+      });
+    } else {
+      SURAHS.forEach(s=>{(Q[s.n]||[]).forEach(v=>pool.push({...v,sn:s.n,surah:s.name,surahAr:s.ar}));});
+    }
+    if(pool.length<4){
+      // Pas assez de versets mémorisés — fallback sur Juz 30 embarqué
+      SURAHS.forEach(s=>{(Q[s.n]||[]).forEach(v=>pool.push({...v,sn:s.n,surah:s.name,surahAr:s.ar}));});
+    }
+    if(pool.length===0)return;
+    const q=pool[Math.floor(Math.random()*pool.length)];
     const correct=SURAHS.find(s=>s.n===q.sn);
     const wrong=SURAHS.filter(s=>s.n!==q.sn).sort(()=>Math.random()-.5).slice(0,3);
     const choices=[correct,...wrong].sort(()=>Math.random()-.5);
     setQuizQ(q);
     setQuizChoices(choices);
     setQuizAnswer(null);
-  },[]);
+  },[mem]);
 
   // Notifications
   const requestNotifications=async()=>{
@@ -2346,12 +2440,31 @@ return (
             {!aiPlanResult&&(
               <div style={{display:"flex",flexDirection:"column",gap:10}}>
                 <div>
-                  <label style={{fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",display:"block",marginBottom:5}}>Objectif</label>
+                  <label style={{fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",display:"block",marginBottom:5}}>Objectif global</label>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
                     {[["juz30","Juz 30"],["juz29","Juz 29-30"],["halfquran","Demi-Coran"],["fullquran","Coran complet"]].map(([v,l])=>(
-                      <button key={v} onClick={()=>setAiPlanParams(p=>({...p,goal:v}))} style={{padding:"8px 10px",borderRadius:8,border:`1.5px solid ${aiPlanParams.goal===v?t.acc:t.b2}`,background:aiPlanParams.goal===v?`${t.acc}15`:t.s2,color:aiPlanParams.goal===v?t.acc:t.tx,fontSize:".72rem",cursor:"pointer",fontWeight:aiPlanParams.goal===v?700:400,transition:"all .15s"}}>{l}</button>
+                      <button key={v} onClick={()=>setAiPlanParams(p=>({...p,goal:v,customGoal:null}))} style={{padding:"8px 10px",borderRadius:8,border:`1.5px solid ${aiPlanParams.goal===v&&!aiPlanParams.customGoal?t.acc:t.b2}`,background:aiPlanParams.goal===v&&!aiPlanParams.customGoal?`${t.acc}15`:t.s2,color:aiPlanParams.goal===v&&!aiPlanParams.customGoal?t.acc:t.tx,fontSize:".72rem",cursor:"pointer",fontWeight:aiPlanParams.goal===v&&!aiPlanParams.customGoal?700:400,transition:"all .15s"}}>{l}</button>
                     ))}
                   </div>
+                </div>
+                {/* Sélection fine par juz, sourate ou hizb */}
+                <div>
+                  <label style={{fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",display:"block",marginBottom:5}}>Ou choisir précisément</label>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
+                    <select onChange={e=>{const v=+e.target.value;if(v)setAiPlanParams(p=>({...p,customGoal:`juz_${v}`,goal:null}));}} style={{padding:"7px 6px",borderRadius:8,border:`1px solid ${aiPlanParams.customGoal?.startsWith("juz_")?t.acc:t.b2}`,background:aiPlanParams.customGoal?.startsWith("juz_")?`${t.acc}15`:t.s2,color:aiPlanParams.customGoal?.startsWith("juz_")?t.acc:t.tx,fontSize:".65rem",cursor:"pointer",outline:"none"}}>
+                      <option value="">Juz…</option>
+                      {Array.from({length:30},(_,i)=>i+1).map(j=><option key={j} value={j}>Juz {j}</option>)}
+                    </select>
+                    <select onChange={e=>{const v=+e.target.value;if(v)setAiPlanParams(p=>({...p,customGoal:`surah_${v}`,goal:null}));}} style={{padding:"7px 6px",borderRadius:8,border:`1px solid ${aiPlanParams.customGoal?.startsWith("surah_")?t.acc:t.b2}`,background:aiPlanParams.customGoal?.startsWith("surah_")?`${t.acc}15`:t.s2,color:aiPlanParams.customGoal?.startsWith("surah_")?t.acc:t.tx,fontSize:".65rem",cursor:"pointer",outline:"none"}}>
+                      <option value="">Sourate…</option>
+                      {SURAHS.map(s=><option key={s.n} value={s.n}>{s.name}</option>)}
+                    </select>
+                    <select onChange={e=>{const v=+e.target.value;if(v)setAiPlanParams(p=>({...p,customGoal:`hizb_${v}`,goal:null}));}} style={{padding:"7px 6px",borderRadius:8,border:`1px solid ${aiPlanParams.customGoal?.startsWith("hizb_")?t.acc:t.b2}`,background:aiPlanParams.customGoal?.startsWith("hizb_")?`${t.acc}15`:t.s2,color:aiPlanParams.customGoal?.startsWith("hizb_")?t.acc:t.tx,fontSize:".65rem",cursor:"pointer",outline:"none"}}>
+                      <option value="">Hizb…</option>
+                      {Array.from({length:60},(_,i)=>i+1).map(h=><option key={h} value={h}>Hizb {h}</option>)}
+                    </select>
+                  </div>
+                  {aiPlanParams.customGoal&&<div style={{fontSize:".6rem",color:t.acc,marginTop:4}}>✦ Objectif : {aiPlanParams.customGoal.replace("juz_","Juz ").replace("surah_",s=>` Sourate ${SURAHS.find(x=>x.n===+aiPlanParams.customGoal.split("_")[1])?.name||""}`).replace("hizb_","Hizb ")}</div>}
                 </div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
                   <div>
@@ -2580,6 +2693,31 @@ return (
         </div>
       )}
 
+      {/* Popup badge débloqué */}
+      {badgePopup&&(
+        <div style={{position:"fixed",bottom:100,left:"50%",transform:"translateX(-50%)",zIndex:300,animation:"slideUp .4s ease"}} onClick={()=>setBadgePopup(null)}>
+          <style>{`@keyframes slideUp{from{transform:translateX(-50%) translateY(30px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}`}</style>
+          <div style={{background:`linear-gradient(135deg,${t.s1},${t.s2})`,border:`2px solid ${t.acc}`,borderRadius:18,padding:"16px 24px",textAlign:"center",boxShadow:`0 8px 32px ${t.acc}44`,backdropFilter:"blur(16px)",minWidth:220,cursor:"pointer"}}>
+            <div style={{fontSize:"2.5rem",marginBottom:6}}>{badgePopup.icon}</div>
+            <div style={{fontSize:".6rem",color:t.acc,textTransform:"uppercase",letterSpacing:2,fontWeight:700,marginBottom:4}}>Badge débloqué !</div>
+            <div style={{fontSize:".9rem",fontWeight:800,color:t.tx,marginBottom:2}}>{badgePopup.label}</div>
+            <div style={{fontSize:".65rem",color:t.tx3}}>{badgePopup.desc}</div>
+            <div style={{marginTop:8,fontSize:".55rem",color:t.tx3}}>Touche pour fermer</div>
+          </div>
+        </div>
+      )}
+      {/* Popup encouragement pages */}
+      {encouragementMsg&&(
+        <div style={{position:"fixed",bottom:100,left:"50%",transform:"translateX(-50%)",zIndex:300,animation:"slideUp .4s ease"}} onClick={()=>setEncouragementMsg(null)}>
+          <div style={{background:`linear-gradient(135deg,${t.s1},${t.s2})`,border:`2px solid ${t.gr}`,borderRadius:18,padding:"14px 22px",textAlign:"center",boxShadow:`0 8px 32px ${t.gr}44`,backdropFilter:"blur(16px)",minWidth:240,cursor:"pointer"}}>
+            <div style={{fontSize:"2rem",marginBottom:6}}>📖</div>
+            <div style={{fontSize:".6rem",color:t.gr,textTransform:"uppercase",letterSpacing:2,fontWeight:700,marginBottom:4}}>{encouragementMsg.pages} pages lues</div>
+            <div style={{fontSize:".8rem",fontWeight:700,color:t.tx,lineHeight:1.5}}>{encouragementMsg.msg}</div>
+            <div style={{marginTop:8,fontSize:".55rem",color:t.tx3}}>Touche pour fermer</div>
+          </div>
+        </div>
+      )}
+
       {/* Timer flottant en haut quand actif */}
       {timerRunning&&timerLeft!==null&&timerLeft>0&&(
         <div style={{position:"fixed",top:0,left:0,right:0,zIndex:250,background:`linear-gradient(135deg,${t.acc}ee,${t.acc2}ee)`,backdropFilter:"blur(12px)",padding:"6px 16px",display:"flex",alignItems:"center",gap:10,boxShadow:`0 2px 16px ${t.acc}44`}}>
@@ -2721,19 +2859,22 @@ return (
           {bookmark&&(<div style={{marginTop:7,display:"flex",alignItems:"center",gap:8,padding:"6px 10px",background:`${acc}10`,borderRadius:8,cursor:"pointer",border:`1px solid ${acc}25`,transition:"transform .2s,box-shadow .2s"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow=`0 4px 12px ${acc}22`;}} onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";}} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>x.n===bookmark.sn);if(s)doSelect(s);}}><span style={{fontSize:".75rem",color:acc}}>◈</span><span style={{fontSize:".68rem",color:t.tx,fontWeight:600,flex:1}}>Reprendre : {bookmark.name}</span><span style={{fontSize:".58rem",color:t.tx3}}>→</span></div>)}
 
           {/* Verset du jour */}
-          {versetDuJour&&(
-            <div style={{marginTop:8,padding:"10px 14px",background:`linear-gradient(135deg,${acc}12,${acc}06)`,borderRadius:10,border:`1px solid ${acc}30`,cursor:"pointer",transition:"all .2s"}}
-              onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow=`0 4px 16px ${acc}22`;}}
-              onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";}}
-              onClick={()=>{const s=SURAHS.find(x=>x.n===versetDuJour.sn);if(s){doSelect(s);setPage("quran");}}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-                <div>
+          {versetDuJour&&!versetDuJourDismissed&&(
+            <div style={{marginTop:8,padding:"10px 14px",background:`linear-gradient(135deg,${acc}12,${acc}06)`,borderRadius:10,border:`1px solid ${acc}30`,transition:"all .2s"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:4}}>
+                <div style={{flex:1,cursor:"pointer"}} onClick={()=>{const s=SURAHS.find(x=>x.n===versetDuJour.sn);if(s){doSelect(s);setPage("quran");}}}>
                   <span style={{fontSize:".58rem",color:acc,textTransform:"uppercase",letterSpacing:"1.5px",fontWeight:700}}>Verset du jour</span>
                   <div style={{fontSize:".5rem",color:t.tx3,opacity:.7,marginTop:1}}>Tiré de tes versets mémorisés · active la mémoire à long terme</div>
                 </div>
-                <span style={{fontSize:".6rem",color:t.tx3}}>{versetDuJour.surah} · v.{versetDuJour.n}</span>
+                <div style={{display:"flex",gap:6,alignItems:"center",flexShrink:0,marginLeft:8}}>
+                  <span style={{fontSize:".6rem",color:t.tx3}}>{versetDuJour.surah} · v.{versetDuJour.n}</span>
+                  <button onClick={e=>{e.stopPropagation();toggleFav(versetDuJour.sn,versetDuJour.n,versetDuJour.ar,versetDuJour.fr,versetDuJour.surah);}} style={{background:"none",border:"none",cursor:"pointer",fontSize:".9rem",padding:"2px",lineHeight:1,color:isFav(versetDuJour.sn,versetDuJour.n)?t.rd:t.tx3}}>
+                    {isFav(versetDuJour.sn,versetDuJour.n)?"❤️":"🤍"}
+                  </button>
+                  <button onClick={e=>{e.stopPropagation();setVersetDuJourDismissed(true);sv("qvdjdis",today());}} style={{background:"none",border:"none",cursor:"pointer",fontSize:".85rem",padding:"2px",lineHeight:1,color:t.tx3,opacity:.7}}>✕</button>
+                </div>
               </div>
-              <div style={{fontFamily:"'Amiri Quran',serif",fontSize:"1.2rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx,marginBottom:4}}>
+              <div style={{fontFamily:"'Amiri Quran',serif",fontSize:"1.2rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx,marginBottom:4,cursor:"pointer"}} onClick={()=>{const s=SURAHS.find(x=>x.n===versetDuJour.sn);if(s){doSelect(s);setPage("quran");}}}>
                 {(versetDuJour.ar||"").replace(/<[^>]*>/g,"")}
               </div>
               {versetDuJour.fr&&<div style={{fontSize:".65rem",color:t.tx2,fontStyle:"italic",lineHeight:1.5,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{versetDuJour.fr}</div>}
@@ -2776,6 +2917,101 @@ return (
       </div>}
 
       <div className={`wrap${pageTransition?" transitioning":""}`}>
+
+        {/* ACCUEIL */}
+        {page==="home"&&(
+          <div style={{display:"flex",flexDirection:"column",gap:14}}>
+            {/* Salutation */}
+            <div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,borderRadius:16,padding:"20px 18px",border:`1px solid ${t.b1}`,position:"relative",overflow:"hidden",textAlign:"center"}}>
+              <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse at 50% 0%,${t.acc}10,transparent 60%)`,pointerEvents:"none"}}/>
+              <div style={{fontFamily:"'Amiri',serif",fontSize:"1.8rem",color:t.acc,marginBottom:4}}>بِسْمِ اللَّهِ</div>
+              <div style={{fontSize:".75rem",color:t.tx2,marginBottom:16}}>
+                {memStreak>0?`🔥 ${memStreak} jours de suite — continue !`:"Commençons la journée avec le Coran"}
+              </div>
+              {/* Progress ring */}
+              <div style={{display:"flex",justifyContent:"center",gap:24}}>
+                {[
+                  {v:totalMem,l:"Mémorisés",c:t.acc},
+                  {v:`${memStreak}j`,l:"Streak",c:"#f97316"},
+                  {v:`${pct}%`,l:"Progression",c:t.gr},
+                ].map((k,i)=>(
+                  <div key={i} style={{textAlign:"center"}}>
+                    <div style={{fontSize:"1.4rem",fontWeight:800,color:k.c}}>{k.v}</div>
+                    <div style={{fontSize:".58rem",color:t.tx3}}>{k.l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Verset du jour condensé */}
+            {versetDuJour&&!versetDuJourDismissed&&(
+              <div style={{background:`linear-gradient(135deg,${t.acc}12,${t.acc}06)`,borderRadius:12,padding:"14px 16px",border:`1px solid ${t.acc}30`}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                  <span style={{fontSize:".6rem",color:t.acc,textTransform:"uppercase",letterSpacing:2,fontWeight:700}}>Verset du jour</span>
+                  <div style={{display:"flex",gap:6}}>
+                    <span style={{fontSize:".58rem",color:t.tx3}}>{versetDuJour.surah} · v.{versetDuJour.n}</span>
+                    <button onClick={()=>toggleFav(versetDuJour.sn,versetDuJour.n,versetDuJour.ar,versetDuJour.fr,versetDuJour.surah)} style={{background:"none",border:"none",cursor:"pointer",fontSize:".85rem",padding:0,color:isFav(versetDuJour.sn,versetDuJour.n)?t.rd:t.tx3}}>{isFav(versetDuJour.sn,versetDuJour.n)?"❤️":"🤍"}</button>
+                    <button onClick={()=>{setVersetDuJourDismissed(true);sv("qvdjdis",today());}} style={{background:"none",border:"none",cursor:"pointer",fontSize:".8rem",padding:0,color:t.tx3,opacity:.6}}>✕</button>
+                  </div>
+                </div>
+                <div style={{fontFamily:"'Amiri Quran',serif",fontSize:"1.3rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx,cursor:"pointer"}} onClick={()=>{const s=SURAHS.find(x=>x.n===versetDuJour.sn);if(s){doSelect(s);setPage("quran");}}}>{(versetDuJour.ar||"").replace(/<[^>]*>/g,"")}</div>
+                {versetDuJour.fr&&<div style={{fontSize:".65rem",color:t.tx2,fontStyle:"italic",lineHeight:1.5,marginTop:4}}>{versetDuJour.fr}</div>}
+              </div>
+            )}
+
+            {/* Actions rapides */}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+              {[
+                {icon:"📖",label:"Lire le Coran",sub:"Reprendre la lecture",action:()=>setPage("quran"),c:t.acc},
+                {icon:"🔄",label:"Réviser",sub:`${spacedDue.length} vers. dus`,action:()=>setPage("pages"),c:spacedDue.length>0?t.rd:t.gr,badge:spacedDue.length},
+                {icon:"🎯",label:"Quiz",sub:"Teste ta mémoire",action:()=>setPage("quiz"),c:t.bl},
+                {icon:"📜",label:"Mushaf",sub:"Lire page par page",action:()=>setPage("mushaf"),c:t.pu},
+              ].map((a,i)=>(
+                <div key={i} onClick={a.action} style={{background:t.cardBg,border:`1px solid ${t.b1}`,borderRadius:14,padding:"14px 14px",cursor:"pointer",transition:"all .2s",position:"relative",overflow:"hidden"}} onMouseEnter={e=>{e.currentTarget.style.borderColor=a.c;e.currentTarget.style.transform="translateY(-2px)";}} onMouseLeave={e=>{e.currentTarget.style.borderColor=t.b1;e.currentTarget.style.transform="";}}>
+                  {a.badge>0&&<div style={{position:"absolute",top:10,right:10,background:t.rd,color:"#fff",borderRadius:99,fontSize:".5rem",fontWeight:800,minWidth:16,height:16,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4px"}}>{a.badge}</div>}
+                  <div style={{fontSize:"1.5rem",marginBottom:6}}>{a.icon}</div>
+                  <div style={{fontSize:".78rem",fontWeight:700,color:t.tx,marginBottom:2}}>{a.label}</div>
+                  <div style={{fontSize:".62rem",color:t.tx3}}>{a.sub}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Progression juz */}
+            <div className="card">
+              <div className="ch"><span className="ct">Progression par Juz</span><button className="tbtn" style={{fontSize:".6rem"}} onClick={()=>setPage("stats")}>Voir tout</button></div>
+              <div style={{padding:"10px 14px",display:"flex",flexDirection:"column",gap:6}}>
+                {[...new Set(SURAHS.map(s=>s.juz))].sort((a,b)=>a-b).slice(0,5).map(juz=>{
+                  const p=juzPct(juz);
+                  return(
+                    <div key={juz} style={{display:"flex",alignItems:"center",gap:10}}>
+                      <span style={{fontSize:".65rem",color:t.tx3,width:36,flexShrink:0}}>Juz {juz}</span>
+                      <div style={{flex:1,height:6,background:t.b1,borderRadius:99,overflow:"hidden"}}>
+                        <div style={{height:"100%",width:`${p}%`,background:p===100?t.gr:`linear-gradient(90deg,${t.acc},${t.acc2})`,borderRadius:99,transition:"width .6s"}}/>
+                      </div>
+                      <span style={{fontSize:".65rem",color:p===100?t.gr:t.acc,fontWeight:700,width:32,textAlign:"right",flexShrink:0}}>{p}%</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Badges récents */}
+            {badges.length>0&&(
+              <div className="card">
+                <div className="ch"><span className="ct">Mes badges</span><span style={{fontSize:".65rem",color:t.acc,fontWeight:700}}>{badges.length} / {BADGE_DEFS.length}</span></div>
+                <div style={{display:"flex",gap:8,padding:"10px 14px",flexWrap:"wrap"}}>
+                  {BADGE_DEFS.filter(b=>badges.includes(b.id)).map(b=>(
+                    <div key={b.id} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 10px",background:`${t.acc}12`,borderRadius:99,border:`1px solid ${t.acc}33`}}>
+                      <span style={{fontSize:".85rem"}}>{b.icon}</span>
+                      <span style={{fontSize:".62rem",fontWeight:600,color:t.acc}}>{b.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* CORAN */}
         {page==="quran"&&(
           <div className="two">
@@ -3276,7 +3512,7 @@ return (
                   <span style={{fontSize:".7rem",opacity:.5}}>▼</span>
                 </button>
               </div>
-              <MushafPage page={mushafPage||1} t={t} tjc={tjc} arFont={arFont} edition={MUSHAF_EDITIONS.find(e=>e.id===mushafEdition)||MUSHAF_EDITIONS[0]} fullscreen={mushafFullscreen} onToggleFullscreen={()=>setMushafFullscreen(f=>!f)} onNext={()=>setMushafPage(p=>Math.min(604,(p||1)+1))} onPrev={()=>setMushafPage(p=>Math.max(1,(p||1)-1))}/>
+              <MushafPage page={mushafPage||1} t={t} tjc={tjc} arFont={arFont} edition={MUSHAF_EDITIONS.find(e=>e.id===mushafEdition)||MUSHAF_EDITIONS[0]} fullscreen={mushafFullscreen} onToggleFullscreen={()=>setMushafFullscreen(f=>!f)} onNext={()=>goToPage(Math.min(604,(mushafPage||1)+1))} onPrev={()=>goToPage(Math.max(1,(mushafPage||1)-1))}/>
             </div>
           </div>
         )}
@@ -3555,6 +3791,27 @@ return (
                     <div className="khs"><div style={{fontSize:"1.4rem"}}>🔥</div><div className="khs-v">{khatmaStreak(activeKhatma)}j</div><div className="khs-l">Série ◈</div></div>
                     <div className="khs"><div className="khs-v" style={{color:t.rd}}>{Math.max(0,activeKhatma.totalDays-Object.values(activeKhatma.log).filter(Boolean).length)}</div><div className="khs-l">Restants</div></div>
                   </div>
+                  {/* Bouton Lire maintenant */}
+                  <div style={{marginTop:14,display:"flex",gap:8}}>
+                    <button onClick={()=>{
+                      // Reprendre à la dernière page lue ou calculer la page du jour
+                      const doneCount=Object.values(activeKhatma.log).filter(Boolean).length;
+                      const pagesPerDay=Math.ceil(604/activeKhatma.totalDays);
+                      const lastPage=activeKhatma.lastPage||Math.min(604,doneCount*pagesPerDay+1);
+                      setMushafPage(lastPage);
+                      setPage("mushaf");
+                    }} style={{flex:1,padding:"10px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:10,color:"#000",fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>
+                      📖 Lire maintenant {activeKhatma.lastPage?`(p.${activeKhatma.lastPage})`:""}
+                    </button>
+                    <button onClick={()=>{
+                      const updated={...activeKhatma,log:{...activeKhatma.log,[today()]:true},lastPage:(mushafPage||1)};
+                      setKhatmas(p=>p.map(x=>x.id===activeKhatma.id?updated:x));
+                      setActiveKhatma(updated);
+                      togglePage(mushafPage||1);
+                    }} style={{padding:"10px 14px",background:`${t.gr}18`,border:`1px solid ${t.gr}44`,borderRadius:10,color:t.gr,fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>
+                      👍 Journée lue
+                    </button>
+                  </div>
                 </div>
 
                 {/* Calendrier */}
@@ -3765,22 +4022,32 @@ return (
                 <span className="ct">🎯 Quiz de mémorisation</span>
                 <div style={{display:"flex",gap:6,alignItems:"center"}}>
                   <span style={{fontSize:".65rem",color:t.tx3}}>{quizScore.correct}/{quizScore.total}</span>
-                  <button className="tbtn" onClick={()=>setQuizScore({correct:0,total:0})}>Reset</button>
+                  <button className="tbtn" onClick={()=>setQuizScore({correct:0,total:0,wrongs:[]})}>Reset</button>
                 </div>
               </div>
               <div style={{padding:12}}>
-                <div style={{display:"flex",gap:6,marginBottom:14}}>
+                {/* Mode */}
+                <div style={{display:"flex",gap:6,marginBottom:10}}>
                   {[["surah","Quelle sourate ?"],["complete","Complète le verset"]].map(([m,l])=>(
                     <button key={m} onClick={()=>{setQuizMode(m);setQuizQ(null);setQuizAnswer(null);}} style={{flex:1,padding:"8px",borderRadius:10,border:`1.5px solid ${quizMode===m?t.acc:t.b2}`,background:quizMode===m?`${t.acc}15`:t.s2,color:quizMode===m?t.acc:t.tx2,fontSize:".72rem",cursor:"pointer",fontWeight:quizMode===m?700:400}}>{l}</button>
                   ))}
                 </div>
+                {/* Filtre source */}
+                <div style={{display:"flex",gap:5,marginBottom:12,flexWrap:"wrap"}}>
+                  <button onClick={()=>{setQuizFilter("memorized");setQuizFilterSurah(null);setQuizQ(null);}} style={{padding:"4px 10px",borderRadius:99,border:`1px solid ${quizFilter==="memorized"&&!quizFilterSurah?t.acc:t.b2}`,background:quizFilter==="memorized"&&!quizFilterSurah?`${t.acc}15`:t.s2,color:quizFilter==="memorized"&&!quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer",fontWeight:600}}>Mes mémorisés</button>
+                  <button onClick={()=>{setQuizFilter("all");setQuizFilterSurah(null);setQuizQ(null);}} style={{padding:"4px 10px",borderRadius:99,border:`1px solid ${quizFilter==="all"&&!quizFilterSurah?t.acc:t.b2}`,background:quizFilter==="all"&&!quizFilterSurah?`${t.acc}15`:t.s2,color:quizFilter==="all"&&!quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer"}}>Tout</button>
+                  <select value={quizFilterSurah||""} onChange={e=>{const v=+e.target.value||null;setQuizFilterSurah(v);setQuizFilter(v?"surah":"memorized");setQuizQ(null);}} style={{padding:"4px 8px",borderRadius:99,border:`1px solid ${quizFilterSurah?t.acc:t.b2}`,background:quizFilterSurah?`${t.acc}15`:t.s2,color:quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer",outline:"none"}}>
+                    <option value="">Par sourate…</option>
+                    {SURAHS.filter(s=>Q[s.n]?.length>0).map(s=><option key={s.n} value={s.n}>{s.name}</option>)}
+                  </select>
+                </div>
 
                 {!quizQ&&(
-                  <div style={{textAlign:"center",padding:"30px 20px"}}>
+                  <div style={{textAlign:"center",padding:"24px 20px"}}>
                     <div style={{fontSize:"3rem",marginBottom:12}}>🎯</div>
                     <div style={{fontSize:".85rem",color:t.tx,fontWeight:600,marginBottom:6}}>Teste ta mémorisation</div>
-                    <div style={{fontSize:".7rem",color:t.tx3,marginBottom:20}}>{quizMode==="surah"?"Un verset s'affiche, devine la sourate":"Le début d'un verset s'affiche, complète-le"}</div>
-                    <button onClick={()=>{generateQuiz();}} style={{padding:"12px 28px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:12,color:"#000",fontWeight:800,fontSize:".85rem",cursor:"pointer"}}>▶ Commencer</button>
+                    <div style={{fontSize:".7rem",color:t.tx3,marginBottom:20}}>{quizFilter==="memorized"&&!quizFilterSurah?"Quiz sur tes versets mémorisés":quizFilterSurah?`Quiz sur ${SURAHS.find(s=>s.n===quizFilterSurah)?.name}`:"Quiz sur tout le Coran embarqué"}</div>
+                    <button onClick={()=>generateQuiz(quizFilterSurah,quizFilter)} style={{padding:"12px 28px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:12,color:"#000",fontWeight:800,fontSize:".85rem",cursor:"pointer"}}>▶ Commencer</button>
                   </div>
                 )}
 
@@ -3803,7 +4070,8 @@ return (
                               <button key={s.n} onClick={()=>{
                                 if(quizAnswer)return;
                                 setQuizAnswer(s.n);
-                                setQuizScore(p=>({correct:p.correct+(s.n===quizQ.sn?1:0),total:p.total+1}));
+                                const correct=s.n===quizQ.sn;
+                                setQuizScore(p=>({...p,correct:p.correct+(correct?1:0),total:p.total+1,wrongs:correct?p.wrongs:[...p.wrongs,{q:quizQ,chosen:s.n,correct:quizQ.sn}]}));
                               }} style={{padding:"10px 8px",borderRadius:10,border,background:bg,cursor:quizAnswer?"default":"pointer",transition:"all .2s",textAlign:"left"}}>
                                 <div style={{fontSize:".72rem",fontWeight:600,color:quizAnswer?isCorrect?t.gr:isChosen?t.rd:t.tx2:t.tx}}>{s.name}</div>
                                 <div style={{fontFamily:"'Amiri',serif",fontSize:".85rem",color:quizAnswer?isCorrect?t.gr:isChosen?t.rd:t.tx3:t.tx3,direction:"rtl",textAlign:"right"}}>{s.ar}</div>
@@ -3814,9 +4082,9 @@ return (
                         {quizAnswer&&(
                           <div style={{display:"flex",flexDirection:"column",gap:8}}>
                             <div style={{textAlign:"center",padding:"10px",background:quizAnswer===quizQ.sn?`${t.gr}15`:`${t.rd}15`,borderRadius:10,border:`1px solid ${quizAnswer===quizQ.sn?t.gr:t.rd}`,color:quizAnswer===quizQ.sn?t.gr:t.rd,fontWeight:700,fontSize:".8rem"}}>
-                              {quizAnswer===quizQ.sn?"✓ Bonne réponse ! 🌟":`✗ C'était ${SURAHS.find(s=>s.n===quizQ.sn)?.name}`}
+                              {quizAnswer===quizQ.sn?"✓ Bonne réponse ! 🌟":`✗ C'était ${SURAHS.find(s=>s.n===quizQ.sn)?.name} · v.${quizQ.n}`}
                             </div>
-                            <button onClick={generateQuiz} style={{padding:"11px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:10,color:"#000",fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>Question suivante →</button>
+                            <button onClick={()=>generateQuiz(quizFilterSurah,quizFilter)} style={{padding:"11px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:10,color:"#000",fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>Question suivante →</button>
                           </div>
                         )}
                       </>
@@ -3832,7 +4100,7 @@ return (
                           {quizQ.fr&&<div style={{fontSize:".7rem",color:t.tx3,marginTop:6,fontStyle:"italic"}}>{quizQ.fr?.split(" ").slice(0,6).join(" ")}…</div>}
                         </div>
                         {!quizAnswer?(
-                          <button onClick={()=>{setQuizAnswer("shown");}} style={{padding:"11px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:10,color:t.tx2,fontWeight:600,fontSize:".8rem",cursor:"pointer"}}>👁 Révéler la suite</button>
+                          <button onClick={()=>setQuizAnswer("shown")} style={{padding:"11px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:10,color:t.tx2,fontWeight:600,fontSize:".8rem",cursor:"pointer"}}>👁 Révéler la suite</button>
                         ):(
                           <div style={{display:"flex",flexDirection:"column",gap:8}}>
                             <div style={{background:t.s2,borderRadius:12,padding:"16px",border:`1px solid ${t.acc}44`}}>
@@ -3840,8 +4108,8 @@ return (
                               {quizQ.fr&&<div style={{fontSize:".72rem",color:t.tx2,marginTop:8,fontStyle:"italic"}}>{quizQ.fr}</div>}
                             </div>
                             <div style={{display:"flex",gap:8}}>
-                              <button onClick={()=>{setQuizScore(p=>({...p,correct:p.correct+1,total:p.total+1}));generateQuiz();}} style={{flex:1,padding:"11px",background:`${t.gr}20`,border:`1px solid ${t.gr}`,borderRadius:10,color:t.gr,fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>✓ Je savais</button>
-                              <button onClick={()=>{setQuizScore(p=>({...p,total:p.total+1}));generateQuiz();}} style={{flex:1,padding:"11px",background:`${t.rd}15`,border:`1px solid ${t.rd}`,borderRadius:10,color:t.rd,fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>✗ À revoir</button>
+                              <button onClick={()=>{setQuizScore(p=>({...p,correct:p.correct+1,total:p.total+1}));generateQuiz(quizFilterSurah,quizFilter);}} style={{flex:1,padding:"11px",background:`${t.gr}20`,border:`1px solid ${t.gr}`,borderRadius:10,color:t.gr,fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>✓ Je savais</button>
+                              <button onClick={()=>{setQuizScore(p=>({...p,total:p.total+1,wrongs:[...p.wrongs,{q:quizQ,chosen:null,correct:quizQ.sn}]}));generateQuiz(quizFilterSurah,quizFilter);}} style={{flex:1,padding:"11px",background:`${t.rd}15`,border:`1px solid ${t.rd}`,borderRadius:10,color:t.rd,fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>✗ À revoir</button>
                             </div>
                           </div>
                         )}
@@ -3852,22 +4120,45 @@ return (
               </div>
             </div>
 
-            {/* Score card */}
+            {/* Score card avec détail des erreurs */}
             {quizScore.total>0&&(
               <div className="card">
                 <div className="ch"><span className="ct">📊 Session en cours</span></div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,padding:12}}>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,padding:"12px 12px 8px",width:"100%",boxSizing:"border-box"}}>
                   {[
                     {v:quizScore.correct,l:"Correctes",c:t.gr},
                     {v:quizScore.total-quizScore.correct,l:"À revoir",c:t.rd},
                     {v:quizScore.total>0?Math.round(quizScore.correct/quizScore.total*100)+"%":"—",l:"Score",c:t.acc},
                   ].map((k,i)=>(
-                    <div key={i} style={{textAlign:"center",padding:"12px 8px",background:t.s2,borderRadius:10,border:`1px solid ${t.b1}`}}>
-                      <div style={{fontSize:"1.4rem",fontWeight:800,color:k.c}}>{k.v}</div>
-                      <div style={{fontSize:".55rem",color:t.tx3,marginTop:2}}>{k.l}</div>
+                    <div key={i} style={{textAlign:"center",padding:"10px 4px",background:t.s2,borderRadius:10,border:`1px solid ${t.b1}`,minWidth:0}}>
+                      <div style={{fontSize:"1.3rem",fontWeight:800,color:k.c}}>{k.v}</div>
+                      <div style={{fontSize:".52rem",color:t.tx3,marginTop:2}}>{k.l}</div>
                     </div>
                   ))}
                 </div>
+                {/* Erreurs cliquables */}
+                {quizScore.wrongs?.length>0&&(
+                  <div style={{padding:"0 12px 12px"}}>
+                    <div style={{fontSize:".6rem",color:t.tx3,textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Mes erreurs — clique pour voir le verset</div>
+                    <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                      {quizScore.wrongs.slice(-5).map((w,i)=>(
+                        <div key={i} onClick={()=>setQuizShowWrong(quizShowWrong?.q?.n===w.q.n?null:w)} style={{padding:"8px 12px",background:`${t.rd}10`,borderRadius:8,border:`1px solid ${t.rd}30`,cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>e.currentTarget.style.background=`${t.rd}18`} onMouseLeave={e=>e.currentTarget.style.background=`${t.rd}10`}>
+                          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                            <span style={{fontSize:".68rem",color:t.rd,fontWeight:600}}>{SURAHS.find(s=>s.n===w.correct)?.name} · v.{w.q.n}</span>
+                            {w.chosen&&<span style={{fontSize:".6rem",color:t.tx3}}>Tu as dit : {SURAHS.find(s=>s.n===w.chosen)?.name}</span>}
+                            <span style={{fontSize:".7rem",color:t.tx3}}>{quizShowWrong?.q?.n===w.q.n?"▲":"▼"}</span>
+                          </div>
+                          {quizShowWrong?.q?.n===w.q.n&&(
+                            <div style={{marginTop:8,paddingTop:8,borderTop:`1px solid ${t.rd}20`}}>
+                              <div style={{fontFamily:"'Amiri Quran',serif",fontSize:"1.1rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx,marginBottom:4}}>{w.q.ar?.replace(/<[^>]*>/g,"")}</div>
+                              {w.q.fr&&<div style={{fontSize:".68rem",color:t.tx2,fontStyle:"italic"}}>{w.q.fr}</div>}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -3962,6 +4253,44 @@ return (
                   <div className="ssub">{k.s}</div>
                 </div>
               ))}
+            </div>
+
+            {/* ── Stats Tarteel-style ── */}
+            {(()=>{
+              const fmtDur=s=>{const h=Math.floor(s/3600);const m=Math.floor((s%3600)/60);const sec=s%60;return h>0?`${h}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`:`${m}:${String(sec).padStart(2,"0")}`;};
+              const hassanat=totalMem*10+versesRecited*3; // estimation : 10/verset mémorisé + 3/récité
+              const hassFmt=hassanat>=1000000?`${(hassanat/1000000).toFixed(2)}M`:hassanat>=1000?`${(hassanat/1000).toFixed(1)}k`:String(hassanat);
+              const statsItems=[
+                {v:fmtDur(engagementTime),l:"Temps d'engagement",icon:"⏱",c:t.acc},
+                {v:`${Math.round(pct)}%`,l:"Achèvement du Coran",icon:"📿",c:t.gr},
+                {v:versesRecited.toLocaleString(),l:"Versets récités",icon:"🎙️",c:t.bl},
+                {v:fmtDur(recitTime),l:"Temps de récitation",icon:"📖",c:t.pu},
+                {v:badges.length,l:"Badges reçus",icon:"🏅",c:"#f59e0b"},
+                {v:hassFmt,l:"Estimation hassanates",icon:"⭐",c:"#10b981"},
+              ];
+              return(
+                <div className="card">
+                  <div className="ch">
+                    <span className="ct">Statistiques détaillées</span>
+                    <span style={{fontSize:".6rem",color:t.tx3}}>Pour la vie</span>
+                  </div>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:1,borderTop:`1px solid ${t.b1}`}}>
+                    {statsItems.map((s,i)=>(
+                      <div key={i} style={{padding:"16px 14px",borderBottom:`1px solid ${t.b1}`,borderRight:i%2===0?`1px solid ${t.b1}`:"none",display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
+                        <div style={{flex:1,minWidth:0}}>
+                          <div style={{fontSize:"1.3rem",fontWeight:800,color:s.c,letterSpacing:-.5,fontVariantNumeric:"tabular-nums"}}>{s.v}</div>
+                          <div style={{fontSize:".6rem",color:t.tx3,marginTop:2,lineHeight:1.3}}>{s.l}</div>
+                        </div>
+                        <div style={{width:36,height:36,borderRadius:10,background:`${s.c}18`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.1rem",flexShrink:0}}>{s.icon}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{padding:"10px 14px",fontSize:".6rem",color:t.tx3,textAlign:"center",borderTop:`1px solid ${t.b1}`}}>
+                    ⭐ Les hassanates sont une estimation indicative · Allah seul en connaît la récompense réelle
+                  </div>
+                </div>
+              );
+            })()}
             </div>
 
             {/* Graphique */}
@@ -4418,11 +4747,11 @@ return (
       {/* Bottom nav */}
       <div className="bnav">
         {[
+          {id:"home",icon:<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,label:"Accueil"},
           {id:"quran",icon:<Icons.Book size={19}/>,label:"Coran"},
           {id:"mushaf",icon:<Icons.Scroll size={19}/>,label:"Mushaf"},
           {id:"pages",icon:<Icons.Brain size={19}/>,label:"Révision",badge:spacedDue.length},
           {id:"khatma",icon:<Icons.Star size={19}/>,label:"Khatma"},
-          {id:"communaute",icon:<Icons.Heart size={19}/>,label:"Favoris",badge:favorites.length},
           {id:"quiz",icon:<Icons.Check size={19}/>,label:"Quiz"},
           {id:"stats",icon:<Icons.Chart size={19}/>,label:"Stats"},
           {id:"settings",icon:<Icons.Settings size={19}/>,label:"Réglages"},
