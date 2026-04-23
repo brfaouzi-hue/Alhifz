@@ -1770,34 +1770,34 @@ const handleReset=async()=>{
   const tafsirLoadingRef=useRef({});
   const loadTafsir=useCallback(async(sn,vn)=>{
     const key=`${sn}_${vn}`;
-    if(tafsirLoadingRef.current[key]) return;
-    setTafsirData(prev=>{if(prev[key])return prev;return prev;});
-    // Vérifie si déjà chargé
-    if(tafsirData[key]) return;
+    if(tafsirLoadingRef.current[key]||tafsirData[key]) return;
     tafsirLoadingRef.current[key]=true;
     setTafsirLoading(p=>({...p,[key]:true}));
+    const setText=(text)=>{
+      setTafsirData(p=>({...p,[key]:text}));
+      setTafsirLoading(p=>({...p,[key]:false}));
+      tafsirLoadingRef.current[key]=false;
+    };
     try{
-      // API principale : quran.com tafsir (id=169 = Ibn Kathir FR)
-      const r=await fetch(`https://api.quran.com/api/v4/tafsirs/169/by_ayah/${sn}:${vn}?language=fr`);
+      // Source 1 : jsdelivr spa5k — tafsir Ibn Kathir FR (le plus complet)
+      const r=await fetch(`https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/fr-tafsir-ibn-kathir/${sn}/${vn}.json`);
       if(r.ok){
         const d=await r.json();
-        const text=(d?.tafsir?.text||"").replace(/<[^>]*>/g,"").replace(/&amp;/g,"&").replace(/&nbsp;/g," ").trim().slice(0,800);
-        if(text){setTafsirData(p=>({...p,[key]:text}));setTafsirLoading(p=>({...p,[key]:false}));tafsirLoadingRef.current[key]=false;return;}
+        const raw=d.text||d.tafsir||"";
+        const text=raw.replace(/<[^>]*>/g,"").replace(/&amp;/g,"&").replace(/&nbsp;/g," ").replace(/\s+/g," ").trim().slice(0,900);
+        if(text&&text.length>20){setText(text);return;}
       }
     }catch{}
     try{
-      // Fallback : jsdelivr
-      const r2=await fetch(`https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/fr-tafsir-ibn-kathir/${sn}/${vn}.json`);
+      // Source 2 : API alquran.cloud — tafsir FR jalalayn (fallback)
+      const r2=await fetch(`https://api.alquran.cloud/v1/ayah/${sn}:${vn}/fr.hamidullah`);
       if(r2.ok){
         const d=await r2.json();
-        const text=(d.text||d.tafsir||"").replace(/<[^>]*>/g,"").trim().slice(0,800);
-        if(text){setTafsirData(p=>({...p,[key]:text}));setTafsirLoading(p=>({...p,[key]:false}));tafsirLoadingRef.current[key]=false;return;}
+        const text=(d?.data?.text||"").trim();
+        if(text&&text.length>10){setText("(Traduction) "+text);return;}
       }
     }catch{}
-    // Si tout échoue
-    setTafsirData(p=>({...p,[key]:"Tafsir non disponible pour ce verset."}));
-    setTafsirLoading(p=>({...p,[key]:false}));
-    tafsirLoadingRef.current[key]=false;
+    setText("Tafsir non disponible pour ce verset.");
   },[tafsirData]);
 
   const buildUrl=(sn,vn)=>{
