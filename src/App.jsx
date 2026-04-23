@@ -1013,7 +1013,7 @@ body>*{position:relative;z-index:1;}
 .bn.on::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:linear-gradient(90deg,${acc},${acc2});border-radius:0 0 99px 99px;box-shadow:0 0 6px ${acc};}
 .bn-lbl{font-size:.52rem;font-weight:500;}
 /* ── Layout ── */
-.wrap{max-width:1200px;margin:0 auto;padding:14px 16px calc(120px + env(safe-area-inset-bottom));padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));}
+.wrap{max-width:1200px;margin:0 auto;padding:14px 16px calc(120px + env(safe-area-inset-bottom));padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));width:100%;box-sizing:border-box;overflow-x:hidden;}
 .two{display:grid;grid-template-columns:300px 1fr;gap:12px;align-items:start;}
 /* ── Cards — hover effect ── */
 .card{background:${t.cardBg};border:1px solid ${t.b1};border-radius:14px;overflow:hidden;transition:box-shadow .25s,border-color .25s;}
@@ -1330,6 +1330,7 @@ const [wbwOpen,setWbwOpen]=useState(false);
 const [wbwWords,setWbwWords]=useState(null);
 // Lecture partielle
 const [partialVerse,setPartialVerse]=useState(null); // {sn,vn,words:[],from:0,to:N}
+const partialPlayRef=useRef(null); // {stopAt: ratio 0-1}
   const [newListName,setNewListName]=useState("");
   const [selList,setSelList]=useState(null);
   const [mushafFullscreen,setMushafFullscreen]=useState(false);
@@ -1756,7 +1757,7 @@ const handleReset=async()=>{
   };
 
   // Moteur audio unifié — préchargement + zéro latence
-  // Charge le tafsir Ibn Kathir (FR)
+  // Charge le tafsir Ibn Kathir (FR) — 3 sources en cascade
   const tafsirLoadingRef=useRef({});
   const loadTafsir=useCallback(async(sn,vn)=>{
     const key=`${sn}_${vn}`;
@@ -1768,37 +1769,39 @@ const handleReset=async()=>{
       setTafsirLoading(p=>({...p,[key]:false}));
       tafsirLoadingRef.current[key]=false;
     };
-    // Source 1 : quran.com — tafsir id=31 = Ibn Kathir FR
-    try{
-      const r=await fetch(`https://api.quran.com/api/v4/tafsirs/31/by_ayah/${sn}:${vn}`);
-      if(r.ok){
-        const d=await r.json();
-        const raw=d?.tafsir?.text||d?.data?.text||"";
-        const text=raw.replace(/<[^>]*>/g,"").replace(/&amp;/g,"&").replace(/&nbsp;/g," ").replace(/\s+/g," ").trim();
-        if(text.length>30){done(text.slice(0,900));return;}
-      }
-    }catch{}
-    // Source 2 : jsdelivr spa5k — Ibn Kathir FR direct
-    try{
-      const r=await fetch(`https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/fr-tafsir-ibn-kathir/${sn}/${vn}.json`);
-      if(r.ok){
-        const d=await r.json();
-        const raw=d?.text||d?.tafsir||"";
-        const text=raw.replace(/<[^>]*>/g,"").replace(/\s+/g," ").trim();
-        if(text.length>30){done(text.slice(0,900));return;}
-      }
-    }catch{}
-    // Source 3 : raw GitHub (contourne le cache jsdelivr)
+    const clean=(s)=>s.replace(/<[^>]*>/g,"").replace(/&amp;/g,"&").replace(/&nbsp;/g," ").replace(/&#\d+;/g,"").replace(/\s+/g," ").trim();
+
+    // Source 1 : quran.com API — essayer plusieurs IDs tafsir FR
+    for(const tid of [31,169,817]){
+      try{
+        const r=await fetch(`https://api.quran.com/api/v4/tafsirs/${tid}/by_ayah/${sn}:${vn}`,{headers:{"Accept":"application/json"}});
+        if(r.ok){
+          const d=await r.json();
+          const raw=d?.tafsir?.text||d?.data?.text||"";
+          const text=clean(raw);
+          if(text.length>40){done(text.slice(0,1000));return;}
+        }
+      }catch{}
+    }
+    // Source 2 : raw GitHub spa5k (pas de cache CDN)
     try{
       const r=await fetch(`https://raw.githubusercontent.com/spa5k/tafsir_api/main/tafsir/fr-tafsir-ibn-kathir/${sn}/${vn}.json`);
       if(r.ok){
         const d=await r.json();
-        const raw=d?.text||d?.tafsir||"";
-        const text=raw.replace(/<[^>]*>/g,"").replace(/\s+/g," ").trim();
-        if(text.length>30){done(text.slice(0,900));return;}
+        const text=clean(d?.text||d?.tafsir||"");
+        if(text.length>40){done(text.slice(0,1000));return;}
       }
     }catch{}
-    done("Tafsir Ibn Kathir non disponible pour ce verset.");
+    // Source 3 : API alquran.cloud — tafsir jalalayn FR (bon fallback)
+    try{
+      const r=await fetch(`https://api.alquran.cloud/v1/ayah/${sn}:${vn}/fr.jalalayn`);
+      if(r.ok){
+        const d=await r.json();
+        const text=clean(d?.data?.text||"");
+        if(text.length>20){done("Jalâlayn : "+text.slice(0,800));return;}
+      }
+    }catch{}
+    done("Tafsir non disponible hors ligne pour ce verset.");
   },[tafsirData]);
 
   const buildUrl=(sn,vn)=>{
@@ -2523,12 +2526,26 @@ return (
             {/* Actions */}
             <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
               <button className="mbtn" style={{flex:1}} onClick={()=>{
-                // Répéter en boucle ce segment audio (on joue le verset entier — l'audio partiel n'est pas disponible)
-                doPlay(partialVerse.vn);
+                const total=partialVerse.words.length;
+                const startAt=partialVerse.from/total;
+                const stopAt=(partialVerse.to+1)/total;
+                // Joue le verset et stoppe au bon ratio de durée
+                const url=buildUrl(partialVerse.sn,partialVerse.vn);
+                const audio=audioRef.current;
+                partialPlayRef.current={startAt,stopAt};
+                audio.pause();
+                audio.src=url;
+                audio.load();
+                audio.addEventListener("canplay",function onCp(){
+                  audio.removeEventListener("canplay",onCp);
+                  audio.currentTime=audio.duration*startAt||0;
+                  audio.play().catch(()=>{});
+                },{once:true});
+                setPlaying(partialVerse.vn);
+                setLoopCurrent(1);
                 setPartialVerse(null);
-              }}>▶ Écouter</button>
+              }}>▶ Écouter le segment</button>
               <button className="tbtn" style={{flex:1,borderColor:t.pu,color:t.pu}} onClick={()=>{
-                // Copier le segment sélectionné
                 const seg=partialVerse.words.slice(partialVerse.from,partialVerse.to+1).join(" ");
                 navigator.clipboard?.writeText(seg);
                 setPartialVerse(null);
@@ -3040,7 +3057,7 @@ return (
                     ].map(([c,l])=>(<div key={l} className="tj-item"><div className="tj-dot" style={{background:c}}/><span style={{color:t.tx2,fontSize:".58rem"}}>{l}</span></div>))}
                   </div>)}
 
-                  {playing!==null&&(<div className="arow"><button className="vbtn snd" style={{flexShrink:0}} onClick={()=>doPlay(playing)}>{audioPlaying?"⏸":"▶ "+playing}</button><span style={{fontSize:".62rem",color:t.tx2,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{selS?.name} · v.{playing} · {rec.name}</span><button className="tbtn" style={{flexShrink:0}} onClick={()=>{setPlaying(null);if(audioRef.current){audioRef.current.pause();audioRef.current.src="";}}}>✕</button></div>)}
+                  {playing!==null&&(<div className="arow"><button className="vbtn snd" style={{flexShrink:0}} onClick={()=>doPlay(playing)}>{audioPlaying?"⏸":"▶ "+playing}</button><span style={{fontSize:".62rem",color:t.tx2,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{selS?.name} · v.{playing} · {rec.name}</span><button className="tbtn" style={{flexShrink:0}} onClick={()=>{setPlaying(null);partialPlayRef.current=null;if(audioRef.current){audioRef.current.pause();audioRef.current.src="";}}}>✕</button></div>)}
 
                   {/* Banner mode récitation continue */}
                   {continuousMode&&(
@@ -3269,7 +3286,7 @@ return (
           <div style={{display:"flex",flexDirection:"column",gap:14,overflow:"hidden"}}>
 
             {/* Stats rapides */}
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,overflow:"hidden"}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,width:"100%",boxSizing:"border-box"}}>
               {[
                 {l:"En révision",v:Object.values(revFlags).filter(f=>f==="active").length,c:t.acc,icon:"◈"},
                 {l:"Maîtrisées",v:Object.values(revFlags).filter(f=>f==="mastered").length,c:t.gr,icon:"✦"},
@@ -4424,7 +4441,25 @@ return (
       <audio ref={audioRef} style={{display:"none"}}
         onPlay={()=>setAudioPlaying(true)}
         onPause={()=>setAudioPlaying(false)}
-        onTimeUpdate={e=>{const a=e.target;if(a.duration>0)setAudioPct(Math.round(a.currentTime/a.duration*100));}}
+        onTimeUpdate={e=>{
+          const a=e.target;
+          if(a.duration>0){
+            setAudioPct(Math.round(a.currentTime/a.duration*100));
+            // Lecture partielle — stopper à stopAt
+            if(partialPlayRef.current&&a.currentTime/a.duration>=partialPlayRef.current.stopAt){
+              a.pause();
+              // Si loopInfinite ou loopCount > 1 — relancer depuis startAt
+              if(loopInfinite||(loopCount>1&&loopCurrent<loopCount)){
+                if(!loopInfinite)setLoopCurrent(p=>p+1);
+                setTimeout(()=>{a.currentTime=a.duration*partialPlayRef.current.startAt;a.play().catch(()=>{});},200);
+              } else {
+                partialPlayRef.current=null;
+                setLoopCurrent(0);
+                setAudioPlaying(false);
+              }
+            }
+          }
+        }}
       />
     </>
   );
