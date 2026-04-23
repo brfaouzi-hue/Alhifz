@@ -1213,7 +1213,7 @@ body>*{position:relative;z-index:1;}
 
 // Main App
 export default function App() {
-  const [tn,setTn]=useState(()=>ld("qtheme2","dark")); // qtheme2 = new key with new themes
+  const [tn,setTn]=useState(()=>ld("qtheme2","light")); // qtheme2 = new key with new themes
   const t=THEMES[tn]||THEMES.dark;
   const tjc=(tn==="light")?TJC_LIGHT:TJC_DARK; // dark for all dark-bg themes
   const [fontId,setFontId]=useState(()=>ld("qfont","amiri-quran"));
@@ -1511,7 +1511,7 @@ const handleReset=async()=>{
   },[mem]);
 
   useEffect(()=>{if(audioRef.current)audioRef.current.playbackRate=playbackRate;},[playbackRate,playing]);
-  useEffect(()=>{if(!autoNight)return;const h=new Date().getHours();if(h>=20||h<7)setTn("dark");else setTn("light");},[autoNight]);
+  useEffect(()=>{if(!autoNight)return;const h=new Date().getHours();if(h>=20||h<7)setTn("emerald");else setTn("light");},[autoNight]);
   useEffect(()=>{
     const onOnline=()=>setIsOffline(false);
     const onOffline=()=>setIsOffline(true);
@@ -2744,7 +2744,7 @@ return (
           <div className="tb-r">
             <button className="tbtn" style={{borderColor:t.pu,color:t.pu,fontSize:".6rem"}} onClick={()=>setShowAIPlan(true)}>✦ Mon Parcours</button>
             <button className="tbtn" style={{borderColor:timerRunning?t.acc:t.gr,color:timerRunning?t.acc:t.gr,fontSize:".6rem",fontWeight:timerRunning?800:400}} onClick={()=>setTimerOpen(true)}>{timerRunning&&timerLeft?fmtTime(timerLeft):"⏱"}</button>
-            <button className="ib" title={THEME_META[tn]?.label||tn} onClick={()=>{const keys=Object.keys(THEMES);setTn(keys[(keys.indexOf(tn)+1)%keys.length]);}}>{tn==="dark"||tn==="andalous"||tn==="ottoman"||tn==="abbasid"||tn==="emerald"?<Icons.Sun size={14}/>:<Icons.Moon size={14}/>}</button>
+            <button className="ib" title={tn==="light"?"Passer en mode nuit":"Passer en mode jour"} onClick={()=>setTn(tn==="light"?"emerald":"light")}>{tn==="light"?<Icons.Moon size={14}/>:<Icons.Sun size={14}/>}</button>
             {memStreak>0&&<div style={{display:"flex",alignItems:"center",gap:2,padding:"3px 7px",background:"rgba(249,115,22,.15)",borderRadius:8,border:"1px solid rgba(249,115,22,.3)",flexShrink:0}}>
               <span style={{fontSize:".85rem",lineHeight:1}}>🔥</span>
               <span style={{fontSize:".65rem",fontWeight:800,color:"#f97316"}}>{memStreak}</span>
@@ -2754,166 +2754,35 @@ return (
         </div>
       </div>
 
-      {/* Hero — visible uniquement sur l'onglet Coran */}
-      {page==="quran"&&<div className="hero">
-        <svg style={{position:"absolute",top:0,left:0,width:"100%",height:12,display:"block"}} preserveAspectRatio="none" viewBox="0 0 800 12">
-          <defs><linearGradient id="bord" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="transparent"/><stop offset=".15" stopColor={acc}/><stop offset=".5" stopColor={acc3}/><stop offset=".85" stopColor={acc}/><stop offset="1" stopColor="transparent"/></linearGradient></defs>
-          <rect y="0" width="800" height="1.5" fill="url(#bord)"/>
-          <path d="M0,6 Q25,2 50,6 Q75,10 100,6 Q125,2 150,6 Q175,10 200,6 Q225,2 250,6 Q275,10 300,6 Q325,2 350,6 Q375,10 400,6 Q425,2 450,6 Q475,10 500,6 Q525,2 550,6 Q575,10 600,6 Q625,2 650,6 Q675,10 700,6 Q725,2 750,6 Q775,10 800,6" stroke={acc} strokeWidth="1" fill="none" opacity=".35"/>
-        </svg>
-        <svg style={{position:"absolute",top:8,left:8,opacity:.18}} width="40" height="40" viewBox="0 0 40 40"><path d="M0,0 L40,0 L40,4 L4,4 L4,40 L0,40 Z" fill={acc}/><circle cx="4" cy="4" r="3" fill="none" stroke={acc} strokeWidth="1"/><path d="M8,4 Q20,4 20,16" stroke={acc} strokeWidth=".8" fill="none"/><path d="M4,8 Q4,20 16,20" stroke={acc} strokeWidth=".8" fill="none"/></svg>
-        <svg style={{position:"absolute",top:8,right:8,opacity:.18,transform:"scaleX(-1)"}} width="40" height="40" viewBox="0 0 40 40"><path d="M0,0 L40,0 L40,4 L4,4 L4,40 L0,40 Z" fill={acc}/><circle cx="4" cy="4" r="3" fill="none" stroke={acc} strokeWidth="1"/><path d="M8,4 Q20,4 20,16" stroke={acc} strokeWidth=".8" fill="none"/><path d="M4,8 Q4,20 16,20" stroke={acc} strokeWidth=".8" fill="none"/></svg>
-        <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse at 50% 100%,${acc}0e 0%,transparent 70%)`,pointerEvents:"none"}}/>
-
-        <div className="hero-i" style={{paddingTop:6}}>
-          {/* Title row */}
-          <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,marginBottom:14}}>
-            <svg width="80" height="10" viewBox="0 0 80 10"><line x1="0" y1="5" x2="55" y2="5" stroke={acc} strokeWidth=".8" opacity=".4"/><circle cx="62" cy="5" r="2.5" fill="none" stroke={acc} strokeWidth=".8" opacity=".6"/><circle cx="72" cy="5" r="1.5" fill={acc} opacity=".5"/><circle cx="79" cy="5" r=".8" fill={acc} opacity=".3"/></svg>
-            <div style={{textAlign:"center"}}>
-              <div style={{fontFamily:"'Amiri',serif",fontSize:"1.6rem",fontWeight:700,color:acc,lineHeight:1,letterSpacing:"1px",textShadow:`0 0 30px ${acc}55,0 2px 4px rgba(0,0,0,.3)`}}>Al-Hifz</div>
-              <div style={{fontSize:".48rem",textTransform:"uppercase",letterSpacing:"4px",color:t.tx3,marginTop:2}}>حفظ القرآن الكريم</div>
+      {/* Hero — onglet Coran uniquement — version épurée */}
+      {page==="quran"&&<div className="hero" style={{padding:"12px 16px"}}>
+        {/* Verset du jour */}
+        {versetDuJour&&!versetDuJourDismissed&&(
+          <div style={{padding:"10px 14px",background:`linear-gradient(135deg,${acc}12,${acc}06)`,borderRadius:10,border:`1px solid ${acc}30`,marginBottom:8}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+              <span style={{fontSize:".58rem",color:acc,textTransform:"uppercase",letterSpacing:"1.5px",fontWeight:700}}>Verset du jour</span>
+              <div style={{display:"flex",gap:6,alignItems:"center"}}>
+                <span style={{fontSize:".58rem",color:t.tx3}}>{versetDuJour.surah} · v.{versetDuJour.n}</span>
+                <button onClick={e=>{e.stopPropagation();toggleFav(versetDuJour.sn,versetDuJour.n,versetDuJour.ar,versetDuJour.fr,versetDuJour.surah);}} style={{background:"none",border:"none",cursor:"pointer",fontSize:".85rem",padding:"2px",lineHeight:1,color:isFav(versetDuJour.sn,versetDuJour.n)?t.rd:t.tx3}}>
+                  {isFav(versetDuJour.sn,versetDuJour.n)?"❤️":"🤍"}
+                </button>
+                <button onClick={e=>{e.stopPropagation();setVersetDuJourDismissed(true);sv("qvdjdis",today());}} style={{background:"none",border:"none",cursor:"pointer",fontSize:".8rem",padding:"2px",lineHeight:1,color:t.tx3,opacity:.6}}>✕</button>
+              </div>
             </div>
-            <svg width="80" height="10" viewBox="0 0 80 10" style={{transform:"scaleX(-1)"}}><line x1="0" y1="5" x2="55" y2="5" stroke={acc} strokeWidth=".8" opacity=".4"/><circle cx="62" cy="5" r="2.5" fill="none" stroke={acc} strokeWidth=".8" opacity=".6"/><circle cx="72" cy="5" r="1.5" fill={acc} opacity=".5"/><circle cx="79" cy="5" r=".8" fill={acc} opacity=".3"/></svg>
+            <div style={{fontFamily:"'Amiri Quran',serif",fontSize:"1.2rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx,cursor:"pointer"}} onClick={()=>{const s=SURAHS.find(x=>x.n===versetDuJour.sn);if(s)doSelect(s);}}>
+              {(versetDuJour.ar||"").replace(/<[^>]*>/g,"")}
+            </div>
+            {versetDuJour.fr&&<div style={{fontSize:".62rem",color:t.tx2,fontStyle:"italic",lineHeight:1.5,marginTop:2,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{versetDuJour.fr}</div>}
           </div>
-
-          {/* Main stats */}
-          <div style={{display:"flex",gap:14,alignItems:"stretch"}}>
-            {/* Circular progress */}
-            <div style={{flexShrink:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
-              <div style={{position:"relative",width:88,height:88}}>
-                <svg width="88" height="88" viewBox="0 0 88 88">
-                  <defs><linearGradient id="cg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor={acc}/><stop offset="1" stopColor={acc3}/></linearGradient><filter id="glow"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-                  <circle cx="44" cy="44" r="42" fill="none" stroke={acc} strokeWidth=".4" opacity=".2" strokeDasharray="3,4"/>
-                  <circle cx="44" cy="44" r="35" fill="none" stroke={t.b1} strokeWidth="7"/>
-                  <circle cx="44" cy="44" r="35" fill="none" stroke="url(#cg)" strokeWidth="7" strokeDasharray={`${2*Math.PI*35*pct/100} ${2*Math.PI*35*(1-pct/100)}`} strokeLinecap="round" transform="rotate(-90 44 44)" filter="url(#glow)" style={{transition:"stroke-dasharray 1.2s cubic-bezier(.4,0,.2,1)"}}/>
-                  <circle cx="44" cy="44" r="26" fill="none" stroke={acc} strokeWidth=".4" opacity=".15"/>
-                  <g transform="translate(44,44)" opacity=".15">{[0,60,120,180,240,300].map(a=>(<line key={a} x1="0" y1="-12" x2="0" y2="-7" stroke={acc} strokeWidth=".8" transform={`rotate(${a})`}/>))}</g>
-                </svg>
-                <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
-                  <div style={{fontSize:"1.55rem",fontWeight:800,color:acc,lineHeight:1,textShadow:`0 0 12px ${acc}77`,fontVariantNumeric:"tabular-nums"}}>{pct}<span style={{fontSize:".65rem",fontWeight:600}}>%</span></div>
-                  <div style={{fontSize:".48rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px"}}>mémorisé</div>
-                </div>
-              </div>
-            </div>
-
-            {/* KPIs */}
-            <div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",gap:8}}>
-              <div>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
-                  <span style={{fontSize:".58rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1.5px"}}>Progression</span>
-                  <div style={{display:"flex",alignItems:"center",gap:6}}>
-                    <span style={{fontSize:".7rem",color:acc,fontWeight:800,fontVariantNumeric:"tabular-nums"}}>{pct}%</span>
-                    <span style={{fontSize:".58rem",color:t.tx3}}>{totalMem.toLocaleString()} / {TOTAL_VERSES}</span>
-                  </div>
-                </div>
-                <div style={{position:"relative",height:12,background:t.b1,borderRadius:99,overflow:"hidden",boxShadow:"inset 0 2px 6px rgba(0,0,0,.3)"}}>
-                  <div style={{height:"100%",width:`${pct}%`,borderRadius:99,background:`linear-gradient(90deg,${acc},${acc2},${acc3})`,boxShadow:`0 0 12px ${acc}aa`,transition:"width 1.2s cubic-bezier(.4,0,.2,1)",position:"relative",minWidth:pct>0?"12px":"0"}}>
-                    <div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent)",backgroundSize:"200% 100%",animation:"shimmer 2.5s infinite",borderRadius:99}}/>
-                  </div>
-                  {pct>2&&<div style={{position:"absolute",top:"50%",transform:"translateY(-50%)",left:`calc(${pct}% - 6px)`,width:12,height:12,borderRadius:"50%",background:"#fff",boxShadow:`0 0 8px ${acc}`,opacity:.9}}/>}
-                </div>
-                <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}>
-                  <span style={{fontSize:".52rem",color:t.tx3}}>0</span>
-                  {[25,50,75].map(m=>(
-                    <span key={m} style={{fontSize:".52rem",color:pct>=m?acc:t.tx3,fontWeight:pct>=m?700:400,transition:"color .5s"}}>{m}%</span>
-                  ))}
-                  <span style={{fontSize:".52rem",color:pct>=100?t.gr:t.tx3,fontWeight:pct>=100?700:400}}>✓</span>
-                </div>
-              </div>
-
-              {/* KPI grid — icônes SVG tendance */}
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px 8px"}}>
-                {/* Rythme — cerveau/éclair */}
-                <div style={{display:"flex",alignItems:"center",gap:6,padding:"6px 8px",background:t.s3,borderRadius:8}}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={t.bl} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity=".8"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-5 0v-15A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 8A2.5 2.5 0 0 1 17 10.5v9a2.5 2.5 0 0 1-5 0v-9A2.5 2.5 0 0 1 14.5 8Z"/><path d="M5 15a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z"/></svg>
-                  <div><div style={{fontSize:".82rem",fontWeight:700,color:t.bl,lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{vpd}<span style={{fontSize:".55rem",fontWeight:500}}> v/j</span></div><div style={{fontSize:".46rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Rythme</div></div>
-                </div>
-                {/* Avant fin — horloge */}
-                <div style={{display:"flex",alignItems:"center",gap:6,padding:"6px 8px",background:t.s3,borderRadius:8}}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round" opacity=".8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-                  <div><div style={{fontSize:".82rem",fontWeight:700,color:daysLeft<=0?t.gr:"#f97316",lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{daysLeft>0?(daysLeft>365?`~${(daysLeft/365).toFixed(1)}a`:`${daysLeft}j`):"Fini!"}</div><div style={{fontSize:".46rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Avant fin</div></div>
-                </div>
-                {/* Sourates — livre ouvert */}
-                <div style={{display:"flex",alignItems:"center",gap:6,padding:"6px 8px",background:t.s3,borderRadius:8}}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={t.gr} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity=".8"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                  <div><div style={{fontSize:".82rem",fontWeight:700,color:t.gr,lineHeight:1}}>{SURAHS.filter(s=>sPct(s)===100).length}</div><div style={{fontSize:".46rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Sourates</div></div>
-                </div>
-                {/* Restants — cible */}
-                <div style={{display:"flex",alignItems:"center",gap:6,padding:"6px 8px",background:t.s3,borderRadius:8}}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={t.tx2} strokeWidth="1.5" strokeLinecap="round" opacity=".8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill={t.tx2}/></svg>
-                  <div><div style={{fontSize:".82rem",fontWeight:700,color:t.tx2,lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{remaining.toLocaleString()}</div><div style={{fontSize:".46rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Restants</div></div>
-                </div>
-              </div>
-            </div>
+        )}
+        {/* Streak cliquable → Stats */}
+        {memStreak>0&&(
+          <div onClick={()=>setPage("stats")} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 12px",background:"rgba(249,115,22,.08)",borderRadius:9,border:"1px solid rgba(249,115,22,.2)",cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>{e.currentTarget.style.background="rgba(249,115,22,.14)";e.currentTarget.style.transform="translateY(-1px)";}} onMouseLeave={e=>{e.currentTarget.style.background="rgba(249,115,22,.08)";e.currentTarget.style.transform="";}}>
+            <span style={{fontSize:"1.1rem"}}>🔥</span>
+            <span style={{fontSize:".72rem",fontWeight:700,color:"#f97316",flex:1}}>{memStreak} jour{memStreak>1?"s":""} de suite</span>
+            <span style={{fontSize:".6rem",color:"#f97316",opacity:.7}}>Voir stats →</span>
           </div>
-
-          {/* ETA */}
-          <div style={{marginTop:8,padding:"6px 12px",borderTop:`1px solid ${acc}15`,display:"flex",alignItems:"center",justifyContent:"center",gap:6,background:`${acc}04`,borderRadius:"0 0 10px 10px"}}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={acc} strokeWidth="1.5" strokeLinecap="round" opacity=".5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-            <span style={{fontSize:".62rem",color:t.tx3,fontStyle:"italic"}}>{remaining>0?`Fin estimée · ${eta}`:"🎉 Coran complet !"}</span>
-          </div>
-
-          {/* Rappel si pas de mémorisation aujourd'hui */}
-          { !(hist[today()]||0) && (<div style={{marginTop:7,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${t.bl}15`,borderRadius:8,border:`1px solid ${t.bl}30`,cursor:"pointer",transition:"transform .2s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-1px)"} onMouseLeave={e=>e.currentTarget.style.transform=""} onClick={()=>{const s=SURAHS.find(x=>sPct(x)<100);if(s)doSelect(s);}}><div style={{width:6,height:6,borderRadius:"50%",background:t.bl,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".65rem",color:t.bl,fontWeight:600}}>Aucune mémorisation aujourd'hui — on commence ?</span><span style={{fontSize:".6rem",color:t.bl,marginLeft:"auto",opacity:.7}}>→</span></div>)}
-          {spacedDue.length>0&&(<div style={{marginTop:7,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${t.rd}15`,borderRadius:8,border:`1px solid ${t.rd}30`,cursor:"pointer",transition:"transform .2s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-1px)"} onMouseLeave={e=>e.currentTarget.style.transform=""} onClick={()=>setPage("stats")}><div style={{width:6,height:6,borderRadius:"50%",background:t.rd,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".65rem",color:t.rd,fontWeight:600}}>{spacedDue.length} verset{spacedDue.length>1?"s":""} à réviser aujourd'hui</span><span style={{fontSize:".6rem",color:t.rd,marginLeft:"auto",opacity:.7}}>Voir →</span></div>)}
-          {bookmark&&(<div style={{marginTop:7,display:"flex",alignItems:"center",gap:8,padding:"6px 10px",background:`${acc}10`,borderRadius:8,cursor:"pointer",border:`1px solid ${acc}25`,transition:"transform .2s,box-shadow .2s"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow=`0 4px 12px ${acc}22`;}} onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";}} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>x.n===bookmark.sn);if(s)doSelect(s);}}><span style={{fontSize:".75rem",color:acc}}>◈</span><span style={{fontSize:".68rem",color:t.tx,fontWeight:600,flex:1}}>Reprendre : {bookmark.name}</span><span style={{fontSize:".58rem",color:t.tx3}}>→</span></div>)}
-
-          {/* Verset du jour */}
-          {versetDuJour&&!versetDuJourDismissed&&(
-            <div style={{marginTop:8,padding:"10px 14px",background:`linear-gradient(135deg,${acc}12,${acc}06)`,borderRadius:10,border:`1px solid ${acc}30`,transition:"all .2s"}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:4}}>
-                <div style={{flex:1,cursor:"pointer"}} onClick={()=>{const s=SURAHS.find(x=>x.n===versetDuJour.sn);if(s){doSelect(s);setPage("quran");}}}>
-                  <span style={{fontSize:".58rem",color:acc,textTransform:"uppercase",letterSpacing:"1.5px",fontWeight:700}}>Verset du jour</span>
-                  <div style={{fontSize:".5rem",color:t.tx3,opacity:.7,marginTop:1}}>Tiré de tes versets mémorisés · active la mémoire à long terme</div>
-                </div>
-                <div style={{display:"flex",gap:6,alignItems:"center",flexShrink:0,marginLeft:8}}>
-                  <span style={{fontSize:".6rem",color:t.tx3}}>{versetDuJour.surah} · v.{versetDuJour.n}</span>
-                  <button onClick={e=>{e.stopPropagation();toggleFav(versetDuJour.sn,versetDuJour.n,versetDuJour.ar,versetDuJour.fr,versetDuJour.surah);}} style={{background:"none",border:"none",cursor:"pointer",fontSize:".9rem",padding:"2px",lineHeight:1,color:isFav(versetDuJour.sn,versetDuJour.n)?t.rd:t.tx3}}>
-                    {isFav(versetDuJour.sn,versetDuJour.n)?"❤️":"🤍"}
-                  </button>
-                  <button onClick={e=>{e.stopPropagation();setVersetDuJourDismissed(true);sv("qvdjdis",today());}} style={{background:"none",border:"none",cursor:"pointer",fontSize:".85rem",padding:"2px",lineHeight:1,color:t.tx3,opacity:.7}}>✕</button>
-                </div>
-              </div>
-              <div style={{fontFamily:"'Amiri Quran',serif",fontSize:"1.2rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx,marginBottom:4,cursor:"pointer"}} onClick={()=>{const s=SURAHS.find(x=>x.n===versetDuJour.sn);if(s){doSelect(s);setPage("quran");}}}>
-                {(versetDuJour.ar||"").replace(/<[^>]*>/g,"")}
-              </div>
-              {versetDuJour.fr&&<div style={{fontSize:".65rem",color:t.tx2,fontStyle:"italic",lineHeight:1.5,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{versetDuJour.fr}</div>}
-            </div>
-          )}
-        </div>
-          {/* Défi Ramadan */}
-          {riInfo.isActive
-            ?(<div style={{marginTop:8,padding:"8px 12px",background:"linear-gradient(135deg,rgba(201,168,76,.12),rgba(201,168,76,.05))",borderRadius:10,border:`1px solid ${acc}33`}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}>
-                  <span style={{fontSize:".72rem",fontWeight:700,color:acc}}>🌙 Défi Ramadan — Jour {riInfo.dayIn}/30</span>
-                  <span style={{fontSize:".65rem",color:t.tx3}}>{riInfo.daysLeft}j restants</span>
-                </div>
-                <div style={{height:6,background:t.b1,borderRadius:99,overflow:"hidden",marginBottom:5}}>
-                  <div style={{height:"100%",width:`${riInfo.dayIn/30*100}%`,background:`linear-gradient(90deg,${acc},${acc2})`,borderRadius:99}}/>
-                </div>
-                <div style={{display:"flex",justifyContent:"space-between",fontSize:".62rem",color:t.tx3}}>
-                  <span>{versesThisRamadan} versets ce Ramadan</span>
-                  <span style={{color:acc,fontWeight:600}}>{Math.round(riInfo.dayIn/30*100)}% du mois</span>
-                </div>
-              </div>)
-            :riInfo.daysLeft<=60?(<div style={{marginTop:8,padding:"7px 12px",background:`${acc}08`,borderRadius:8,border:`1px solid ${acc}20`,display:"flex",alignItems:"center",gap:8}}>
-                <span style={{fontSize:".75rem",color:acc}}>🌙</span>
-                <span style={{fontSize:".65rem",color:t.tx2,flex:1}}>Ramadan dans <span style={{color:acc,fontWeight:700}}>{riInfo.daysLeft} jours</span></span>
-                <button onClick={()=>setPage("khatma")} style={{background:`${acc}18`,border:`1px solid ${acc}33`,color:acc,borderRadius:6,padding:"3px 8px",fontSize:".6rem",cursor:"pointer",fontWeight:600}}>Préparer →</button>
-              </div>):null
-          }
-            {/* Streak card */}
-            {memStreak>0&&(
-              <div style={{marginTop:8,padding:"8px 12px",background:"rgba(249,115,22,.08)",borderRadius:10,border:"1px solid rgba(249,115,22,.2)",display:"flex",alignItems:"center",gap:10}}>
-                <span style={{fontSize:"1.5rem"}}>🔥</span>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:".75rem",fontWeight:700,color:"#f97316"}}>{memStreak} jour{memStreak>1?"s":""} de suite</div>
-                  <div style={{fontSize:".6rem",color:t.tx3}}>Continue comme ça !</div>
-                </div>
-              </div>
-            )}
-
-                <svg style={{position:"absolute",bottom:0,left:0,width:"100%",height:10,display:"block"}} preserveAspectRatio="none" viewBox="0 0 800 10"><path d="M0,5 Q25,9 50,5 Q75,1 100,5 Q125,9 150,5 Q175,1 200,5 Q225,9 250,5 Q275,1 300,5 Q325,9 350,5 Q375,1 400,5 Q425,9 450,5 Q475,1 500,5 Q525,9 550,5 Q575,1 600,5 Q625,9 650,5 Q675,1 700,5 Q725,9 750,5 Q775,1 800,5" stroke={acc} strokeWidth=".8" fill="none" opacity=".3"/></svg>
+        )}
       </div>}
 
       <div className={`wrap${pageTransition?" transitioning":""}`}>
