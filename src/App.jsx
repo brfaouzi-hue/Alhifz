@@ -4291,7 +4291,6 @@ return (
                 </div>
               );
             })()}
-            </div>
 
             {/* Graphique */}
             <div className="card">
