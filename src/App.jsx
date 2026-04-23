@@ -2790,25 +2790,103 @@ return (
         {/* ACCUEIL */}
         {page==="home"&&(
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
-            {/* Salutation */}
-            <div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,borderRadius:16,padding:"20px 18px",border:`1px solid ${t.b1}`,position:"relative",overflow:"hidden",textAlign:"center"}}>
-              <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse at 50% 0%,${t.acc}10,transparent 60%)`,pointerEvents:"none"}}/>
-              <div style={{fontFamily:"'Amiri',serif",fontSize:"1.8rem",color:t.acc,marginBottom:4}}>بِسْمِ اللَّهِ</div>
-              <div style={{fontSize:".75rem",color:t.tx2,marginBottom:16}}>
-                {memStreak>0?`🔥 ${memStreak} jours de suite — continue !`:"Commençons la journée avec le Coran"}
-              </div>
-              {/* Progress ring */}
-              <div style={{display:"flex",justifyContent:"center",gap:24}}>
-                {[
-                  {v:totalMem,l:"Mémorisés",c:t.acc},
-                  {v:`${memStreak}j`,l:"Streak",c:"#f97316"},
-                  {v:`${pct}%`,l:"Progression",c:t.gr},
-                ].map((k,i)=>(
-                  <div key={i} style={{textAlign:"center"}}>
-                    <div style={{fontSize:"1.4rem",fontWeight:800,color:k.c}}>{k.v}</div>
-                    <div style={{fontSize:".58rem",color:t.tx3}}>{k.l}</div>
+
+            {/* ── Bloc Al-Hifz exact ── */}
+            <div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,borderRadius:16,border:`1px solid ${t.b1}`,position:"relative",overflow:"hidden"}}>
+              {/* Décoration bordure haut */}
+              <svg style={{position:"absolute",top:0,left:0,width:"100%",height:12,display:"block"}} preserveAspectRatio="none" viewBox="0 0 800 12">
+                <defs><linearGradient id="bord2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="transparent"/><stop offset=".15" stopColor={acc}/><stop offset=".5" stopColor={acc3}/><stop offset=".85" stopColor={acc}/><stop offset="1" stopColor="transparent"/></linearGradient></defs>
+                <rect y="0" width="800" height="1.5" fill="url(#bord2)"/>
+              </svg>
+              <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse at 50% 100%,${acc}0e 0%,transparent 70%)`,pointerEvents:"none"}}/>
+
+              <div style={{padding:"18px 16px 14px"}}>
+                {/* Title */}
+                <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,marginBottom:14}}>
+                  <svg width="60" height="8" viewBox="0 0 80 10"><line x1="0" y1="5" x2="55" y2="5" stroke={acc} strokeWidth=".8" opacity=".4"/><circle cx="62" cy="5" r="2.5" fill="none" stroke={acc} strokeWidth=".8" opacity=".6"/><circle cx="72" cy="5" r="1.5" fill={acc} opacity=".5"/></svg>
+                  <div style={{textAlign:"center"}}>
+                    <div style={{fontFamily:"'Amiri',serif",fontSize:"1.6rem",fontWeight:700,color:acc,lineHeight:1,letterSpacing:"1px",textShadow:`0 0 30px ${acc}55`}}>Al-Hifz</div>
+                    <div style={{fontSize:".46rem",textTransform:"uppercase",letterSpacing:"4px",color:t.tx3,marginTop:2}}>حفظ القرآن الكريم</div>
                   </div>
-                ))}
+                  <svg width="60" height="8" viewBox="0 0 80 10" style={{transform:"scaleX(-1)"}}><line x1="0" y1="5" x2="55" y2="5" stroke={acc} strokeWidth=".8" opacity=".4"/><circle cx="62" cy="5" r="2.5" fill="none" stroke={acc} strokeWidth=".8" opacity=".6"/><circle cx="72" cy="5" r="1.5" fill={acc} opacity=".5"/></svg>
+                </div>
+
+                {/* Ring + KPIs */}
+                <div style={{display:"flex",gap:14,alignItems:"stretch"}}>
+                  {/* Circular progress */}
+                  <div style={{flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                    <div style={{position:"relative",width:88,height:88}}>
+                      <svg width="88" height="88" viewBox="0 0 88 88">
+                        <defs><linearGradient id="cg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor={acc}/><stop offset="1" stopColor={acc3}/></linearGradient><filter id="glow2h"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+                        <circle cx="44" cy="44" r="42" fill="none" stroke={acc} strokeWidth=".4" opacity=".2" strokeDasharray="3,4"/>
+                        <circle cx="44" cy="44" r="35" fill="none" stroke={t.b1} strokeWidth="7"/>
+                        <circle cx="44" cy="44" r="35" fill="none" stroke="url(#cg2)" strokeWidth="7" strokeDasharray={`${2*Math.PI*35*pct/100} ${2*Math.PI*35*(1-pct/100)}`} strokeLinecap="round" transform="rotate(-90 44 44)" filter="url(#glow2h)" style={{transition:"stroke-dasharray 1.2s cubic-bezier(.4,0,.2,1)"}}/>
+                        <g transform="translate(44,44)" opacity=".15">{[0,60,120,180,240,300].map(a=>(<line key={a} x1="0" y1="-12" x2="0" y2="-7" stroke={acc} strokeWidth=".8" transform={`rotate(${a})`}/>))}</g>
+                      </svg>
+                      <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+                        <div style={{fontSize:"1.55rem",fontWeight:800,color:acc,lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{pct}<span style={{fontSize:".65rem",fontWeight:600}}>%</span></div>
+                        <div style={{fontSize:".46rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px"}}>mémorisé</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* KPIs droite */}
+                  <div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",gap:8}}>
+                    {/* Barre progression */}
+                    <div>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}>
+                        <span style={{fontSize:".55rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1.5px"}}>Progression</span>
+                        <div style={{display:"flex",gap:5}}>
+                          <span style={{fontSize:".7rem",color:acc,fontWeight:800,fontVariantNumeric:"tabular-nums"}}>{pct}%</span>
+                          <span style={{fontSize:".55rem",color:t.tx3}}>{totalMem.toLocaleString()} / {TOTAL_VERSES}</span>
+                        </div>
+                      </div>
+                      <div style={{position:"relative",height:11,background:t.b1,borderRadius:99,overflow:"hidden",boxShadow:"inset 0 2px 6px rgba(0,0,0,.15)"}}>
+                        <div style={{height:"100%",width:`${pct}%`,borderRadius:99,background:`linear-gradient(90deg,${acc},${acc2},${acc3})`,boxShadow:`0 0 10px ${acc}99`,transition:"width 1.2s cubic-bezier(.4,0,.2,1)",position:"relative",minWidth:pct>0?"12px":"0"}}>
+                          <div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent)",backgroundSize:"200% 100%",animation:"shimmer 2.5s infinite",borderRadius:99}}/>
+                        </div>
+                        {pct>2&&<div style={{position:"absolute",top:"50%",transform:"translateY(-50%)",left:`calc(${pct}% - 6px)`,width:11,height:11,borderRadius:"50%",background:"#fff",boxShadow:`0 0 6px ${acc}`,opacity:.9}}/>}
+                      </div>
+                      <div style={{display:"flex",justifyContent:"space-between",marginTop:3}}>
+                        <span style={{fontSize:".5rem",color:t.tx3}}>0</span>
+                        {[25,50,75].map(m=><span key={m} style={{fontSize:".5rem",color:pct>=m?acc:t.tx3,fontWeight:pct>=m?700:400}}>{m}%</span>)}
+                        <span style={{fontSize:".5rem",color:pct>=100?t.gr:t.tx3,fontWeight:pct>=100?700:400}}>✓</span>
+                      </div>
+                    </div>
+                    {/* 4 KPIs */}
+                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"5px 6px"}}>
+                      <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:t.s3,borderRadius:7}}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.bl} strokeWidth="1.5" strokeLinecap="round" opacity=".8"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-5 0v-15A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 8A2.5 2.5 0 0 1 17 10.5v9a2.5 2.5 0 0 1-5 0v-9A2.5 2.5 0 0 1 14.5 8Z"/></svg>
+                        <div><div style={{fontSize:".8rem",fontWeight:700,color:t.bl,lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{vpd}<span style={{fontSize:".52rem",fontWeight:500}}> v/j</span></div><div style={{fontSize:".44rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Rythme</div></div>
+                      </div>
+                      <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:t.s3,borderRadius:7}}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round" opacity=".8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+                        <div><div style={{fontSize:".8rem",fontWeight:700,color:daysLeft<=0?t.gr:"#f97316",lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{daysLeft>0?(daysLeft>365?`~${(daysLeft/365).toFixed(1)}a`:`${daysLeft}j`):"Fini!"}</div><div style={{fontSize:".44rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Avant fin</div></div>
+                      </div>
+                      <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:t.s3,borderRadius:7}}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.gr} strokeWidth="1.5" strokeLinecap="round" opacity=".8"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                        <div><div style={{fontSize:".8rem",fontWeight:700,color:t.gr,lineHeight:1}}>{SURAHS.filter(s=>sPct(s)===100).length}</div><div style={{fontSize:".44rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Sourates</div></div>
+                      </div>
+                      <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:t.s3,borderRadius:7}}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.tx2} strokeWidth="1.5" strokeLinecap="round" opacity=".8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill={t.tx2}/></svg>
+                        <div><div style={{fontSize:".8rem",fontWeight:700,color:t.tx2,lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{remaining.toLocaleString()}</div><div style={{fontSize:".44rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Restants</div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ETA */}
+                <div style={{marginTop:8,padding:"5px 10px",borderTop:`1px solid ${acc}15`,display:"flex",alignItems:"center",justifyContent:"center",gap:5,background:`${acc}04`,borderRadius:"0 0 8px 8px",marginLeft:-16,marginRight:-16,paddingLeft:16,paddingRight:16}}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={acc} strokeWidth="1.5" strokeLinecap="round" opacity=".5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+                  <span style={{fontSize:".6rem",color:t.tx3,fontStyle:"italic"}}>{remaining>0?`Fin estimée · ${eta}`:"🎉 Coran complet !"}</span>
+                </div>
+
+                {/* Rappels */}
+                {!(hist[today()]||0)&&(<div style={{marginTop:7,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${t.bl}15`,borderRadius:8,border:`1px solid ${t.bl}30`,cursor:"pointer"}} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>sPct(x)<100);if(s)doSelect(s);}}><div style={{width:6,height:6,borderRadius:"50%",background:t.bl,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".63rem",color:t.bl,fontWeight:600,flex:1}}>Aucune mémorisation aujourd'hui — on commence ?</span><span style={{fontSize:".58rem",color:t.bl,opacity:.7}}>→</span></div>)}
+                {spacedDue.length>0&&(<div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${t.rd}15`,borderRadius:8,border:`1px solid ${t.rd}30`,cursor:"pointer"}} onClick={()=>setPage("pages")}><div style={{width:6,height:6,borderRadius:"50%",background:t.rd,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".63rem",color:t.rd,fontWeight:600,flex:1}}>{spacedDue.length} verset{spacedDue.length>1?"s":""} à réviser aujourd'hui</span><span style={{fontSize:".58rem",color:t.rd,opacity:.7}}>Voir →</span></div>)}
+                {bookmark&&(<div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${acc}10`,borderRadius:8,border:`1px solid ${acc}25`,cursor:"pointer"}} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>x.n===bookmark.sn);if(s)doSelect(s);}}><span style={{fontSize:".7rem",color:acc}}>◈</span><span style={{fontSize:".63rem",color:t.tx,fontWeight:600,flex:1}}>Reprendre : {bookmark.name}</span><span style={{fontSize:".58rem",color:t.tx3}}>→</span></div>)}
+                {/* Streak */}
+                {memStreak>0&&(<div onClick={()=>setPage("stats")} style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"6px 10px",background:"rgba(249,115,22,.08)",borderRadius:9,border:"1px solid rgba(249,115,22,.2)",cursor:"pointer"}}><span style={{fontSize:"1.1rem"}}>🔥</span><span style={{fontSize:".7rem",fontWeight:700,color:"#f97316",flex:1}}>{memStreak} jour{memStreak>1?"s":""} de suite</span><span style={{fontSize:".58rem",color:"#f97316",opacity:.7}}>Stats →</span></div>)}
               </div>
             </div>
 
