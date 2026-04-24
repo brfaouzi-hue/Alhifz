@@ -893,7 +893,7 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
           )}
           <span style={{fontSize:".58rem",color:"#5a4a2a",fontStyle:"italic"}}>{ed.name}</span>
         </div>
-        <button onClick={onToggleFullscreen} style={{background:"rgba(255,255,255,.05)",border:"1px solid rgba(255,255,255,.1)",color:"#777",padding:"5px 11px",borderRadius:8,cursor:"pointer",fontSize:".62rem"}}>{fullscreen?"✕":"⛶"}</button>
+        <button onClick={onToggleFullscreen} style={{background:"rgba(201,168,76,.18)",border:"1px solid rgba(201,168,76,.4)",color:AC,padding:"5px 11px",borderRadius:8,cursor:"pointer",fontSize:".72rem",fontWeight:700}}>{fullscreen?"✕ Quitter":"⛶ Plein écran"}</button>
         <button onClick={onNext} style={{background:"rgba(201,168,76,.12)",border:"1px solid rgba(201,168,76,.22)",color:AC,padding:"5px 14px",borderRadius:8,cursor:"pointer",fontWeight:700}}>►</button>
       </div>
 
@@ -1190,7 +1190,7 @@ body>*{position:relative;z-index:1;}
 .khs-l{font-size:.6rem;color:${t.tx3};text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
 .streak-fire{font-size:1.8rem;}
 /* ── Settings ── */
-.settings-wrap{display:flex;flex-direction:column;gap:14px;max-width:600px;margin:0 auto;}
+.settings-wrap{display:flex;flex-direction:column;gap:14px;max-width:600px;margin:0 auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
 .settings-section{background:${t.cardBg};border:1px solid ${t.b1};border-radius:14px;overflow:hidden;transition:box-shadow .2s;}
 .settings-section:hover{box-shadow:0 4px 20px ${acc}14;}
 .ss-hd{padding:12px 16px;border-bottom:1px solid ${t.b1};font-size:.68rem;text-transform:uppercase;letter-spacing:1.5px;color:${t.tx3};font-weight:600;}
@@ -2296,22 +2296,42 @@ const handleReset=async()=>{
 
   // Compare deux mots arabes en ignorant les diacritiques
   const arabicMatch=(a,b)=>{
-    const clean=s=>s.replace(/[ًٌٍَُِّْٰ]/g,"").replace(/[أإآ]/g,"ا").replace(/[ىة]/g,"ي").trim();
+    // Normalisation complète — supprime diacritiques, harmonise les lettres similaires
+    const clean=s=>s
+      .replace(/<[^>]*>/g,"")              // strip HTML tajweed
+      .replace(/[ًٌٍَُِّْٰٓٔءۭۨ]/g,"")  // strip toutes diacritiques et hamza flottante
+      .replace(/[أإآٱ]/g,"ا")              // toutes formes de alef → ا
+      .replace(/[ىة]/g,"ي")               // ta marbuta et alef maqsura → ي
+      .replace(/ؤ/g,"و")                  // waw avec hamza → و
+      .replace(/ئ/g,"ي")                  // ya avec hamza → ي
+      .replace(/\s+/g,"")
+      .trim();
     const ca=clean(a),cb=clean(b);
-    return ca===cb||ca.includes(cb)||cb.includes(ca);
+    if(!ca||!cb) return false;
+    if(ca===cb) return true;
+    if(ca.includes(cb)||cb.includes(ca)) return true;
+    // Levenshtein tolérant — accepte 1 erreur par tranche de 4 caractères
+    const maxDist=Math.floor(Math.max(ca.length,cb.length)/4);
+    if(maxDist===0) return ca===cb;
+    const dp=Array.from({length:ca.length+1},(_,i)=>Array.from({length:cb.length+1},(_,j)=>i===0?j:j===0?i:0));
+    for(let i=1;i<=ca.length;i++) for(let j=1;j<=cb.length;j++) dp[i][j]=ca[i-1]===cb[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+    return dp[ca.length][cb.length]<=maxDist;
   };
 
-  // Analyse mot par mot — retourne [{word, status: ok|wrong|missing}]
+  // Analyse mot par mot — tolère l'ordre et les omissions mineures
   const analyzeRecitation=(targetAr,spoken)=>{
-    const target=(targetAr||"").replace(/<[^>]*>/g,"").trim().split(/\s+/).filter(Boolean);
-    const said=(spoken||"").trim().split(/\s+/).filter(Boolean);
+    const stripH=s=>(s||"").replace(/<[^>]*>/g,"").replace(/[ًٌٍَُِّْٰٓٔءۭۨ]/g,"").replace(/[أإآٱ]/g,"ا").replace(/[ىة]/g,"ي").replace(/ؤ/g,"و").replace(/ئ/g,"ي").trim();
+    const target=stripH(targetAr).split(/\s+/).filter(Boolean);
+    const said=stripH(spoken).split(/\s+/).filter(Boolean);
+    if(!said.length) return target.map(tw=>({word:tw,status:"missing"}));
     let si=0;
     return target.map(tw=>{
       if(si>=said.length) return {word:tw,status:"missing"};
       if(arabicMatch(tw,said[si])){si++;return {word:tw,status:"ok"};}
-      // Cherche en avance (mot sauté)
-      const ahead=said.slice(si,si+3).findIndex(w=>arabicMatch(tw,w));
+      // Cherche dans les 4 prochains mots (skip de mots)
+      const ahead=said.slice(si,si+4).findIndex(w=>arabicMatch(tw,w));
       if(ahead>=0){si+=ahead+1;return {word:tw,status:"ok"};}
+      si++; // avance quand même pour ne pas bloquer
       return {word:tw,status:"wrong"};
     });
   };
@@ -2339,7 +2359,6 @@ const handleReset=async()=>{
         recognitionRef.current=recognition;
         setSpeechListening(true);
         recognition.onresult=e=>{
-          // Sépare les résultats finaux des résultats intermédiaires
           let finalTranscript="";
           let interimTranscript="";
           for(let i=0;i<e.results.length;i++){
@@ -2347,9 +2366,7 @@ const handleReset=async()=>{
             if(e.results[i].isFinal) finalTranscript+=t+" ";
             else interimTranscript+=t;
           }
-          // Afficher en direct ce qui est dit (interim)
           if(interimTranscript) setSpeechResult(interimTranscript);
-          // Quand on a un résultat final, analyser
           if(finalTranscript.trim()){
             const transcript=finalTranscript.trim();
             setSpeechResult(transcript);
@@ -2358,10 +2375,9 @@ const handleReset=async()=>{
             const analysis=analyzeRecitation(verseAr,transcript);
             const correct=analysis.filter(w=>w.status==="ok").length;
             const total=analysis.length;
-            const pct=Math.round(correct/total*100);
+            const pct=total>0?Math.round(correct/total*100):0;
             const score={
-              pct,
-              analysis,
+              pct,analysis,
               wrong:analysis.filter(w=>w.status!=="ok").map(w=>w.word),
               correct:analysis.filter(w=>w.status==="ok").map(w=>w.word),
               targetWords:analysis.map(w=>w.word),
@@ -2655,11 +2671,15 @@ return (
                 <div style={{fontSize:".58rem",color:t.tx3,textTransform:"uppercase",letterSpacing:2,marginBottom:2}}>Récitation</div>
                 <div style={{fontFamily:"'Amiri',serif",fontSize:"1rem",color:t.acc,fontWeight:700}}>{selS.name} <span style={{color:t.tx3,fontSize:".8rem"}}>· {selS.ar}</span></div>
               </div>
-              <div style={{fontSize:".65rem",color:t.tx3,textAlign:"center"}}>
+              {/* Toggle enchaîné */}
+              <button onClick={()=>setContinuousMode(p=>!p)} style={{padding:"5px 10px",borderRadius:8,border:`1px solid ${continuousMode?t.acc:t.b2}`,background:continuousMode?`${t.acc}18`:t.s2,color:continuousMode?t.acc:t.tx3,fontSize:".58rem",fontWeight:700,cursor:"pointer",flexShrink:0,whiteSpace:"nowrap"}}>
+                {continuousMode?"⚡ Enchaîné":"↩ Verset/verset"}
+              </button>
+              <div style={{fontSize:".65rem",color:t.tx3,textAlign:"center",flexShrink:0}}>
                 <div style={{fontWeight:700,color:t.tx}}>{continuousIdx+1}<span style={{color:t.tx3,fontWeight:400}}>/{recitVerses.length}</span></div>
                 <div>versets</div>
               </div>
-              <button onClick={()=>{setRecitModal(false);stopListening();setContinuousMode(false);setSpeechScore(null);}} style={{background:"none",border:`1px solid ${t.b2}`,borderRadius:10,padding:"6px 12px",color:t.tx3,cursor:"pointer",fontSize:".72rem",fontWeight:600}}>✕ Fermer</button>
+              <button onClick={()=>{setRecitModal(false);stopListening();setContinuousMode(false);setSpeechScore(null);}} style={{background:"none",border:`1px solid ${t.b2}`,borderRadius:10,padding:"6px 12px",color:t.tx3,cursor:"pointer",fontSize:".72rem",fontWeight:600}}>✕</button>
             </div>
 
             {/* Barre de progression */}
@@ -2757,7 +2777,23 @@ return (
                   onClick={()=>{
                     if(isListening){stopListening();}
                     else if(isCountdown){clearInterval(countdownRef.current);setSpeechCountdown(0);}
-                    else{setSpeechScore(null);startListening(curV?.ar||"",curV?.n);}
+                    else{
+                      setSpeechScore(null);
+                      startListening(curV?.ar||"",curV?.n,(score)=>{
+                        // Mode enchaîné : avance auto si ≥ 70%
+                        if(continuousMode&&score.pct>=70){
+                          setTimeout(()=>{
+                            setSpeechScore(null);
+                            if(continuousIdx<recitVerses.length-1){
+                              setContinuousIdx(p=>p+1);
+                            } else {
+                              // Fini !
+                              setTimeout(()=>setRecitModal(false),1500);
+                            }
+                          },1200);
+                        }
+                      });
+                    }
                   }}
                   style={{
                     width:80,height:80,borderRadius:"50%",border:"none",cursor:"pointer",
@@ -2941,20 +2977,46 @@ return (
 
       {/* Timer flottant en haut quand actif */}
       {timerRunning&&timerLeft!==null&&timerLeft>0&&(
-        <div style={{position:"fixed",top:0,left:0,right:0,zIndex:250,background:`linear-gradient(135deg,${t.acc}ee,${t.acc2}ee)`,backdropFilter:"blur(12px)",padding:"6px 16px",display:"flex",alignItems:"center",gap:10,boxShadow:`0 2px 16px ${t.acc}44`}}>
-          <span style={{fontSize:".7rem",fontWeight:700,color:"#000",opacity:.7}}>⏱ Séance</span>
-          <div style={{flex:1,height:3,background:"rgba(0,0,0,.2)",borderRadius:99,overflow:"hidden"}}>
-            <div style={{height:"100%",width:`${100-(timerLeft/(timerDuration*60)*100)}%`,background:"rgba(0,0,0,.4)",borderRadius:99,transition:"width 1s linear"}}/>
+        <div style={{position:"fixed",top:0,left:0,right:0,zIndex:250,backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",background:tn==="light"?"rgba(255,255,255,.92)":"rgba(13,26,14,.92)",borderBottom:`1px solid ${t.b1}`,boxShadow:`0 2px 20px rgba(0,0,0,.15)`}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,padding:"7px 16px"}}>
+            {/* Icône séance */}
+            <div style={{width:28,height:28,borderRadius:"50%",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:`0 2px 8px ${t.acc}44`}}>
+              <span style={{fontSize:".7rem"}}>⏱</span>
+            </div>
+            <div style={{flex:1,display:"flex",flexDirection:"column",gap:3,minWidth:0}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span style={{fontSize:".56rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1.5px",fontWeight:600}}>Séance en cours</span>
+                <span style={{fontFamily:"monospace",fontWeight:900,fontSize:".85rem",color:t.acc,letterSpacing:"1px"}}>{fmtTime(timerLeft)}</span>
+              </div>
+              {/* Barre de progression */}
+              <div style={{height:4,background:t.b1,borderRadius:99,overflow:"hidden"}}>
+                <div style={{
+                  height:"100%",
+                  width:`${100-(timerLeft/(timerDuration*60)*100)}%`,
+                  background:`linear-gradient(90deg,${t.acc},${t.acc2})`,
+                  borderRadius:99,
+                  transition:"width 1s linear",
+                  boxShadow:`0 0 6px ${t.acc}66`,
+                }}/>
+              </div>
+            </div>
+            <button onClick={pauseTimer} style={{background:t.s2,border:`1px solid ${t.b2}`,borderRadius:8,padding:"5px 10px",color:t.tx2,cursor:"pointer",fontSize:".65rem",fontWeight:700,flexShrink:0}}>⏸</button>
+            <button onClick={()=>setTimerOpen(true)} style={{background:`${t.acc}15`,border:`1px solid ${t.acc}44`,borderRadius:8,padding:"5px 10px",color:t.acc,cursor:"pointer",fontSize:".65rem",fontWeight:700,flexShrink:0}}>↗</button>
           </div>
-          <span style={{fontFamily:"monospace",fontWeight:900,fontSize:"1rem",color:"#000",letterSpacing:1,minWidth:52,textAlign:"center"}}>{fmtTime(timerLeft)}</span>
-          <button onClick={pauseTimer} style={{background:"rgba(0,0,0,.15)",border:"1px solid rgba(0,0,0,.2)",borderRadius:7,padding:"3px 10px",color:"#000",cursor:"pointer",fontSize:".7rem",fontWeight:700}}>⏸</button>
-          <button onClick={()=>setTimerOpen(true)} style={{background:"rgba(0,0,0,.1)",border:"1px solid rgba(0,0,0,.15)",borderRadius:7,padding:"3px 10px",color:"#000",cursor:"pointer",fontSize:".7rem"}}>↗</button>
         </div>
       )}
       {timerLeft===0&&(
-        <div style={{position:"fixed",top:0,left:0,right:0,zIndex:250,background:"linear-gradient(135deg,#2e7d32ee,#43a047ee)",backdropFilter:"blur(12px)",padding:"6px 16px",display:"flex",alignItems:"center",gap:10}}>
-          <span style={{fontSize:".75rem",fontWeight:700,color:"#fff",flex:1}}>✓ Séance terminée · بارك الله فيك</span>
-          <button onClick={resetTimer} style={{background:"rgba(255,255,255,.2)",border:"1px solid rgba(255,255,255,.3)",borderRadius:7,padding:"3px 10px",color:"#fff",cursor:"pointer",fontSize:".7rem",fontWeight:700}}>✕</button>
+        <div style={{position:"fixed",top:0,left:0,right:0,zIndex:250,backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",background:tn==="light"?"rgba(232,255,235,.95)":"rgba(13,40,18,.95)",borderBottom:`1px solid ${t.gr}44`}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,padding:"7px 16px"}}>
+            <div style={{width:28,height:28,borderRadius:"50%",background:`linear-gradient(135deg,${t.gr},#43a047)`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+              <span style={{fontSize:".75rem"}}>✓</span>
+            </div>
+            <div style={{flex:1}}>
+              <div style={{fontSize:".72rem",fontWeight:700,color:t.gr}}>Séance terminée</div>
+              <div style={{fontSize:".58rem",color:t.tx3,marginTop:1}}>بارك الله فيك — que Allah bénisse ton effort</div>
+            </div>
+            <button onClick={resetTimer} style={{background:"none",border:`1px solid ${t.gr}44`,borderRadius:8,padding:"5px 10px",color:t.gr,cursor:"pointer",fontSize:".65rem",fontWeight:700}}>✕</button>
+          </div>
         </div>
       )}
 
