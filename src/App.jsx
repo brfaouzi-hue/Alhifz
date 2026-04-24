@@ -813,8 +813,9 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
       idxRef.current=n;
       setIdx(n);
       setSpeechScore(null);setSpeechResult("");
-      // Lance l'écoute sur le suivant
-      if(chainRef.current){
+      // Sur desktop uniquement — iOS requiert un geste direct
+      const isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if(chainRef.current&&!isIOS){
         setTimeout(()=>{
           const nextV=versesRef.current[n];
           if(nextV&&chainRef.current) startListening(nextV.ar||"",nextV.n,(s)=>{
@@ -822,6 +823,7 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
           });
         },300);
       }
+      // Sur iOS : le message "Appuie pour continuer" s'affiche, l'utilisateur tape
     } else {
       setTimeout(onClose,800);
     }
@@ -831,10 +833,8 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
     if(chainRef.current&&score.pct>=70) setTimeout(nextVerse,700);
   },[nextVerse]);
 
-  // Démarrage auto en mode enchaîné au montage
-  React.useEffect(()=>{
-    if(chainRef.current&&curV) startListening(curV.ar||"",curV.n,onDone);
-  },[]); // eslint-disable-line
+  // Pas de démarrage auto — iOS Safari requiert un geste utilisateur direct
+  // L'utilisateur appuie sur le bouton micro pour démarrer
 
   const goTo=(n)=>{
     stopListening();setSpeechScore(null);setSpeechResult("");
@@ -850,6 +850,10 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
   const handleMic=()=>{
     if(isListening){stopListening();}
     else if(isCountdown){clearInterval(countdownRef.current);setSpeechCountdown(0);}
+    else if(hasScore&&chain&&speechScore?.pct>=70){
+      // En mode enchaîné et bon score — passer au verset suivant
+      nextVerse();
+    }
     else{setSpeechScore(null);setSpeechResult("");startListening(curV?.ar||"",curV?.n,onDone);}
   };
 
@@ -971,8 +975,9 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
           <div style={{fontSize:".68rem",color:t.tx3,textAlign:"center",minHeight:18,fontWeight:500}}>
             {isListening?<span style={{color:"#e91e63",fontWeight:700}}>En écoute…</span>
             :isCountdown?<span style={{color:"#f59e0b",fontWeight:700}}>Prépare-toi {speechCountdown}…</span>
+            :hasScore&&speechScore?.pct>=70&&chain?"→ Appuie pour verset suivant"
             :hasScore?"Appuie ↺ pour réessayer"
-            :chain?"Écoute automatique active"
+            :chain?"Appuie · mode enchaîné actif"
             :"Appuie pour réciter"}
           </div>
         </div>
@@ -2545,10 +2550,62 @@ const handleReset=async()=>{
 
   const startListening=(verseAr,vn,onDone)=>{
     if(!speechSupported)return;
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR)return;
+
     setSpeechVerseTarget({ar:verseAr,vn});
     setSpeechResult("");
     setSpeechScore(null);
-    // Compte à rebours 3→0
+
+    // Créer la recognition MAINTENANT (dans le contexte synchrone du geste utilisateur)
+    // pour satisfaire la restriction iOS Safari
+    const recognition=new SR();
+    recognition.lang="ar-SA";
+    recognition.continuous=false;     // false = compatible iOS
+    recognition.interimResults=true;
+    recognition.maxAlternatives=5;
+    recognitionRef.current=recognition;
+
+    recognition.onresult=e=>{
+      let finalTranscript="";
+      let interimTranscript="";
+      for(let i=0;i<e.results.length;i++){
+        const r=e.results[i];
+        // Prendre la meilleure alternative
+        const best=Array.from({length:r.length},(_,k)=>r[k].transcript).join(" ");
+        if(r.isFinal) finalTranscript+=r[0].transcript+" ";
+        else interimTranscript+=r[0].transcript;
+      }
+      if(interimTranscript) setSpeechResult(interimTranscript);
+      if(finalTranscript.trim()){
+        const transcript=finalTranscript.trim();
+        setSpeechResult(transcript);
+        setSpeechListening(false);
+        const analysis=analyzeRecitation(verseAr,transcript);
+        const correct=analysis.filter(w=>w.status==="ok").length;
+        const total=analysis.length;
+        const pct=total>0?Math.round(correct/total*100):0;
+        const score={pct,analysis,
+          wrong:analysis.filter(w=>w.status!=="ok").map(w=>w.word),
+          correct:analysis.filter(w=>w.status==="ok").map(w=>w.word),
+          targetWords:analysis.map(w=>w.word),
+          spokenWords:transcript.split(/\s+/),
+        };
+        setSpeechScore(score);
+        if(onDone) onDone(score);
+      }
+    };
+    recognition.onerror=(ev)=>{
+      console.warn("Speech error:",ev.error);
+      setSpeechListening(false);
+      setSpeechCountdown(0);
+    };
+    recognition.onend=()=>{
+      setSpeechListening(false);
+    };
+
+    // Countdown visuel — mais start() lancé immédiatement
+    // (iOS Safari autorise si l'objet recognition a été créé dans le geste)
     setSpeechCountdown(3);
     let cd=3;
     countdownRef.current=setInterval(()=>{
@@ -2556,47 +2613,10 @@ const handleReset=async()=>{
       setSpeechCountdown(cd);
       if(cd<=0){
         clearInterval(countdownRef.current);
-        // Démarrer la reconnaissance
-        const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-        const recognition=new SR();
-        recognition.lang="ar-SA";
-        recognition.continuous=true;
-        recognition.interimResults=true;  // affiche en temps réel
-        recognition.maxAlternatives=3;
-        recognitionRef.current=recognition;
+        setSpeechCountdown(0);
         setSpeechListening(true);
-        recognition.onresult=e=>{
-          let finalTranscript="";
-          let interimTranscript="";
-          for(let i=0;i<e.results.length;i++){
-            const t=e.results[i][0].transcript;
-            if(e.results[i].isFinal) finalTranscript+=t+" ";
-            else interimTranscript+=t;
-          }
-          if(interimTranscript) setSpeechResult(interimTranscript);
-          if(finalTranscript.trim()){
-            const transcript=finalTranscript.trim();
-            setSpeechResult(transcript);
-            recognition.stop();
-            setSpeechListening(false);
-            const analysis=analyzeRecitation(verseAr,transcript);
-            const correct=analysis.filter(w=>w.status==="ok").length;
-            const total=analysis.length;
-            const pct=total>0?Math.round(correct/total*100):0;
-            const score={
-              pct,analysis,
-              wrong:analysis.filter(w=>w.status!=="ok").map(w=>w.word),
-              correct:analysis.filter(w=>w.status==="ok").map(w=>w.word),
-              targetWords:analysis.map(w=>w.word),
-              spokenWords:transcript.split(/\s+/),
-            };
-            setSpeechScore(score);
-            if(onDone) onDone(score);
-          }
-        };
-        recognition.onerror=()=>setSpeechListening(false);
-        recognition.onend=()=>setSpeechListening(false);
-        recognition.start();
+        try{ recognition.start(); }
+        catch(err){ console.warn("recognition.start error:",err); setSpeechListening(false); }
       }
     },1000);
   };
@@ -3301,6 +3321,78 @@ return (
                 </div>
               </div>
             )}
+
+            {/* Dernière activité / Reprendre */}
+            {readHistory.length>0&&(()=>{
+              const last=readHistory[0];
+              const s=SURAHS.find(x=>x.n===last.sn);
+              return s?(
+                <div className="card" onClick={()=>{doSelect(s);setPage("quran");}} style={{cursor:"pointer"}} onMouseEnter={e=>{e.currentTarget.style.borderColor=t.acc;e.currentTarget.style.transform="translateY(-1px)";}} onMouseLeave={e=>{e.currentTarget.style.borderColor=t.b1;e.currentTarget.style.transform="";}}>
+                  <div style={{padding:"12px 14px",display:"flex",alignItems:"center",gap:12}}>
+                    <div style={{width:40,height:40,borderRadius:10,background:`${t.acc}12`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.acc} strokeWidth="1.6" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+                    </div>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:".6rem",color:t.tx3,marginBottom:2}}>Reprendre là où tu t'es arrêté</div>
+                      <div style={{fontSize:".82rem",fontWeight:700,color:t.tx,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{s.name}</div>
+                      <div style={{fontFamily:"'Amiri',serif",fontSize:".8rem",color:t.tx3,direction:"rtl",textAlign:"right"}}>v.{last.vn} · {s.ar}</div>
+                    </div>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.acc} strokeWidth="2" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </div>
+                </div>
+              ):null;
+            })()}
+
+            {/* Hadith / Citation du jour */}
+            {(()=>{
+              const hadiths=[
+                {ar:"خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ",fr:"Le meilleur d'entre vous est celui qui apprend le Coran et l'enseigne.",src:"Al-Bukhari"},
+                {ar:"مَثَلُ الَّذِي يَقْرَأُ الْقُرْآنَ وَهُوَ حَافِظٌ لَهُ مَعَ السَّفَرَةِ الْكِرَامِ الْبَرَرَةِ",fr:"Celui qui récite le Coran en le connaissant par cœur sera avec les nobles et pieux scribes.",src:"Al-Bukhari & Muslim"},
+                {ar:"إِنَّ الَّذِي لَيْسَ فِي جَوْفِهِ شَيْءٌ مِنَ الْقُرْآنِ كَالْبَيْتِ الْخَرِبِ",fr:"Celui qui n'a rien du Coran dans son cœur est comme une maison en ruine.",src:"At-Tirmidhi"},
+                {ar:"اقْرَءُوا الْقُرْآنَ فَإِنَّهُ يَأْتِي يَوْمَ الْقِيَامَةِ شَفِيعًا لأَصْحَابِهِ",fr:"Récitez le Coran car il sera un intercesseur pour ses compagnons le Jour du Jugement.",src:"Muslim"},
+                {ar:"أَهْلُ الْقُرْآنِ هُمْ أَهْلُ اللَّهِ وَخَاصَّتُهُ",fr:"Les gens du Coran sont les gens d'Allah et Ses élus.",src:"An-Nasa'i"},
+              ];
+              const h=hadiths[new Date().getDate()%hadiths.length];
+              return(
+                <div style={{padding:"14px 16px",background:`linear-gradient(135deg,${t.acc}08,${t.acc}04)`,borderRadius:14,border:`1px solid ${t.acc}20`}}>
+                  <div style={{fontSize:".54rem",color:t.acc,textTransform:"uppercase",letterSpacing:"2px",fontWeight:700,marginBottom:8}}>Hadith du jour</div>
+                  <div style={{fontFamily:"'Amiri',serif",fontSize:"1.05rem",direction:"rtl",textAlign:"right",lineHeight:1.8,color:t.tx,marginBottom:8}}>{h.ar}</div>
+                  <div style={{fontSize:".68rem",color:t.tx2,fontStyle:"italic",lineHeight:1.5,marginBottom:6}}>{h.fr}</div>
+                  <div style={{fontSize:".56rem",color:t.tx3}}>— {h.src}</div>
+                </div>
+              );
+            })()}
+
+            {/* Prochain objectif */}
+            {(()=>{
+              const nextS=SURAHS.find(s=>sPct(s)>0&&sPct(s)<100);
+              const firstUnstarted=SURAHS.find(s=>sPct(s)===0);
+              const target=nextS||firstUnstarted;
+              if(!target) return null;
+              const pctV=sPct(target);
+              return(
+                <div className="card" onClick={()=>{doSelect(target);setPage("quran");}} style={{cursor:"pointer"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";}} onMouseLeave={e=>{e.currentTarget.style.transform="";}}>
+                  <div style={{padding:"12px 14px"}}>
+                    <div style={{fontSize:".58rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1.5px",marginBottom:8}}>
+                      {nextS?"En cours de mémorisation":"Prochaine sourate"}
+                    </div>
+                    <div style={{display:"flex",alignItems:"center",gap:12}}>
+                      <div style={{width:40,height:40,borderRadius:10,background:`${t.gr}12`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".75rem",fontWeight:800,color:t.gr,border:`1px solid ${t.gr}30`,flexShrink:0}}>{target.n}</div>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
+                          <span style={{fontSize:".8rem",fontWeight:700,color:t.tx}}>{target.name}</span>
+                          <span style={{fontFamily:"'Amiri',serif",fontSize:".85rem",color:t.tx3}}>{target.ar}</span>
+                        </div>
+                        <div style={{height:5,background:t.b1,borderRadius:99,overflow:"hidden"}}>
+                          <div style={{height:"100%",width:`${pctV}%`,background:`linear-gradient(90deg,${t.gr},${t.acc})`,borderRadius:99,transition:"width .6s"}}/>
+                        </div>
+                        <div style={{fontSize:".58rem",color:t.tx3,marginTop:3}}>{sMem(target)}/{target.v} versets · {target.v-sMem(target)} restants</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
 
