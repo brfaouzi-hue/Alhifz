@@ -785,6 +785,24 @@ function TajwidSpan({text,enabled,tjc}) {
   }
 }
 
+function TajweedLegend({effectiveTjc}){
+  const [show,setShow]=React.useState(true);
+  if(!show) return(
+    <button onClick={()=>setShow(true)} style={{padding:"3px 10px",background:"rgba(26,10,0,.8)",border:"none",borderTop:"1px solid rgba(201,168,76,.1)",color:"#7a6a5a",fontSize:".5rem",cursor:"pointer",flexShrink:0,textAlign:"center",width:"100%"}}>● Afficher légende tajweed</button>
+  );
+  return(
+    <div style={{padding:"4px 10px",background:"rgba(26,10,0,.92)",borderTop:"1px solid rgba(201,168,76,.15)",display:"flex",gap:6,flexWrap:"wrap",alignItems:"center",flexShrink:0}}>
+      {[[effectiveTjc.m,"Madd nat."],[effectiveTjc.mr,"Madd perm."],[effectiveTjc.mo,"Madd wajib"],[effectiveTjc.ml,"Madd lazim"],[effectiveTjc.g,"Ghunna"],[effectiveTjc.q,"Qalqala"],[effectiveTjc.ikh,"Ikhfa"],[effectiveTjc.iql,"Iqlab"]].map(([c,l])=>(
+        <div key={l} style={{display:"flex",alignItems:"center",gap:3}}>
+          <div style={{width:7,height:7,borderRadius:"50%",background:c,flexShrink:0}}/>
+          <span style={{fontSize:".46rem",color:"#9a8a6a"}}>{l}</span>
+        </div>
+      ))}
+      <button onClick={()=>setShow(false)} style={{marginLeft:"auto",background:"none",border:"none",color:"#7a6a5a",cursor:"pointer",fontSize:".75rem",padding:"0 4px",lineHeight:1}}>✕</button>
+    </div>
+  );
+}
+
 // MushafPage
 // Vraies URL par édition — plusieurs fallbacks pour fiabilité
 // URLs Mushaf — proxy Vercel en premier (pas de CORS), puis CDN directs en fallback
@@ -908,70 +926,59 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
               <button onClick={()=>{try{localStorage.removeItem(`mpage9_${page}`);}catch{}setTextState("idle");setTimeout(()=>setTextState("loading"),50);}} style={{marginTop:10,padding:"5px 12px",border:"1px solid #c9a84c",background:"transparent",color:"#c9a84c",borderRadius:7,cursor:"pointer",fontSize:".7rem"}}>↺ Réessayer</button>
             </div>
           )}
-          {textState==="ok"&&groups.map((g,gi)=>(
-            <div key={gi} style={{marginBottom:20}}>
-              {/* En-tête sourate */}
-              {g.vs[0]?.n===1&&(
-                <div style={{textAlign:"center",margin:"0 0 16px",padding:"12px 16px",background:"linear-gradient(135deg,#2c1810,#4a2c18)",borderRadius:12,border:"1px solid rgba(201,168,76,.4)",boxShadow:"0 2px 12px rgba(0,0,0,.2)"}}>
-                  <div style={{fontFamily:"'Amiri',serif",fontSize:"1.2rem",color:"#e8c060",letterSpacing:3}}>{g.sAr}</div>
-                  <div style={{fontSize:".6rem",color:"#c8a060",marginTop:3,letterSpacing:1}}>{g.sName}</div>
-                  {g.s!==1&&g.s!==9&&(
-                    <div style={{fontFamily:"'Amiri Quran',serif",fontSize:"1.5rem",color:"#1a0a00",marginTop:10,direction:"rtl",background:"#f5f0dc",padding:"8px 16px",borderRadius:8,boxShadow:"inset 0 1px 3px rgba(0,0,0,.1)"}}>
-                      بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ
+          {textState==="ok"&&(
+            <div style={{
+              direction:"rtl",
+              fontFamily:"'Scheherazade New',serif",
+              fontSize:"1.45rem",
+              lineHeight:"2.4",
+              color:"#1a0a00",
+              padding:"16px 20px",
+              textAlign:"justify",
+              wordSpacing:"2px",
+              letterSpacing:"0",
+              background:"rgba(255,255,255,.5)",
+              borderRadius:10,
+              minHeight:"70vh",
+            }}>
+              {groups.map((g,gi)=>(
+                <React.Fragment key={gi}>
+                  {/* En-tête sourate */}
+                  {g.vs[0]?.n===1&&(
+                    <div style={{textAlign:"center",margin:"8px 0 12px",padding:"8px 14px",background:"linear-gradient(135deg,#2c1810,#4a2c18)",borderRadius:8,border:"1px solid rgba(201,168,76,.4)"}}>
+                      <div style={{fontFamily:"'Amiri',serif",fontSize:"1rem",color:"#e8c060",letterSpacing:2}}>{g.sAr}</div>
+                      <div style={{fontSize:".55rem",color:"#c8a060",marginTop:2,direction:"ltr"}}>{g.sName}</div>
+                      {g.s!==1&&g.s!==9&&(
+                        <div style={{fontFamily:"'Scheherazade New',serif",fontSize:"1.3rem",color:"#1a0a00",marginTop:8,direction:"rtl",background:"#f5f0dc",padding:"6px 14px",borderRadius:6}}>
+                          بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ
+                        </div>
+                      )}
                     </div>
                   )}
-                </div>
-              )}
-              {/* Versets — style Mushaf : justifié RTL, grande police */}
-              <div style={{
-                direction:"rtl",
-                textAlign:"justify",
-                fontFamily:arFont||"'Scheherazade New','Amiri Quran',serif",
-                fontSize:"2rem",
-                lineHeight:"3.6",
-                color:"#1a0a00",
-                padding:"4px 12px 12px",
-                background:"rgba(255,255,255,.4)",
-                borderRadius:10,
-                border:"1px solid rgba(201,168,76,.15)",
-                boxShadow:"0 1px 6px rgba(0,0,0,.06)",
-              }}>
-                {g.vs.map((v,vi)=>(
-                  <React.Fragment key={vi}>
-                    <TajwidSpan text={v.ar} enabled={true} tjc={effectiveTjc}/>
-                    {" "}
-                    <span style={{
-                      fontFamily:"'Amiri',serif",
-                      fontSize:".75rem",
-                      color:"#c9a84c",
-                      margin:"0 2px",
-                      verticalAlign:"middle",
-                      display:"inline-block",
-                    }}>﴿{v.n}﴾</span>
-                    {" "}
-                  </React.Fragment>
-                ))}
-              </div>
+                  {/* Versets en flux continu — comme une vraie page */}
+                  {g.vs.map((v,vi)=>(
+                    <React.Fragment key={vi}>
+                      <TajwidSpan text={v.ar} enabled={true} tjc={effectiveTjc}/>
+                      <span style={{
+                        fontFamily:"'Amiri',serif",
+                        fontSize:".65rem",
+                        color:"#c9a84c",
+                        margin:"0 3px",
+                        verticalAlign:"middle",
+                        display:"inline-block",
+                        lineHeight:1,
+                      }}>﴿{v.n}﴾</span>
+                    </React.Fragment>
+                  ))}
+                </React.Fragment>
+              ))}
             </div>
-          ))}
+          )}
         </div>
       )}
 
-      {/* Légende tajweed */}
-      {mode==="text"&&(
-        <div style={{padding:"5px 12px",background:"rgba(26,10,0,.9)",borderTop:"1px solid rgba(201,168,76,.15)",display:"flex",gap:8,flexWrap:"wrap",alignItems:"center",flexShrink:0}}>
-          {[
-            [effectiveTjc.m,"Madd nat."],[effectiveTjc.mr,"Madd perm."],[effectiveTjc.mo,"Madd wajib"],
-            [effectiveTjc.ml,"Madd lazim"],[effectiveTjc.g,"Ghunna"],[effectiveTjc.q,"Qalqala"],
-            [effectiveTjc.ikh,"Ikhfa"],[effectiveTjc.iql,"Iqlab"],
-          ].map(([c,l])=>(
-            <div key={l} style={{display:"flex",alignItems:"center",gap:3}}>
-              <div style={{width:7,height:7,borderRadius:"50%",background:c,flexShrink:0}}/>
-              <span style={{fontSize:".48rem",color:"#9a8a6a"}}>{l}</span>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Légende tajweed masquable */}
+      {mode==="text"&&<TajweedLegend effectiveTjc={effectiveTjc}/>}
     </div>
   );
 }
@@ -2767,7 +2774,15 @@ return (
       {/* Topbar */}
       <div className="topbar" style={{marginTop:(timerRunning&&timerLeft!==null&&timerLeft>0)||timerLeft===0?36:0,transition:"margin-top .2s"}}>
         <div className="tb">
-          <div className="logo"><span className="logo-h">Al-Hifz</span><span className="logo-ar">القرآن</span><span className="logo-sub">mémorisation</span></div>
+          <div className="logo">
+            <div style={{display:"flex",flexDirection:"column",lineHeight:1.1}}>
+              <div style={{display:"flex",alignItems:"baseline",gap:5}}>
+                <span className="logo-h">Al-Hifz</span>
+                <span className="logo-ar">القرآن</span>
+              </div>
+              <span style={{fontSize:".42rem",color:t.tx3,letterSpacing:"1.5px",textTransform:"uppercase",whiteSpace:"nowrap",fontStyle:"italic"}}>Le mémorisateur</span>
+            </div>
+          </div>
           <div className="tb-r">
             <button className="tbtn" style={{borderColor:t.pu,color:t.pu,fontSize:".6rem"}} onClick={()=>setShowAIPlan(true)}>✦ Mon Parcours</button>
             <button className="tbtn" style={{borderColor:timerRunning?t.acc:t.gr,color:timerRunning?t.acc:t.gr,fontSize:".6rem",fontWeight:timerRunning?800:400}} onClick={()=>setTimerOpen(true)}>{timerRunning&&timerLeft?fmtTime(timerLeft):"⏱"}</button>
@@ -3240,9 +3255,22 @@ return (
                         </select>
                         <span style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",color:t.tx3,fontSize:".75rem",pointerEvents:"none"}}>▾</span>
                       </div>
-                      <button onClick={()=>{if(continuousMode){setContinuousMode(false);stopListening();}else if(speechSupported&&verses.length>0){const firstV=verses.find(v=>!!(mem[String(selS.n)]||{})[String(v.n)]);if(firstV){doPlay(firstV.n);setTimeout(()=>startListening(firstV.ar,firstV.n,(s)=>continuousNext(s)),2500);}setContinuousMode(true);setContinuousIdx(0);}}} style={{flexShrink:0,display:"flex",alignItems:"center",gap:5,background:continuousMode?"#e53935":`${t.acc}22`,border:`1px solid ${continuousMode?"#e53935":t.acc}`,borderRadius:10,padding:"7px 12px",color:continuousMode?"#fff":t.acc,fontSize:".68rem",fontWeight:700,cursor:"pointer",transition:"all .2s"}}>
-                      {continuousMode?"■ Stop récit.":"🎤 Récitation"}
-                    </button>
+                      <button onClick={()=>{
+                        if(continuousMode){
+                          setContinuousMode(false);stopListening();
+                        } else if(speechSupported&&verses.length>0){
+                          // D'abord jouer la sourate entière pour mémoriser, puis proposer récitation
+                          if(!playlistActive){
+                            startPlaylist(selS.n,verses,1);
+                            // Après 2s afficher message
+                          }
+                          const firstV=verses.find(v=>!!(mem[String(selS.n)]||{})[String(v.n)]);
+                          if(firstV){doPlay(firstV.n);setTimeout(()=>startListening(firstV.ar,firstV.n,(s)=>continuousNext(s)),2500);}
+                          setContinuousMode(true);setContinuousIdx(0);
+                        }
+                      }} style={{flexShrink:0,display:"flex",alignItems:"center",gap:5,background:continuousMode?"#e53935":`${t.acc}22`,border:`1px solid ${continuousMode?"#e53935":t.acc}`,borderRadius:10,padding:"7px 12px",color:continuousMode?"#fff":t.acc,fontSize:".68rem",fontWeight:700,cursor:"pointer",transition:"all .2s"}}>
+                        {continuousMode?"■ Stop récit.":"🎤 Récitation"}
+                      </button>
                     <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,1);}} style={{flexShrink:0,display:"flex",alignItems:"center",gap:5,background:playlistActive&&playlist[0]?.sn===selS.n?"#e53935":t.acc,border:"none",borderRadius:10,padding:"8px 14px",color:"#fff",fontSize:".72rem",fontWeight:700,cursor:"pointer",boxShadow:`0 2px 8px ${t.acc}44`,transition:"transform .15s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-1px)"} onMouseLeave={e=>e.currentTarget.style.transform=""}>{playlistActive&&playlist[0]?.sn===selS.n?"■ Stop":"▶ Sourate"}</button>
                     </div>
                     <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
