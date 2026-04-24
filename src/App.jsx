@@ -2657,6 +2657,14 @@ return (
         const isMem=!!(mem[String(selS.n)]||{})[String(curV?.n)];
         const progress=Math.round((continuousIdx/(recitVerses.length-1||1))*100);
 
+        // En mode enchaîné — si pas en écoute et pas de score, démarrer auto
+        React.useEffect(()=>{
+          if(continuousMode&&!isListening&&!isCountdown&&!hasScore&&curV){
+            startListening(curV.ar||"",curV.n);
+          }
+        // eslint-disable-next-line
+        },[continuousIdx,continuousMode]);
+
         return(
           <div style={{position:"fixed",inset:0,zIndex:400,display:"flex",flexDirection:"column",background:tn==="light"?"#fafaf8":"#0d1a0e"}} onClick={e=>e.stopPropagation()}>
             <style>{`
@@ -2780,18 +2788,22 @@ return (
                     else{
                       setSpeechScore(null);
                       startListening(curV?.ar||"",curV?.n,(score)=>{
-                        // Mode enchaîné : avance auto si ≥ 70%
-                        if(continuousMode&&score.pct>=70){
-                          setTimeout(()=>{
-                            setSpeechScore(null);
-                            if(continuousIdx<recitVerses.length-1){
-                              setContinuousIdx(p=>p+1);
-                            } else {
-                              // Fini !
-                              setTimeout(()=>setRecitModal(false),1500);
-                            }
-                          },1200);
-                        }
+                    if(continuousMode&&score.pct>=70){
+                        setTimeout(()=>{
+                          setSpeechScore(null);
+                          setSpeechResult("");
+                          if(continuousIdx<recitVerses.length-1){
+                            const nextIdx=continuousIdx+1;
+                            setContinuousIdx(nextIdx);
+                            // Relance l'écoute automatiquement sur le verset suivant
+                            const nextV=recitVerses[nextIdx];
+                            if(nextV) setTimeout(()=>startListening(nextV.ar||"",nextV.n),600);
+                          } else {
+                            // Récitation complète !
+                            setTimeout(()=>{setRecitModal(false);setContinuousMode(false);},1500);
+                          }
+                        },800);
+                      }
                       });
                     }
                   }}
@@ -4631,52 +4643,62 @@ return (
 
         {/* SETTINGS */}
         {page==="settings"&&(
-          <div className="settings-wrap">
+          <div className="settings-wrap" style={{paddingBottom:"env(safe-area-inset-bottom)"}}>
+
+            {/* Compte */}
             <div className="settings-section">
-  <div className="ss-hd">Compte</div>
-  <div style={{padding:"12px 0"}}>
-    <div style={{fontSize:".8rem",color:"#888",marginBottom:12}}>Connecté en tant que :</div>
-<div style={{fontSize:".85rem",color:"#c9a84c",fontWeight:600,marginBottom:12,padding:"8px 12px",background:"rgba(201,168,76,.08)",borderRadius:8,border:"1px solid rgba(201,168,76,.15)"}}>{user?.email}</div>
-    <button onClick={()=>supabase.auth.signOut()} style={{width:"100%",padding:"13px",background:"transparent",border:"1px solid rgba(239,68,68,.4)",borderRadius:12,color:"#ef4444",fontWeight:700,fontSize:".85rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-      🚪 Se déconnecter
-    </button>
-  </div>
-</div>
-                          <div className="settings-section">
-                <div className="ss-hd">🔔 Notifications</div>
-                <div style={{padding:"8px 0",display:"flex",flexDirection:"column",gap:10}}>
-                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 0",borderBottom:`1px solid ${t.b1}`}}>
-                    <div>
-                      <div style={{fontSize:".8rem",color:t.tx,fontWeight:600}}>Rappel quotidien</div>
-                      <div style={{fontSize:".65rem",color:t.tx3,marginTop:2}}>Recevoir un rappel chaque jour</div>
-                    </div>
-                    <button onClick={notifEnabled?()=>{setNotifEnabled(false);sv("qnotif",false);}:requestNotifications} style={{padding:"6px 14px",borderRadius:20,border:`1.5px solid ${notifEnabled?t.gr:t.b2}`,background:notifEnabled?`${t.gr}20`:t.s2,color:notifEnabled?t.gr:t.tx2,fontSize:".72rem",cursor:"pointer",fontWeight:600}}>
-                      {notifEnabled?"✓ Activé":"Activer"}
-                    </button>
+              <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                Compte
+              </div>
+              <div style={{padding:"14px 0 4px"}}>
+                <div style={{fontSize:".68rem",color:t.tx3,marginBottom:8}}>Connecté en tant que</div>
+                <div style={{fontSize:".82rem",color:t.acc,fontWeight:600,marginBottom:14,padding:"10px 14px",background:`${t.acc}10`,borderRadius:10,border:`1px solid ${t.acc}25`}}>{user?.email}</div>
+                <button onClick={()=>supabase.auth.signOut()} style={{width:"100%",padding:"13px",background:"transparent",border:`1px solid ${t.rd}55`,borderRadius:12,color:t.rd,fontWeight:700,fontSize:".82rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,transition:"background .2s"}} onMouseEnter={e=>e.currentTarget.style.background=`${t.rd}0a`} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                  Se déconnecter
+                </button>
+              </div>
+            </div>
+
+            {/* Notifications */}
+            <div className="settings-section">
+              <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                Notifications
+              </div>
+              <div style={{padding:"8px 0",display:"flex",flexDirection:"column",gap:10}}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 0",borderBottom:`1px solid ${t.b1}`}}>
+                  <div>
+                    <div style={{fontSize:".8rem",color:t.tx,fontWeight:600}}>Rappel quotidien</div>
+                    <div style={{fontSize:".63rem",color:t.tx3,marginTop:2}}>Recevoir un rappel chaque jour</div>
                   </div>
-                  {notifEnabled&&(
-                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                      <div style={{fontSize:".75rem",color:t.tx2}}>Tester la notification</div>
-                      <button onClick={sendTestNotif} className="tbtn">Envoyer un test</button>
-                    </div>
-                  )}
-                  <div style={{fontSize:".65rem",color:t.tx3,fontStyle:"italic"}}>
-                    {Notification?.permission==="granted"?"✓ Permission accordée":Notification?.permission==="denied"?"✗ Permission refusée — va dans les réglages iPhone":"En attente de permission"}
-                  </div>
+                  <button onClick={notifEnabled?()=>{setNotifEnabled(false);sv("qnotif",false);}:requestNotifications} style={{padding:"6px 16px",borderRadius:20,border:`1.5px solid ${notifEnabled?t.gr:t.b2}`,background:notifEnabled?`${t.gr}18`:t.s2,color:notifEnabled?t.gr:t.tx2,fontSize:".7rem",cursor:"pointer",fontWeight:700,transition:"all .2s"}}>
+                    {notifEnabled?"Activé":"Activer"}
+                  </button>
+                </div>
+                <div style={{fontSize:".62rem",color:t.tx3,fontStyle:"italic",padding:"2px 0"}}>
+                  {Notification?.permission==="granted"
+                    ?<span style={{color:t.gr}}>✓ Permission accordée</span>
+                    :Notification?.permission==="denied"
+                    ?<span style={{color:t.rd}}>✗ Bloqué — activez dans les réglages iPhone</span>
+                    :"En attente de permission"}
                 </div>
               </div>
+            </div>
 
-<div className="settings-section">
-              <div className="ss-hd">Objectif & profil</div>
+            {/* Objectif & Profil */}
+            <div className="settings-section">
+              <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
+                Objectif & Profil
+              </div>
               <div className="set-row">
                 <div><div className="set-lbl">Versets par jour</div><div className="set-sub">Objectif de nouvelles mémorisations</div></div>
                 <input className="set-inp" type="number" min="1" max="200" value={settings?.dailyGoal||5} onChange={e=>setSettings(s=>({...s,dailyGoal:parseInt(e.target.value)||5}))}/>
               </div>
               <div className="set-row">
-                <div>
-                  <div className="set-lbl">Versets connus avant Al-Hifz</div>
-                  <div className="set-sub">Exclus du calcul de rythme · actuellement : {settings?.baselineVerses||0}</div>
-                </div>
+                <div><div className="set-lbl">Versets connus avant Al-Hifz</div><div className="set-sub">Actuellement : {settings?.baselineVerses||0}</div></div>
                 <input className="set-inp" type="number" min="0" max="6236" value={settings?.baselineVerses||0} onChange={e=>setSettings(s=>({...s,baselineVerses:parseInt(e.target.value)||0}))}/>
               </div>
               <div className="set-row">
@@ -4685,10 +4707,14 @@ return (
               </div>
             </div>
 
+            {/* Apparence */}
             <div className="settings-section">
-              <div className="ss-hd">Apparence</div>
-              <div style={{padding:12}}>
-                <div style={{fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginBottom:10}}>Thème visuel</div>
+              <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                Apparence
+              </div>
+              <div style={{padding:"10px 0 4px"}}>
+                <div style={{fontSize:".62rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginBottom:10}}>Thème visuel</div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
                   {Object.entries(THEME_META).map(([key,meta])=>(
                     <div key={key} onClick={()=>setTn(key)} style={{border:`2px solid ${tn===key?t.acc:t.b1}`,borderRadius:12,padding:"10px 12px",cursor:"pointer",background:tn===key?`${t.acc}10`:t.s2,transition:"all .2s",transform:tn===key?"translateY(-1px)":"none",boxShadow:tn===key?`0 4px 14px ${t.acc}33`:"none"}}>
@@ -4703,7 +4729,7 @@ return (
                 </div>
               </div>
               <div className="set-row">
-                <div><div className="set-lbl">Mode nuit automatique</div><div className="set-sub">Bascule après 20h</div></div>
+                <div><div className="set-lbl">Mode nuit automatique</div><div className="set-sub">Bascule en émeraude après 20h</div></div>
                 <button className={`toggle ${autoNight?"on":""}`} onClick={()=>setAutoNight(v=>!v)}/>
               </div>
               <div className="set-row">
@@ -4712,8 +4738,12 @@ return (
               </div>
             </div>
 
+            {/* Police arabe */}
             <div className="settings-section">
-              <div className="ss-hd">Police arabe</div>
+              <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+                Police arabe
+              </div>
               <div className="font-grid">
                 {FONTS.map(f=>(
                   <div key={f.id} className={`font-card ${fontId===f.id?"sel":""}`} onClick={()=>setFontId(f.id)}>
@@ -4725,23 +4755,31 @@ return (
               </div>
             </div>
 
+            {/* Récitateurs */}
             <div className="settings-section">
-              <div className="ss-hd">Récitateurs</div>
-              <div style={{padding:12,display:"flex",flexDirection:"column",gap:6}}>
+              <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+                Récitateurs
+              </div>
+              <div style={{padding:"8px 0",display:"flex",flexDirection:"column",gap:6}}>
                 {RECITERS.map(r=>(
-                  <div key={r.id} style={{padding:"10px 12px",borderRadius:10,border:`1.5px solid ${rec.id===r.id?t.acc:t.b1}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",background:rec.id===r.id?`${t.acc}10`:t.s2,transition:"all .2s"}} onMouseEnter={e=>{if(rec.id!==r.id)e.currentTarget.style.borderColor=t.acc+"66";}} onMouseLeave={e=>{if(rec.id!==r.id)e.currentTarget.style.borderColor=t.b1;}} onClick={()=>setRec(r)}>
+                  <div key={r.id} style={{padding:"10px 14px",borderRadius:10,border:`1.5px solid ${rec.id===r.id?t.acc:t.b1}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",background:rec.id===r.id?`${t.acc}10`:t.s2,transition:"all .2s"}} onClick={()=>setRec(r)}>
                     <div>
                       <div style={{fontSize:".76rem",fontWeight:600,color:rec.id===r.id?t.acc:t.tx}}>{r.name}</div>
                       <div style={{fontFamily:"'Amiri',serif",fontSize:".85rem",color:t.tx3,marginTop:2}}>{r.ar}</div>
                     </div>
-                    {rec.id===r.id&&<Icons.Check size={16} color={t.acc}/>}
+                    {rec.id===r.id&&<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={t.acc} strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>}
                   </div>
                 ))}
               </div>
             </div>
 
+            {/* Données */}
             <div className="settings-section">
-              <div className="ss-hd">Données</div>
+              <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                Données
+              </div>
               <div className="set-row">
                 <div><div className="set-lbl">Exporter les mémorisations</div><div className="set-sub">Fichier JSON de sauvegarde</div></div>
                 <button className="tbtn" style={{borderColor:t.gr,color:t.gr}} onClick={()=>{const data=JSON.stringify({mem,settings,hist,badges,spaced,favorites,notes,khatmas,activeKhatma,readHistory,pageRead},null,2);const blob=new Blob([data],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=`alhifz_backup_${today()}.json`;a.click();}}>Exporter</button>
@@ -4755,13 +4793,13 @@ return (
               </div>
               <div className="set-row" style={{borderBottom:"none"}}>
                 <div><div className="set-lbl" style={{color:t.rd}}>Effacer toutes les données</div><div className="set-sub">Action irréversible</div></div>
-                <button className="tbtn" style={{borderColor:t.rd,color:t.rd}} onClick={()=>{if(window.confirm("Effacer toutes tes mémorisations ? Cette action est irréversible.")){setMem({});setHist({});setBadges([]);setSpaced({});setFavorites([]);setNotes({});setKhatmas([]);setActiveKhatma(null);setReadHistory([]);setPageRead({});}}}>Effacer</button>
+                <button className="tbtn" style={{borderColor:t.rd,color:t.rd}} onClick={()=>{if(window.confirm("Effacer toutes tes mémorisations ?  Action irréversible.")){setMem({});setHist({});setBadges([]);setSpaced({});setFavorites([]);setNotes({});setKhatmas([]);setActiveKhatma(null);setReadHistory([]);setPageRead({});}}}>Effacer</button>
               </div>
             </div>
 
-            <div style={{textAlign:"center",padding:16,color:t.tx3,fontSize:".6rem"}}>
-              Al-Hifz — حفظ القرآن الكريم<br/>
-              <span style={{fontFamily:"'Amiri',serif",fontSize:".9rem",color:t.acc,marginTop:4,display:"block"}}>رَبِّ زِدْنِي عِلْمًا</span>
+            <div style={{textAlign:"center",padding:"16px 0 32px",color:t.tx3,fontSize:".6rem"}}>
+              Al-Hifz — Le mémorisateur · v2.0<br/>
+              <span style={{fontFamily:"'Amiri',serif",fontSize:".9rem",color:t.acc,marginTop:6,display:"block"}}>رَبِّ زِدْنِي عِلْمًا</span>
             </div>
           </div>
         )}
