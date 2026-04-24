@@ -901,7 +901,7 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx,setContinuousIdx,continu
               </div>
               <div style={{flex:1,minWidth:0}}>
                 <div style={{fontSize:".82rem",fontWeight:700,color:speechScore.pct>=80?t.gr:speechScore.pct>=50?acc:"#e91e63",marginBottom:5}}>
-                  {speechScore.pct>=90?"Excellent !"":speechScore.pct>=80?"Très bien !":speechScore.pct>=60?"Presque…":"À retravailler"}
+                  {speechScore.pct>=90?"Excellent !":speechScore.pct>=80?"Très bien !":speechScore.pct>=60?"Presque…":"À retravailler"}
                 </div>
                 <div style={{fontSize:".62rem",color:t.tx3,marginBottom:6}}>{speechScore.correct?.length||0} correct{(speechScore.correct?.length||0)>1?"s":""} · {speechScore.wrong?.length||0} erreur{(speechScore.wrong?.length||0)>1?"s":""}</div>
                 <div style={{padding:"5px 8px",background:t.s2,borderRadius:7,direction:"rtl"}}>
