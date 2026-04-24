@@ -2291,6 +2291,7 @@ const handleReset=async()=>{
   const [speechCountdown,setSpeechCountdown]=useState(0); // 3,2,1,0
   const [continuousMode,setContinuousMode]=useState(false);
   const [continuousIdx,setContinuousIdx]=useState(0);
+  const [recitModal,setRecitModal]=useState(false); // modal récitation plein écran
   const countdownRef=useRef(null);
 
   // Compare deux mots arabes en ignorant les diacritiques
@@ -2624,6 +2625,192 @@ return (
           </div>
         </div>
       )}
+
+      {/* ══════════════════════════════════════════
+          MODAL RÉCITATION — Plein écran, propre
+          ══════════════════════════════════════════ */}
+      {recitModal&&selS&&verses.length>0&&(()=>{
+        const recitVerses=verses.filter((v,i)=>{
+          // Tous les versets, mémorisés en priorité
+          return true;
+        });
+        const curV=recitVerses[continuousIdx]||recitVerses[0];
+        const isListening=speechListening&&speechVerseTarget?.vn===curV?.n;
+        const isCountdown=speechCountdown>0&&speechVerseTarget?.vn===curV?.n;
+        const hasScore=speechScore&&speechVerseTarget?.vn===curV?.n;
+        const isMem=!!(mem[String(selS.n)]||{})[String(curV?.n)];
+        const progress=Math.round((continuousIdx/(recitVerses.length-1||1))*100);
+
+        return(
+          <div style={{position:"fixed",inset:0,zIndex:400,display:"flex",flexDirection:"column",background:tn==="light"?"#fafaf8":"#0d1a0e"}} onClick={e=>e.stopPropagation()}>
+            <style>{`
+              @keyframes micPulseRing{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(233,30,99,.5)}70%{transform:scale(1.04);box-shadow:0 0 0 18px rgba(233,30,99,0)}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(233,30,99,0)}}
+              @keyframes scoreIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+              @keyframes waveBar{0%,100%{height:6px}50%{height:22px}}
+            `}</style>
+
+            {/* Header */}
+            <div style={{display:"flex",alignItems:"center",padding:"14px 18px",borderBottom:`1px solid ${t.b1}`,flexShrink:0,gap:12}}>
+              <div style={{flex:1}}>
+                <div style={{fontSize:".58rem",color:t.tx3,textTransform:"uppercase",letterSpacing:2,marginBottom:2}}>Récitation</div>
+                <div style={{fontFamily:"'Amiri',serif",fontSize:"1rem",color:t.acc,fontWeight:700}}>{selS.name} <span style={{color:t.tx3,fontSize:".8rem"}}>· {selS.ar}</span></div>
+              </div>
+              <div style={{fontSize:".65rem",color:t.tx3,textAlign:"center"}}>
+                <div style={{fontWeight:700,color:t.tx}}>{continuousIdx+1}<span style={{color:t.tx3,fontWeight:400}}>/{recitVerses.length}</span></div>
+                <div>versets</div>
+              </div>
+              <button onClick={()=>{setRecitModal(false);stopListening();setContinuousMode(false);setSpeechScore(null);}} style={{background:"none",border:`1px solid ${t.b2}`,borderRadius:10,padding:"6px 12px",color:t.tx3,cursor:"pointer",fontSize:".72rem",fontWeight:600}}>✕ Fermer</button>
+            </div>
+
+            {/* Barre de progression */}
+            <div style={{height:3,background:t.b1,flexShrink:0}}>
+              <div style={{height:"100%",width:`${progress}%`,background:`linear-gradient(90deg,${t.acc},${t.acc2})`,transition:"width .4s ease"}}/>
+            </div>
+
+            {/* Zone principale */}
+            <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px 20px",gap:28,overflowY:"auto"}}>
+
+              {/* Numéro du verset */}
+              <div style={{display:"flex",alignItems:"center",gap:12}}>
+                <div style={{width:36,height:36,borderRadius:"50%",border:`2px solid ${isMem?t.gr:t.b2}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".75rem",fontWeight:700,color:isMem?t.gr:t.tx3}}>{curV?.n}</div>
+                {isMem&&<span style={{fontSize:".62rem",color:t.gr,fontWeight:600}}>✓ Mémorisé</span>}
+              </div>
+
+              {/* Verset arabe — grand, centré */}
+              <div style={{
+                fontFamily:"'Scheherazade New','Amiri Quran',serif",
+                fontSize:"2.2rem",
+                direction:"rtl",
+                textAlign:"center",
+                lineHeight:2,
+                color:t.tx,
+                padding:"0 8px",
+                maxWidth:600,
+                width:"100%",
+                filter:hasScore?"none":"none",
+              }}>
+                {hasScore
+                  ? speechScore.analysis?.map((w,wi)=>(
+                      <span key={wi} style={{
+                        color:w.status==="ok"?t.gr:w.status==="wrong"?"#e91e63":t.tx3,
+                        fontWeight:w.status==="wrong"?700:400,
+                        margin:"0 2px",
+                        textDecoration:w.status==="wrong"?"underline wavy #e91e63":"none",
+                      }}>{w.word} </span>
+                    ))
+                  : <TajwidSpan text={curV?.ar||""} enabled={showTj} tjc={tjc}/>
+                }
+                <span style={{fontFamily:"'Amiri',serif",fontSize:"1rem",color:t.acc,marginRight:4}}>﴿{curV?.n}﴾</span>
+              </div>
+
+              {/* Traduction */}
+              {curV?.fr&&(
+                <div style={{fontSize:".75rem",color:t.tx2,fontStyle:"italic",textAlign:"center",maxWidth:480,lineHeight:1.7,padding:"0 8px"}}>
+                  {curV.fr}
+                </div>
+              )}
+
+              {/* Feedback score */}
+              {hasScore&&(
+                <div style={{width:"100%",maxWidth:480,animation:"scoreIn .3s ease"}}>
+                  {/* Score ring */}
+                  <div style={{display:"flex",alignItems:"center",gap:16,padding:"16px 20px",background:speechScore.pct>=80?`${t.gr}12`:speechScore.pct>=50?`${t.acc}12`:`rgba(233,30,99,.08)`,borderRadius:16,border:`1.5px solid ${speechScore.pct>=80?t.gr:speechScore.pct>=50?t.acc:"#e91e63"}44`}}>
+                    {/* Cercle score */}
+                    <div style={{position:"relative",width:64,height:64,flexShrink:0}}>
+                      <svg width="64" height="64" viewBox="0 0 64 64">
+                        <circle cx="32" cy="32" r="28" fill="none" stroke={t.b1} strokeWidth="6"/>
+                        <circle cx="32" cy="32" r="28" fill="none"
+                          stroke={speechScore.pct>=80?t.gr:speechScore.pct>=50?t.acc:"#e91e63"}
+                          strokeWidth="6"
+                          strokeDasharray={`${2*Math.PI*28*speechScore.pct/100} ${2*Math.PI*28}`}
+                          strokeLinecap="round"
+                          transform="rotate(-90 32 32)"
+                          style={{transition:"stroke-dasharray .6s ease"}}
+                        />
+                      </svg>
+                      <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column"}}>
+                        <span style={{fontSize:"1rem",fontWeight:800,color:speechScore.pct>=80?t.gr:speechScore.pct>=50?t.acc:"#e91e63",lineHeight:1}}>{speechScore.pct}</span>
+                        <span style={{fontSize:".45rem",color:t.tx3}}>%</span>
+                      </div>
+                    </div>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:".85rem",fontWeight:700,color:speechScore.pct>=80?t.gr:speechScore.pct>=50?t.acc:"#e91e63",marginBottom:4}}>
+                        {speechScore.pct>=90?"Excellent ! 🌟":speechScore.pct>=80?"Très bien ! ✓":speechScore.pct>=60?"Presque… 💪":"À retravailler 🔄"}
+                      </div>
+                      <div style={{fontSize:".65rem",color:t.tx3}}>
+                        {speechScore.correct?.length||0} mot{(speechScore.correct?.length||0)>1?"s":""} correct{(speechScore.correct?.length||0)>1?"s":""} · {speechScore.wrong?.length||0} erreur{(speechScore.wrong?.length||0)>1?"s":""}
+                      </div>
+                      {/* Ce que tu as dit */}
+                      <div style={{marginTop:6,padding:"5px 8px",background:t.s2,borderRadius:7,direction:"rtl"}}>
+                        <span style={{fontSize:".5rem",color:t.tx3,direction:"ltr",display:"block",marginBottom:2}}>Tu as dit :</span>
+                        <span style={{fontFamily:"'Amiri',serif",fontSize:".9rem",color:t.tx}}>{speechResult||"—"}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Micro / état d'écoute */}
+              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:12}}>
+                {/* Bouton micro principal */}
+                <button
+                  onClick={()=>{
+                    if(isListening){stopListening();}
+                    else if(isCountdown){clearInterval(countdownRef.current);setSpeechCountdown(0);}
+                    else{setSpeechScore(null);startListening(curV?.ar||"",curV?.n);}
+                  }}
+                  style={{
+                    width:80,height:80,borderRadius:"50%",border:"none",cursor:"pointer",
+                    background:isListening?"#e91e63":isCountdown?"#ff9800":hasScore&&speechScore.pct>=80?t.gr:t.acc,
+                    display:"flex",alignItems:"center",justifyContent:"center",
+                    fontSize:"1.8rem",
+                    animation:isListening?"micPulseRing 1.2s infinite":"none",
+                    transition:"background .3s",
+                    boxShadow:`0 4px 24px ${isListening?"rgba(233,30,99,.4)":isCountdown?"rgba(255,152,0,.4)":`${t.acc}44`}`,
+                    flexShrink:0,
+                  }}>
+                  {isListening?"🎙️":isCountdown?speechCountdown:hasScore?"↺":"🎤"}
+                </button>
+
+                {/* Ondes sonores — pendant l'écoute */}
+                {isListening&&(
+                  <div style={{display:"flex",gap:4,alignItems:"center",height:30}}>
+                    {[1,1.4,.8,1.2,.6,1.3,.9,1.1,.7,1.5].map((h,i)=>(
+                      <div key={i} style={{width:4,background:"#e91e63",borderRadius:99,height:6,animation:`waveBar .8s ease-in-out ${i*.08}s infinite`,opacity:.7+i*.02}}/>
+                    ))}
+                  </div>
+                )}
+
+                {/* Label état */}
+                <div style={{fontSize:".75rem",color:t.tx3,fontWeight:500,textAlign:"center"}}>
+                  {isListening
+                    ? <span style={{color:"#e91e63",fontWeight:700}}>● Écoute en cours…</span>
+                    : isCountdown
+                    ? <span style={{color:"#ff9800",fontWeight:700}}>Prêt dans {speechCountdown}s…</span>
+                    : hasScore
+                    ? "Appuie pour réessayer"
+                    : "Appuie sur le micro et récite"
+                  }
+                </div>
+              </div>
+            </div>
+
+            {/* Footer — navigation entre versets */}
+            <div style={{display:"flex",gap:8,padding:"14px 18px",borderTop:`1px solid ${t.b1}`,flexShrink:0,alignItems:"center"}}>
+              <button onClick={()=>{if(continuousIdx>0){setSpeechScore(null);stopListening();setContinuousIdx(p=>p-1);}}} disabled={continuousIdx===0} style={{padding:"10px 16px",borderRadius:12,border:`1px solid ${t.b2}`,background:t.s2,color:continuousIdx===0?t.tx3:t.tx,cursor:continuousIdx===0?"default":"pointer",fontSize:".75rem",fontWeight:600,opacity:continuousIdx===0?.4:1}}>← Préc.</button>
+              <div style={{flex:1,textAlign:"center"}}>
+                {/* Écouter le verset */}
+                <button onClick={()=>doPlay(curV?.n)} style={{padding:"8px 18px",borderRadius:10,border:`1px solid ${t.b2}`,background:t.s2,color:t.tx2,cursor:"pointer",fontSize:".72rem",fontWeight:600}}>
+                  ▶ Écouter
+                </button>
+              </div>
+              <button onClick={()=>{if(continuousIdx<recitVerses.length-1){setSpeechScore(null);stopListening();setContinuousIdx(p=>p+1);}else{setRecitModal(false);stopListening();setContinuousMode(false);}}} style={{padding:"10px 16px",borderRadius:12,border:"none",background:t.acc,color:"#000",cursor:"pointer",fontSize:".75rem",fontWeight:700}}>
+                {continuousIdx<recitVerses.length-1?"Suiv. →":"Terminer ✓"}
+              </button>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Modal Lecture partielle */}
       {partialVerse&&(
@@ -3256,20 +3443,14 @@ return (
                         <span style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",color:t.tx3,fontSize:".75rem",pointerEvents:"none"}}>▾</span>
                       </div>
                       <button onClick={()=>{
-                        if(continuousMode){
-                          setContinuousMode(false);stopListening();
-                        } else if(speechSupported&&verses.length>0){
-                          // D'abord jouer la sourate entière pour mémoriser, puis proposer récitation
-                          if(!playlistActive){
-                            startPlaylist(selS.n,verses,1);
-                            // Après 2s afficher message
-                          }
-                          const firstV=verses.find(v=>!!(mem[String(selS.n)]||{})[String(v.n)]);
-                          if(firstV){doPlay(firstV.n);setTimeout(()=>startListening(firstV.ar,firstV.n,(s)=>continuousNext(s)),2500);}
-                          setContinuousMode(true);setContinuousIdx(0);
-                        }
-                      }} style={{flexShrink:0,display:"flex",alignItems:"center",gap:5,background:continuousMode?"#e53935":`${t.acc}22`,border:`1px solid ${continuousMode?"#e53935":t.acc}`,borderRadius:10,padding:"7px 12px",color:continuousMode?"#fff":t.acc,fontSize:".68rem",fontWeight:700,cursor:"pointer",transition:"all .2s"}}>
-                        {continuousMode?"■ Stop récit.":"🎤 Récitation"}
+                        if(!verses.length)return;
+                        stopListening();
+                        setSpeechScore(null);
+                        setContinuousMode(false);
+                        setContinuousIdx(0);
+                        setRecitModal(true);
+                      }} style={{flexShrink:0,display:"flex",alignItems:"center",gap:5,background:`${t.acc}18`,border:`1px solid ${t.acc}`,borderRadius:10,padding:"7px 14px",color:t.acc,fontSize:".7rem",fontWeight:700,cursor:"pointer",transition:"all .2s"}} onMouseEnter={e=>{e.currentTarget.style.background=`${t.acc}30`;}} onMouseLeave={e=>{e.currentTarget.style.background=`${t.acc}18`;}}>
+                        🎤 Récitation
                       </button>
                     <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,1);}} style={{flexShrink:0,display:"flex",alignItems:"center",gap:5,background:playlistActive&&playlist[0]?.sn===selS.n?"#e53935":t.acc,border:"none",borderRadius:10,padding:"8px 14px",color:"#fff",fontSize:".72rem",fontWeight:700,cursor:"pointer",boxShadow:`0 2px 8px ${t.acc}44`,transition:"transform .15s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-1px)"} onMouseLeave={e=>e.currentTarget.style.transform=""}>{playlistActive&&playlist[0]?.sn===selS.n?"■ Stop":"▶ Sourate"}</button>
                     </div>
@@ -3298,17 +3479,6 @@ return (
                   {playing!==null&&(<div className="arow"><button className="vbtn snd" style={{flexShrink:0}} onClick={()=>doPlay(playing)}>{audioPlaying?"⏸":"▶ "+playing}</button><span style={{fontSize:".62rem",color:t.tx2,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{selS?.name} · v.{playing} · {rec.name}</span><button className="tbtn" style={{flexShrink:0}} onClick={()=>{setPlaying(null);partialPlayRef.current=null;if(audioRef.current){audioRef.current.pause();audioRef.current.src="";}}}>✕</button></div>)}
 
                   {/* Banner mode récitation continue */}
-                  {continuousMode&&(
-                    <div style={{padding:"10px 14px",background:"linear-gradient(135deg,rgba(233,30,99,.12),rgba(233,30,99,.06))",borderBottom:`1px solid rgba(233,30,99,.3)`,display:"flex",alignItems:"center",gap:10}}>
-                      <div style={{width:8,height:8,borderRadius:"50%",background:"#e91e63",animation:"pulse .8s infinite",flexShrink:0}}/>
-                      <div style={{flex:1}}>
-                        <div style={{fontSize:".72rem",fontWeight:700,color:"#e91e63"}}>Mode récitation active</div>
-                        <div style={{fontSize:".6rem",color:t.tx3,marginTop:1}}>Écoute → répète → valide · verset {continuousIdx+1}/{verses.length}</div>
-                      </div>
-                      <div style={{height:24,width:1,background:"rgba(233,30,99,.3)"}}/>
-                      <button onClick={()=>{setContinuousMode(false);stopListening();}} style={{background:"none",border:"1px solid rgba(233,30,99,.4)",color:"#e91e63",borderRadius:6,padding:"3px 8px",fontSize:".62rem",cursor:"pointer",fontWeight:600}}>■ Stop</button>
-                    </div>
-                  )}
                   <div className="vscroll" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
                     {loadState==="loading"&&(<div style={{textAlign:"center",padding:"30px 14px",color:t.tx3}}><div style={{display:"inline-block",width:22,height:22,border:`2px solid ${t.b2}`,borderTopColor:t.acc,borderRadius:"50%",animation:"spin .7s linear infinite",marginBottom:10}}/><div style={{fontSize:".8rem"}}>Chargement des versets…</div></div>)}
                     {loadState==="error"&&(<div style={{textAlign:"center",padding:"24px 14px",color:t.rd,fontSize:".78rem"}}><div style={{fontSize:"1.8rem",marginBottom:8}}>⚠️</div>Impossible de charger cette sourate.<br/><button className="tbtn" style={{marginTop:10,borderColor:t.acc,color:t.acc}} onClick={()=>{const s=selS;setSelS(null);setTimeout(()=>setSelS(s),50);}}>↻ Réessayer</button></div>)}
