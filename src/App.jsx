@@ -785,6 +785,286 @@ function TajwidSpan({text,enabled,tjc}) {
   }
 }
 
+// ═══════════════════════════════════════
+// ONBOARDING — Premier lancement
+// ═══════════════════════════════════════
+const ONBOARD_SLIDES=[
+  {
+    icon:(acc)=>(
+      <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+        <circle cx="32" cy="32" r="30" fill={acc+"22"} stroke={acc} strokeWidth="1.5"/>
+        <path d="M20 44 Q32 12 44 44" stroke={acc} strokeWidth="2" strokeLinecap="round" fill="none"/>
+        <path d="M24 36 Q32 20 40 36" stroke={acc} strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+        <circle cx="32" cy="46" r="3" fill={acc}/>
+      </svg>
+    ),
+    title:"بِسْمِ اللَّهِ",
+    sub:"Bienvenue dans Al-Hifz",
+    desc:"Le mémorisateur de Coran le plus complet. Mémorise, révcite, révise — tout en un.",
+    color:"#16a34a",
+  },
+  {
+    icon:(acc)=>(
+      <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+        <rect x="12" y="8" width="40" height="48" rx="4" fill={acc+"18"} stroke={acc} strokeWidth="1.5"/>
+        <line x1="20" y1="20" x2="44" y2="20" stroke={acc} strokeWidth="1.5" strokeLinecap="round"/>
+        <line x1="20" y1="28" x2="44" y2="28" stroke={acc} strokeWidth="1.5" strokeLinecap="round"/>
+        <line x1="20" y1="36" x2="36" y2="36" stroke={acc} strokeWidth="1.5" strokeLinecap="round"/>
+        <circle cx="48" cy="48" r="10" fill={acc}/>
+        <polyline points="44 48 47 51 53 45" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none"/>
+      </svg>
+    ),
+    title:"Mémorise verset par verset",
+    sub:"Progression intelligente",
+    desc:"Marque les versets mémorisés, suis ta progression par sourate et juz. La révision espacée (SM2) t'aide à ne rien oublier.",
+    color:"#2563eb",
+  },
+  {
+    icon:(acc)=>(
+      <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+        <circle cx="32" cy="32" r="20" fill={acc+"18"} stroke={acc} strokeWidth="1.5"/>
+        <circle cx="32" cy="32" r="10" fill={acc+"30"}/>
+        <path d="M32 12 L32 8M32 56 L32 52M12 32 L8 32M56 32 L52 32" stroke={acc} strokeWidth="2" strokeLinecap="round"/>
+        <circle cx="32" cy="32" r="4" fill={acc}/>
+        <path d="M28 32a3 3 0 0 0-3 3v8" stroke="#e91e63" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+      </svg>
+    ),
+    title:"Récite et sois évalué",
+    sub:"Reconnaissance vocale arabe",
+    desc:"Appuie sur 🎤, récite le verset, et reçois un score mot par mot avec les erreurs surlignées. Mode enchaîné pour toute la sourate.",
+    color:"#e91e63",
+  },
+  {
+    icon:(acc)=>(
+      <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+        <rect x="8" y="16" width="48" height="36" rx="4" fill={acc+"18"} stroke={acc} strokeWidth="1.5"/>
+        <path d="M8 24 L56 24" stroke={acc} strokeWidth="1" opacity=".4"/>
+        <text x="32" y="38" textAnchor="middle" fontFamily="serif" fontSize="16" fill={acc}>القرآن</text>
+        <path d="M16 48 Q32 44 48 48" stroke={acc} strokeWidth="1" strokeLinecap="round" opacity=".4"/>
+      </svg>
+    ),
+    title:"Mushaf & Tajweed",
+    sub:"Lecture page par page",
+    desc:"Lis le Mushaf page par page, active le tajweed coloré, swipe pour naviguer. Lance une khatma pour lire le Coran complet.",
+    color:"#7c3aed",
+  },
+];
+
+function OnboardModal({t,acc,tn,onDone,onSkip,onTutorial}){
+  const [slide,setSlide]=React.useState(0);
+  const s=ONBOARD_SLIDES[slide];
+  const isLast=slide===ONBOARD_SLIDES.length-1;
+  const bg=tn==="light"?"#ffffff":"#0a150b";
+  return(
+    <div style={{position:"fixed",inset:0,zIndex:500,background:bg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"space-between",padding:"env(safe-area-inset-top) 24px max(24px,env(safe-area-inset-bottom))",overflowY:"auto"}}>
+      <style>{`@keyframes fadeSlide{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}`}</style>
+      {/* Skip */}
+      <div style={{width:"100%",display:"flex",justifyContent:"flex-end",paddingTop:16}}>
+        {!isLast&&<button onClick={onSkip} style={{background:"none",border:"none",color:t.tx3,fontSize:".75rem",cursor:"pointer",padding:"4px 8px"}}>Passer →</button>}
+      </div>
+      {/* Contenu */}
+      <div key={slide} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:28,animation:"fadeSlide .35s ease",textAlign:"center",maxWidth:360,width:"100%"}}>
+        <div style={{width:120,height:120,borderRadius:28,background:`${s.color}12`,display:"flex",alignItems:"center",justifyContent:"center",border:`2px solid ${s.color}33`}}>
+          {s.icon(s.color)}
+        </div>
+        <div>
+          <div style={{fontFamily:"'Amiri',serif",fontSize:"1.5rem",color:s.color,marginBottom:6,fontWeight:700}}>{s.title}</div>
+          <div style={{fontSize:".72rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"2px",marginBottom:14}}>{s.sub}</div>
+          <div style={{fontSize:".88rem",color:t.tx2,lineHeight:1.7}}>{s.desc}</div>
+        </div>
+        {/* Points de progression */}
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          {ONBOARD_SLIDES.map((_,i)=>(
+            <div key={i} onClick={()=>setSlide(i)} style={{width:i===slide?24:8,height:8,borderRadius:99,background:i===slide?s.color:t.b2,transition:"all .3s",cursor:"pointer"}}/>
+          ))}
+        </div>
+      </div>
+      {/* Footer */}
+      <div style={{width:"100%",maxWidth:360,display:"flex",flexDirection:"column",gap:10}}>
+        {isLast?(
+          <>
+            <button onClick={onTutorial} style={{width:"100%",padding:"15px",background:`linear-gradient(135deg,${acc},${acc}cc)`,border:"none",borderRadius:14,color:"#000",fontWeight:800,fontSize:".9rem",cursor:"pointer"}}>
+              Voir le tutoriel complet
+            </button>
+            <button onClick={onDone} style={{width:"100%",padding:"13px",background:"none",border:`1.5px solid ${t.b2}`,borderRadius:14,color:t.tx2,fontWeight:600,fontSize:".85rem",cursor:"pointer"}}>
+              Commencer directement
+            </button>
+          </>
+        ):(
+          <button onClick={()=>setSlide(p=>p+1)} style={{width:"100%",padding:"15px",background:`linear-gradient(135deg,${s.color},${s.color}cc)`,border:"none",borderRadius:14,color:"#fff",fontWeight:800,fontSize:".9rem",cursor:"pointer"}}>
+            Suivant →
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════
+// TUTORIEL COMPLET — Toutes les fonctionnalités
+// ═══════════════════════════════════════
+const TUTORIAL_SECTIONS=[
+  {
+    id:"memo",label:"Mémorisation",icon:"📿",color:"#16a34a",
+    steps:[
+      {title:"Ouvre une sourate",desc:"Dans l'onglet Coran → appuie sur une sourate pour voir ses versets.",visual:"coran"},
+      {title:"Marque un verset mémorisé",desc:"Sur chaque verset, appuie sur '+ Mémoriser'. Il devient vert avec une coche. Tu peux aussi mémoriser en glissant le verset vers la droite.",visual:"memorise"},
+      {title:"Suis ta progression",desc:"L'onglet Accueil montre ton anneau de progression, le nombre de versets et la date de fin estimée.",visual:"accueil"},
+      {title:"Révision espacée",desc:"L'onglet Révision te montre les versets dus pour révision. Le système SM2 calcule quand réviser pour ancrer la mémoire à long terme.",visual:"revision"},
+    ],
+  },
+  {
+    id:"recit",label:"Récitation",icon:"🎤",color:"#e91e63",
+    steps:[
+      {title:"Lance la récitation",desc:"Dans une sourate, appuie sur '🎤 Récitation' en haut à droite. Un écran plein écran s'ouvre.",visual:"recit1"},
+      {title:"Appuie sur le micro",desc:"Le bouton rond démarre l'écoute. Récite le verset à voix haute en arabe. Le micro s'arrête automatiquement quand tu termines.",visual:"recit2"},
+      {title:"Lis ton score",desc:"Chaque mot est coloré en vert (correct) ou rouge souligné (erreur). Tu vois ce que tu as dit et combien de mots sont justes.",visual:"recit3"},
+      {title:"Mode enchaîné",desc:"Active '→ Enchaîné' pour enchaîner tous les versets automatiquement. Si tu dépasses 70%, le verset suivant se lance.",visual:"recit4"},
+    ],
+  },
+  {
+    id:"partial",label:"Lecture partielle",icon:"✂",color:"#0284c7",
+    steps:[
+      {title:"C'est quoi ?",desc:"Sur les versets longs (+5 mots), un bouton '✂ Partiel' apparaît dans les actions. Il permet de sélectionner une partie du verset.",visual:"partial1"},
+      {title:"Sélectionne les mots",desc:"Dans le modal, les mots sont affichés en arabe. Clique sur chaque mot pour l'inclure/exclure, ou utilise les sliders Début/Fin.",visual:"partial2"},
+      {title:"Utilisation",desc:"Idéal pour mémoriser bout par bout un verset difficile. Écoute et copie la partie sélectionnée.",visual:"partial3"},
+    ],
+  },
+  {
+    id:"wbw",label:"Mot à mot",icon:"📖",color:"#7c3aed",
+    steps:[
+      {title:"Accès mot à mot",desc:"Sur chaque verset, appuie sur '📖 Mot à mot'. Un panneau s'ouvre en bas avec chaque mot arabe et sa traduction française.",visual:"wbw1"},
+      {title:"Comprendre le Coran",desc:"Chaque mot est affiché en grand avec sa translittération et son sens. Idéal pour comprendre ce que tu mémorises.",visual:"wbw2"},
+    ],
+  },
+  {
+    id:"mushaf",label:"Mushaf",icon:"📜",color:"#b45309",
+    steps:[
+      {title:"Naviguer",desc:"L'onglet Mushaf affiche les pages du Coran. Swipe gauche/droite ou utilise les boutons ◄ ► pour changer de page.",visual:"mushaf1"},
+      {title:"Mode Image vs Tajweed",desc:"'📖 Image' montre le Mushaf original. '🎨 Tajweed' affiche le texte avec les règles de tajweed colorées.",visual:"mushaf2"},
+      {title:"Aller à une sourate",desc:"En haut, un menu 'Aller à une sourate' te positionne directement sur la page de la sourate choisie.",visual:"mushaf3"},
+      {title:"Plein écran",desc:"Le bouton '⛶ Plein écran' t'offre une lecture immersive sans distraction.",visual:"mushaf4"},
+    ],
+  },
+  {
+    id:"khatma",label:"Khatma",icon:"🌿",color:"#065f46",
+    steps:[
+      {title:"Créer une khatma",desc:"Dans l'onglet Khatma, choisis un préset (30 jours, 60 jours…) ou personnalise. Lance ta khatma pour lire le Coran complet.",visual:"khatma1"},
+      {title:"Marquer les jours",desc:"Chaque jour, appuie sur '👍 Journée lue'. Ton streak de khatma s'incrémente et la progression avance.",visual:"khatma2"},
+      {title:"Lire depuis la khatma",desc:"Le bouton '📖 Lire maintenant' t'emmène directement à la page du Mushaf où tu t'es arrêté.",visual:"khatma3"},
+      {title:"Khatma collective",desc:"Invite des amis ou de la famille. Chacun couvre des juz différents. La khatma est complète quand les 30 juz sont couverts.",visual:"khatma4"},
+    ],
+  },
+  {
+    id:"quiz",label:"Quiz",icon:"🎯",color:"#1d4ed8",
+    steps:[
+      {title:"Deux modes",desc:"'Quelle sourate ?' — tu vois un verset et tu choisis la sourate. 'Complète le verset' — tu dois finir un verset partiel.",visual:"quiz1"},
+      {title:"Filtrer par mémorisés",desc:"Par défaut le quiz porte sur tes versets mémorisés. Tu peux aussi choisir une sourate spécifique ou tout le Coran embarqué.",visual:"quiz2"},
+      {title:"Revoir tes erreurs",desc:"En bas de la session, chaque erreur est cliquable. Tu vois le verset complet avec sa traduction pour mieux l'ancrer.",visual:"quiz3"},
+    ],
+  },
+];
+
+function TutorialModal({t,acc,tn,page,setPage,onClose}){
+  const [step,setStep]=React.useState(0);
+  const [activeSection,setActiveSection]=React.useState(0);
+  const section=TUTORIAL_SECTIONS[activeSection];
+  const currentStep=section?.steps[step];
+  const isLastStep=step===section?.steps.length-1;
+  const isLastSection=activeSection===TUTORIAL_SECTIONS.length-1;
+  const bg=tn==="light"?"#fafaf8":"#0a150b";
+
+  const goNext=()=>{
+    if(!isLastStep){setStep(p=>p+1);}
+    else if(!isLastSection){setActiveSection(p=>p+1);setStep(0);}
+    else onClose();
+  };
+  const goPrev=()=>{
+    if(step>0)setStep(p=>p-1);
+    else if(activeSection>0){setActiveSection(p=>p-1);setStep(TUTORIAL_SECTIONS[activeSection-1].steps.length-1);}
+  };
+
+  return(
+    <div style={{position:"fixed",inset:0,zIndex:500,background:bg,display:"flex",flexDirection:"column",overflowY:"auto"}}>
+      <style>{`@keyframes tutoIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}`}</style>
+
+      {/* Header */}
+      <div style={{display:"flex",alignItems:"center",padding:"14px 16px",paddingTop:"max(14px,env(safe-area-inset-top))",borderBottom:`1px solid ${t.b1}`,flexShrink:0,gap:10}}>
+        <div style={{flex:1}}>
+          <div style={{fontSize:".54rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"2px",marginBottom:2}}>Tutoriel</div>
+          <div style={{fontSize:".9rem",fontWeight:700,color:t.tx}}>{section.icon} {section.label}</div>
+        </div>
+        <span style={{fontSize:".62rem",color:t.tx3}}>{step+1}/{section.steps.length}</span>
+        <button onClick={onClose} style={{width:30,height:30,borderRadius:"50%",border:`1px solid ${t.b2}`,background:t.s2,color:t.tx3,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      {/* Navigation sections */}
+      <div style={{display:"flex",gap:6,padding:"10px 14px",overflowX:"auto",borderBottom:`1px solid ${t.b1}`,flexShrink:0,scrollbarWidth:"none"}}>
+        {TUTORIAL_SECTIONS.map((s,i)=>(
+          <button key={s.id} onClick={()=>{setActiveSection(i);setStep(0);}} style={{padding:"5px 12px",borderRadius:99,border:`1.5px solid ${i===activeSection?s.color:t.b2}`,background:i===activeSection?`${s.color}15`:t.s2,color:i===activeSection?s.color:t.tx3,fontSize:".62rem",fontWeight:i===activeSection?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,transition:"all .2s"}}>
+            {s.icon} {s.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Barre de progression */}
+      <div style={{height:3,background:t.b1,flexShrink:0}}>
+        <div style={{height:"100%",width:`${((activeSection*10+step+1)/(TUTORIAL_SECTIONS.reduce((a,s)=>a+s.steps.length,0)))*100}%`,background:section.color,transition:"width .4s ease"}}/>
+      </div>
+
+      {/* Contenu du step */}
+      <div key={`${activeSection}-${step}`} style={{flex:1,display:"flex",flexDirection:"column",padding:"24px 20px",gap:20,animation:"tutoIn .3s ease",overflowY:"auto"}}>
+
+        {/* Illustration */}
+        <div style={{width:"100%",borderRadius:16,background:`${section.color}10`,border:`1.5px solid ${section.color}30`,padding:"28px 20px",display:"flex",alignItems:"center",justifyContent:"center",minHeight:160,position:"relative",overflow:"hidden"}}>
+          <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse at 50% 0%,${section.color}15,transparent 70%)`,pointerEvents:"none"}}/>
+          {/* Illustration basée sur la section */}
+          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:12,textAlign:"center",position:"relative",zIndex:1}}>
+            <div style={{fontSize:"3.5rem",lineHeight:1}}>{section.icon}</div>
+            <div style={{fontFamily:"'Amiri',serif",fontSize:"1.1rem",color:section.color,fontWeight:700}}>{currentStep?.title}</div>
+            <div style={{fontSize:".65rem",color:t.tx3,maxWidth:280,lineHeight:1.5}}>
+              {step===0?"Étape 1 sur "+section.steps.length:`Étape ${step+1} sur ${section.steps.length}`}
+            </div>
+          </div>
+        </div>
+
+        {/* Description */}
+        <div style={{padding:"18px 16px",background:t.s2,borderRadius:14,border:`1px solid ${t.b1}`}}>
+          <div style={{fontSize:".88rem",color:t.tx,lineHeight:1.8,fontWeight:500}}>{currentStep?.desc}</div>
+        </div>
+
+        {/* Liste de steps de la section */}
+        <div style={{display:"flex",flexDirection:"column",gap:8}}>
+          {section.steps.map((s,i)=>(
+            <div key={i} onClick={()=>setStep(i)} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 14px",borderRadius:10,border:`1.5px solid ${i===step?section.color:t.b1}`,background:i===step?`${section.color}10`:t.s2,cursor:"pointer",transition:"all .15s"}}>
+              <div style={{width:26,height:26,borderRadius:"50%",background:i<step?section.color:i===step?`${section.color}20`:t.b1,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                {i<step
+                  ?<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  :<span style={{fontSize:".65rem",fontWeight:700,color:i===step?section.color:t.tx3}}>{i+1}</span>
+                }
+              </div>
+              <span style={{fontSize:".78rem",fontWeight:i===step?700:400,color:i===step?section.color:t.tx2}}>{s.title}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Footer navigation */}
+      <div style={{display:"flex",gap:8,padding:"12px 16px",paddingBottom:"max(12px,env(safe-area-inset-bottom))",borderTop:`1px solid ${t.b1}`,flexShrink:0,alignItems:"center"}}>
+        <button onClick={goPrev} disabled={activeSection===0&&step===0} style={{padding:"11px 16px",borderRadius:12,border:`1px solid ${t.b2}`,background:t.s2,color:t.tx2,cursor:"pointer",fontSize:".75rem",fontWeight:600,opacity:activeSection===0&&step===0?.35:1}}>←</button>
+        <div style={{flex:1,textAlign:"center",fontSize:".62rem",color:t.tx3}}>
+          {isLastSection&&isLastStep?"Fin du tutoriel !":isLastStep?"Section suivante : "+TUTORIAL_SECTIONS[activeSection+1]?.label:`${section.steps.length-step-1} étape${section.steps.length-step-1>1?"s":""} restante${section.steps.length-step-1>1?"s":""}`}
+        </div>
+        <button onClick={goNext} style={{padding:"11px 20px",borderRadius:12,border:"none",background:section.color,color:"#fff",cursor:"pointer",fontSize:".78rem",fontWeight:700}}>
+          {isLastSection&&isLastStep?"Terminer ✓":isLastStep?"Section suivante →":"Suivant →"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx,continuousMode:initChain,setContinuousMode,speechListening,speechVerseTarget,speechCountdown,speechScore,speechResult,showTj,tjc,mem,startListening,stopListening,setSpeechScore,setSpeechResult,countdownRef,setSpeechCountdown,doPlay,onClose}){
   // Index interne — ne dépend pas du re-render parent
   const [idx,setIdx]=React.useState(initIdx);
@@ -1169,8 +1449,17 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
         <button onClick={onNext} style={{background:"rgba(201,168,76,.12)",border:"1px solid rgba(201,168,76,.22)",color:AC,padding:"5px 14px",borderRadius:8,cursor:"pointer",fontWeight:700}}>►</button>
       </div>
 
-      {/* Mode image — PNG haute résolution avec fallback en cascade */}
-      {mode==="image"&&<MushafImageView page={page||1} fullscreen={fullscreen}/>}
+      {/* Mode image — iframe Archive.org (fonctionne bien) */}
+      {mode==="image"&&(
+        <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:6,minHeight:400,background:"#1a1200"}}>
+          <iframe
+            src={`https://archive.org/embed/al-quran-al-karim-tajwid-hafs/page/n${(page||1)-1}/mode/1up`}
+            style={{width:"100%",height:fullscreen?"calc(100vh - 52px)":"75vh",border:"none",borderRadius:6,background:"#f5f0e8"}}
+            title={`Mushaf page ${page}`}
+            allowFullScreen
+          />
+        </div>
+      )}
 
       {/* Mode texte tajweed — rendu Amiri Quran avec couleurs tajweed */}
       {mode==="text"&&(
@@ -1257,7 +1546,7 @@ const acc3=ramadan?"#f5e0a0":t.acc3;
 return `
 @import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Lateef:wght@400&family=Noto+Naskh+Arabic:wght@400;600&family=Noto+Nastaliq+Urdu:wght@400;700&family=Reem+Kufi:wght@400;700&family=Cairo:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-*{box-sizing:border-box;}html{overflow-x:hidden;max-width:100vw;}body{overflow-x:hidden;}
+*{box-sizing:border-box;}html{overflow-x:hidden;max-width:100vw;overscroll-behavior:none;}body{overflow-x:hidden;overscroll-behavior:none;}
 body{background:${bg};color:${t.tx};font-family:'DM Sans',sans-serif;min-height:100vh;min-height:100dvh;padding-bottom:80px;transition:background .4s,color .4s;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);}
 :root{--sat:env(safe-area-inset-top);--sab:env(safe-area-inset-bottom);--sal:env(safe-area-inset-left);--sar:env(safe-area-inset-right);}
 ${t.arabesque ? (
@@ -1310,7 +1599,7 @@ body>*{position:relative;z-index:1;}
 .bn.on::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:linear-gradient(90deg,${acc},${acc2});border-radius:0 0 99px 99px;box-shadow:0 0 6px ${acc};}
 .bn-lbl{font-size:.52rem;font-weight:500;}
 /* ── Layout ── */
-.wrap{max-width:1200px;margin:0 auto;padding:14px 16px calc(120px + env(safe-area-inset-bottom));padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));width:100%;box-sizing:border-box;overflow-x:hidden;}
+.wrap{max-width:1200px;margin:0 auto;padding:14px 16px calc(120px + env(safe-area-inset-bottom));padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));width:100%;box-sizing:border-box;overflow-x:hidden;overscroll-behavior-x:none;}
 .two{display:grid;grid-template-columns:300px 1fr;gap:12px;align-items:start;}
 /* ── Cards — hover effect ── */
 .card{background:${t.cardBg};border:1px solid ${t.b1};border-radius:14px;overflow:hidden;transition:box-shadow .25s,border-color .25s;}
@@ -1453,7 +1742,7 @@ body>*{position:relative;z-index:1;}
 .khs-l{font-size:.6rem;color:${t.tx3};text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
 .streak-fire{font-size:1.8rem;}
 /* ── Settings ── */
-.settings-wrap{display:flex;flex-direction:column;gap:14px;max-width:600px;margin:0 auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
+.settings-wrap{display:flex;flex-direction:column;gap:14px;max-width:600px;margin:0 auto;overflow-x:hidden;overscroll-behavior:none;-webkit-overflow-scrolling:touch;}
 .settings-section{background:${t.cardBg};border:1px solid ${t.b1};border-radius:14px;overflow:hidden;transition:box-shadow .2s;}
 .settings-section:hover{box-shadow:0 4px 20px ${acc}14;}
 .ss-hd{padding:12px 16px;border-bottom:1px solid ${t.b1};font-size:.68rem;text-transform:uppercase;letter-spacing:1.5px;color:${t.tx3};font-weight:600;}
@@ -1565,6 +1854,10 @@ const [authError, setAuthError] = useState("");
   const [showTr,setShowTr]=useState(false);
   const [showTj,setShowTj]=useState(false);
   const [showTf,setShowTf]=useState(false);
+  const [showTutorial,setShowTutorial]=useState(false);
+  const [tutorialPage,setTutorialPage]=useState(0);
+  const [onboardDone,setOnboardDone]=useState(()=>ld("qonboard",false));
+  const [showOnboard,setShowOnboard]=useState(()=>!ld("qonboard",false));
   const [versetDuJourDismissed,setVersetDuJourDismissed]=useState(()=>ld("qvdjdis","")===today());
   const [showPage,setShowPage]=useState(false);
   const [mushafPage,setMushafPage]=useState(null);
@@ -2609,62 +2902,46 @@ const handleReset=async()=>{
     setSpeechScore(null);
     setSpeechCountdown(0);
 
-    // iOS Safari : demander permission micro explicitement d'abord
-    const doStart=()=>{
-      const recognition=new SR();
-      recognition.lang="ar-SA";
-      recognition.continuous=false;
-      recognition.interimResults=true;
-      recognition.maxAlternatives=5;
-      recognitionRef.current=recognition;
+    const recognition=new SR();
+    recognition.lang="ar-SA";
+    recognition.continuous=false;
+    recognition.interimResults=true;
+    recognition.maxAlternatives=5;
+    recognitionRef.current=recognition;
 
-      recognition.onresult=e=>{
-        let finalTranscript="";
-        let interimTranscript="";
-        for(let i=0;i<e.results.length;i++){
-          const r=e.results[i];
-          if(r.isFinal) finalTranscript+=r[0].transcript+" ";
-          else interimTranscript+=r[0].transcript;
-        }
-        if(interimTranscript) setSpeechResult(interimTranscript);
-        if(finalTranscript.trim()){
-          const transcript=finalTranscript.trim();
-          setSpeechResult(transcript);
-          setSpeechListening(false);
-          const analysis=analyzeRecitation(verseAr,transcript);
-          const correct=analysis.filter(w=>w.status==="ok").length;
-          const total=analysis.length;
-          const pct=total>0?Math.round(correct/total*100):0;
-          const score={pct,analysis,
-            wrong:analysis.filter(w=>w.status!=="ok").map(w=>w.word),
-            correct:analysis.filter(w=>w.status==="ok").map(w=>w.word),
-            targetWords:analysis.map(w=>w.word),
-            spokenWords:transcript.split(/\s+/),
-          };
-          setSpeechScore(score);
-          if(onDone) onDone(score);
-        }
-      };
-      recognition.onerror=(ev)=>{ setSpeechListening(false); };
-      recognition.onend=()=>{ setSpeechListening(false); };
-
-      setSpeechListening(true);
-      try{ recognition.start(); }
-      catch(err){ setSpeechListening(false); }
+    recognition.onresult=e=>{
+      let finalTranscript="";
+      let interimTranscript="";
+      for(let i=0;i<e.results.length;i++){
+        const r=e.results[i];
+        if(r.isFinal) finalTranscript+=r[0].transcript+" ";
+        else interimTranscript+=r[0].transcript;
+      }
+      if(interimTranscript) setSpeechResult(interimTranscript);
+      if(finalTranscript.trim()){
+        const transcript=finalTranscript.trim();
+        setSpeechResult(transcript);
+        setSpeechListening(false);
+        const analysis=analyzeRecitation(verseAr,transcript);
+        const correct=analysis.filter(w=>w.status==="ok").length;
+        const total=analysis.length;
+        const pct=total>0?Math.round(correct/total*100):0;
+        const score={pct,analysis,
+          wrong:analysis.filter(w=>w.status!=="ok").map(w=>w.word),
+          correct:analysis.filter(w=>w.status==="ok").map(w=>w.word),
+          targetWords:analysis.map(w=>w.word),
+          spokenWords:transcript.split(/\s+/),
+        };
+        setSpeechScore(score);
+        if(onDone) onDone(score);
+      }
     };
+    recognition.onerror=()=>{ setSpeechListening(false); };
+    recognition.onend=()=>{ setSpeechListening(false); };
 
-    // Demander la permission micro avant (important sur iOS)
-    if(navigator.mediaDevices?.getUserMedia){
-      navigator.mediaDevices.getUserMedia({audio:true})
-        .then(stream=>{
-          // Stopper immédiatement le stream — on voulait juste la permission
-          stream.getTracks().forEach(t=>t.stop());
-          doStart();
-        })
-        .catch(()=>{ doStart(); }); // Essayer quand même si refus
-    } else {
-      doStart();
-    }
+    setSpeechListening(true);
+    try{ recognition.start(); }
+    catch(err){ setSpeechListening(false); }
   };
 
   const stopListening=()=>{
@@ -3032,6 +3309,16 @@ return (
           <button onClick={()=>{installPromptRef.current?.prompt();setShowInstallBanner(false);}} style={{background:"rgba(255,255,255,.25)",border:"1px solid rgba(255,255,255,.4)",color:"#fff",borderRadius:8,padding:"4px 12px",fontSize:".7rem",fontWeight:700,cursor:"pointer"}}>Installer</button>
           <button onClick={()=>setShowInstallBanner(false)} style={{background:"none",border:"none",color:"rgba(255,255,255,.7)",cursor:"pointer",fontSize:"1rem"}}>✕</button>
         </div>
+      )}
+
+      {/* ══ ONBOARDING ══ */}
+      {showOnboard&&(
+        <OnboardModal t={t} acc={acc} tn={tn} onDone={()=>{setShowOnboard(false);setOnboardDone(true);sv("qonboard",true);}} onSkip={()=>{setShowOnboard(false);setOnboardDone(true);sv("qonboard",true);}} onTutorial={()=>{setShowOnboard(false);setOnboardDone(true);sv("qonboard",true);setShowTutorial(true);setTutorialPage(0);}}/>
+      )}
+
+      {/* ══ TUTORIEL COMPLET ══ */}
+      {showTutorial&&(
+        <TutorialModal t={t} acc={acc} tn={tn} page={tutorialPage} setPage={setTutorialPage} onClose={()=>setShowTutorial(false)}/>
       )}
 
       {/* Popup badge débloqué */}
@@ -4974,6 +5261,30 @@ return (
               <div className="set-row" style={{borderBottom:"none"}}>
                 <div><div className="set-lbl" style={{color:t.rd}}>Effacer toutes les données</div><div className="set-sub">Action irréversible</div></div>
                 <button className="tbtn" style={{borderColor:t.rd,color:t.rd}} onClick={()=>{if(window.confirm("Effacer toutes tes mémorisations ?  Action irréversible.")){setMem({});setHist({});setBadges([]);setSpaced({});setFavorites([]);setNotes({});setKhatmas([]);setActiveKhatma(null);setReadHistory([]);setPageRead({});}}}>Effacer</button>
+              </div>
+            </div>
+
+            {/* Aide & Tutoriel */}
+            <div className="settings-section">
+              <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" strokeWidth="2.5"/></svg>
+                Aide & Tutoriel
+              </div>
+              <div style={{padding:"8px 0",display:"flex",flexDirection:"column",gap:8}}>
+                <button onClick={()=>{setShowTutorial(true);setTutorialPage(0);}} style={{width:"100%",padding:"14px 16px",background:`linear-gradient(135deg,${t.acc}18,${t.acc2||t.acc}10)`,border:`1.5px solid ${t.acc}44`,borderRadius:12,color:t.acc,fontWeight:700,fontSize:".85rem",cursor:"pointer",display:"flex",alignItems:"center",gap:12,transition:"all .2s"}} onMouseEnter={e=>e.currentTarget.style.background=`linear-gradient(135deg,${t.acc}28,${t.acc2||t.acc}18)`} onMouseLeave={e=>e.currentTarget.style.background=`linear-gradient(135deg,${t.acc}18,${t.acc2||t.acc}10)`}>
+                  <div style={{width:38,height:38,borderRadius:10,background:`${t.acc}20`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.acc} strokeWidth="1.8" strokeLinecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  </div>
+                  <div style={{textAlign:"left"}}>
+                    <div style={{fontSize:".85rem",fontWeight:700}}>Tutoriel interactif</div>
+                    <div style={{fontSize:".62rem",color:t.tx3,marginTop:2}}>Découvre toutes les fonctionnalités</div>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.acc} strokeWidth="2" strokeLinecap="round" style={{marginLeft:"auto"}}><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+                <button onClick={()=>{setShowOnboard(true);setOnboardDone(false);}} style={{width:"100%",padding:"12px 16px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:12,color:t.tx2,fontWeight:600,fontSize:".78rem",cursor:"pointer",display:"flex",alignItems:"center",gap:10,transition:"all .2s"}}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                  Revoir l'écran d'accueil
+                </button>
               </div>
             </div>
 
