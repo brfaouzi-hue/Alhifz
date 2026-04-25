@@ -1312,10 +1312,10 @@ function MushafTajweedView({page}){
       )}
       <iframe
         key={pg}
-        src={}
+        src={`/api/tajweed?page=${pg}`}
         onLoad={()=>setLoaded(true)}
         style={{flex:1,border:"none",width:"100%",minHeight:"70vh",background:"#faf7f2",opacity:loaded?1:0,transition:"opacity .3s"}}
-        title={}
+        title={`Tajweed page ${pg}`}
       />
     </div>
   );
