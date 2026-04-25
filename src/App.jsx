@@ -1296,96 +1296,31 @@ function TajweedLegend({effectiveTjc}){
 }
 
 // Tajweed view — images qurancdn (comme Tarteel) avec fallback texte robuste
-function MushafTajweedView({page,effectiveTjc,arFont,verses,textState,setTextState,groups}){
+// Tajweed view — HTML généré par API Vercel avec vraies couleurs tajweed
+function MushafTajweedView({page}){
   const pg=page||1;
-  const pad=String(pg).padStart(3,"0");
-
-  const [mode,setMode]=React.useState("testing"); // testing | image | text
-  const [imgSrc,setImgSrc]=React.useState("");
-  const [imgLoaded,setImgLoaded]=React.useState(false);
-
-  React.useEffect(()=>{
-    setMode("testing");setImgLoaded(false);setImgSrc("");
-    // Test rapide via Image() — si l'URL charge → mode image, sinon → texte
-    // API route Vercel — proxy côté serveur, zéro CORS
-    const URLS=[
-      `/api/tajweed?page=${pg}`,
-    ];
-    let tried=0;
-    const tryUrl=(url)=>{
-      const img=new Image();
-      img.crossOrigin="anonymous";
-      img.onload=()=>{setImgSrc(url);setMode("image");};
-      img.onerror=()=>{
-        tried++;
-        if(tried<URLS.length) tryUrl(URLS[tried]);
-        else setMode("text"); // toutes les sources échouent → texte
-      };
-      // Timeout de sécurité — si pas de réponse en 4s → texte
-      const t=setTimeout(()=>{img.src="";setMode("text");},4000);
-      img.onload=()=>{clearTimeout(t);setImgSrc(url);setMode("image");};
-      img.src=url;
-    };
-    tryUrl(URLS[0]);
-  },[pg]);
-
-  if(mode==="testing") return(
-    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:14,background:"#f5f0e8"}}>
-      <div style={{width:32,height:32,border:"3px solid #c9a84c",borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite"}}/>
-      <div style={{fontFamily:"'Amiri',serif",fontSize:".9rem",color:"#c9a84c"}}>جاري التحميل…</div>
-      <div style={{fontSize:".58rem",color:"#9a8060"}}>Page {pg} · Tajweed</div>
-    </div>
-  );
-
-  if(mode==="image") return(
-    <div style={{flex:1,overflowY:"auto",background:"#f5f0e8",display:"flex",flexDirection:"column",alignItems:"center",position:"relative"}}>
-      {!imgLoaded&&(
-        <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",background:"#f5f0e8",zIndex:1}}>
-          <div style={{width:28,height:28,border:"3px solid #c9a84c",borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite"}}/>
-        </div>
-      )}
-      <img
-        src={imgSrc}
-        alt={`Tajweed p.${pg}`}
-        onLoad={()=>setImgLoaded(true)}
-        onError={()=>setMode("text")}
-        style={{width:"100%",maxWidth:700,height:"auto",display:imgLoaded?"block":"none",userSelect:"none",WebkitUserSelect:"none"}}
-        draggable={false}
-      />
-      {imgLoaded&&<TajweedLegend effectiveTjc={effectiveTjc}/>}
-    </div>
-  );
-
-  // Fallback texte
+  const [loaded,setLoaded]=React.useState(false);
+  React.useEffect(()=>{setLoaded(false);},[pg]);
   return(
-    <div style={{flex:1,overflowY:"auto",padding:"16px 14px 80px",background:"#f5f0e8"}}>
-      {textState==="loading"&&<div style={{textAlign:"center",padding:40,color:"#7a6a40"}}><div style={{width:28,height:28,border:"3px solid #c9a84c",borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite",margin:"0 auto 12px"}}/><div style={{fontFamily:"'Amiri',serif"}}>جاري التحميل…</div></div>}
-      {textState==="error"&&<div style={{textAlign:"center",padding:28,color:"#c62828"}}><div style={{fontSize:"1.8rem",marginBottom:8}}>⚠</div>Connexion requise.<button onClick={()=>{try{localStorage.removeItem(`mpage9_${pg}`);}catch{}setTextState("idle");}} style={{display:"block",margin:"10px auto 0",padding:"5px 12px",border:"1px solid #c9a84c",background:"transparent",color:"#c9a84c",borderRadius:7,cursor:"pointer",fontSize:".7rem"}}>↺ Réessayer</button></div>}
-      {textState==="ok"&&(
-        <div style={{direction:"rtl",fontFamily:arFont||"'Scheherazade New',serif",fontSize:"1.55rem",lineHeight:"2.6",color:"#1a0a00",textAlign:"justify",wordSpacing:"3px",background:"rgba(255,255,255,.6)",borderRadius:10,padding:"14px 18px",boxShadow:"0 1px 8px rgba(0,0,0,.06)"}}>
-          {groups.map((g,gi)=>(
-            <React.Fragment key={gi}>
-              {g.vs[0]?.n===1&&(
-                <div style={{textAlign:"center",margin:"0 0 14px",padding:"10px 14px",background:"linear-gradient(135deg,#2c1810,#4a2c18)",borderRadius:10,border:"1px solid rgba(201,168,76,.4)"}}>
-                  <div style={{fontFamily:"'Amiri',serif",fontSize:"1.1rem",color:"#e8c060",letterSpacing:3}}>{g.sAr}</div>
-                  <div style={{fontSize:".58rem",color:"#c8a060",marginTop:2,direction:"ltr"}}>{g.sName}</div>
-                  {g.s!==1&&g.s!==9&&<div style={{fontFamily:"'Scheherazade New',serif",fontSize:"1.35rem",color:"#1a0a00",marginTop:10,direction:"rtl",background:"#f5f0dc",padding:"7px 14px",borderRadius:7}}>بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>}
-                </div>
-              )}
-              {g.vs.map((v,vi)=>(
-                <React.Fragment key={vi}>
-                  <TajwidSpan text={v.ar} enabled={true} tjc={effectiveTjc}/>
-                  <span style={{fontFamily:"'Amiri',serif",fontSize:".6em",color:"#c9a84c",margin:"0 3px",verticalAlign:"middle"}}>﴿{v.n}﴾</span>
-                </React.Fragment>
-              ))}
-            </React.Fragment>
-          ))}
+    <div style={{flex:1,display:"flex",flexDirection:"column",background:"#faf7f2",position:"relative"}}>
+      {!loaded&&(
+        <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:14,background:"#faf7f2",zIndex:1}}>
+          <div style={{width:32,height:32,border:"3px solid #c9a84c",borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite"}}/>
+          <div style={{fontFamily:"'Amiri',serif",fontSize:".9rem",color:"#c9a84c"}}>&#1580;&#1575;&#1585;&#1610; &#1575;&#1604;&#1578;&#1581;&#1605;&#1610;&#1604;&#8230;</div>
+          <div style={{fontSize:".6rem",color:"#9a8060"}}>Page {pg} · Tajweed</div>
         </div>
       )}
-      <TajweedLegend effectiveTjc={effectiveTjc}/>
+      <iframe
+        key={pg}
+        src={}
+        onLoad={()=>setLoaded(true)}
+        style={{flex:1,border:"none",width:"100%",minHeight:"70vh",background:"#faf7f2",opacity:loaded?1:0,transition:"opacity .3s"}}
+        title={}
+      />
     </div>
   );
 }
+
 
 // MushafPage
 // Vraies URL par édition — plusieurs fallbacks pour fiabilité
