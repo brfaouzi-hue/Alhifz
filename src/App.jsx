@@ -1295,62 +1295,103 @@ function TajweedLegend({effectiveTjc}){
   );
 }
 
-// Sources d'images Mushaf gratuites — Hafs Medina haute résolution
-function MushafImageView({page,fullscreen}){
+// Sources d'images Mushaf — tajweed coloré identique à Tarteel/quran.com
+function MushafTajweedView({page,effectiveTjc,arFont,verses,textState,setTextState,groups}){
   const pg=page||1;
   const pad=String(pg).padStart(3,"0");
-  // Toutes sources gratuites sans CORS issues
-  const SOURCES=[
+
+  // Sources en cascade — tajweed coloré en priorité
+  const IMG_SOURCES=[
+    // Source 1 : qurancdn — même CDN que quran.com et Tarteel
+    `https://static.qurancdn.com/images/quran/pages/v4/tajweed/page${pad}.png`,
+    // Source 2 : cdn islamic network (sans couleurs mais bonne calligraphie)
     `https://cdn.islamic.network/quran/images/high-resolution/${pg}.jpg`,
-    `https://islamicstudies.info/quran/hafs/images/${pad}.jpg`,
-    `https://quran.com/images/pages/page${pad}.jpg`,
   ];
-  const [srcIdx,setSrcIdx]=React.useState(0);
-  const [loaded,setLoaded]=React.useState(false);
-  const [error,setError]=React.useState(false);
 
-  React.useEffect(()=>{setSrcIdx(0);setLoaded(false);setError(false);},[pg]);
+  const [imgIdx,setImgIdx]=React.useState(0);
+  const [imgLoaded,setImgLoaded]=React.useState(false);
+  const [imgFailed,setImgFailed]=React.useState(false);
 
-  const tryNext=()=>{
-    const next=srcIdx+1;
-    if(next<SOURCES.length){setSrcIdx(next);setLoaded(false);}
-    else setError(true);
+  React.useEffect(()=>{setImgIdx(0);setImgLoaded(false);setImgFailed(false);},[pg]);
+
+  const onImgError=()=>{
+    const next=imgIdx+1;
+    if(next<IMG_SOURCES.length){setImgIdx(next);}
+    else{setImgFailed(true);} // → fallback texte
   };
 
-  return(
-    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-start",overflowY:"auto",background:"#f9f6f0",padding:"0"}}>
-      {!loaded&&!error&&(
-        <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",display:"flex",flexDirection:"column",alignItems:"center",gap:12}}>
-          <div style={{width:32,height:32,border:"3px solid #c9a84c",borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite"}}/>
-          <div style={{fontFamily:"'Amiri',serif",fontSize:".9rem",color:"#c9a84c"}}>جاري التحميل…</div>
-        </div>
-      )}
-      {error&&(
-        <div style={{textAlign:"center",padding:40,color:"#c62828"}}>
-          <div style={{fontSize:"2rem",marginBottom:12}}>⚠</div>
-          <div style={{fontSize:".8rem",marginBottom:16}}>Image non disponible<br/><span style={{fontSize:".68rem",color:"#9a8060"}}>Vérifie ta connexion</span></div>
-          <button onClick={()=>{setSrcIdx(0);setError(false);}} style={{padding:"7px 16px",border:"1px solid #c9a84c",background:"transparent",color:"#c9a84c",borderRadius:8,cursor:"pointer",fontSize:".75rem"}}>↺ Réessayer</button>
-        </div>
-      )}
-      {!error&&(
+  // Mode image réussi
+  if(!imgFailed){
+    return(
+      <div style={{flex:1,overflowY:"auto",background:"#f5f0e8",display:"flex",flexDirection:"column",alignItems:"center",position:"relative"}}>
+        {!imgLoaded&&(
+          <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:14,background:"#f5f0e8"}}>
+            <div style={{width:32,height:32,border:"3px solid #c9a84c",borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite"}}/>
+            <div style={{fontFamily:"'Amiri',serif",fontSize:".9rem",color:"#c9a84c"}}>جاري التحميل…</div>
+            <div style={{fontSize:".6rem",color:"#9a8060"}}>page {pg}</div>
+          </div>
+        )}
         <img
-          key={`${pg}-${srcIdx}`}
-          src={SOURCES[srcIdx]}
-          alt={`Mushaf page ${pg}`}
-          onLoad={()=>setLoaded(true)}
-          onError={tryNext}
+          key={`tj-${pg}-${imgIdx}`}
+          src={IMG_SOURCES[imgIdx]}
+          alt={`Tajweed page ${pg}`}
+          onLoad={()=>setImgLoaded(true)}
+          onError={onImgError}
           style={{
             width:"100%",
-            maxWidth:fullscreen?800:680,
+            maxWidth:680,
             height:"auto",
-            display:loaded?"block":"none",
-            imageRendering:"auto",
-            WebkitUserSelect:"none",
+            display:imgLoaded?"block":"none",
             userSelect:"none",
+            WebkitUserSelect:"none",
+            padding:"4px",
           }}
           draggable={false}
         />
+        {/* Légende */}
+        {imgLoaded&&<TajweedLegend effectiveTjc={effectiveTjc}/>}
+      </div>
+    );
+  }
+
+  // Fallback — texte avec TajwidSpan si images échouent
+  return(
+    <div style={{flex:1,overflowY:"auto",padding:"16px 14px 80px",background:"#f5f0e8"}}>
+      {textState==="loading"&&(
+        <div style={{textAlign:"center",padding:40,color:"#7a6a40"}}>
+          <div style={{width:28,height:28,border:"3px solid #c9a84c",borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite",margin:"0 auto 12px"}}/>
+          <div style={{fontFamily:"'Amiri',serif",fontSize:".9rem"}}>جاري التحميل…</div>
+        </div>
       )}
+      {textState==="error"&&(
+        <div style={{textAlign:"center",padding:28,color:"#c62828",fontSize:".8rem"}}>
+          <div style={{fontSize:"1.8rem",marginBottom:8}}>⚠</div>
+          Connexion requise.
+          <button onClick={()=>{try{localStorage.removeItem(`mpage9_${pg}`);}catch{}setTextState("idle");}} style={{display:"block",margin:"10px auto 0",padding:"5px 12px",border:"1px solid #c9a84c",background:"transparent",color:"#c9a84c",borderRadius:7,cursor:"pointer",fontSize:".7rem"}}>↺ Réessayer</button>
+        </div>
+      )}
+      {textState==="ok"&&(
+        <div style={{direction:"rtl",fontFamily:arFont||"'Scheherazade New',serif",fontSize:"1.5rem",lineHeight:"2.5",color:"#1a0a00",textAlign:"justify",wordSpacing:"3px",background:"rgba(255,255,255,.5)",borderRadius:10,padding:"12px 16px"}}>
+          {groups.map((g,gi)=>(
+            <React.Fragment key={gi}>
+              {g.vs[0]?.n===1&&(
+                <div style={{textAlign:"center",margin:"0 0 12px",padding:"10px 14px",background:"linear-gradient(135deg,#2c1810,#4a2c18)",borderRadius:10,border:"1px solid rgba(201,168,76,.4)"}}>
+                  <div style={{fontFamily:"'Amiri',serif",fontSize:"1rem",color:"#e8c060",letterSpacing:2}}>{g.sAr}</div>
+                  <div style={{fontSize:".58rem",color:"#c8a060",marginTop:2,direction:"ltr"}}>{g.sName}</div>
+                  {g.s!==1&&g.s!==9&&<div style={{fontFamily:"'Scheherazade New',serif",fontSize:"1.3rem",color:"#1a0a00",marginTop:8,direction:"rtl",background:"#f5f0dc",padding:"6px 14px",borderRadius:6}}>بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>}
+                </div>
+              )}
+              {g.vs.map((v,vi)=>(
+                <React.Fragment key={vi}>
+                  <TajwidSpan text={v.ar} enabled={true} tjc={effectiveTjc}/>
+                  <span style={{fontFamily:"'Amiri',serif",fontSize:".65em",color:"#c9a84c",margin:"0 3px",verticalAlign:"middle"}}>﴿{v.n}﴾</span>
+                </React.Fragment>
+              ))}
+            </React.Fragment>
+          ))}
+        </div>
+      )}
+      <TajweedLegend effectiveTjc={effectiveTjc}/>
     </div>
   );
 }
@@ -1461,76 +1502,19 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
         </div>
       )}
 
-      {/* Mode texte tajweed — rendu Amiri Quran avec couleurs tajweed */}
+      {/* Mode tajweed — images qurancdn en priorité, fallback texte */}
       {mode==="text"&&(
-        <div style={{flex:1,overflowY:"auto",padding:"20px 14px 80px",background:"#f5f0e8",backgroundImage:"radial-gradient(ellipse at top,#f0e8d4,#f5f0e8)"}}>
-          {textState==="loading"&&(
-            <div style={{textAlign:"center",padding:40,color:"#7a6a40"}}>
-              <div style={{width:28,height:28,border:"3px solid #c9a84c",borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite",margin:"0 auto 12px"}}/>
-              <div style={{fontFamily:"'Amiri',serif",fontSize:".9rem"}}>جاري التحميل…</div>
-            </div>
-          )}
-          {textState==="error"&&(
-            <div style={{textAlign:"center",padding:28,color:"#c62828",fontSize:".8rem"}}>
-              <div style={{fontSize:"1.8rem",marginBottom:8}}>⚠</div>
-              Connexion requise.
-              <br/>
-              <button onClick={()=>{try{localStorage.removeItem(`mpage9_${page}`);}catch{}setTextState("idle");setTimeout(()=>setTextState("loading"),50);}} style={{marginTop:10,padding:"5px 12px",border:"1px solid #c9a84c",background:"transparent",color:"#c9a84c",borderRadius:7,cursor:"pointer",fontSize:".7rem"}}>↺ Réessayer</button>
-            </div>
-          )}
-          {textState==="ok"&&(
-            <div style={{
-              direction:"rtl",
-              fontFamily:"'Scheherazade New',serif",
-              fontSize:"1.45rem",
-              lineHeight:"2.4",
-              color:"#1a0a00",
-              padding:"16px 20px",
-              textAlign:"justify",
-              wordSpacing:"2px",
-              letterSpacing:"0",
-              background:"rgba(255,255,255,.5)",
-              borderRadius:10,
-              minHeight:"70vh",
-            }}>
-              {groups.map((g,gi)=>(
-                <React.Fragment key={gi}>
-                  {/* En-tête sourate */}
-                  {g.vs[0]?.n===1&&(
-                    <div style={{textAlign:"center",margin:"8px 0 12px",padding:"8px 14px",background:"linear-gradient(135deg,#2c1810,#4a2c18)",borderRadius:8,border:"1px solid rgba(201,168,76,.4)"}}>
-                      <div style={{fontFamily:"'Amiri',serif",fontSize:"1rem",color:"#e8c060",letterSpacing:2}}>{g.sAr}</div>
-                      <div style={{fontSize:".55rem",color:"#c8a060",marginTop:2,direction:"ltr"}}>{g.sName}</div>
-                      {g.s!==1&&g.s!==9&&(
-                        <div style={{fontFamily:"'Scheherazade New',serif",fontSize:"1.3rem",color:"#1a0a00",marginTop:8,direction:"rtl",background:"#f5f0dc",padding:"6px 14px",borderRadius:6}}>
-                          بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {/* Versets en flux continu — comme une vraie page */}
-                  {g.vs.map((v,vi)=>(
-                    <React.Fragment key={vi}>
-                      <TajwidSpan text={v.ar} enabled={true} tjc={effectiveTjc}/>
-                      <span style={{
-                        fontFamily:"'Amiri',serif",
-                        fontSize:".65rem",
-                        color:"#c9a84c",
-                        margin:"0 3px",
-                        verticalAlign:"middle",
-                        display:"inline-block",
-                        lineHeight:1,
-                      }}>﴿{v.n}﴾</span>
-                    </React.Fragment>
-                  ))}
-                </React.Fragment>
-              ))}
-            </div>
-          )}
-        </div>
+        <MushafTajweedView
+          page={page||1}
+          effectiveTjc={effectiveTjc}
+          arFont={arFont}
+          verses={verses}
+          textState={textState}
+          setTextState={setTextState}
+          groups={groups}
+        />
       )}
 
-      {/* Légende tajweed masquable */}
-      {mode==="text"&&<TajweedLegend effectiveTjc={effectiveTjc}/>}
     </div>
   );
 }
