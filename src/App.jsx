@@ -1307,10 +1307,9 @@ function MushafTajweedView({page,effectiveTjc,arFont,verses,textState,setTextSta
   React.useEffect(()=>{
     setMode("testing");setImgLoaded(false);setImgSrc("");
     // Test rapide via Image() — si l'URL charge → mode image, sinon → texte
-    // Proxy Vercel = même domaine = zéro CORS
+    // API route Vercel — proxy côté serveur, zéro CORS
     const URLS=[
-      `/api/tajweed/page${pad}.png`,
-      `/api/mushaf/${pg}.jpg`,
+      `/api/tajweed?page=${pg}`,
     ];
     let tried=0;
     const tryUrl=(url)=>{

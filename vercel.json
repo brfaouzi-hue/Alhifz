@@ -1,12 +1,7 @@
 {
-  "rewrites": [
-    {
-      "source": "/api/tajweed/:page",
-      "destination": "https://static.qurancdn.com/images/quran/pages/v4/tajweed/:page"
-    },
-    {
-      "source": "/api/mushaf/:page",
-      "destination": "https://cdn.islamic.network/quran/images/high-resolution/:page"
+  "functions": {
+    "api/tajweed.js": {
+      "maxDuration": 10
     }
-  ]
+  }
 }
