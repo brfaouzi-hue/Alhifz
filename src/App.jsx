@@ -1313,12 +1313,10 @@ const TJ_COLORS={
 // Parser le HTML tajweed de qurancdn → spans React colorés
 function parseTajweed(html){
   if(!html) return null;
-  // Décoder les entités HTML si nécessaire
-  let h=html
-    .replace(/&lt;/g,"<").replace(/&gt;/g,">")
-    .replace(/&amp;/g,"&").replace(/&quot;/g,'"');
+  const h=html.replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&amp;/g,"&");
   const parts=[];
-  const re=/<tajweed class="([^"]+)">([^<]*)<\/tajweed>|([^<]+)/g;
+  // Regex tolère class="x" ET class=x (avec ou sans guillemets)
+  const re=/<tajweed class=["']?([a-z_]+)["']?>([^<]*)<\/tajweed>|([^<]+)/g;
   let m,key=0;
   while((m=re.exec(h))!==null){
     if(m[3]!==undefined){
@@ -1341,7 +1339,7 @@ function MushafTajweedView({page}){
 
   React.useEffect(()=>{
     setState("loading");setVerses([]);
-    const ck=`qtj2_${pg}`; // qtj2 = nouvelle version, invalide l'ancien cache qtj_
+    const ck=`qtj3_${pg}`;
     // Cache localStorage
     try{const c=localStorage.getItem(ck);if(c){setVerses(JSON.parse(c));setState("ok");return;}}catch{}
     fetch(`https://api.qurancdn.com/api/qdc/verses/by_page/${pg}?language=ar&words=false&per_page=50&fields=text_uthmani_tajweed,text_uthmani,verse_number,chapter_id`)
@@ -1351,10 +1349,9 @@ function MushafTajweedView({page}){
           n:v.verse_number,s:v.chapter_id,
           raw:v.text_uthmani_tajweed||v.text_uthmani||"",
         }));
-        // DEBUG — afficher le premier raw dans la console
-        if(vs[0]) console.log("RAW TAJWEED:",JSON.stringify(vs[0].raw).slice(0,200));
+        // DEBUG supprimé
         setVerses(vs);setState("ok");
-        try{localStorage.setItem(`qtj2_${pg}`,JSON.stringify(vs));}catch{}
+        try{localStorage.setItem(`qtj3_${pg}`,JSON.stringify(vs));}catch{}
       })
       .catch(()=>setState("error"));
   },[pg]);
@@ -1402,8 +1399,6 @@ function MushafTajweedView({page}){
 
   return(
     <div style={{flex:1,overflowY:"auto",background:"#faf7f2"}}>
-      {/* DEBUG — à supprimer après diagnostic */}
-      {verses[0]&&<div style={{padding:10,background:"#fee",fontSize:".55rem",wordBreak:"break-all",direction:"ltr",color:"#333",marginBottom:8}}><b>RAW:</b> {JSON.stringify(verses[0].raw).slice(0,300)}</div>}
       <div style={{
         direction:"rtl",textAlign:"justify",
         fontFamily:"'Scheherazade New',serif",
