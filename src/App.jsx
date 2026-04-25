@@ -1307,9 +1307,10 @@ function MushafTajweedView({page,effectiveTjc,arFont,verses,textState,setTextSta
   React.useEffect(()=>{
     setMode("testing");setImgLoaded(false);setImgSrc("");
     // Test rapide via Image() — si l'URL charge → mode image, sinon → texte
+    // Proxy Vercel = même domaine = zéro CORS
     const URLS=[
-      `https://static.qurancdn.com/images/quran/pages/v4/tajweed/page${pad}.png`,
-      `https://cdn.islamic.network/quran/images/high-resolution/${pg}.jpg`,
+      `/api/tajweed/page${pad}.png`,
+      `/api/mushaf/${pg}.jpg`,
     ];
     let tried=0;
     const tryUrl=(url)=>{
