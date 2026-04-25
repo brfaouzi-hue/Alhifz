@@ -1351,6 +1351,8 @@ function MushafTajweedView({page}){
           n:v.verse_number,s:v.chapter_id,
           raw:v.text_uthmani_tajweed||v.text_uthmani||"",
         }));
+        // DEBUG — afficher le premier raw dans la console
+        if(vs[0]) console.log("RAW TAJWEED:",JSON.stringify(vs[0].raw).slice(0,200));
         setVerses(vs);setState("ok");
         try{localStorage.setItem(`qtj2_${pg}`,JSON.stringify(vs));}catch{}
       })
@@ -1400,6 +1402,8 @@ function MushafTajweedView({page}){
 
   return(
     <div style={{flex:1,overflowY:"auto",background:"#faf7f2"}}>
+      {/* DEBUG — à supprimer après diagnostic */}
+      {verses[0]&&<div style={{padding:10,background:"#fee",fontSize:".55rem",wordBreak:"break-all",direction:"ltr",color:"#333",marginBottom:8}}><b>RAW:</b> {JSON.stringify(verses[0].raw).slice(0,300)}</div>}
       <div style={{
         direction:"rtl",textAlign:"justify",
         fontFamily:"'Scheherazade New',serif",
