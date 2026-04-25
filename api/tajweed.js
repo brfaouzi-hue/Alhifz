@@ -1,148 +1,160 @@
-// api/tajweed.js — Génère une page Mushaf en SVG/HTML avec tajweed coloré
-// Utilise l'API quran.com qui est publique et accessible depuis Vercel
-
 export default async function handler(req, res) {
   const { page } = req.query;
   const pg = parseInt(page) || 1;
 
   try {
-    // API quran.com v4 — publique, pas de restrictions IP
     const r = await fetch(
-      `https://api.quran.com/api/v4/verses/by_page/${pg}?language=ar&words=true&word_fields=text_uthmani,text_uthmani_tajweed&per_page=50&fields=text_uthmani_tajweed,chapter_id,verse_number`,
-      { headers: { "Accept": "application/json" } }
+      `https://api.qurancdn.com/api/qdc/verses/by_page/${pg}?language=ar&words=false&per_page=50&fields=text_uthmani_tajweed,text_uthmani,verse_number,chapter_id`,
+      { headers: { "Accept": "application/json", "User-Agent": "Mozilla/5.0" } }
     );
-
-    if (!r.ok) throw new Error(`quran.com API ${r.status}`);
+    if (!r.ok) throw new Error(`API ${r.status}`);
     const data = await r.json();
     const verses = data.verses || [];
 
-    // Couleurs tajweed standard
-    const COLORS = {
-      "ham_wasl": "#AAAAAA",
-      "slnt": "#AAAAAA",
-      "laam_shamsiyya": "#AAAAAA",
-      "madda_normal": "#537FFF",
-      "madda_permissible": "#4050FF",
-      "madda_necessary": "#000EBC",
-      "madda_obligatory": "#2144C1",
-      "qalaqah": "#DD8800",
-      "ikhafa_shafawi": "#D500B7",
-      "ikhafa": "#D500B7",
-      "idgham_shafawi": "#58B800",
-      "idgham_ghunnah": "#169200",
-      "idgham_wo_ghunnah": "#169200",
-      "idgham_mutajanisayn": "#169200",
-      "idgham_mutaqaribayn": "#169200",
-      "ghunnah": "#169200",
-      "iqlab": "#26BFFD",
-      "izhar_shafawi": "#58B800",
-      "izhar": "#58B800",
-      "izhar_qamariyya": "#2D9660",
+    // Couleurs tajweed — classes CSS de qurancdn
+    const C = {
+      ham_wasl:"#AAAAAA", slnt:"#AAAAAA", laam_shamsiyya:"#AAAAAA",
+      madda_normal:"#537FFF", madda_permissible:"#4050FF",
+      madda_necessary:"#000EBC", madda_obligatory:"#2144C1",
+      qalaqah:"#DD8800",
+      ikhafa_shafawi:"#D500B7", ikhafa:"#D500B7",
+      idgham_shafawi:"#58B800", idgham_ghunnah:"#169200",
+      idgham_wo_ghunnah:"#169200", idgham_mutajanisayn:"#169200",
+      idgham_mutaqaribayn:"#169200", ghunnah:"#169200",
+      iqlab:"#26BFFD",
+      izhar_shafawi:"#58B800", izhar_qamariyya:"#2D9660",
     };
 
-    // Construire le HTML de la page
-    let verseBlocks = "";
-    for (const v of verses) {
-      const ar = (v.text_uthmani_tajweed || v.text_uthmani || "")
-        .replace(/<tajweed class="([^"]*)">(.*?)<\/tajweed>/g, (_, cls, text) => {
-          const color = COLORS[cls] || "#1a0a00";
-          return `<span style="color:${color};font-weight:bold">${text}</span>`;
-        })
-        .replace(/<[^>]*>/g, "");
+    // Parser le HTML tajweed de qurancdn
+    // Format : <tajweed class="xxx">text</tajweed>
+    function colorize(html) {
+      return html.replace(
+        /<tajweed class="([^"]+)">([^<]*)<\/tajweed>/g,
+        (_, cls, text) => {
+          const color = C[cls] || null;
+          return color
+            ? `<span style="color:${color};font-weight:bold">${text}</span>`
+            : text;
+        }
+      ).replace(/<[^>]+>/g, ''); // strip remaining tags
+    }
 
-      verseBlocks += `
-        <div class="verse">
-          <span class="text">${ar}</span>
-          <span class="num">﴿${v.verse_number}﴾</span>
-        </div>`;
+    let content = '';
+    let lastChapter = null;
+
+    for (const v of verses) {
+      const chId = v.chapter_id;
+      const raw = v.text_uthmani_tajweed || v.text_uthmani || '';
+      const colored = colorize(raw);
+
+      // En-tête sourate si nouveau chapitre
+      if (chId !== lastChapter) {
+        lastChapter = chId;
+        if (v.verse_number === 1) {
+          const surahName = verses.find(x => x.chapter_id === chId)?.chapter_id;
+          content += `<div class="surah-name">سورة</div>`;
+          if (chId !== 1 && chId !== 9) {
+            content += `<div class="basmala">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>`;
+          }
+        }
+      }
+
+      content += `<span class="verse">${colored}<span class="num"> ﴿${v.verse_number}﴾ </span></span>`;
     }
 
     const html = `<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <link href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body {
-    background: #faf7f2;
-    font-family: 'Scheherazade New', serif;
-    padding: 20px 16px 40px;
-    min-height: 100vh;
-  }
-  .page-header {
-    text-align: center;
-    font-size: 1rem;
-    color: #8a7050;
-    margin-bottom: 16px;
-    font-family: sans-serif;
-    direction: ltr;
-  }
-  .content {
-    direction: rtl;
-    text-align: justify;
-    font-size: 2rem;
-    line-height: 3.2;
-    color: #1a0a00;
-    word-spacing: 4px;
-  }
-  .verse { display: inline; }
-  .text { display: inline; }
-  .num {
-    font-size: 1rem;
-    color: #c9a84c;
-    margin: 0 4px;
-    font-family: 'Scheherazade New', serif;
-    vertical-align: middle;
-  }
-  .surah-header {
-    text-align: center;
-    background: linear-gradient(135deg, #2c1810, #4a2c18);
-    color: #e8c060;
-    padding: 12px 20px;
-    border-radius: 10px;
-    margin-bottom: 16px;
-    font-size: 1.4rem;
-    letter-spacing: 2px;
-    display: block;
-  }
-  .legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 10px 0;
-    margin-top: 20px;
-    border-top: 1px solid #e0d8cc;
-    direction: ltr;
-    justify-content: center;
-  }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.65rem;
-    font-family: sans-serif;
-    color: #6a5a40;
-  }
-  .dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#faf7f2;
+  font-family:'Scheherazade New',serif;
+  padding:16px 14px 60px;
+  direction:rtl;
+}
+.page-num{
+  text-align:center;
+  font-size:.75rem;
+  color:#8a7050;
+  margin-bottom:14px;
+  font-family:sans-serif;
+  direction:ltr;
+  letter-spacing:1px;
+}
+.content{
+  text-align:justify;
+  font-size:1.9rem;
+  line-height:3.0;
+  color:#1a0a00;
+  word-spacing:3px;
+}
+.verse{display:inline}
+.num{
+  font-size:.9rem;
+  color:#c9a84c;
+  margin:0 2px;
+  vertical-align:middle;
+  font-family:'Scheherazade New',serif;
+}
+.surah-name{
+  display:block;
+  text-align:center;
+  background:linear-gradient(135deg,#2c1810,#4a2c18);
+  color:#e8c060;
+  padding:10px 16px;
+  border-radius:8px;
+  margin:8px 0 12px;
+  font-size:1.4rem;
+  letter-spacing:3px;
+}
+.basmala{
+  display:block;
+  text-align:center;
+  background:#f0e8d4;
+  color:#1a0a00;
+  padding:8px 16px;
+  border-radius:8px;
+  margin:0 0 14px;
+  font-size:1.8rem;
+  line-height:2;
+}
+.legend{
+  margin-top:18px;
+  padding-top:12px;
+  border-top:1px solid #e0d4c0;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px 14px;
+  justify-content:center;
+  direction:ltr;
+}
+.li{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  font-size:.62rem;
+  font-family:sans-serif;
+  color:#6a5a40;
+}
+.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 </style>
 </head>
 <body>
-  <div class="page-header">Page ${pg} / 604</div>
-  <div class="content">${verseBlocks}</div>
-  <div class="legend">
-    <div class="legend-item"><div class="dot" style="background:#537FFF"></div>Madd naturel</div>
-    <div class="legend-item"><div class="dot" style="background:#000EBC"></div>Madd nécessaire</div>
-    <div class="legend-item"><div class="dot" style="background:#DD8800"></div>Qalqala</div>
-    <div class="legend-item"><div class="dot" style="background:#D500B7"></div>Ikhfâ</div>
-    <div class="legend-item"><div class="dot" style="background:#169200"></div>Idghâm/Ghunna</div>
-    <div class="legend-item"><div class="dot" style="background:#26BFFD"></div>Iqlab</div>
-  </div>
+<div class="page-num">Page ${pg} / 604 — Tajweed</div>
+<div class="content">${content}</div>
+<div class="legend">
+  <div class="li"><div class="dot" style="background:#537FFF"></div>Madd naturel</div>
+  <div class="li"><div class="dot" style="background:#000EBC"></div>Madd nécessaire</div>
+  <div class="li"><div class="dot" style="background:#DD8800"></div>Qalqala</div>
+  <div class="li"><div class="dot" style="background:#D500B7"></div>Ikhfâ</div>
+  <div class="li"><div class="dot" style="background:#169200"></div>Idghâm / Ghunna</div>
+  <div class="li"><div class="dot" style="background:#26BFFD"></div>Iqlab</div>
+  <div class="li"><div class="dot" style="background:#AAAAAA"></div>Liaison</div>
+</div>
 </body>
 </html>`;
 
