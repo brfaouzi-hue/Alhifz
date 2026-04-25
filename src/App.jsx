@@ -1015,6 +1015,66 @@ function TajweedLegend({effectiveTjc}){
   );
 }
 
+// Sources d'images Mushaf gratuites — Hafs Medina haute résolution
+function MushafImageView({page,fullscreen}){
+  const pg=page||1;
+  const pad=String(pg).padStart(3,"0");
+  // Toutes sources gratuites sans CORS issues
+  const SOURCES=[
+    `https://cdn.islamic.network/quran/images/high-resolution/${pg}.jpg`,
+    `https://islamicstudies.info/quran/hafs/images/${pad}.jpg`,
+    `https://quran.com/images/pages/page${pad}.jpg`,
+  ];
+  const [srcIdx,setSrcIdx]=React.useState(0);
+  const [loaded,setLoaded]=React.useState(false);
+  const [error,setError]=React.useState(false);
+
+  React.useEffect(()=>{setSrcIdx(0);setLoaded(false);setError(false);},[pg]);
+
+  const tryNext=()=>{
+    const next=srcIdx+1;
+    if(next<SOURCES.length){setSrcIdx(next);setLoaded(false);}
+    else setError(true);
+  };
+
+  return(
+    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-start",overflowY:"auto",background:"#f9f6f0",padding:"0"}}>
+      {!loaded&&!error&&(
+        <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",display:"flex",flexDirection:"column",alignItems:"center",gap:12}}>
+          <div style={{width:32,height:32,border:"3px solid #c9a84c",borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite"}}/>
+          <div style={{fontFamily:"'Amiri',serif",fontSize:".9rem",color:"#c9a84c"}}>جاري التحميل…</div>
+        </div>
+      )}
+      {error&&(
+        <div style={{textAlign:"center",padding:40,color:"#c62828"}}>
+          <div style={{fontSize:"2rem",marginBottom:12}}>⚠</div>
+          <div style={{fontSize:".8rem",marginBottom:16}}>Image non disponible<br/><span style={{fontSize:".68rem",color:"#9a8060"}}>Vérifie ta connexion</span></div>
+          <button onClick={()=>{setSrcIdx(0);setError(false);}} style={{padding:"7px 16px",border:"1px solid #c9a84c",background:"transparent",color:"#c9a84c",borderRadius:8,cursor:"pointer",fontSize:".75rem"}}>↺ Réessayer</button>
+        </div>
+      )}
+      {!error&&(
+        <img
+          key={`${pg}-${srcIdx}`}
+          src={SOURCES[srcIdx]}
+          alt={`Mushaf page ${pg}`}
+          onLoad={()=>setLoaded(true)}
+          onError={tryNext}
+          style={{
+            width:"100%",
+            maxWidth:fullscreen?800:680,
+            height:"auto",
+            display:loaded?"block":"none",
+            imageRendering:"auto",
+            WebkitUserSelect:"none",
+            userSelect:"none",
+          }}
+          draggable={false}
+        />
+      )}
+    </div>
+  );
+}
+
 // MushafPage
 // Vraies URL par édition — plusieurs fallbacks pour fiabilité
 // URLs Mushaf — proxy Vercel en premier (pas de CORS), puis CDN directs en fallback
@@ -1109,17 +1169,8 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
         <button onClick={onNext} style={{background:"rgba(201,168,76,.12)",border:"1px solid rgba(201,168,76,.22)",color:AC,padding:"5px 14px",borderRadius:8,cursor:"pointer",fontWeight:700}}>►</button>
       </div>
 
-      {/* Mode image — Archive.org (qui fonctionnait avant) */}
-      {mode==="image"&&(
-        <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:8,minHeight:400}}>
-          <iframe
-            src={`https://archive.org/embed/${ed.archiveId||"al-quran-al-karim-tajwid-hafs"}/page/n${(page||1)-1}/mode/1up`}
-            style={{width:"100%",height:fullscreen?"calc(100vh - 56px)":"72vh",border:"none",borderRadius:8}}
-            title={`Mushaf page ${page}`}
-            allowFullScreen
-          />
-        </div>
-      )}
+      {/* Mode image — PNG haute résolution avec fallback en cascade */}
+      {mode==="image"&&<MushafImageView page={page||1} fullscreen={fullscreen}/>}
 
       {/* Mode texte tajweed — rendu Amiri Quran avec couleurs tajweed */}
       {mode==="text"&&(
@@ -2556,69 +2607,64 @@ const handleReset=async()=>{
     setSpeechVerseTarget({ar:verseAr,vn});
     setSpeechResult("");
     setSpeechScore(null);
+    setSpeechCountdown(0);
 
-    // Créer la recognition MAINTENANT (dans le contexte synchrone du geste utilisateur)
-    // pour satisfaire la restriction iOS Safari
-    const recognition=new SR();
-    recognition.lang="ar-SA";
-    recognition.continuous=false;     // false = compatible iOS
-    recognition.interimResults=true;
-    recognition.maxAlternatives=5;
-    recognitionRef.current=recognition;
+    // iOS Safari : demander permission micro explicitement d'abord
+    const doStart=()=>{
+      const recognition=new SR();
+      recognition.lang="ar-SA";
+      recognition.continuous=false;
+      recognition.interimResults=true;
+      recognition.maxAlternatives=5;
+      recognitionRef.current=recognition;
 
-    recognition.onresult=e=>{
-      let finalTranscript="";
-      let interimTranscript="";
-      for(let i=0;i<e.results.length;i++){
-        const r=e.results[i];
-        // Prendre la meilleure alternative
-        const best=Array.from({length:r.length},(_,k)=>r[k].transcript).join(" ");
-        if(r.isFinal) finalTranscript+=r[0].transcript+" ";
-        else interimTranscript+=r[0].transcript;
-      }
-      if(interimTranscript) setSpeechResult(interimTranscript);
-      if(finalTranscript.trim()){
-        const transcript=finalTranscript.trim();
-        setSpeechResult(transcript);
-        setSpeechListening(false);
-        const analysis=analyzeRecitation(verseAr,transcript);
-        const correct=analysis.filter(w=>w.status==="ok").length;
-        const total=analysis.length;
-        const pct=total>0?Math.round(correct/total*100):0;
-        const score={pct,analysis,
-          wrong:analysis.filter(w=>w.status!=="ok").map(w=>w.word),
-          correct:analysis.filter(w=>w.status==="ok").map(w=>w.word),
-          targetWords:analysis.map(w=>w.word),
-          spokenWords:transcript.split(/\s+/),
-        };
-        setSpeechScore(score);
-        if(onDone) onDone(score);
-      }
-    };
-    recognition.onerror=(ev)=>{
-      console.warn("Speech error:",ev.error);
-      setSpeechListening(false);
-      setSpeechCountdown(0);
-    };
-    recognition.onend=()=>{
-      setSpeechListening(false);
+      recognition.onresult=e=>{
+        let finalTranscript="";
+        let interimTranscript="";
+        for(let i=0;i<e.results.length;i++){
+          const r=e.results[i];
+          if(r.isFinal) finalTranscript+=r[0].transcript+" ";
+          else interimTranscript+=r[0].transcript;
+        }
+        if(interimTranscript) setSpeechResult(interimTranscript);
+        if(finalTranscript.trim()){
+          const transcript=finalTranscript.trim();
+          setSpeechResult(transcript);
+          setSpeechListening(false);
+          const analysis=analyzeRecitation(verseAr,transcript);
+          const correct=analysis.filter(w=>w.status==="ok").length;
+          const total=analysis.length;
+          const pct=total>0?Math.round(correct/total*100):0;
+          const score={pct,analysis,
+            wrong:analysis.filter(w=>w.status!=="ok").map(w=>w.word),
+            correct:analysis.filter(w=>w.status==="ok").map(w=>w.word),
+            targetWords:analysis.map(w=>w.word),
+            spokenWords:transcript.split(/\s+/),
+          };
+          setSpeechScore(score);
+          if(onDone) onDone(score);
+        }
+      };
+      recognition.onerror=(ev)=>{ setSpeechListening(false); };
+      recognition.onend=()=>{ setSpeechListening(false); };
+
+      setSpeechListening(true);
+      try{ recognition.start(); }
+      catch(err){ setSpeechListening(false); }
     };
 
-    // Countdown visuel — mais start() lancé immédiatement
-    // (iOS Safari autorise si l'objet recognition a été créé dans le geste)
-    setSpeechCountdown(3);
-    let cd=3;
-    countdownRef.current=setInterval(()=>{
-      cd--;
-      setSpeechCountdown(cd);
-      if(cd<=0){
-        clearInterval(countdownRef.current);
-        setSpeechCountdown(0);
-        setSpeechListening(true);
-        try{ recognition.start(); }
-        catch(err){ console.warn("recognition.start error:",err); setSpeechListening(false); }
-      }
-    },1000);
+    // Demander la permission micro avant (important sur iOS)
+    if(navigator.mediaDevices?.getUserMedia){
+      navigator.mediaDevices.getUserMedia({audio:true})
+        .then(stream=>{
+          // Stopper immédiatement le stream — on voulait juste la permission
+          stream.getTracks().forEach(t=>t.stop());
+          doStart();
+        })
+        .catch(()=>{ doStart(); }); // Essayer quand même si refus
+    } else {
+      doStart();
+    }
   };
 
   const stopListening=()=>{
