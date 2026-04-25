@@ -1313,22 +1313,24 @@ const TJ_COLORS={
 // Parser le HTML tajweed de qurancdn → spans React colorés
 function parseTajweed(html){
   if(!html) return null;
+  // Décoder les entités HTML si nécessaire
+  let h=html
+    .replace(/&lt;/g,"<").replace(/&gt;/g,">")
+    .replace(/&amp;/g,"&").replace(/&quot;/g,'"');
   const parts=[];
-  // Regex pour <tajweed class="xxx">text</tajweed>
   const re=/<tajweed class="([^"]+)">([^<]*)<\/tajweed>|([^<]+)/g;
   let m,key=0;
-  while((m=re.exec(html))!==null){
-    if(m[3]){
-      // Texte brut
+  while((m=re.exec(h))!==null){
+    if(m[3]!==undefined){
       parts.push(<React.Fragment key={key++}>{m[3]}</React.Fragment>);
-    } else {
-      // Tag tajweed coloré
+    } else if(m[1]){
       const color=TJ_COLORS[m[1]]||null;
-      if(color) parts.push(<span key={key++} style={{color,fontWeight:"bold"}}>{m[2]}</span>);
-      else parts.push(<React.Fragment key={key++}>{m[2]}</React.Fragment>);
+      const text=m[2]||"";
+      if(color) parts.push(<span key={key++} style={{color,fontWeight:"bold"}}>{text}</span>);
+      else parts.push(<React.Fragment key={key++}>{text}</React.Fragment>);
     }
   }
-  return parts;
+  return parts.length?parts:h.replace(/<[^>]*>/g,"");
 }
 
 // MushafTajweedView — rendu React direct depuis l'API qurancdn JSON
@@ -1339,7 +1341,7 @@ function MushafTajweedView({page}){
 
   React.useEffect(()=>{
     setState("loading");setVerses([]);
-    const ck=`qtj_${pg}`;
+    const ck=`qtj2_${pg}`; // qtj2 = nouvelle version, invalide l'ancien cache qtj_
     // Cache localStorage
     try{const c=localStorage.getItem(ck);if(c){setVerses(JSON.parse(c));setState("ok");return;}}catch{}
     fetch(`https://api.qurancdn.com/api/qdc/verses/by_page/${pg}?language=ar&words=false&per_page=50&fields=text_uthmani_tajweed,text_uthmani,verse_number,chapter_id`)
@@ -1350,7 +1352,7 @@ function MushafTajweedView({page}){
           raw:v.text_uthmani_tajweed||v.text_uthmani||"",
         }));
         setVerses(vs);setState("ok");
-        try{localStorage.setItem(ck,JSON.stringify(vs));}catch{}
+        try{localStorage.setItem(`qtj2_${pg}`,JSON.stringify(vs));}catch{}
       })
       .catch(()=>setState("error"));
   },[pg]);
