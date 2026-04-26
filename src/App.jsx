@@ -1310,25 +1310,17 @@ const TJ_COLORS={
   izhar_shafawi:"#58B800",izhar_qamariyya:"#2D9660",
 };
 
-// Parser le HTML tajweed de qurancdn → spans React colorés
-function parseTajweed(html){
-  if(!html) return null;
-  const h=html.replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&amp;/g,"&");
-  const parts=[];
-  // Regex tolère class="x" ET class=x (avec ou sans guillemets)
-  const re=/<tajweed class=["']?([a-z_]+)["']?>([^<]*)<\/tajweed>|([^<]+)/g;
-  let m,key=0;
-  while((m=re.exec(h))!==null){
-    if(m[3]!==undefined){
-      parts.push(<React.Fragment key={key++}>{m[3]}</React.Fragment>);
-    } else if(m[1]){
-      const color=TJ_COLORS[m[1]]||null;
-      const text=m[2]||"";
-      if(color) parts.push(<span key={key++} style={{color,fontWeight:"bold"}}>{text}</span>);
-      else parts.push(<React.Fragment key={key++}>{text}</React.Fragment>);
-    }
-  }
-  return parts.length?parts:h.replace(/<[^>]*>/g,"");
+// Colorie le HTML tajweed qurancdn avec des spans inline
+function colorTajweed(html){
+  if(!html) return "";
+  return html
+    .replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&amp;/g,"&")
+    .replace(/<tajweed class=["']?([a-z_]+)["']?>/g,(_, cls)=>{
+      const c=TJ_COLORS[cls];
+      return c?`<span style="color:${c};font-weight:bold">`:"<span>";
+    })
+    .replace(/<\/tajweed>/g,"</span>")
+    .replace(/<[^>]+>/g,""); // nettoie les tags inconnus
 }
 
 // MushafTajweedView — rendu React direct depuis l'API qurancdn JSON
@@ -1389,28 +1381,47 @@ function MushafTajweedView({page}){
       }
     }
     blocks.push(
-      <React.Fragment key={`${v.s}_${v.n}`}>
-        {parseTajweed(v.raw)}
-        <span style={{fontFamily:"'Amiri',serif",fontSize:".65em",color:"#c9a84c",margin:"0 4px",verticalAlign:"middle"}}>﴿{v.n}﴾</span>
-        {" "}
-      </React.Fragment>
+      <span key={`${v.s}_${v.n}`} dangerouslySetInnerHTML={{__html:
+        colorTajweed(v.raw)+
+        `<span style="font-family:'Amiri',serif;font-size:.65em;color:#c9a84c;margin:0 4px;vertical-align:middle">﴿${v.n}﴾</span> `
+      }}/>
     );
+  }
+
+  // Construire tout le HTML en une fois
+  let fullHtml="";
+  let lastS2=null;
+  for(const v of verses){
+    if(v.s!==lastS2){
+      lastS2=v.s;
+      if(v.n===1){
+        const sName=SURAHS.find(s=>s.n===v.s);
+        fullHtml+=`<div style="text-align:center;margin:8px 0 14px;padding:10px 16px;background:linear-gradient(135deg,#2c1810,#4a2c18);border-radius:10px;border:1px solid rgba(201,168,76,.4)">
+          <div style="font-family:'Amiri',serif;font-size:1.2rem;color:#e8c060;letter-spacing:3px">${sName?.ar||""}</div>
+          <div style="font-size:.6rem;color:#c8a060;margin-top:3px;direction:ltr">${sName?.name||""}</div>
+          ${v.s!==1&&v.s!==9?`<div style="font-family:'Scheherazade New',serif;font-size:1.6rem;color:#1a0a00;margin-top:10px;direction:rtl;background:#f0e8d4;padding:8px 16px;border-radius:8px">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>`:""}
+        </div>`;
+      }
+    }
+    fullHtml+=colorTajweed(v.raw);
+    fullHtml+=`<span style="font-family:'Amiri',serif;font-size:.65em;color:#c9a84c;margin:0 4px;vertical-align:middle">﴿${v.n}﴾</span> `;
   }
 
   return(
     <div style={{flex:1,overflowY:"auto",background:"#faf7f2"}}>
-      <div style={{
-        direction:"rtl",textAlign:"justify",
-        fontFamily:"'Scheherazade New',serif",
-        fontSize:"1.9rem",lineHeight:"3.0",
-        color:"#1a0a00",wordSpacing:"3px",
-        padding:"16px 16px 20px",
-      }}>
-        {blocks}
-      </div>
+      <div
+        style={{
+          direction:"rtl",textAlign:"justify",
+          fontFamily:"'Scheherazade New',serif",
+          fontSize:"1.9rem",lineHeight:"3.0",
+          color:"#1a0a00",wordSpacing:"3px",
+          padding:"16px 16px 20px",
+        }}
+        dangerouslySetInnerHTML={{__html:fullHtml}}
+      />
       {/* Légende */}
-      <div style={{display:"flex",flexWrap:"wrap",gap:"6px 12px",padding:"12px 16px",borderTop:"1px solid #e0d4c0",justifyContent:"center",direction:"ltr",marginTop:8}}>
-        {[["#537FFF","Madd naturel"],["#000EBC","Madd nécessaire"],["#DD8800","Qalqala"],["#D500B7","Ikhfâ"],["#169200","Idghâm/Ghunna"],["#26BFFD","Iqlab"],["#AAAAAA","Liaison"]].map(([c,l])=>(
+      <div style={{display:"flex",flexWrap:"wrap",gap:"6px 12px",padding:"12px 16px",borderTop:"1px solid #e0d4c0",justifyContent:"center",direction:"ltr"}}>
+        {[["#537FFF","Madd naturel"],["#000EBC","Madd nécessaire"],["#DD8800","Qalqala"],["#D500B7","Ikhfâ"],["#169200","Idghâm"],["#26BFFD","Iqlab"],["#AAAAAA","Liaison"]].map(([c,l])=>(
           <div key={l} style={{display:"flex",alignItems:"center",gap:4}}>
             <div style={{width:8,height:8,borderRadius:"50%",background:c,flexShrink:0}}/>
             <span style={{fontSize:".58rem",color:"#6a5a40",fontFamily:"sans-serif"}}>{l}</span>
