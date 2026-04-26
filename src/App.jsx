@@ -1416,7 +1416,7 @@ const fetchMushafPageUrl=async(pg, editionId)=>{
     return d?.page?.image_url||null;
   }catch{return null;}
 };
-function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onNext,onPrev}) {
+function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onNext,onPrev,onGoTo}) {
   const ed=edition||MUSHAF_EDITIONS[0];
   const isTextOnly=ed.id==="tajweed";
   const [mode,setMode]=useState(isTextOnly?"text":"image");
@@ -1478,7 +1478,21 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
               ))}
             </div>
           )}
-          <span style={{fontSize:".58rem",color:"#5a4a2a",fontStyle:"italic"}}>{ed.name}</span>
+          {/* Sélecteur sourate discret */}
+          <select
+            onChange={e=>{
+              const sn=parseInt(e.target.value);
+              if(!sn||!onGoTo) return;
+              const SURAH_PAGES=[1,2,50,77,106,128,150,177,187,208,221,235,249,255,262,267,271,274,278,282,287,291,294,296,299,302,304,306,308,311,313,315,317,320,322,325,328,331,334,336,338,340,342,344,346,348,350,351,353,354,355,356,358,359,360,361,362,363,364,365,366,367,367,368,369,369,370,371,371,372,373,373,374,374,375,376,376,377,377,378,378,379,379,380,380,381,381,381,382,382,382,383,383,383,384,384,384,385,385,385,386,386,386,387,387,387,388,388,388,389,389,389,390,390,390,391,391,392,392,392,393,393,393,394,394,394,395,395,395,396,396,396,397,397,397,398,398,398,399,399,399,400,400,400,401,401,401,402,402,402,403,403,403,404,404,404,405,405,405,406,406,406,407,407,407,408,408,408,409,409,409,410,410,410,411,411,411,412,412,412,413,413,413,414,414,414,415,415,415,416,416,416,417,417,417,418,418,418,419,419,420,420,421,421,422,422,423,423,424,425,426,427,428,429,430,431,433,434,435,436,437,438,439,440,441,442,443,444,445,447,449,451,453,455,457,459,461,462,463,464,465,466,467,468,469,470,471,472,473,474,475,476,477,478,479,480,481,482,483,484,485,486,487,488,489,490,491,492,493,494,495,496,497,498,499,500,501,502,503,504,505,506,507,508,509,510,511,512,513,514,515,516,517,518,519,520,521,522,523,524,525,526,527,528,529,530,531,532,533,534,535,536,537,538,539,540,541,542,543,544,545,546,547,548,549,550,551,552,553,554,555,556,557,558,559,560,561,562,563,564,565,566,567,568,569,570,571,572,573,574,575,576,577,578,579,580,581,582,583,584,585,586,587,588,589,590,591,592,593,594,595,596,597,598,599,600,601,602,603,604];
+              onGoTo(SURAH_PAGES[sn-1]||1);
+              e.target.value="";
+            }}
+            style={{padding:"2px 6px",borderRadius:6,border:"1px solid rgba(201,168,76,.3)",background:"rgba(0,0,0,.3)",color:AC,fontSize:".55rem",cursor:"pointer",outline:"none",maxWidth:90}}
+            defaultValue=""
+          >
+            <option value="">↗ Sourate</option>
+            {SURAHS.map(s=><option key={s.n} value={s.n}>{s.n}. {s.name}</option>)}
+          </select>
         </div>
         <button onClick={onToggleFullscreen} style={{background:"rgba(201,168,76,.18)",border:"1px solid rgba(201,168,76,.4)",color:AC,padding:"5px 11px",borderRadius:8,cursor:"pointer",fontSize:".72rem",fontWeight:700}}>{fullscreen?"✕ Quitter":"⛶ Plein écran"}</button>
         <button onClick={onNext} style={{background:"rgba(201,168,76,.12)",border:"1px solid rgba(201,168,76,.22)",color:AC,padding:"5px 14px",borderRadius:8,cursor:"pointer",fontWeight:700}}>►</button>
@@ -4195,7 +4209,7 @@ return (
                   <span style={{fontSize:".7rem",opacity:.5}}>▼</span>
                 </button>
               </div>
-              <MushafPage page={mushafPage||1} t={t} tjc={tjc} arFont={arFont} edition={MUSHAF_EDITIONS.find(e=>e.id===mushafEdition)||MUSHAF_EDITIONS[0]} fullscreen={mushafFullscreen} onToggleFullscreen={()=>setMushafFullscreen(f=>!f)} onNext={()=>goToPage(Math.min(604,(mushafPage||1)+1))} onPrev={()=>goToPage(Math.max(1,(mushafPage||1)-1))}/>
+              <MushafPage page={mushafPage||1} t={t} tjc={tjc} arFont={arFont} edition={MUSHAF_EDITIONS.find(e=>e.id===mushafEdition)||MUSHAF_EDITIONS[0]} fullscreen={mushafFullscreen} onToggleFullscreen={()=>setMushafFullscreen(f=>!f)} onNext={()=>goToPage(Math.min(604,(mushafPage||1)+1))} onPrev={()=>goToPage(Math.max(1,(mushafPage||1)-1))} onGoTo={(pg)=>goToPage(pg)}/>
             </div>
           </div>
         )}
