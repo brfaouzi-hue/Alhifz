@@ -1340,112 +1340,31 @@ function colorTajweed(html){
 }
 
 // MushafTajweedView — rendu React direct depuis l'API qurancdn JSON
-function MushafTajweedView({page}){
+// Tajweed view — même Archive.org mais avec l'édition tajweed colorée
+function MushafTajweedView({page,fullscreen}){
   const pg=page||1;
-  const [state,setState]=React.useState("loading"); // loading|ok|error
-  const [verses,setVerses]=React.useState([]);
-
-  React.useEffect(()=>{
-    setState("loading");setVerses([]);
-    const ck=`qtj4_${pg}`;
-    try{const c=localStorage.getItem(ck);if(c){setVerses(JSON.parse(c));setState("ok");return;}}catch{}
-    fetch(`https://api.qurancdn.com/api/qdc/verses/by_page/${pg}?language=ar&words=false&per_page=50&fields=text_uthmani_tajweed,text_uthmani,verse_number,chapter_id`)
-      .then(r=>r.json())
-      .then(d=>{
-        const vs=(d.verses||[]).map(v=>({
-          n:v.verse_number,s:v.chapter_id,
-          raw:v.text_uthmani_tajweed||v.text_uthmani||"",
-        }));
-        // DEBUG supprimé
-        setVerses(vs);setState("ok");
-        try{localStorage.setItem(`qtj4_${pg}`,JSON.stringify(vs));}catch{}
-      })
-      .catch(()=>setState("error"));
-  },[pg]);
-
-  if(state==="loading") return(
-    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:14,background:"#faf7f2"}}>
-      <div style={{width:32,height:32,border:"3px solid #c9a84c",borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite"}}/>
-      <div style={{fontFamily:"'Amiri',serif",fontSize:".9rem",color:"#c9a84c"}}>جاري التحميل…</div>
-    </div>
-  );
-
-  if(state==="error") return(
-    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,background:"#faf7f2",padding:20}}>
-      <div style={{fontSize:"2rem"}}>⚠️</div>
-      <div style={{fontSize:".8rem",color:"#c62828",textAlign:"center"}}>Connexion requise pour charger le Tajweed</div>
-      <button onClick={()=>{try{localStorage.removeItem(`qtj_${pg}`);}catch{}setState("loading");}} style={{padding:"8px 16px",border:"1px solid #c9a84c",background:"transparent",color:"#c9a84c",borderRadius:8,cursor:"pointer"}}>↺ Réessayer</button>
-    </div>
-  );
-
-  // Grouper par chapitre pour afficher les en-têtes
-  let lastS=null;
-  const blocks=[];
-  for(const v of verses){
-    if(v.s!==lastS){
-      lastS=v.s;
-      if(v.n===1){
-        const sName=SURAHS.find(s=>s.n===v.s);
-        blocks.push(
-          <div key={`hd-${v.s}`} style={{textAlign:"center",margin:"8px 0 12px",padding:"10px 16px",background:"linear-gradient(135deg,#2c1810,#4a2c18)",borderRadius:10,border:"1px solid rgba(201,168,76,.4)"}}>
-            <div style={{fontFamily:"'Amiri',serif",fontSize:"1.2rem",color:"#e8c060",letterSpacing:3}}>{sName?.ar||""}</div>
-            <div style={{fontSize:".58rem",color:"#c8a060",marginTop:2,direction:"ltr"}}>{sName?.name||""}</div>
-            {v.s!==1&&v.s!==9&&<div style={{fontFamily:"'Scheherazade New',serif",fontSize:"1.5rem",color:"#1a0a00",marginTop:10,direction:"rtl",background:"#f0e8d4",padding:"8px 16px",borderRadius:8}}>بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>}
-          </div>
-        );
-      }
-    }
-    blocks.push(
-      <span key={`${v.s}_${v.n}`} dangerouslySetInnerHTML={{__html:
-        colorTajweed(v.raw)+
-        `<span style="font-family:'Amiri',serif;font-size:.65em;color:#c9a84c;margin:0 4px;vertical-align:middle">﴿${v.n}﴾</span> `
-      }}/>
-    );
-  }
-
-  // Construire tout le HTML en une fois
-  let fullHtml="";
-  let lastS2=null;
-  for(const v of verses){
-    if(v.s!==lastS2){
-      lastS2=v.s;
-      if(v.n===1){
-        const sName=SURAHS.find(s=>s.n===v.s);
-        fullHtml+=`<div style="text-align:center;margin:8px 0 14px;padding:10px 16px;background:linear-gradient(135deg,#2c1810,#4a2c18);border-radius:10px;border:1px solid rgba(201,168,76,.4)">
-          <div style="font-family:'Amiri',serif;font-size:1.2rem;color:#e8c060;letter-spacing:3px">${sName?.ar||""}</div>
-          <div style="font-size:.6rem;color:#c8a060;margin-top:3px;direction:ltr">${sName?.name||""}</div>
-          ${v.s!==1&&v.s!==9?`<div style="font-family:'Scheherazade New',serif;font-size:1.6rem;color:#1a0a00;margin-top:10px;direction:rtl;background:#f0e8d4;padding:8px 16px;border-radius:8px">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>`:""}
-        </div>`;
-      }
-    }
-    fullHtml+=colorTajweed(v.raw);
-    fullHtml+=`<span style="font-family:'Amiri',serif;font-size:.65em;color:#c9a84c;margin:0 4px;vertical-align:middle">﴿${v.n}﴾</span> `;
-  }
-
+  const [loaded,setLoaded]=React.useState(false);
+  React.useEffect(()=>setLoaded(false),[pg]);
   return(
-    <div style={{flex:1,overflowY:"auto",background:"#faf7f2"}}>
-      <div
-        style={{
-          direction:"rtl",textAlign:"justify",
-          fontFamily:"'Scheherazade New',serif",
-          fontSize:"1.9rem",lineHeight:"3.0",
-          color:"#1a0a00",wordSpacing:"3px",
-          padding:"16px 16px 20px",
-        }}
-        dangerouslySetInnerHTML={{__html:fullHtml}}
+    <div style={{flex:1,display:"flex",flexDirection:"column",background:"#1a1200",position:"relative"}}>
+      {!loaded&&(
+        <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:14,background:"#1a1200",zIndex:1}}>
+          <div style={{width:32,height:32,border:"3px solid #c9a84c",borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite"}}/>
+          <div style={{fontFamily:"'Amiri',serif",fontSize:".9rem",color:"#c9a84c"}}>جاري التحميل…</div>
+        </div>
+      )}
+      <iframe
+        key={pg}
+        src={`https://archive.org/embed/al-quran-al-karim-tajwid-hafs/page/n${pg-1}/mode/1up`}
+        onLoad={()=>setLoaded(true)}
+        style={{flex:1,border:"none",width:"100%",height:fullscreen?"calc(100vh - 52px)":"75vh",opacity:loaded?1:0,transition:"opacity .4s"}}
+        title={`Tajweed page ${pg}`}
+        allowFullScreen
       />
-      {/* Légende */}
-      <div style={{display:"flex",flexWrap:"wrap",gap:"6px 12px",padding:"12px 16px",borderTop:"1px solid #e0d4c0",justifyContent:"center",direction:"ltr"}}>
-        {[["#537FFF","Madd naturel"],["#000EBC","Madd nécessaire"],["#DD8800","Qalqala"],["#D500B7","Ikhfâ"],["#169200","Idghâm"],["#26BFFD","Iqlab"],["#AAAAAA","Liaison"]].map(([c,l])=>(
-          <div key={l} style={{display:"flex",alignItems:"center",gap:4}}>
-            <div style={{width:8,height:8,borderRadius:"50%",background:c,flexShrink:0}}/>
-            <span style={{fontSize:".58rem",color:"#6a5a40",fontFamily:"sans-serif"}}>{l}</span>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
+
 
 
 // MushafPage
@@ -1554,17 +1473,9 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
         </div>
       )}
 
-      {/* Mode tajweed — images qurancdn en priorité, fallback texte */}
+      {/* Mode tajweed — iframe Archive.org édition tajweed colorée */}
       {mode==="text"&&(
-        <MushafTajweedView
-          page={page||1}
-          effectiveTjc={effectiveTjc}
-          arFont={arFont}
-          verses={verses}
-          textState={textState}
-          setTextState={setTextState}
-          groups={groups}
-        />
+        <MushafTajweedView page={page||1} fullscreen={fullscreen}/>
       )}
 
     </div>
