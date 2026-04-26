@@ -1500,16 +1500,9 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
         <button onClick={onNext} style={{background:"rgba(201,168,76,.12)",border:"1px solid rgba(201,168,76,.22)",color:AC,padding:"5px 14px",borderRadius:8,cursor:"pointer",fontWeight:700}}>►</button>
       </div>
 
-      {/* Mode image — iframe Archive.org (fonctionne bien) */}
+      {/* Mode image — même Supabase Storage */}
       {mode==="image"&&(
-        <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:6,minHeight:400,background:"#1a1200"}}>
-          <iframe
-            src={`https://archive.org/embed/al-quran-al-karim-tajwid-hafs/page/n${(page||1)-1}/mode/1up`}
-            style={{width:"100%",height:fullscreen?"calc(100vh - 52px)":"75vh",border:"none",borderRadius:6,background:"#f5f0e8"}}
-            title={`Mushaf page ${page}`}
-            allowFullScreen
-          />
-        </div>
+        <MushafTajweedView page={page||1} fullscreen={fullscreen} edition={ed}/>
       )}
 
       {mode==="text"&&(
