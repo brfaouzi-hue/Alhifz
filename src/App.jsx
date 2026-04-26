@@ -2789,8 +2789,9 @@ const handleReset=async()=>{
   const [continuousMode,setContinuousMode]=useState(false);
   const [continuousIdx,setContinuousIdx]=useState(0);
   const [recitModal,setRecitModal]=useState(false);
-  const [activeVerseActions,setActiveVerseActions]=useState(null); // vn du verset dont les actions sont ouvertes
-  const longPressTimer=useRef(null); // modal récitation plein écran
+  const [activeVerseActions,setActiveVerseActions]=useState(null);
+  const longPressTimer=useRef(null);
+  const [hadithDismissed,setHadithDismissed]=useState(()=>ld("qhadith_dis_"+new Date().toISOString().slice(0,10),false));
   const countdownRef=useRef(null);
 
   // Compare deux mots arabes en ignorant les diacritiques
@@ -3586,7 +3587,8 @@ return (
             })()}
 
             {/* Hadith / Citation du jour */}
-            {(()=>{
+            {/* Hadith du jour */}
+            {!hadithDismissed&&(()=>{
               const hadiths=[
                 {ar:"خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ",fr:"Le meilleur d'entre vous est celui qui apprend le Coran et l'enseigne.",src:"Al-Bukhari"},
                 {ar:"مَثَلُ الَّذِي يَقْرَأُ الْقُرْآنَ وَهُوَ حَافِظٌ لَهُ مَعَ السَّفَرَةِ الْكِرَامِ الْبَرَرَةِ",fr:"Celui qui récite le Coran en le connaissant par cœur sera avec les nobles et pieux scribes.",src:"Al-Bukhari & Muslim"},
@@ -3595,12 +3597,9 @@ return (
                 {ar:"أَهْلُ الْقُرْآنِ هُمْ أَهْلُ اللَّهِ وَخَاصَّتُهُ",fr:"Les gens du Coran sont les gens d'Allah et Ses élus.",src:"An-Nasa'i"},
               ];
               const h=hadiths[new Date().getDate()%hadiths.length];
-              const hdKey=`qhadith_${today()}`;
-              const [hdDismissed,setHdDismissed]=React.useState(()=>ld(hdKey,false));
-              if(hdDismissed) return null;
               return(
                 <div style={{padding:"14px 16px",background:`linear-gradient(135deg,${t.acc}08,${t.acc}04)`,borderRadius:14,border:`1px solid ${t.acc}20`,position:"relative"}}>
-                  <button onClick={()=>{setHdDismissed(true);sv(hdKey,true);}} style={{position:"absolute",top:10,right:10,background:"none",border:"none",cursor:"pointer",color:t.tx3,fontSize:".8rem",lineHeight:1,padding:4}}>✕</button>
+                  <button onClick={()=>{setHadithDismissed(true);sv("qhadith_dis_"+today(),true);}} style={{position:"absolute",top:10,right:10,background:"none",border:"none",cursor:"pointer",color:t.tx3,fontSize:".8rem",lineHeight:1,padding:4}}>✕</button>
                   <div style={{fontSize:".54rem",color:t.acc,textTransform:"uppercase",letterSpacing:"2px",fontWeight:700,marginBottom:8}}>Hadith du jour</div>
                   <div style={{fontFamily:"'Amiri',serif",fontSize:"1.05rem",direction:"rtl",textAlign:"right",lineHeight:1.8,color:t.tx,marginBottom:8}}>{h.ar}</div>
                   <div style={{fontSize:".68rem",color:t.tx2,fontStyle:"italic",lineHeight:1.5,marginBottom:6}}>{h.fr}</div>
