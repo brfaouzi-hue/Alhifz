@@ -1354,8 +1354,6 @@ function MushafTajweedView({page,fullscreen,edition}){
 
   const url=`https://dccirpngkozsexrzuzgy.supabase.co/storage/v1/object/public/mushaf/${folder}/${pad}.jpg`;
 
-  const url=`https://dccirpngkozsexrzuzgy.supabase.co/storage/v1/object/public/mushaf/tajweed/${pad}.jpg`;
-
   return(
     <div style={{flex:1,overflowY:"auto",background:"#f5f0e8",display:"flex",flexDirection:"column",alignItems:"center",position:"relative"}}>
       {!loaded&&!error&&(
