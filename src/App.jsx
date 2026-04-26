@@ -1343,7 +1343,9 @@ function colorTajweed(html){
 // Tajweed view — images depuis Supabase Storage
 function MushafTajweedView({page,fullscreen}){
   const pg=page||1;
-  const pad=String(pg).padStart(3,"0");
+  // Offset +7 car le PDF commence par 7 pages d'intro avant Al-Fatiha
+  const imgNum=pg+7;
+  const pad=String(imgNum).padStart(3,"0");
   const [loaded,setLoaded]=React.useState(false);
   const [error,setError]=React.useState(false);
   React.useEffect(()=>{setLoaded(false);setError(false);},[pg]);
