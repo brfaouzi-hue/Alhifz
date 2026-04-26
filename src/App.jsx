@@ -1341,14 +1341,18 @@ function colorTajweed(html){
 
 // MushafTajweedView — rendu React direct depuis l'API qurancdn JSON
 // Tajweed view — images depuis Supabase Storage
-function MushafTajweedView({page,fullscreen}){
+function MushafTajweedView({page,fullscreen,edition}){
   const pg=page||1;
-  // Offset +7 car le PDF commence par 7 pages d'intro avant Al-Fatiha
-  const imgNum=pg+7;
+  const isFr=edition?.id==="tajwid_fr";
+  // Offset : le PDF Hafs a 7 pages d'intro, le FR en a probablement aussi
+  const imgNum=pg+(isFr?7:7);
   const pad=String(imgNum).padStart(3,"0");
+  const folder=isFr?"tajweed-fr":"tajweed";
   const [loaded,setLoaded]=React.useState(false);
   const [error,setError]=React.useState(false);
-  React.useEffect(()=>{setLoaded(false);setError(false);},[pg]);
+  React.useEffect(()=>{setLoaded(false);setError(false);},[pg,isFr]);
+
+  const url=`https://dccirpngkozsexrzuzgy.supabase.co/storage/v1/object/public/mushaf/${folder}/${pad}.jpg`;
 
   const url=`https://dccirpngkozsexrzuzgy.supabase.co/storage/v1/object/public/mushaf/tajweed/${pad}.jpg`;
 
@@ -1510,9 +1514,8 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
         </div>
       )}
 
-      {/* Mode tajweed — iframe Archive.org édition tajweed colorée */}
       {mode==="text"&&(
-        <MushafTajweedView page={page||1} fullscreen={fullscreen}/>
+        <MushafTajweedView page={page||1} fullscreen={fullscreen} edition={ed}/>
       )}
 
     </div>
