@@ -1340,26 +1340,47 @@ function colorTajweed(html){
 }
 
 // MushafTajweedView — rendu React direct depuis l'API qurancdn JSON
-// Tajweed view — même Archive.org mais avec l'édition tajweed colorée
+// Tajweed view — images depuis Supabase Storage
 function MushafTajweedView({page,fullscreen}){
   const pg=page||1;
+  const pad=String(pg).padStart(3,"0");
   const [loaded,setLoaded]=React.useState(false);
-  React.useEffect(()=>setLoaded(false),[pg]);
+  const [error,setError]=React.useState(false);
+  React.useEffect(()=>{setLoaded(false);setError(false);},[pg]);
+
+  const url=`https://dccirpngkozsexrzuzgy.supabase.co/storage/v1/object/public/mushaf/tajweed/${pad}.jpg`;
+
   return(
-    <div style={{flex:1,display:"flex",flexDirection:"column",background:"#1a1200",position:"relative"}}>
-      {!loaded&&(
-        <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:14,background:"#1a1200",zIndex:1}}>
+    <div style={{flex:1,overflowY:"auto",background:"#f5f0e8",display:"flex",flexDirection:"column",alignItems:"center",position:"relative"}}>
+      {!loaded&&!error&&(
+        <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:14,background:"#f5f0e8",zIndex:1}}>
           <div style={{width:32,height:32,border:"3px solid #c9a84c",borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite"}}/>
           <div style={{fontFamily:"'Amiri',serif",fontSize:".9rem",color:"#c9a84c"}}>جاري التحميل…</div>
+          <div style={{fontSize:".6rem",color:"#9a8060"}}>Page {pg}</div>
         </div>
       )}
-      <iframe
+      {error&&(
+        <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,padding:20}}>
+          <div style={{fontSize:"2rem"}}>⚠️</div>
+          <div style={{fontSize:".8rem",color:"#c62828",textAlign:"center"}}>Page non disponible</div>
+          <button onClick={()=>{setError(false);setLoaded(false);}} style={{padding:"7px 16px",border:"1px solid #c9a84c",background:"transparent",color:"#c9a84c",borderRadius:8,cursor:"pointer"}}>↺ Réessayer</button>
+        </div>
+      )}
+      <img
         key={pg}
-        src={`https://archive.org/embed/al-quran-al-karim-tajwid-hafs/page/n${pg-1}/mode/1up`}
+        src={url}
+        alt={`Mushaf page ${pg}`}
         onLoad={()=>setLoaded(true)}
-        style={{flex:1,border:"none",width:"100%",height:fullscreen?"calc(100vh - 52px)":"75vh",opacity:loaded?1:0,transition:"opacity .4s"}}
-        title={`Tajweed page ${pg}`}
-        allowFullScreen
+        onError={()=>setError(true)}
+        style={{
+          width:"100%",
+          maxWidth:fullscreen?800:680,
+          height:"auto",
+          display:loaded?"block":"none",
+          userSelect:"none",
+          WebkitUserSelect:"none",
+        }}
+        draggable={false}
       />
     </div>
   );
