@@ -1506,14 +1506,43 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
           </div>}
         </div>
 
-        {/* Verset */}
-        <div key={idx} style={{fontFamily:"'Scheherazade New','Amiri Quran',serif",fontSize:"clamp(1.6rem,5vw,2.2rem)",direction:"rtl",textAlign:"center",lineHeight:2.2,color:t.tx,width:"100%",maxWidth:540,animation:"scoreIn .25s ease"}}>
-          {hasScore
-            ? speechScore.analysis?.map((w,wi)=>(
-                <span key={wi} style={{color:w.status==="ok"?t.gr:w.status==="wrong"?"#e91e63":t.tx3,fontWeight:w.status==="wrong"?700:400,margin:"0 2px",textDecoration:w.status==="wrong"?"underline wavy #e91e63":"none"}}>{w.word} </span>
-              ))
-            : <TajwidSpan text={curV?.ar||""} enabled={showTj} tjc={tjc}/>
-          }
+        {/* Verset — affichage temps réel style Tarteel */}
+        <div key={idx} style={{fontFamily:"'Scheherazade New','Amiri Quran',serif",fontSize:"clamp(1.6rem,5vw,2.2rem)",direction:"rtl",textAlign:"center",lineHeight:2.4,width:"100%",maxWidth:540,animation:"scoreIn .25s ease"}}>
+          {(()=>{
+            const targetWords=(curV?.ar||"").replace(/<[^>]*>/g,"").replace(/[ًٌٍَُِّْٰٓٔ]/g,"").split(/\s+/).filter(Boolean);
+            const spokenWords=speechResult?(speechResult).replace(/[ًٌٍَُِّْٰٓٔ]/g,"").replace(/[أإآٱ]/g,"ا").split(/\s+/).filter(Boolean):[];
+            const arWords=(curV?.ar||"").replace(/<[^>]*>/g,"").split(/\s+/).filter(Boolean);
+
+            if(hasScore){
+              // Score final — vert/rouge
+              return speechScore.analysis?.map((w,wi)=>(
+                <span key={wi} style={{color:w.status==="ok"?t.gr:w.status==="wrong"?"#e91e63":t.tx3,fontWeight:w.status==="wrong"?700:400,margin:"0 3px",textDecoration:w.status==="wrong"?"underline wavy #e91e63":"none"}}>{arWords[wi]||w.word} </span>
+              ));
+            } else if(isListening&&speechResult){
+              // En temps réel — compare mot à mot
+              return arWords.map((word,wi)=>{
+                const cleanWord=word.replace(/[ًٌٍَُِّْٰٓٔ]/g,"").replace(/[أإآٱ]/g,"ا").replace(/[ىة]/g,"ي");
+                const cleanSpoken=spokenWords[wi]?.replace(/[أإآٱ]/g,"ا").replace(/[ىة]/g,"ي")||"";
+                const said=wi<spokenWords.length;
+                const correct=said&&(cleanWord===cleanSpoken||cleanWord.includes(cleanSpoken)||cleanSpoken.includes(cleanWord));
+                const wrong=said&&!correct;
+                return(
+                  <span key={wi} style={{
+                    color:correct?t.gr:wrong?"#e91e63":t.tx3,
+                    fontWeight:wi===spokenWords.length?"900":400,
+                    margin:"0 3px",
+                    opacity:wi>spokenWords.length?0.35:1,
+                    transition:"all .15s",
+                    fontSize:wi===spokenWords.length?"1.1em":"1em",
+                    textShadow:wi===spokenWords.length?`0 0 16px ${acc}`:"none",
+                  }}>{word} </span>
+                );
+              });
+            } else {
+              // Idle — verset avec tajweed
+              return <TajwidSpan text={curV?.ar||""} enabled={showTj} tjc={tjc}/>;
+            }
+          })()}
           <span style={{fontFamily:"'Amiri',serif",fontSize:".65em",color:acc,margin:"0 3px"}}>﴿{curV?.n}﴾</span>
         </div>
 
@@ -3009,14 +3038,22 @@ const handleReset=async()=>{
   const updateStreak=useCallback(()=>{},[]);
 
   // Quiz generation
-  const generateQuiz=useCallback((filterSurah=null,filterMode="memorized")=>{
-    // Pool de versets selon le filtre
+  const generateQuiz=useCallback(async(filterSurah=null,filterMode="memorized")=>{
     let pool=[];
     if(filterSurah){
-      const vs=Q[filterSurah]||[];
-      vs.forEach(v=>pool.push({...v,sn:filterSurah,surah:SURAHS.find(s=>s.n===filterSurah)?.name||"",surahAr:SURAHS.find(s=>s.n===filterSurah)?.ar||""}));
+      // Charger la sourate si pas dans Q
+      let vs=Q[filterSurah]||[];
+      if(vs.length===0){
+        try{
+          const r=await fetch(`https://api.qurancdn.com/api/qdc/verses/by_chapter/${filterSurah}?language=fr&words=false&per_page=286&fields=text_uthmani,verse_number,translations`);
+          const d=await r.json();
+          vs=(d.verses||[]).map(v=>({n:v.verse_number,ar:v.text_uthmani||"",fr:v.translations?.[0]?.text||""}));
+          if(!Q[filterSurah]) Q[filterSurah]=vs;
+        }catch{}
+      }
+      const s=SURAHS.find(x=>x.n===filterSurah);
+      vs.forEach(v=>pool.push({...v,sn:filterSurah,surah:s?.name||"",surahAr:s?.ar||""}));
     } else if(filterMode==="memorized"){
-      // Uniquement les versets que l'utilisateur a mémorisés
       SURAHS.forEach(s=>{
         const memKeys=Object.keys(mem[String(s.n)]||{});
         memKeys.forEach(vk=>{
@@ -3028,7 +3065,6 @@ const handleReset=async()=>{
       SURAHS.forEach(s=>{(Q[s.n]||[]).forEach(v=>pool.push({...v,sn:s.n,surah:s.name,surahAr:s.ar}));});
     }
     if(pool.length<4){
-      // Pas assez de versets mémorisés — fallback sur Juz 30 embarqué
       SURAHS.forEach(s=>{(Q[s.n]||[]).forEach(v=>pool.push({...v,sn:s.n,surah:s.name,surahAr:s.ar}));});
     }
     if(pool.length===0)return;
@@ -4433,41 +4469,18 @@ return (
 
         {/* MUSHAF */}
         {page==="mushaf"&&(
-          <div style={{display:"flex",flexDirection:"column",gap:12}}>
-            <div className="card">
-              <div className="ch"><span className="ct">Édition du Mushaf</span></div>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))",gap:10,padding:12}}>
-                {MUSHAF_EDITIONS.map(ed=>(
-                  <div key={ed.id} style={{borderRadius:12,border:`2px solid ${mushafEdition===ed.id?t.acc:t.b1}`,overflow:"hidden",cursor:"pointer",transition:"all .2s",transform:mushafEdition===ed.id?"translateY(-2px)":"none",boxShadow:mushafEdition===ed.id?`0 4px 16px ${t.acc}33`:"none"}} onMouseEnter={e=>{if(mushafEdition!==ed.id){e.currentTarget.style.borderColor=t.acc+"66";e.currentTarget.style.transform="translateY(-2px)";}}} onMouseLeave={e=>{if(mushafEdition!==ed.id){e.currentTarget.style.borderColor=t.b1;e.currentTarget.style.transform="none";}}} onClick={()=>setMushafEdition(ed.id)}>
-                    <div style={{height:60,background:ed.coverBg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
-                      <span style={{fontSize:"1.6rem"}}>{ed.coverIcon}</span>
-                      <span style={{fontFamily:"'Amiri',serif",fontSize:".7rem",color:"#fff",opacity:.8,marginTop:2}}>{ed.coverSub}</span>
-                    </div>
-                    <div style={{padding:"7px 10px",background:t.s2}}>
-                      <div style={{fontSize:".72rem",fontWeight:600,color:t.tx}}>{ed.name}</div>
-                      <div style={{fontSize:".58rem",color:t.tx3,marginTop:1}}>{ed.desc}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="card">
-              <div className="ch" style={{flexDirection:"column",gap:8,alignItems:"stretch"}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <span className="ct">Page {mushafPage||1} / 604</span>
-                  <div style={{display:"flex",gap:6}}>
-                    <button className="tbtn" onClick={()=>setMushafPage(p=>Math.max(1,(p||1)-1))}>← Précédente</button>
-                    <button className={`tbtn ${pageRead[String(mushafPage||1)]?"on":""}`} onClick={()=>togglePage(mushafPage||1)}>{pageRead[String(mushafPage||1)]?"Lue ✓":"Marquer lue"}</button>
-                    <button className="tbtn" onClick={()=>setMushafPage(p=>Math.min(604,(p||1)+1))}>Suivante →</button>
-                  </div>
-                </div>
-                <button onClick={()=>{setMushafSurahModal(true);setMushafSurahSearch("");}} style={{width:"100%",padding:"9px 14px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:10,color:t.tx2,fontSize:".75rem",cursor:"pointer",display:"flex",alignItems:"center",gap:8,transition:"all .2s"}} onMouseEnter={e=>{e.currentTarget.style.borderColor=t.acc;e.currentTarget.style.color=t.tx;}} onMouseLeave={e=>{e.currentTarget.style.borderColor=t.b2;e.currentTarget.style.color=t.tx2;}}>
-                  <span style={{fontSize:"1rem"}}>📖</span>
-                  <span style={{flex:1,textAlign:"left"}}>Aller à une sourate…</span>
-                  <span style={{fontSize:".7rem",opacity:.5}}>▼</span>
+          <div style={{position:"fixed",inset:0,zIndex:10,display:"flex",flexDirection:"column",background:"#0d1000",paddingTop:"env(safe-area-inset-top)"}}>
+            {/* Sélecteur édition compact en haut */}
+            <div style={{display:"flex",gap:6,padding:"6px 10px",background:"rgba(0,0,0,.8)",flexShrink:0,overflowX:"auto",borderBottom:"1px solid rgba(201,168,76,.15)"}}>
+              {MUSHAF_EDITIONS.map(ed=>(
+                <button key={ed.id} onClick={()=>setMushafEdition(ed.id)} style={{padding:"5px 12px",borderRadius:20,border:`1.5px solid ${mushafEdition===ed.id?"#c9a84c":"rgba(201,168,76,.2)"}`,background:mushafEdition===ed.id?"rgba(201,168,76,.15)":"transparent",color:mushafEdition===ed.id?"#c9a84c":"rgba(201,168,76,.5)",fontSize:".6rem",fontWeight:mushafEdition===ed.id?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
+                  {ed.name}
                 </button>
-              </div>
-              <MushafPage page={mushafPage||1} t={t} tjc={tjc} arFont={arFont} edition={MUSHAF_EDITIONS.find(e=>e.id===mushafEdition)||MUSHAF_EDITIONS[0]} fullscreen={mushafFullscreen} onToggleFullscreen={()=>setMushafFullscreen(f=>!f)} onNext={()=>goToPage(Math.min(604,(mushafPage||1)+1))} onPrev={()=>goToPage(Math.max(1,(mushafPage||1)-1))} onGoTo={(pg)=>goToPage(pg)}/>
+              ))}
+            </div>
+            {/* MushafPage prend tout l'espace restant */}
+            <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+              <MushafPage page={mushafPage||1} t={t} tjc={tjc} arFont={arFont} edition={MUSHAF_EDITIONS.find(e=>e.id===mushafEdition)||MUSHAF_EDITIONS[0]} fullscreen={false} onToggleFullscreen={()=>setMushafFullscreen(f=>!f)} onNext={()=>goToPage(Math.min(604,(mushafPage||1)+1))} onPrev={()=>goToPage(Math.max(1,(mushafPage||1)-1))} onGoTo={(pg)=>goToPage(pg)}/>
             </div>
           </div>
         )}
