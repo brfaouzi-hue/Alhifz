@@ -1296,56 +1296,47 @@ function TajweedLegend({effectiveTjc}){
 }
 
 // Tajweed view — images qurancdn (comme Tarteel) avec fallback texte robuste
-// Couleurs tajweed — noms EXACTS des classes qurancdn
+// Couleurs tajweed — toutes les variantes de noms qurancdn
 const TJ_COLORS={
-  // Liaison / silencieux
-  "ham_wasl":"#AAAAAA",
-  "slnt":"#AAAAAA",
-  // Lam solaire
-  "laam_shamsiyah":"#AAAAAA",
-  "laam_shamsiyya":"#AAAAAA",
+  // Silence / liaison
+  "ham_wasl":"#AAAAAA","slnt":"#AAAAAA",
+  "laam_shamsiyah":"#AAAAAA","laam_shamsiyya":"#AAAAAA","lam_shamsiyah":"#AAAAAA",
   // Madd
-  "madda_normal":"#537FFF",
-  "madda_permissible":"#4050FF",
-  "madda_necessary":"#000EBC",
-  "madda_obligatory":"#2144C1",
-  "madda_mutawassit":"#2144C1",
+  "madda_normal":"#537FFF","madda_permissible":"#4050FF",
+  "madda_necessary":"#000EBC","madda_obligatory":"#2144C1",
+  "madda_mutawassit":"#4050FF","madda_far":"#000EBC",
+  "madd_normal":"#537FFF","madd_permissible":"#4050FF",
+  "madd_necessary":"#000EBC","madd_obligatory":"#2144C1",
   // Qalqala
-  "qalaqah":"#DD8800",
-  "qalqalah":"#DD8800",
+  "qalaqah":"#DD8800","qalqalah":"#DD8800","qalqala":"#DD8800",
   // Ikhfa
-  "ikhafa_shafawi":"#D500B7",
-  "ikhafa":"#D500B7",
-  "ikhfa":"#D500B7",
-  "ikhfa_shafawi":"#D500B7",
+  "ikhafa":"#D500B7","ikhafa_shafawi":"#D500B7",
+  "ikhfa":"#D500B7","ikhfa_shafawi":"#D500B7",
   // Idgham
   "idgham_shafawi":"#58B800",
-  "idgham_ghunnah":"#169200",
-  "idgham_wo_ghunnah":"#169200",
-  "idgham_mutajanisayn":"#169200",
-  "idgham_mutaqaribayn":"#169200",
-  "idgham_with_ghunnah":"#169200",
-  "idgham_without_ghunnah":"#169200",
+  "idgham_ghunnah":"#169200","idgham_with_ghunnah":"#169200",
+  "idgham_wo_ghunnah":"#169200","idgham_without_ghunnah":"#169200",
+  "idgham_mutajanisayn":"#169200","idgham_mutaqaribayn":"#169200",
+  "idgham":"#169200",
   // Ghunna
-  "ghunnah":"#169200",
+  "ghunnah":"#169200","ghunna":"#169200",
   // Iqlab
   "iqlab":"#26BFFD",
   // Izhar
-  "izhar_shafawi":"#58B800",
-  "izhar_qamariyya":"#2D9660",
-  "izhar_oral":"#58B800",
-  "izhar":"#58B800",
+  "izhar":"#58B800","izhar_shafawi":"#58B800",
+  "izhar_qamariyya":"#2D9660","izhar_oral":"#58B800",
 };
 
 // Colorie le HTML tajweed qurancdn avec des spans inline
 function colorTajweed(html){
   if(!html) return "";
   const h=html.replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&amp;/g,"&");
-  return h.replace(/<tajweed class=["']?([a-z_]+)["']?>/g,(match, cls)=>{
-    const c=TJ_COLORS[cls];
-    if(!c) console.log("UNKNOWN CLASS:",cls); // debug
-    return c?`<span style="color:${c};font-weight:bold">`:"<span>";
-  }).replace(/<\/tajweed>/g,"</span>");
+  return h
+    .replace(/<tajweed class=["']?([a-z_]+)["']?>/g,(match,cls)=>{
+      const c=TJ_COLORS[cls];
+      return c?`<span style="color:${c};font-weight:bold">`:"<span>";
+    })
+    .replace(/<\/tajweed>/g,"</span>");
 }
 
 // MushafTajweedView — rendu React direct depuis l'API qurancdn JSON
@@ -1356,8 +1347,7 @@ function MushafTajweedView({page}){
 
   React.useEffect(()=>{
     setState("loading");setVerses([]);
-    const ck=`qtj3_${pg}`;
-    // Cache localStorage
+    const ck=`qtj4_${pg}`;
     try{const c=localStorage.getItem(ck);if(c){setVerses(JSON.parse(c));setState("ok");return;}}catch{}
     fetch(`https://api.qurancdn.com/api/qdc/verses/by_page/${pg}?language=ar&words=false&per_page=50&fields=text_uthmani_tajweed,text_uthmani,verse_number,chapter_id`)
       .then(r=>r.json())
@@ -1368,7 +1358,7 @@ function MushafTajweedView({page}){
         }));
         // DEBUG supprimé
         setVerses(vs);setState("ok");
-        try{localStorage.setItem(`qtj3_${pg}`,JSON.stringify(vs));}catch{}
+        try{localStorage.setItem(`qtj4_${pg}`,JSON.stringify(vs));}catch{}
       })
       .catch(()=>setState("error"));
   },[pg]);
