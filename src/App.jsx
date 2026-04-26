@@ -1623,7 +1623,8 @@ body>*{position:relative;z-index:1;}
 .vfr{font-size:.74rem;color:${t.tx2};line-height:1.7;margin-top:6px;padding-top:6px;border-top:1px solid ${t.b1};font-style:italic;}
 .vtf{margin-top:7px;padding:8px 10px;background:rgba(168,85,247,.07);border-left:3px solid ${t.pu};border-radius:0 8px 8px 0;font-size:.7rem;color:${t.tx2};line-height:1.7;}
 .vtf-hd{font-size:.58rem;color:${t.pu};text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:3px;}
-.vacts{display:flex;gap:4px;margin-top:7px;flex-wrap:wrap;}
+.vacts{display:flex;gap:4px;margin-top:7px;flex-wrap:wrap;max-height:0;overflow:hidden;transition:max-height .25s ease,opacity .2s;opacity:0;pointer-events:none;}
+.vacts.open{max-height:120px;opacity:1;pointer-events:auto;}
 .vbtn{padding:3px 8px;border-radius:99px;border:1px solid ${t.b2};background:transparent;color:${t.tx3};font-size:.6rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:3px;}
 .vbtn:hover{border-color:${acc};color:${acc};transform:translateY(-1px);}
 .vbtn.mem{background:${t.grD};border-color:${t.gr};color:${t.gr};}
@@ -2787,7 +2788,9 @@ const handleReset=async()=>{
   const [speechCountdown,setSpeechCountdown]=useState(0); // 3,2,1,0
   const [continuousMode,setContinuousMode]=useState(false);
   const [continuousIdx,setContinuousIdx]=useState(0);
-  const [recitModal,setRecitModal]=useState(false); // modal récitation plein écran
+  const [recitModal,setRecitModal]=useState(false);
+  const [activeVerseActions,setActiveVerseActions]=useState(null); // vn du verset dont les actions sont ouvertes
+  const longPressTimer=useRef(null); // modal récitation plein écran
   const countdownRef=useRef(null);
 
   // Compare deux mots arabes en ignorant les diacritiques
@@ -3561,40 +3564,6 @@ return (
               ))}
             </div>
 
-            {/* Progression juz */}
-            <div className="card">
-              <div className="ch"><span className="ct">Progression par Juz</span><button className="tbtn" style={{fontSize:".6rem"}} onClick={()=>setPage("stats")}>Voir tout</button></div>
-              <div style={{padding:"10px 14px",display:"flex",flexDirection:"column",gap:6}}>
-                {[...new Set(SURAHS.map(s=>s.juz))].sort((a,b)=>a-b).slice(0,5).map(juz=>{
-                  const p=juzPct(juz);
-                  return(
-                    <div key={juz} style={{display:"flex",alignItems:"center",gap:10}}>
-                      <span style={{fontSize:".65rem",color:t.tx3,width:36,flexShrink:0}}>Juz {juz}</span>
-                      <div style={{flex:1,height:6,background:t.b1,borderRadius:99,overflow:"hidden"}}>
-                        <div style={{height:"100%",width:`${p}%`,background:p===100?t.gr:`linear-gradient(90deg,${t.acc},${t.acc2})`,borderRadius:99,transition:"width .6s"}}/>
-                      </div>
-                      <span style={{fontSize:".65rem",color:p===100?t.gr:t.acc,fontWeight:700,width:32,textAlign:"right",flexShrink:0}}>{p}%</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Badges récents */}
-            {badges.length>0&&(
-              <div className="card">
-                <div className="ch"><span className="ct">Mes badges</span><span style={{fontSize:".65rem",color:t.acc,fontWeight:700}}>{badges.length} / {BADGE_DEFS.length}</span></div>
-                <div style={{display:"flex",gap:8,padding:"10px 14px",flexWrap:"wrap"}}>
-                  {BADGE_DEFS.filter(b=>badges.includes(b.id)).map(b=>(
-                    <div key={b.id} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 10px",background:`${t.acc}12`,borderRadius:99,border:`1px solid ${t.acc}33`}}>
-                      <span style={{fontSize:".85rem"}}>{b.icon}</span>
-                      <span style={{fontSize:".62rem",fontWeight:600,color:t.acc}}>{b.label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Dernière activité / Reprendre */}
             {readHistory.length>0&&(()=>{
               const last=readHistory[0];
@@ -3626,8 +3595,12 @@ return (
                 {ar:"أَهْلُ الْقُرْآنِ هُمْ أَهْلُ اللَّهِ وَخَاصَّتُهُ",fr:"Les gens du Coran sont les gens d'Allah et Ses élus.",src:"An-Nasa'i"},
               ];
               const h=hadiths[new Date().getDate()%hadiths.length];
+              const hdKey=`qhadith_${today()}`;
+              const [hdDismissed,setHdDismissed]=React.useState(()=>ld(hdKey,false));
+              if(hdDismissed) return null;
               return(
-                <div style={{padding:"14px 16px",background:`linear-gradient(135deg,${t.acc}08,${t.acc}04)`,borderRadius:14,border:`1px solid ${t.acc}20`}}>
+                <div style={{padding:"14px 16px",background:`linear-gradient(135deg,${t.acc}08,${t.acc}04)`,borderRadius:14,border:`1px solid ${t.acc}20`,position:"relative"}}>
+                  <button onClick={()=>{setHdDismissed(true);sv(hdKey,true);}} style={{position:"absolute",top:10,right:10,background:"none",border:"none",cursor:"pointer",color:t.tx3,fontSize:".8rem",lineHeight:1,padding:4}}>✕</button>
                   <div style={{fontSize:".54rem",color:t.acc,textTransform:"uppercase",letterSpacing:"2px",fontWeight:700,marginBottom:8}}>Hadith du jour</div>
                   <div style={{fontFamily:"'Amiri',serif",fontSize:"1.05rem",direction:"rtl",textAlign:"right",lineHeight:1.8,color:t.tx,marginBottom:8}}>{h.ar}</div>
                   <div style={{fontSize:".68rem",color:t.tx2,fontStyle:"italic",lineHeight:1.5,marginBottom:6}}>{h.fr}</div>
@@ -3973,7 +3946,13 @@ return (
                       return (
                         <React.Fragment key={v.n}>
                           {showBismillah&&(<div style={{textAlign:"center",padding:"14px 8px 6px",direction:"rtl",fontFamily:"'Amiri Quran',serif",fontSize:"1.3rem",color:t.acc,letterSpacing:2,borderBottom:`1px solid ${t.b1}`,marginBottom:4,background:`linear-gradient(135deg,${t.acc}08,transparent)`}}>بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>)}
-                          <div id={`v-${selS?.n}-${v.n}`} className={`vitem ${isMem?"mem":""} ${isPl?"pl":""} ${isDue?"due":""}`}>
+                          <div id={`v-${selS?.n}-${v.n}`} className={`vitem ${isMem?"mem":""} ${isPl?"pl":""} ${isDue?"due":""}`}
+                            onTouchStart={()=>{longPressTimer.current=setTimeout(()=>setActiveVerseActions(vn=>vn===v.n?null:v.n),500);}}
+                            onTouchEnd={()=>clearTimeout(longPressTimer.current)}
+                            onTouchMove={()=>clearTimeout(longPressTimer.current)}
+                            onMouseDown={()=>{longPressTimer.current=setTimeout(()=>setActiveVerseActions(vn=>vn===v.n?null:v.n),500);}}
+                            onMouseUp={()=>clearTimeout(longPressTimer.current)}
+                          >
                             <div className="vtop">
                               <div className={`vnum ${isMem?"mem":""} ${isPl?"pl":""}`} onClick={()=>toggleV(selS.n,v.n,v.ar)}>{isMem?<Icons.Check size={11} color={t.gr}/>:v.n}</div>
                               <div className="var-text" style={{fontSize:`${arabicSize}rem`}}>
@@ -4018,7 +3997,7 @@ return (
                                 }
                               </div>
                             )}
-                            <div className="vacts">
+                            <div className={`vacts ${activeVerseActions===v.n?"open":""}`}>
                               <button className={`vbtn ${isMem?"mem":""}`} onClick={()=>toggleV(selS.n,v.n,v.ar)}>{isMem?<><Icons.Check size={10}/>Mémorisé</>:<>+ Mémoriser</>}</button>
                               <button className="vbtn snd" onClick={()=>{setLoopCurrent(1);doPlay(v.n);addToHistory(selS.n,v.n);}}><Icons.Play size={10}/>{isPl?"Stop":"Écouter"}</button>
                               <button className={`vbtn ${isFav(selS.n,v.n)?"mem":""}`} onClick={()=>toggleFav(selS.n,v.n,v.ar,v.fr,selS.name)}><Icons.Heart size={10} filled={isFav(selS.n,v.n)}/>{isFav(selS.n,v.n)?"Favori ✓":"Favori"}</button>
@@ -4691,7 +4670,7 @@ return (
                   <button onClick={()=>{setQuizFilter("all");setQuizFilterSurah(null);setQuizQ(null);}} style={{padding:"4px 10px",borderRadius:99,border:`1px solid ${quizFilter==="all"&&!quizFilterSurah?t.acc:t.b2}`,background:quizFilter==="all"&&!quizFilterSurah?`${t.acc}15`:t.s2,color:quizFilter==="all"&&!quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer"}}>Tout</button>
                   <select value={quizFilterSurah||""} onChange={e=>{const v=+e.target.value||null;setQuizFilterSurah(v);setQuizFilter(v?"surah":"memorized");setQuizQ(null);}} style={{padding:"4px 8px",borderRadius:99,border:`1px solid ${quizFilterSurah?t.acc:t.b2}`,background:quizFilterSurah?`${t.acc}15`:t.s2,color:quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer",outline:"none"}}>
                     <option value="">Par sourate…</option>
-                    {SURAHS.filter(s=>Q[s.n]?.length>0).map(s=><option key={s.n} value={s.n}>{s.name}</option>)}
+                    {SURAHS.map(s=><option key={s.n} value={s.n}>{s.n}. {s.name}</option>)}
                   </select>
                 </div>
 
@@ -5159,7 +5138,7 @@ return (
 
         {/* SETTINGS */}
         {page==="settings"&&(
-          <div className="settings-wrap" style={{paddingBottom:"env(safe-area-inset-bottom)"}}>
+          <div className="settings-wrap" style={{paddingBottom:"calc(120px + env(safe-area-inset-bottom))",WebkitOverflowScrolling:"touch",overscrollBehavior:"none"}}>
 
             {/* Compte */}
             <div className="settings-section">
