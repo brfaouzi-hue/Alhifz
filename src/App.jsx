@@ -1341,10 +1341,9 @@ function colorTajweed(html){
 
 // MushafTajweedView — rendu React direct depuis l'API qurancdn JSON
 // Tajweed view — images depuis Supabase Storage
-function MushafTajweedView({page,fullscreen,edition}){
+function MushafTajweedView({page,fullscreen,edition,nightMode}){
   const pg=page||1;
   const isFr=edition?.id==="tajwid_fr";
-  // Offset : le PDF Hafs a 7 pages d'intro, le FR en a probablement aussi
   const imgNum=pg+(isFr?7:7);
   const pad=String(imgNum).padStart(3,"0");
   const folder=isFr?"tajweed-fr":"tajweed";
@@ -1355,12 +1354,11 @@ function MushafTajweedView({page,fullscreen,edition}){
   const url=`https://dccirpngkozsexrzuzgy.supabase.co/storage/v1/object/public/mushaf/${folder}/${pad}.jpg`;
 
   return(
-    <div style={{flex:1,overflowY:"auto",background:"#f5f0e8",display:"flex",flexDirection:"column",alignItems:"center",position:"relative"}}>
+    <div style={{flex:1,overflowY:"auto",background:nightMode?"#0d0d0d":"#f5f0e8",display:"flex",flexDirection:"column",alignItems:"center",position:"relative",transition:"background .3s"}}>
       {!loaded&&!error&&(
-        <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:14,background:"#f5f0e8",zIndex:1}}>
+        <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:14,background:nightMode?"#0d0d0d":"#f5f0e8",zIndex:1}}>
           <div style={{width:32,height:32,border:"3px solid #c9a84c",borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite"}}/>
           <div style={{fontFamily:"'Amiri',serif",fontSize:".9rem",color:"#c9a84c"}}>جاري التحميل…</div>
-          <div style={{fontSize:".6rem",color:"#9a8060"}}>Page {pg}</div>
         </div>
       )}
       {error&&(
@@ -1371,7 +1369,7 @@ function MushafTajweedView({page,fullscreen,edition}){
         </div>
       )}
       <img
-        key={pg}
+        key={`${pg}-${isFr}`}
         src={url}
         alt={`Mushaf page ${pg}`}
         onLoad={()=>setLoaded(true)}
@@ -1383,6 +1381,9 @@ function MushafTajweedView({page,fullscreen,edition}){
           display:loaded?"block":"none",
           userSelect:"none",
           WebkitUserSelect:"none",
+          // Mode nuit : inverser les couleurs de l'image
+          filter:nightMode?"invert(1) sepia(1) saturate(3) hue-rotate(90deg) brightness(.85)":"none",
+          transition:"filter .3s",
         }}
         draggable={false}
       />
@@ -1418,40 +1419,12 @@ const fetchMushafPageUrl=async(pg, editionId)=>{
     return d?.page?.image_url||null;
   }catch{return null;}
 };
-function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onNext,onPrev,onGoTo}) {
+function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onNext,onPrev,onGoTo,onRecite}) {
   const ed=edition||MUSHAF_EDITIONS[0];
-  const isTextOnly=ed.id==="tajweed";
-  const [mode,setMode]=useState(isTextOnly?"text":"image");
-  const [verses,setVerses]=useState([]);
-  const [textState,setTextState]=useState("idle");
+  const [nightMode,setNightMode]=React.useState(false);
   const touchStart=useRef(null);
   const touchStartY=useRef(null);
-  const effectiveTjc=tjc||TJC_DARK;
   const AC="#c9a84c";
-
-  useEffect(()=>{ setMode(ed.id==="tajweed"?"text":"image"); },[ed.id]);
-
-  // Mode texte tajweed — charge les versets avec tajweed HTML depuis qurancdn
-  useEffect(()=>{
-    if(mode!=="text")return;
-    const ck=`mpage9_${page}`;
-    try{const c=localStorage.getItem(ck);if(c){setVerses(JSON.parse(c));setTextState("ok");return;}}catch{}
-    setTextState("loading");setVerses([]);
-    fetch(`https://api.qurancdn.com/api/qdc/verses/by_page/${page||1}?language=en&words=false&per_page=50&fields=text_uthmani_tajweed,text_uthmani,verse_number,chapter_id`)
-      .then(r=>r.json()).then(d=>{
-        const vs=(d.verses||[]).map(a=>({
-          n:a.verse_number,s:a.chapter_id,
-          ar:a.text_uthmani_tajweed||a.text_uthmani||"",
-          sName:SURAHS.find(x=>x.n===a.chapter_id)?.name||"",
-          sAr:SURAHS.find(x=>x.n===a.chapter_id)?.ar||""
-        }));
-        setVerses(vs);setTextState(vs.length?"ok":"error");
-        if(vs.length)try{localStorage.setItem(ck,JSON.stringify(vs));}catch{}
-      }).catch(()=>setTextState("error"));
-  },[page,mode]);
-
-  const groups=[];let cur=null;
-  for(const v of verses){if(!cur||cur.s!==v.s){cur={s:v.s,sName:v.sName,sAr:v.sAr,vs:[]};groups.push(cur);}cur.vs.push(v);}
 
   const onTS=e=>{touchStart.current=e.touches[0].clientX;touchStartY.current=e.touches[0].clientY;};
   const onTE=e=>{
@@ -1463,52 +1436,40 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
   };
 
   const outer=fullscreen
-    ?{position:"fixed",inset:0,zIndex:200,background:mode==="text"?"#f5f0e8":"#0d1800",display:"flex",flexDirection:"column",overflow:"hidden"}
-    :{width:"100%",minHeight:480,background:mode==="text"?"#f5f0e8":"#0d1800",display:"flex",flexDirection:"column",borderRadius:"0 0 14px 14px"};
+    ?{position:"fixed",inset:0,zIndex:200,background:"#0d1000",display:"flex",flexDirection:"column",overflow:"hidden"}
+    :{width:"100%",minHeight:480,background:"#0d1000",display:"flex",flexDirection:"column",borderRadius:"0 0 14px 14px"};
+
+  const SURAH_PAGES=[1,2,50,77,106,128,150,177,187,208,221,235,249,255,262,267,271,274,278,282,287,291,294,296,299,302,304,306,308,311,313,315,317,320,322,325,328,331,334,336,338,340,342,344,346,348,350,351,353,354,355,356,358,359,360,361,362,363,364,365,366,367,367,368,369,369,370,371,371,372,373,373,374,374,375,376,376,377,377,378,378,379,379,380,380,381,381,381,382,382,382,383,383,383,384,384,384,385,385,385,386,386,386,387,387,387,388,388,388,389,389,389,390,390,390,391,391,392,392,392,393,393,393,394,394,394,395,395,395,396,396,396,397,397,397,398,398,398,399,399,399,400,400,400,401,401,401,402,402,402,403,403,403,404,404,404,405,405,405,406,406,406,407,407,407,408,408,408,409,409,409,410,410,410,411,411,411,412,412,412,413,413,413,414,414,414,415,415,415,416,416,416,417,417,417,418,418,418,419,419,420,420,421,421,422,422,423,423,424,425,426,427,428,429,430,431,433,434,435,436,437,438,439,440,441,442,443,444,445,447,449,451,453,455,457,459,461,462,463,464,465,466,467,468,469,470,471,472,473,474,475,476,477,478,479,480,481,482,483,484,485,486,487,488,489,490,491,492,493,494,495,496,497,498,499,500,501,502,503,504,505,506,507,508,509,510,511,512,513,514,515,516,517,518,519,520,521,522,523,524,525,526,527,528,529,530,531,532,533,534,535,536,537,538,539,540,541,542,543,544,545,546,547,548,549,550,551,552,553,554,555,556,557,558,559,560,561,562,563,564,565,566,567,568,569,570,571,572,573,574,575,576,577,578,579,580,581,582,583,584,585,586,587,588,589,590,591,592,593,594,595,596,597,598,599,600,601,602,603,604];
 
   return (
     <div style={outer} onTouchStart={onTS} onTouchEnd={onTE}>
-      {/* Barre nav */}
-      <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",background:"rgba(0,0,0,.55)",flexShrink:0,borderBottom:"1px solid rgba(201,168,76,.15)"}}>
-        <button onClick={onPrev} style={{background:"rgba(201,168,76,.12)",border:"1px solid rgba(201,168,76,.22)",color:AC,padding:"5px 14px",borderRadius:8,cursor:"pointer",fontWeight:700}}>◄</button>
-        <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:8,flexWrap:"wrap"}}>
-          <span style={{fontSize:".68rem",color:AC,fontWeight:700}}>p.{page||1}</span>
-          {!isTextOnly&&(
-            <div style={{display:"flex",background:"rgba(0,0,0,.5)",borderRadius:6,padding:2,gap:1}}>
-              {[["image","📖 Image"],["text","🎨 Tajweed"]].map(([m,l])=>(
-                <button key={m} onClick={()=>setMode(m)} style={{padding:"3px 10px",borderRadius:4,border:"none",background:mode===m?AC:"transparent",color:mode===m?"#0d1800":"#7a6a4a",fontSize:".58rem",cursor:"pointer",fontWeight:700,transition:"all .15s"}}>{l}</button>
-              ))}
-            </div>
-          )}
-          {/* Sélecteur sourate discret */}
-          <select
-            onChange={e=>{
-              const sn=parseInt(e.target.value);
-              if(!sn||!onGoTo) return;
-              const SURAH_PAGES=[1,2,50,77,106,128,150,177,187,208,221,235,249,255,262,267,271,274,278,282,287,291,294,296,299,302,304,306,308,311,313,315,317,320,322,325,328,331,334,336,338,340,342,344,346,348,350,351,353,354,355,356,358,359,360,361,362,363,364,365,366,367,367,368,369,369,370,371,371,372,373,373,374,374,375,376,376,377,377,378,378,379,379,380,380,381,381,381,382,382,382,383,383,383,384,384,384,385,385,385,386,386,386,387,387,387,388,388,388,389,389,389,390,390,390,391,391,392,392,392,393,393,393,394,394,394,395,395,395,396,396,396,397,397,397,398,398,398,399,399,399,400,400,400,401,401,401,402,402,402,403,403,403,404,404,404,405,405,405,406,406,406,407,407,407,408,408,408,409,409,409,410,410,410,411,411,411,412,412,412,413,413,413,414,414,414,415,415,415,416,416,416,417,417,417,418,418,418,419,419,420,420,421,421,422,422,423,423,424,425,426,427,428,429,430,431,433,434,435,436,437,438,439,440,441,442,443,444,445,447,449,451,453,455,457,459,461,462,463,464,465,466,467,468,469,470,471,472,473,474,475,476,477,478,479,480,481,482,483,484,485,486,487,488,489,490,491,492,493,494,495,496,497,498,499,500,501,502,503,504,505,506,507,508,509,510,511,512,513,514,515,516,517,518,519,520,521,522,523,524,525,526,527,528,529,530,531,532,533,534,535,536,537,538,539,540,541,542,543,544,545,546,547,548,549,550,551,552,553,554,555,556,557,558,559,560,561,562,563,564,565,566,567,568,569,570,571,572,573,574,575,576,577,578,579,580,581,582,583,584,585,586,587,588,589,590,591,592,593,594,595,596,597,598,599,600,601,602,603,604];
-              onGoTo(SURAH_PAGES[sn-1]||1);
-              e.target.value="";
-            }}
-            style={{padding:"2px 6px",borderRadius:6,border:"1px solid rgba(201,168,76,.3)",background:"rgba(0,0,0,.3)",color:AC,fontSize:".55rem",cursor:"pointer",outline:"none",maxWidth:90}}
-            defaultValue=""
-          >
-            <option value="">↗ Sourate</option>
-            {SURAHS.map(s=><option key={s.n} value={s.n}>{s.n}. {s.name}</option>)}
-          </select>
+      {/* Barre nav propre */}
+      <div style={{display:"flex",alignItems:"center",gap:6,padding:"7px 10px",background:"rgba(0,0,0,.7)",flexShrink:0,borderBottom:"1px solid rgba(201,168,76,.15)"}}>
+        <button onClick={onPrev} style={{background:"rgba(201,168,76,.12)",border:"1px solid rgba(201,168,76,.22)",color:AC,padding:"5px 12px",borderRadius:8,cursor:"pointer",fontWeight:700,fontSize:".85rem"}}>◄</button>
+
+        {/* Sélecteur sourate */}
+        <select onChange={e=>{const sn=parseInt(e.target.value);if(!sn||!onGoTo)return;onGoTo(SURAH_PAGES[sn-1]||1);e.target.value="";}} style={{flex:1,padding:"4px 8px",borderRadius:7,border:"1px solid rgba(201,168,76,.3)",background:"rgba(0,0,0,.4)",color:AC,fontSize:".6rem",cursor:"pointer",outline:"none"}} defaultValue="">
+          <option value="">📖 p.{page||1} — Aller à une sourate…</option>
+          {SURAHS.map(s=><option key={s.n} value={s.n}>{s.n}. {s.name} · {s.ar}</option>)}
+        </select>
+
+        {/* Boutons actions */}
+        <div style={{display:"flex",gap:4,flexShrink:0}}>
+          {/* Mode nuit */}
+          <button onClick={()=>setNightMode(p=>!p)} title={nightMode?"Mode jour":"Mode nuit"} style={{background:nightMode?"rgba(201,168,76,.25)":"rgba(0,0,0,.3)",border:`1px solid rgba(201,168,76,${nightMode?".5":".2"})`,color:AC,padding:"5px 8px",borderRadius:8,cursor:"pointer",fontSize:".75rem"}}>
+            {nightMode?"☀️":"🌙"}
+          </button>
+          {/* Récitation */}
+          {onRecite&&<button onClick={()=>onRecite(page||1)} title="Réciter cette page" style={{background:"rgba(233,30,99,.15)",border:"1px solid rgba(233,30,99,.3)",color:"#e91e63",padding:"5px 8px",borderRadius:8,cursor:"pointer",fontSize:".75rem"}}>🎤</button>}
+          {/* Plein écran */}
+          <button onClick={onToggleFullscreen} style={{background:"rgba(201,168,76,.12)",border:"1px solid rgba(201,168,76,.3)",color:AC,padding:"5px 8px",borderRadius:8,cursor:"pointer",fontSize:".7rem",fontWeight:700}}>{fullscreen?"✕":"⛶"}</button>
         </div>
-        <button onClick={onToggleFullscreen} style={{background:"rgba(201,168,76,.18)",border:"1px solid rgba(201,168,76,.4)",color:AC,padding:"5px 11px",borderRadius:8,cursor:"pointer",fontSize:".72rem",fontWeight:700}}>{fullscreen?"✕ Quitter":"⛶ Plein écran"}</button>
-        <button onClick={onNext} style={{background:"rgba(201,168,76,.12)",border:"1px solid rgba(201,168,76,.22)",color:AC,padding:"5px 14px",borderRadius:8,cursor:"pointer",fontWeight:700}}>►</button>
+
+        <button onClick={onNext} style={{background:"rgba(201,168,76,.12)",border:"1px solid rgba(201,168,76,.22)",color:AC,padding:"5px 12px",borderRadius:8,cursor:"pointer",fontWeight:700,fontSize:".85rem"}}>►</button>
       </div>
 
-      {/* Mode image — même Supabase Storage */}
-      {mode==="image"&&(
-        <MushafTajweedView page={page||1} fullscreen={fullscreen} edition={ed}/>
-      )}
-
-      {mode==="text"&&(
-        <MushafTajweedView page={page||1} fullscreen={fullscreen} edition={ed}/>
-      )}
-
+      {/* Image Mushaf */}
+      <MushafTajweedView page={page||1} fullscreen={fullscreen} edition={ed} nightMode={nightMode}/>
     </div>
   );
 }
@@ -1838,7 +1799,7 @@ const [authError, setAuthError] = useState("");
   const [showOnboard,setShowOnboard]=useState(()=>!ld("qonboard",false));
   const [versetDuJourDismissed,setVersetDuJourDismissed]=useState(()=>ld("qvdjdis","")===today());
   const [showPage,setShowPage]=useState(false);
-  const [mushafPage,setMushafPage]=useState(null);
+  const [mushafPage,setMushafPage]=useState(()=>ld("qmushaf_bookmark",1));
   const [mushafSurahModal,setMushafSurahModal]=useState(false);
   const [mushafSurahSearch,setMushafSurahSearch]=useState("");
   const [rec,setRec]=useState(RECITERS[0]);
@@ -2652,7 +2613,8 @@ const handleReset=async()=>{
   const togglePage=p=>setPageRead(prev=>({...prev,[String(p)]:!prev[String(p)]}));
   const goToPage=p=>{
     setMushafPage(p);
-    // Si khatma active — mémoriser la dernière page lue
+    // Signet automatique — sauvegarder la dernière page lue
+    sv("qmushaf_bookmark",p);
     if(activeKhatma){
       const updated={...activeKhatma,lastPage:p};
       setKhatmas(prev=>prev.map(k=>k.id===activeKhatma.id?updated:k));
@@ -4858,6 +4820,115 @@ return (
         {/* STATS */}
         {page==="stats"&&(
           <div className="sp">
+            {/* ── Calendrier GitHub-style ── */}
+            {(()=>{
+              const today2=new Date();
+              const weeks=18;
+              const days=weeks*7;
+              const cells=[];
+              for(let i=days-1;i>=0;i--){
+                const d=new Date(today2);d.setDate(d.getDate()-i);
+                const key=d.toISOString().slice(0,10);
+                const count=hist[key]||0;
+                const intensity=count===0?0:count<3?1:count<6?2:count<10?3:4;
+                cells.push({key,count,intensity,d});
+              }
+              const maxCount=Math.max(...cells.map(c=>c.count),1);
+              const colors=["#1a2a1a",`${t.gr}33`,`${t.gr}66`,`${t.gr}99`,t.gr];
+              // Jours de la semaine
+              const dayLabels=["D","L","M","M","J","V","S"];
+              return(
+                <div className="card">
+                  <div className="ch">
+                    <span className="ct">Calendrier de mémorisation</span>
+                    <span style={{fontSize:".62rem",color:t.tx3}}>{Object.keys(hist).filter(k=>hist[k]>0).length} jours actifs</span>
+                  </div>
+                  <div style={{padding:"10px 14px",overflowX:"auto"}}>
+                    <div style={{display:"flex",gap:3,alignItems:"flex-start"}}>
+                      {/* Labels jours */}
+                      <div style={{display:"flex",flexDirection:"column",gap:3,marginTop:18,marginRight:2}}>
+                        {dayLabels.map((d,i)=>(
+                          <div key={i} style={{fontSize:".45rem",color:t.tx3,height:11,display:"flex",alignItems:"center"}}>{i%2===0?d:""}</div>
+                        ))}
+                      </div>
+                      {/* Grille semaines */}
+                      {Array.from({length:weeks},(_,wi)=>{
+                        const weekCells=cells.slice(wi*7,(wi+1)*7);
+                        const d=weekCells[0]?.d;
+                        const monthLabel=d?d.toLocaleDateString("fr-FR",{month:"short"}):"";
+                        const showMonth=wi===0||d?.getDate()<=7;
+                        return(
+                          <div key={wi} style={{display:"flex",flexDirection:"column",gap:3}}>
+                            <div style={{fontSize:".45rem",color:t.tx3,height:14,textAlign:"center",whiteSpace:"nowrap"}}>{showMonth?monthLabel:""}</div>
+                            {weekCells.map((c,di)=>(
+                              <div key={di}
+                                title={`${c.key} — ${c.count} versets`}
+                                style={{width:11,height:11,borderRadius:2,background:colors[c.intensity],transition:"background .2s",cursor:c.count>0?"pointer":"default"}}
+                                onClick={()=>c.count>0&&console.log(c.key,c.count)}
+                              />
+                            ))}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {/* Légende */}
+                    <div style={{display:"flex",alignItems:"center",gap:4,marginTop:8,justifyContent:"flex-end"}}>
+                      <span style={{fontSize:".48rem",color:t.tx3}}>Moins</span>
+                      {colors.map((c,i)=><div key={i} style={{width:10,height:10,borderRadius:2,background:c}}/>)}
+                      <span style={{fontSize:".48rem",color:t.tx3}}>Plus</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* ── Graphique hebdomadaire ── */}
+            {(()=>{
+              const today2=new Date();
+              const weeks=8;
+              const weekData=Array.from({length:weeks},(_,i)=>{
+                let total=0;
+                for(let d=0;d<7;d++){
+                  const date=new Date(today2);
+                  date.setDate(date.getDate()-(i*7+d));
+                  const key=date.toISOString().slice(0,10);
+                  total+=hist[key]||0;
+                }
+                const startDate=new Date(today2);
+                startDate.setDate(startDate.getDate()-i*7-6);
+                return{total,label:startDate.toLocaleDateString("fr-FR",{month:"short",day:"numeric"})};
+              }).reverse();
+              const maxW=Math.max(...weekData.map(w=>w.total),1);
+              const totalThisWeek=weekData[weekData.length-1]?.total||0;
+              const totalLastWeek=weekData[weekData.length-2]?.total||0;
+              const trend=totalLastWeek>0?Math.round((totalThisWeek-totalLastWeek)/totalLastWeek*100):0;
+              return(
+                <div className="card">
+                  <div className="ch">
+                    <span className="ct">Versets / semaine</span>
+                    <span style={{fontSize:".68rem",fontWeight:700,color:trend>=0?t.gr:t.rd}}>{trend>=0?"+":""}{trend}% vs semaine passée</span>
+                  </div>
+                  <div style={{padding:"10px 14px"}}>
+                    <div style={{display:"flex",gap:6,alignItems:"flex-end",height:100}}>
+                      {weekData.map((w,i)=>{
+                        const h=Math.max(4,Math.round((w.total/maxW)*90));
+                        const isLast=i===weekData.length-1;
+                        return(
+                          <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
+                            <span style={{fontSize:".48rem",color:t.tx3,fontWeight:isLast?700:400}}>{w.total}</span>
+                            <div style={{width:"100%",height:h,borderRadius:"4px 4px 0 0",background:isLast?t.acc:`${t.acc}44`,transition:"height .6s ease",position:"relative"}}>
+                              {isLast&&<div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,rgba(255,255,255,.2),transparent)",borderRadius:"4px 4px 0 0"}}/>}
+                            </div>
+                            <span style={{fontSize:".42rem",color:t.tx3,textAlign:"center",lineHeight:1.2}}>{w.label}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* ── Constellation ── */}
             <div className="card" style={{overflow:"hidden"}}>
               <div className="ch"><span className="ct">Constellation du Coran</span><span style={{fontSize:".62rem",color:t.tx3}}>{SURAHS.filter(s=>sPct(s)===100).length} / 114 sourates allumées</span></div>
@@ -5420,38 +5491,83 @@ return (
       {calligAnim&&<CalligraphyBurst text={calligAnim} onDone={()=>setCalligAnim(null)}/>}
 
       {timerOpen&&(
-        <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.85)",display:"flex",alignItems:"center",justifyContent:"center"}} onClick={()=>setTimerOpen(false)}>
-          <div style={{background:t.s1,border:`1px solid ${t.acc}33`,borderRadius:20,padding:32,width:"90%",maxWidth:340,textAlign:"center"}} onClick={e=>e.stopPropagation()}>
-            <div style={{fontSize:".7rem",color:t.tx3,textTransform:"uppercase",letterSpacing:2,marginBottom:16}}>⏱ Séance de révision</div>
-            <div style={{fontSize:"4rem",fontWeight:800,color:timerLeft===0?t.gr:timerRunning?t.acc:t.tx,fontVariantNumeric:"tabular-nums",letterSpacing:2,marginBottom:24,fontFamily:"monospace"}}>
-              {fmtTime(timerLeft)}
+        <div style={{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,.95)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:24,backdropFilter:"blur(20px)"}} onClick={()=>!timerRunning&&setTimerOpen(false)}>
+          <style>{`@keyframes breathe{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.08);opacity:1}}`}</style>
+
+          {/* Header */}
+          <div style={{position:"absolute",top:"max(20px,env(safe-area-inset-top))",left:0,right:0,display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 20px"}}>
+            <div style={{fontSize:".65rem",color:"rgba(255,255,255,.4)",textTransform:"uppercase",letterSpacing:3}}>Mode concentration</div>
+            <button onClick={()=>setTimerOpen(false)} style={{background:"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.12)",color:"rgba(255,255,255,.5)",borderRadius:"50%",width:32,height:32,cursor:"pointer",fontSize:".8rem",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+          </div>
+
+          {/* Ring SVG animé */}
+          <div style={{position:"relative",width:200,height:200}} onClick={e=>e.stopPropagation()}>
+            <svg width="200" height="200" viewBox="0 0 200 200">
+              <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,.05)" strokeWidth="8"/>
+              <circle cx="100" cy="100" r="90" fill="none"
+                stroke={timerLeft===0?"#4caf50":t.acc}
+                strokeWidth="8"
+                strokeDasharray={`${2*Math.PI*90*(timerLeft!=null?1-(timerLeft/(timerDuration*60)):0)} ${2*Math.PI*90}`}
+                strokeLinecap="round"
+                transform="rotate(-90 100 100)"
+                style={{transition:"stroke-dasharray 1s linear,stroke .5s"}}
+              />
+            </svg>
+            {/* Temps au centre */}
+            <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:4}}>
+              <div style={{fontFamily:"monospace",fontSize:"3.2rem",fontWeight:800,color:timerLeft===0?"#4caf50":timerRunning?t.acc:"rgba(255,255,255,.9)",letterSpacing:2,lineHeight:1,animation:timerRunning?"breathe 4s ease-in-out infinite":"none"}}>
+                {fmtTime(timerLeft??timerDuration*60)}
+              </div>
+              <div style={{fontSize:".6rem",color:"rgba(255,255,255,.3)",textTransform:"uppercase",letterSpacing:2}}>
+                {timerLeft===0?"terminé":timerRunning?"en cours":"en pause"}
+              </div>
             </div>
+          </div>
+
+          {/* Sélecteur durée */}
+          {!timerRunning&&timerLeft===null&&(
+            <div style={{display:"flex",gap:8,flexWrap:"wrap",justifyContent:"center"}} onClick={e=>e.stopPropagation()}>
+              {[5,10,15,20,25,30,45,60].map(m=>(
+                <button key={m} onClick={()=>setTimerDuration(m)} style={{padding:"8px 14px",borderRadius:10,border:`1.5px solid ${timerDuration===m?t.acc:"rgba(255,255,255,.12)"}`,background:timerDuration===m?`${t.acc}20`:"rgba(255,255,255,.04)",color:timerDuration===m?t.acc:"rgba(255,255,255,.5)",fontSize:".78rem",cursor:"pointer",fontWeight:timerDuration===m?700:400}}>
+                  {m}min{m===25?" 🍅":""}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Contrôles */}
+          <div style={{display:"flex",gap:12}} onClick={e=>e.stopPropagation()}>
             {!timerRunning&&timerLeft===null&&(
-              <div style={{display:"flex",gap:8,justifyContent:"center",marginBottom:20,flexWrap:"wrap"}}>
-                {[5,10,15,20,30,45,60].map(m=>(
-                  <button key={m} onClick={()=>setTimerDuration(m)} style={{padding:"6px 12px",borderRadius:8,border:`1.5px solid ${timerDuration===m?t.acc:t.b2}`,background:timerDuration===m?`${t.acc}20`:t.s2,color:timerDuration===m?t.acc:t.tx2,fontSize:".75rem",cursor:"pointer",fontWeight:timerDuration===m?700:400}}>{m}min</button>
-                ))}
-              </div>
+              <button onClick={startTimer} style={{padding:"14px 40px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:14,color:"#000",fontWeight:800,fontSize:"1rem",cursor:"pointer",boxShadow:`0 4px 20px ${t.acc}44`}}>
+                ▶ Démarrer
+              </button>
             )}
-            <div style={{display:"flex",gap:10,justifyContent:"center"}}>
-              {!timerRunning&&timerLeft===null&&(
-                <button onClick={startTimer} style={{flex:1,padding:"13px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:12,color:"#000",fontWeight:800,fontSize:".9rem",cursor:"pointer"}}>▶ Démarrer</button>
-              )}
-              {timerRunning&&(
-                <button onClick={pauseTimer} style={{flex:1,padding:"13px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:12,color:t.tx,fontWeight:700,fontSize:".9rem",cursor:"pointer"}}>⏸ Pause</button>
-              )}
-              {!timerRunning&&timerLeft!==null&&timerLeft>0&&(
-                <button onClick={startTimer} style={{flex:1,padding:"13px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:12,color:"#000",fontWeight:800,fontSize:".9rem",cursor:"pointer"}}>▶ Reprendre</button>
-              )}
-              {timerLeft!==null&&(
-                <button onClick={resetTimer} style={{padding:"13px 16px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:12,color:t.tx2,fontWeight:700,fontSize:".9rem",cursor:"pointer"}}>↺</button>
-              )}
+            {timerRunning&&(
+              <button onClick={pauseTimer} style={{padding:"14px 32px",background:"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.15)",borderRadius:14,color:"rgba(255,255,255,.8)",fontWeight:700,fontSize:"1rem",cursor:"pointer"}}>
+                ⏸ Pause
+              </button>
+            )}
+            {!timerRunning&&timerLeft!==null&&timerLeft>0&&(
+              <button onClick={startTimer} style={{padding:"14px 32px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:14,color:"#000",fontWeight:800,fontSize:"1rem",cursor:"pointer"}}>
+                ▶ Reprendre
+              </button>
+            )}
+            {timerLeft!==null&&(
+              <button onClick={resetTimer} style={{padding:"14px 16px",background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.1)",borderRadius:14,color:"rgba(255,255,255,.5)",fontWeight:700,fontSize:"1rem",cursor:"pointer"}}>↺</button>
+            )}
+          </div>
+
+          {timerLeft===0&&(
+            <div style={{padding:"14px 24px",background:"rgba(76,175,80,.12)",border:"1px solid rgba(76,175,80,.3)",borderRadius:12,color:"#81c784",fontSize:".85rem",fontWeight:600,textAlign:"center"}}>
+              ✓ Séance terminée !<br/>
+              <span style={{fontFamily:"'Amiri',serif",fontSize:"1.1rem",color:"#a5d6a7"}}>بارك الله فيك</span>
             </div>
-            {timerLeft===0&&(
-              <div style={{marginTop:16,padding:"10px",background:`${t.gr}15`,borderRadius:10,color:t.gr,fontSize:".8rem",fontWeight:600}}>
-                ✓ Séance terminée ! بارك الله فيك
-              </div>
-            )}
+          )}
+
+          {/* Citation motivante */}
+          <div style={{position:"absolute",bottom:"max(30px,env(safe-area-inset-bottom))",left:20,right:20,textAlign:"center"}}>
+            <div style={{fontFamily:"'Amiri',serif",fontSize:"1rem",color:"rgba(201,168,76,.5)",lineHeight:1.6}}>وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا</div>
+            <div style={{fontSize:".6rem",color:"rgba(255,255,255,.2)",marginTop:4}}>Quiconque craint Allah, Il lui ouvre une issue · At-Talaq 2</div>
           </div>
         </div>
       )}
