@@ -907,60 +907,248 @@ const TUTORIAL_SECTIONS=[
   {
     id:"memo",label:"Mémorisation",icon:"📿",color:"#16a34a",
     steps:[
-      {title:"Ouvre une sourate",desc:"Dans l'onglet Coran → appuie sur une sourate pour voir ses versets.",visual:"coran"},
-      {title:"Marque un verset mémorisé",desc:"Sur chaque verset, appuie sur '+ Mémoriser'. Il devient vert avec une coche. Tu peux aussi mémoriser en glissant le verset vers la droite.",visual:"memorise"},
-      {title:"Suis ta progression",desc:"L'onglet Accueil montre ton anneau de progression, le nombre de versets et la date de fin estimée.",visual:"accueil"},
-      {title:"Révision espacée",desc:"L'onglet Révision te montre les versets dus pour révision. Le système SM2 calcule quand réviser pour ancrer la mémoire à long terme.",visual:"revision"},
+      {
+        title:"Choisis ta sourate",
+        desc:"Ouvre l'onglet Coran. Tu vois la liste de toutes les sourates. Tape sur celle que tu veux mémoriser — Al-Fatiha pour commencer, ou directement le Juz 30.",
+        mock:{
+          lines:[
+            {type:"header",text:"Al-Fatiha · الفاتحة",sub:"7 versets · Mecquoise"},
+            {type:"verse",ar:"بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",n:1,mem:false},
+            {type:"verse",ar:"ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَٰلَمِينَ",n:2,mem:true},
+            {type:"verse",ar:"ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",n:3,mem:true},
+            {type:"tip",text:"Appuie longuement sur un verset pour faire apparaître les actions"},
+          ]
+        }
+      },
+      {
+        title:"Marque un verset mémorisé",
+        desc:"Appuie longuement sur le verset. Un menu apparaît avec les actions. Tape + Mémoriser. Le verset devient vert avec une coche ✓.",
+        mock:{
+          lines:[
+            {type:"verse",ar:"بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",n:1,mem:false},
+            {type:"actions",btns:["✓ Mémoriser","▶ Écouter","♡ Favori","✂ Partiel"]},
+            {type:"verse",ar:"ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَٰلَمِينَ",n:2,mem:true},
+            {type:"tip",text:"Le verset passe au vert quand il est mémorisé"},
+          ]
+        }
+      },
+      {
+        title:"Suis ta progression",
+        desc:"L'onglet Accueil affiche ton anneau de progression, ton rythme quotidien et la date de fin estimée. Chaque verset compte.",
+        mock:{
+          lines:[
+            {type:"ring",pct:23,label:"mémorisé"},
+            {type:"kpi",items:["3 v/j rythme","12 sourates","🔥 8 jours"]},
+            {type:"bar",label:"Progression",pct:23},
+            {type:"tip",text:"La fin estimée se recalcule à chaque nouveau verset"},
+          ]
+        }
+      },
+      {
+        title:"Révision espacée",
+        desc:"L'onglet Révision affiche les versets à revoir aujourd'hui. Le système calcule automatiquement les intervalles — plus tu récites bien, plus l'intervalle s'allonge.",
+        mock:{
+          lines:[
+            {type:"header",text:"Révision · 5 versets dus",sub:"Système SM2"},
+            {type:"verse",ar:"مَٰلِكِ يَوْمِ ٱلدِّينِ",n:4,mem:true,due:true},
+            {type:"verse",ar:"إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",n:5,mem:true,due:true},
+            {type:"tip",text:"Révise chaque jour pour ancrer définitivement"},
+          ]
+        }
+      },
     ],
   },
   {
     id:"recit",label:"Récitation",icon:"🎤",color:"#e91e63",
     steps:[
-      {title:"Lance la récitation",desc:"Dans une sourate, appuie sur '🎤 Récitation' en haut à droite. Un écran plein écran s'ouvre.",visual:"recit1"},
-      {title:"Appuie sur le micro",desc:"Le bouton rond démarre l'écoute. Récite le verset à voix haute en arabe. Le micro s'arrête automatiquement quand tu termines.",visual:"recit2"},
-      {title:"Lis ton score",desc:"Chaque mot est coloré en vert (correct) ou rouge souligné (erreur). Tu vois ce que tu as dit et combien de mots sont justes.",visual:"recit3"},
-      {title:"Mode enchaîné",desc:"Active '→ Enchaîné' pour enchaîner tous les versets automatiquement. Si tu dépasses 70%, le verset suivant se lance.",visual:"recit4"},
+      {
+        title:"Lance la récitation",
+        desc:"Dans une sourate, appuie sur le bouton 🎤 Récitation en haut à droite. Un écran plein écran s'ouvre avec le premier verset.",
+        mock:{
+          lines:[
+            {type:"header",text:"Al-Fatiha · Récitation",sub:"7 versets"},
+            {type:"verse",ar:"بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",n:1,mem:false},
+            {type:"mic",state:"idle"},
+            {type:"tip",text:"Mode Enchaîné : passe automatiquement au verset suivant"},
+          ]
+        }
+      },
+      {
+        title:"Récite à voix haute",
+        desc:"Appuie sur le bouton micro. Il passe en rouge et écoute. Récite le verset clairement. Le micro s'arrête seul à la fin.",
+        mock:{
+          lines:[
+            {type:"verse",ar:"بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",n:1,mem:false},
+            {type:"mic",state:"listening"},
+            {type:"wave"},
+            {type:"tip",text:"Parle clairement, à vitesse normale"},
+          ]
+        }
+      },
+      {
+        title:"Lis ton résultat",
+        desc:"Chaque mot s'affiche en vert si correct, en rouge souligné si erroné. Tu vois exactement ce que tu as dit et le score en pourcentage.",
+        mock:{
+          lines:[
+            {type:"score",pct:85,correct:6,wrong:1},
+            {type:"verse-colored",words:[{w:"بِسْمِ",ok:true},{w:"ٱللَّهِ",ok:true},{w:"ٱلرَّحْمَٰنِ",ok:false},{w:"ٱلرَّحِيمِ",ok:true}]},
+            {type:"said",text:"بِسمِ اللهِ الرحمَن الرحيم"},
+            {type:"tip",text:"Score ≥ 70% en mode Enchaîné → verset suivant automatique"},
+          ]
+        }
+      },
     ],
   },
   {
-    id:"partial",label:"Lecture partielle",icon:"✂",color:"#0284c7",
+    id:"partial",label:"Lecture partielle",icon:"✂️",color:"#0284c7",
     steps:[
-      {title:"C'est quoi ?",desc:"Sur les versets longs (+5 mots), un bouton '✂ Partiel' apparaît dans les actions. Il permet de sélectionner une partie du verset.",visual:"partial1"},
-      {title:"Sélectionne les mots",desc:"Dans le modal, les mots sont affichés en arabe. Clique sur chaque mot pour l'inclure/exclure, ou utilise les sliders Début/Fin.",visual:"partial2"},
-      {title:"Utilisation",desc:"Idéal pour mémoriser bout par bout un verset difficile. Écoute et copie la partie sélectionnée.",visual:"partial3"},
+      {
+        title:"À quoi ça sert",
+        desc:"Pour les longs versets, tu peux mémoriser bout par bout. La lecture partielle permet de sélectionner exactement les mots que tu veux travailler.",
+        mock:{
+          lines:[
+            {type:"verse",ar:"صِرَٰطَ ٱلَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ ٱلْمَغْضُوبِ عَلَيْهِمْ وَلَا ٱلضَّآلِّينَ",n:7,mem:false},
+            {type:"actions",btns:["✂️ Partiel"]},
+            {type:"tip",text:"Disponible sur les versets de plus de 4 mots"},
+          ]
+        }
+      },
+      {
+        title:"Sélectionne les mots",
+        desc:"Appuie longuement sur le verset puis ✂ Partiel. Tape sur les mots pour les inclure ou exclure. Écoute uniquement la partie choisie.",
+        mock:{
+          lines:[
+            {type:"partial-words",words:["صِرَٰطَ","ٱلَّذِينَ","أَنْعَمْتَ","عَلَيْهِمْ"],selected:[0,1,2]},
+            {type:"bar",label:"Mots sélectionnés",pct:75},
+            {type:"actions",btns:["▶ Écouter la sélection","✓ OK"]},
+          ]
+        }
+      },
     ],
   },
   {
     id:"wbw",label:"Mot à mot",icon:"📖",color:"#7c3aed",
     steps:[
-      {title:"Accès mot à mot",desc:"Sur chaque verset, appuie sur '📖 Mot à mot'. Un panneau s'ouvre en bas avec chaque mot arabe et sa traduction française.",visual:"wbw1"},
-      {title:"Comprendre le Coran",desc:"Chaque mot est affiché en grand avec sa translittération et son sens. Idéal pour comprendre ce que tu mémorises.",visual:"wbw2"},
+      {
+        title:"Comprends chaque mot",
+        desc:"Appuie longuement sur un verset puis 📖 Mot à mot. Chaque mot arabe s'affiche avec sa translittération et sa traduction.",
+        mock:{
+          lines:[
+            {type:"wbw-words",words:[{ar:"بِسْمِ",tr:"bismi",fr:"au nom"},{ar:"ٱللَّهِ",tr:"llāhi",fr:"d'Allah"},{ar:"ٱلرَّحْمَٰنِ",tr:"r-raḥmāni",fr:"le Tout-Miséricordieux"}]},
+            {type:"tip",text:"Idéal pour comprendre ce que tu mémorises"},
+          ]
+        }
+      },
     ],
   },
   {
     id:"mushaf",label:"Mushaf",icon:"📜",color:"#b45309",
     steps:[
-      {title:"Naviguer",desc:"L'onglet Mushaf affiche les pages du Coran. Swipe gauche/droite ou utilise les boutons ◄ ► pour changer de page.",visual:"mushaf1"},
-      {title:"Mode Image vs Tajweed",desc:"'📖 Image' montre le Mushaf original. '🎨 Tajweed' affiche le texte avec les règles de tajweed colorées.",visual:"mushaf2"},
-      {title:"Aller à une sourate",desc:"En haut, un menu 'Aller à une sourate' te positionne directement sur la page de la sourate choisie.",visual:"mushaf3"},
-      {title:"Plein écran",desc:"Le bouton '⛶ Plein écran' t'offre une lecture immersive sans distraction.",visual:"mushaf4"},
+      {
+        title:"Lire page par page",
+        desc:"L'onglet Mushaf affiche les pages du Coran en haute résolution depuis notre serveur. Swipe gauche/droite pour tourner les pages.",
+        mock:{
+          lines:[
+            {type:"mushaf-nav",page:1,total:604},
+            {type:"mushaf-page",text:"Image haute résolution du Mushaf"},
+            {type:"tip",text:"Swipe gauche → page suivante · Swipe droite → page précédente"},
+          ]
+        }
+      },
+      {
+        title:"Choisis ton édition",
+        desc:"Deux éditions disponibles : Hafs (arabe uniquement avec tajweed coloré) et Arabe-Français (tajweed avec traduction des sens).",
+        mock:{
+          lines:[
+            {type:"editions",items:[{name:"Tajwid Hafs",sub:"Couleurs tajweed"},{name:"Tajwid + Français",sub:"Avec traduction"}]},
+            {type:"tip",text:"Change d'édition à tout moment dans l'onglet Mushaf"},
+          ]
+        }
+      },
+      {
+        title:"Aller à une sourate",
+        desc:"Dans la barre de navigation, utilise le menu déroulant pour aller directement à la page d'une sourate. Le signet se crée automatiquement.",
+        mock:{
+          lines:[
+            {type:"mushaf-nav",page:2,total:604},
+            {type:"select",label:"📖 p.2 — Aller à une sourate…"},
+            {type:"tip",text:"L'app mémorise automatiquement ta dernière page lue"},
+          ]
+        }
+      },
     ],
   },
   {
     id:"khatma",label:"Khatma",icon:"🌿",color:"#065f46",
     steps:[
-      {title:"Créer une khatma",desc:"Dans l'onglet Khatma, choisis un préset (30 jours, 60 jours…) ou personnalise. Lance ta khatma pour lire le Coran complet.",visual:"khatma1"},
-      {title:"Marquer les jours",desc:"Chaque jour, appuie sur '👍 Journée lue'. Ton streak de khatma s'incrémente et la progression avance.",visual:"khatma2"},
-      {title:"Lire depuis la khatma",desc:"Le bouton '📖 Lire maintenant' t'emmène directement à la page du Mushaf où tu t'es arrêté.",visual:"khatma3"},
-      {title:"Khatma collective",desc:"Invite des amis ou de la famille. Chacun couvre des juz différents. La khatma est complète quand les 30 juz sont couverts.",visual:"khatma4"},
+      {
+        title:"Lance une Khatma",
+        desc:"Dans l'onglet Khatma, choisis la durée (30, 60 ou 90 jours) et démarre. L'app calcule combien de pages lire chaque jour.",
+        mock:{
+          lines:[
+            {type:"header",text:"Khatma · 30 jours",sub:"20 pages / jour"},
+            {type:"bar",label:"Progression",pct:12},
+            {type:"kpi",items:["4 jours ✓","🔥 4 streak","26 restants"]},
+          ]
+        }
+      },
+      {
+        title:"Lis et valide",
+        desc:"Appuie sur 📖 Lire maintenant pour ouvrir le Mushaf à ta page. Quand tu as fini, appuie sur 👍 Journée lue pour valider ta session.",
+        mock:{
+          lines:[
+            {type:"actions",btns:["📖 Lire maintenant (p.25)","👍 Journée lue"]},
+            {type:"tip",text:"Ta progression dans le Mushaf est synchronisée avec la Khatma"},
+          ]
+        }
+      },
+      {
+        title:"Khatma collective",
+        desc:"Partage un code avec ta famille. Chacun prend en charge des juz différents. La Khatma est complète quand les 30 juz sont couverts ensemble.",
+        mock:{
+          lines:[
+            {type:"grid30",done:[1,2,3,28,29,30]},
+            {type:"tip",text:"Partage le code à 6 chiffres pour inviter des proches"},
+          ]
+        }
+      },
     ],
   },
   {
     id:"quiz",label:"Quiz",icon:"🎯",color:"#1d4ed8",
     steps:[
-      {title:"Deux modes",desc:"'Quelle sourate ?' — tu vois un verset et tu choisis la sourate. 'Complète le verset' — tu dois finir un verset partiel.",visual:"quiz1"},
-      {title:"Filtrer par mémorisés",desc:"Par défaut le quiz porte sur tes versets mémorisés. Tu peux aussi choisir une sourate spécifique ou tout le Coran embarqué.",visual:"quiz2"},
-      {title:"Revoir tes erreurs",desc:"En bas de la session, chaque erreur est cliquable. Tu vois le verset complet avec sa traduction pour mieux l'ancrer.",visual:"quiz3"},
+      {
+        title:"Teste ta mémoire",
+        desc:"L'onglet Quiz te pose des questions sur les versets que tu as mémorisés. Quel verset appartient à quelle sourate ?",
+        mock:{
+          lines:[
+            {type:"quiz-q",ar:"وَلَا ٱلضَّآلِّينَ",choices:["Al-Baqara","Al-Fatiha","Al-Ikhlas","An-Nas"],correct:1},
+            {type:"tip",text:"Les questions viennent uniquement de tes versets mémorisés"},
+          ]
+        }
+      },
+      {
+        title:"Filtre par sourate",
+        desc:"Tu peux cibler une sourate précise en la choisissant dans le menu. Parfait pour tester ta connaissance d'une sourate en particulier.",
+        mock:{
+          lines:[
+            {type:"filter",btns:["Mes mémorisés","Tout","Par sourate…"]},
+            {type:"select",label:"36. Ya-Sin"},
+            {type:"tip",text:"Toutes les 114 sourates sont disponibles dans le filtre"},
+          ]
+        }
+      },
+      {
+        title:"Révise tes erreurs",
+        desc:"À la fin du quiz, toutes tes erreurs sont affichées. Appuie dessus pour voir le verset complet avec sa traduction.",
+        mock:{
+          lines:[
+            {type:"score",pct:80,correct:8,wrong:2},
+            {type:"wrong-list",items:["Al-Baqara v.255","Al-Fatiha v.6"]},
+            {type:"tip",text:"Chaque erreur t'indique quoi réviser en priorité"},
+          ]
+        }
+      },
     ],
   },
 ];
@@ -1017,16 +1205,143 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
       {/* Contenu du step */}
       <div key={`${activeSection}-${step}`} style={{flex:1,display:"flex",flexDirection:"column",padding:"24px 20px",gap:20,animation:"tutoIn .3s ease",overflowY:"auto"}}>
 
-        {/* Illustration */}
-        <div style={{width:"100%",borderRadius:16,background:`${section.color}10`,border:`1.5px solid ${section.color}30`,padding:"28px 20px",display:"flex",alignItems:"center",justifyContent:"center",minHeight:160,position:"relative",overflow:"hidden"}}>
-          <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse at 50% 0%,${section.color}15,transparent 70%)`,pointerEvents:"none"}}/>
-          {/* Illustration basée sur la section */}
-          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:12,textAlign:"center",position:"relative",zIndex:1}}>
-            <div style={{fontSize:"3.5rem",lineHeight:1}}>{section.icon}</div>
-            <div style={{fontFamily:"'Amiri',serif",fontSize:"1.1rem",color:section.color,fontWeight:700}}>{currentStep?.title}</div>
-            <div style={{fontSize:".65rem",color:t.tx3,maxWidth:280,lineHeight:1.5}}>
-              {step===0?"Étape 1 sur "+section.steps.length:`Étape ${step+1} sur ${section.steps.length}`}
-            </div>
+        {/* Illustration mock de l'app */}
+        <div style={{width:"100%",borderRadius:16,background:tn==="light"?"#f0f0f0":"#1a1a1a",border:`1.5px solid ${section.color}30`,overflow:"hidden",minHeight:180,position:"relative"}}>
+          <div style={{position:"absolute",top:0,left:0,right:0,height:28,background:tn==="light"?"#e0e0e0":"#111",display:"flex",alignItems:"center",padding:"0 10px",gap:5}}>
+            <div style={{width:8,height:8,borderRadius:"50%",background:"#ff5f57"}}/>
+            <div style={{width:8,height:8,borderRadius:"50%",background:"#febc2e"}}/>
+            <div style={{width:8,height:8,borderRadius:"50%",background:"#28c840"}}/>
+            <span style={{fontSize:".48rem",color:"#888",marginLeft:8}}>Al-Hifz · Le mémorisateur</span>
+          </div>
+          <div style={{padding:"34px 10px 10px",display:"flex",flexDirection:"column",gap:5}}>
+            {(currentStep?.mock?.lines||[]).map((line,li)=>{
+              if(line.type==="header") return(
+                <div key={li} style={{background:`${section.color}15`,borderRadius:8,padding:"6px 10px",borderLeft:`3px solid ${section.color}`}}>
+                  <div style={{fontSize:".65rem",fontWeight:700,color:section.color}}>{line.text}</div>
+                  {line.sub&&<div style={{fontSize:".5rem",color:"#888",marginTop:1}}>{line.sub}</div>}
+                </div>
+              );
+              if(line.type==="verse") return(
+                <div key={li} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 6px",borderRadius:7,background:line.mem?`${t.gr}15`:tn==="light"?"#fff":"#222",border:`1px solid ${line.mem?t.gr:line.due?"#f59e0b":"#ddd"}`}}>
+                  <div style={{width:18,height:18,borderRadius:"50%",background:line.mem?t.gr:"#ddd",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:".45rem",color:line.mem?"#fff":"#888"}}>{line.mem?"✓":line.n}</div>
+                  <div style={{fontFamily:"'Amiri',serif",fontSize:".85rem",direction:"rtl",flex:1,color:tn==="light"?"#1a0a00":"#f0e8d0",lineHeight:1.5}}>{line.ar}</div>
+                </div>
+              );
+              if(line.type==="actions") return(
+                <div key={li} style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+                  {line.btns.map((b,bi)=><span key={bi} style={{padding:"2px 7px",borderRadius:20,border:`1px solid ${section.color}`,color:section.color,fontSize:".5rem",fontWeight:600}}>{b}</span>)}
+                </div>
+              );
+              if(line.type==="mic") return(
+                <div key={li} style={{display:"flex",justifyContent:"center",padding:"4px 0"}}>
+                  <div style={{width:44,height:44,borderRadius:"50%",background:line.state==="listening"?"#e91e63":section.color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.2rem",boxShadow:line.state==="listening"?"0 0 0 8px rgba(233,30,99,.2)":"none"}}>🎤</div>
+                </div>
+              );
+              if(line.type==="wave") return(
+                <div key={li} style={{display:"flex",gap:2,justifyContent:"center",alignItems:"center",height:16}}>
+                  {Array.from({length:12},(_,i)=><div key={i} style={{width:3,height:6+Math.sin(i*.8)*6,background:"#e91e63",borderRadius:99,opacity:.7}}/>)}
+                </div>
+              );
+              if(line.type==="score") return(
+                <div key={li} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 8px",background:`${t.gr}15`,borderRadius:8}}>
+                  <div style={{width:34,height:34,borderRadius:"50%",background:t.gr,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:".7rem",fontWeight:800}}>{line.pct}%</div>
+                  <div style={{fontSize:".55rem",color:"#666"}}>{line.correct} corrects · {line.wrong} erreur{line.wrong>1?"s":""}</div>
+                </div>
+              );
+              if(line.type==="ring") return(
+                <div key={li} style={{display:"flex",justifyContent:"center",padding:"4px 0"}}>
+                  <div style={{width:50,height:50,borderRadius:"50%",border:`4px solid ${section.color}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".7rem",fontWeight:800,color:section.color}}>{line.pct}%</div>
+                </div>
+              );
+              if(line.type==="kpi") return(
+                <div key={li} style={{display:"flex",gap:4,justifyContent:"center"}}>
+                  {line.items.map((item,ii)=><div key={ii} style={{padding:"3px 7px",borderRadius:6,background:tn==="light"?"#f0f0f0":"#333",fontSize:".5rem",color:"#888"}}>{item}</div>)}
+                </div>
+              );
+              if(line.type==="bar") return(
+                <div key={li} style={{padding:"0 4px"}}>
+                  <div style={{fontSize:".5rem",color:"#888",marginBottom:3}}>{line.label}</div>
+                  <div style={{height:5,background:"#eee",borderRadius:99,overflow:"hidden"}}>
+                    <div style={{height:"100%",width:`${line.pct}%`,background:section.color,borderRadius:99}}/>
+                  </div>
+                </div>
+              );
+              if(line.type==="verse-colored") return(
+                <div key={li} style={{fontFamily:"'Amiri',serif",fontSize:".9rem",direction:"rtl",lineHeight:2}}>
+                  {line.words.map((w,wi)=><span key={wi} style={{color:w.ok?t.gr:"#e91e63",textDecoration:w.ok?"none":"underline",marginRight:4}}>{w.w}</span>)}
+                </div>
+              );
+              if(line.type==="said") return(
+                <div key={li} style={{padding:"4px 8px",background:tn==="light"?"#f5f5f5":"#2a2a2a",borderRadius:6,fontSize:".55rem",color:"#888",direction:"ltr"}}>Tu as dit : <span style={{fontFamily:"'Amiri',serif",direction:"rtl",color:tn==="light"?"#333":"#ccc"}}>{line.text}</span></div>
+              );
+              if(line.type==="tip") return(
+                <div key={li} style={{display:"flex",alignItems:"center",gap:5,padding:"4px 7px",background:`${section.color}10`,borderRadius:6,marginTop:2}}>
+                  <span style={{fontSize:".65rem"}}>💡</span>
+                  <span style={{fontSize:".5rem",color:section.color,fontWeight:600}}>{line.text}</span>
+                </div>
+              );
+              if(line.type==="mushaf-nav") return(
+                <div key={li} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"3px 8px",background:"rgba(0,0,0,.8)",borderRadius:6}}>
+                  <span style={{color:"#c9a84c",fontSize:".65rem",fontWeight:700}}>◄</span>
+                  <span style={{color:"#c9a84c",fontSize:".55rem"}}>p.{line.page} / {line.total}</span>
+                  <span style={{color:"#c9a84c",fontSize:".65rem",fontWeight:700}}>►</span>
+                </div>
+              );
+              if(line.type==="mushaf-page") return(
+                <div key={li} style={{height:70,background:"#f5f0e8",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                  <span style={{fontFamily:"'Amiri',serif",fontSize:".9rem",color:"#1a0a00",direction:"rtl"}}>بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</span>
+                </div>
+              );
+              if(line.type==="select") return(
+                <div key={li} style={{padding:"4px 8px",borderRadius:6,border:"1px solid #c9a84c33",background:"rgba(0,0,0,.3)",fontSize:".52rem",color:"#c9a84c"}}>{line.label}</div>
+              );
+              if(line.type==="editions") return(
+                <div key={li} style={{display:"flex",gap:6}}>
+                  {line.items.map((e,ei)=><div key={ei} style={{flex:1,padding:"6px",borderRadius:8,border:`1px solid ${ei===0?section.color:"#ddd"}`,background:ei===0?`${section.color}15`:"transparent",textAlign:"center"}}>
+                    <div style={{fontSize:".55rem",fontWeight:700,color:ei===0?section.color:"#888"}}>{e.name}</div>
+                    <div style={{fontSize:".45rem",color:"#aaa"}}>{e.sub}</div>
+                  </div>)}
+                </div>
+              );
+              if(line.type==="wbw-words") return(
+                <div key={li} style={{display:"flex",gap:4,justifyContent:"center",flexWrap:"wrap"}}>
+                  {line.words.map((w,wi)=><div key={wi} style={{textAlign:"center",padding:"4px 8px",background:tn==="light"?"#fff":"#2a2a2a",borderRadius:8,border:"1px solid #e0d0c0"}}>
+                    <div style={{fontFamily:"'Amiri',serif",fontSize:".85rem",color:tn==="light"?"#1a0a00":"#f0e0c0"}}>{w.ar}</div>
+                    <div style={{fontSize:".42rem",color:"#888",marginTop:1}}>{w.tr}</div>
+                    <div style={{fontSize:".48rem",color:section.color,fontWeight:600}}>{w.fr}</div>
+                  </div>)}
+                </div>
+              );
+              if(line.type==="partial-words") return(
+                <div key={li} style={{display:"flex",gap:4,justifyContent:"center",flexWrap:"wrap"}}>
+                  {line.words.map((w,wi)=><span key={wi} style={{padding:"3px 8px",borderRadius:20,border:`1px solid ${line.selected.includes(wi)?section.color:"#ddd"}`,background:line.selected.includes(wi)?`${section.color}20`:"transparent",fontFamily:"'Amiri',serif",fontSize:".75rem",color:line.selected.includes(wi)?section.color:"#888"}}>{w}</span>)}
+                </div>
+              );
+              if(line.type==="filter") return(
+                <div key={li} style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+                  {line.btns.map((b,bi)=><span key={bi} style={{padding:"3px 8px",borderRadius:20,border:`1px solid ${bi===0?section.color:"#ddd"}`,background:bi===0?`${section.color}15`:"transparent",fontSize:".5rem",color:bi===0?section.color:"#888"}}>{b}</span>)}
+                </div>
+              );
+              if(line.type==="quiz-q") return(
+                <div key={li} style={{display:"flex",flexDirection:"column",gap:4}}>
+                  <div style={{fontFamily:"'Amiri',serif",fontSize:".95rem",direction:"rtl",textAlign:"center",color:tn==="light"?"#1a0a00":"#f0e8d0",padding:"4px"}}>{line.ar}</div>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:3}}>
+                    {line.choices.map((c,ci)=><div key={ci} style={{padding:"4px 6px",borderRadius:6,border:`1px solid ${ci===line.correct?"#4caf50":"#ddd"}`,background:ci===line.correct?"#4caf5015":"transparent",fontSize:".5rem",color:ci===line.correct?"#4caf50":"#888",textAlign:"center"}}>{c}</div>)}
+                  </div>
+                </div>
+              );
+              if(line.type==="wrong-list") return(
+                <div key={li} style={{display:"flex",flexDirection:"column",gap:3}}>
+                  {line.items.map((item,ii)=><div key={ii} style={{padding:"3px 8px",borderRadius:6,background:"rgba(233,30,99,.08)",border:"1px solid rgba(233,30,99,.2)",fontSize:".52rem",color:"#e91e63"}}>✗ {item}</div>)}
+                </div>
+              );
+              if(line.type==="grid30") return(
+                <div key={li} style={{display:"grid",gridTemplateColumns:"repeat(10,1fr)",gap:2}}>
+                  {Array.from({length:30},(_,i)=><div key={i} style={{aspectRatio:"1",borderRadius:3,background:line.done.includes(i+1)?t.gr:"#e0e0e0",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".4rem",color:line.done.includes(i+1)?"#fff":"#aaa"}}>{i+1}</div>)}
+                </div>
+              );
+              return null;
+            })}
           </div>
         </div>
 
@@ -1341,20 +1656,18 @@ function colorTajweed(html){
 
 // MushafTajweedView — rendu React direct depuis l'API qurancdn JSON
 // Tajweed view — images depuis Supabase Storage
-function MushafTajweedView({page,fullscreen,edition,nightMode}){
+function MushafTajweedView({page,fullscreen,edition}){
   const pg=page||1;
   const isFr=edition?.id==="tajwid_fr";
-  const imgNum=pg+(isFr?7:7);
+  const imgNum=pg+7;
   const pad=String(imgNum).padStart(3,"0");
   const folder=isFr?"tajweed-fr":"tajweed";
   const [loaded,setLoaded]=React.useState(false);
   const [error,setError]=React.useState(false);
   React.useEffect(()=>{setLoaded(false);setError(false);},[pg,isFr]);
-
   const url=`https://dccirpngkozsexrzuzgy.supabase.co/storage/v1/object/public/mushaf/${folder}/${pad}.jpg`;
-
   return(
-    <div style={{flex:1,overflowY:"auto",background:nightMode?"#0d0d0d":"#f5f0e8",display:"flex",flexDirection:"column",alignItems:"center",position:"relative",transition:"background .3s"}}>
+    <div style={{flex:1,overflowY:"auto",background:"#f5f0e8",display:"flex",flexDirection:"column",alignItems:"center",position:"relative"}}>
       {!loaded&&!error&&(
         <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:14,background:nightMode?"#0d0d0d":"#f5f0e8",zIndex:1}}>
           <div style={{width:32,height:32,border:"3px solid #c9a84c",borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite"}}/>
@@ -1381,9 +1694,6 @@ function MushafTajweedView({page,fullscreen,edition,nightMode}){
           display:loaded?"block":"none",
           userSelect:"none",
           WebkitUserSelect:"none",
-          // Mode nuit : inverser les couleurs de l'image
-          filter:nightMode?"invert(1) sepia(1) saturate(3) hue-rotate(90deg) brightness(.85)":"none",
-          transition:"filter .3s",
         }}
         draggable={false}
       />
@@ -1421,7 +1731,6 @@ const fetchMushafPageUrl=async(pg, editionId)=>{
 };
 function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onNext,onPrev,onGoTo,onRecite}) {
   const ed=edition||MUSHAF_EDITIONS[0];
-  const [nightMode,setNightMode]=React.useState(false);
   const touchStart=useRef(null);
   const touchStartY=useRef(null);
   const AC="#c9a84c";
@@ -1455,10 +1764,6 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
 
         {/* Boutons actions */}
         <div style={{display:"flex",gap:4,flexShrink:0}}>
-          {/* Mode nuit */}
-          <button onClick={()=>setNightMode(p=>!p)} title={nightMode?"Mode jour":"Mode nuit"} style={{background:nightMode?"rgba(201,168,76,.25)":"rgba(0,0,0,.3)",border:`1px solid rgba(201,168,76,${nightMode?".5":".2"})`,color:AC,padding:"5px 8px",borderRadius:8,cursor:"pointer",fontSize:".75rem"}}>
-            {nightMode?"☀️":"🌙"}
-          </button>
           {/* Récitation */}
           {onRecite&&<button onClick={()=>onRecite(page||1)} title="Réciter cette page" style={{background:"rgba(233,30,99,.15)",border:"1px solid rgba(233,30,99,.3)",color:"#e91e63",padding:"5px 8px",borderRadius:8,cursor:"pointer",fontSize:".75rem"}}>🎤</button>}
           {/* Plein écran */}
@@ -1469,7 +1774,7 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
       </div>
 
       {/* Image Mushaf */}
-      <MushafTajweedView page={page||1} fullscreen={fullscreen} edition={ed} nightMode={nightMode}/>
+      <MushafTajweedView page={page||1} fullscreen={fullscreen} edition={ed}/>
     </div>
   );
 }
@@ -3646,7 +3951,7 @@ return (
           <div className="two">
             <div className="lp card">
               <div className="ltabs">
-                {[["list","Sourates"],["juz","Juz"],["pages-nav","Pages"],["vsearch","Versets"],["themes","Thèmes"]].map(([id,l])=>(
+                {[["list","Sourates"],["juz","Juz"],["pages-nav","Pages"],["page-view","📄 Page"],["vsearch","Versets"],["themes","Thèmes"]].map(([id,l])=>(
                   <button key={id} className={`lt ${ltab===id?"on":""}`} onClick={()=>setLtab(id)}>{l}</button>
                 ))}
               </div>
@@ -3677,6 +3982,25 @@ return (
                         </div>
                       );
                     })}
+                  </div>
+                </div>
+              )}
+              {ltab==="page-view"&&(
+                <div style={{display:"flex",flexDirection:"column",height:"100%",background:t.s2}}>
+                  {/* Nav page */}
+                  <div style={{display:"flex",alignItems:"center",gap:6,padding:"6px 10px",borderBottom:`1px solid ${t.b1}`,background:"rgba(0,0,0,.6)"}}>
+                    <button onClick={()=>setMushafPage(p=>Math.max(1,(p||1)-1))} style={{background:"rgba(201,168,76,.15)",border:"1px solid rgba(201,168,76,.3)",color:"#c9a84c",padding:"4px 10px",borderRadius:6,cursor:"pointer",fontWeight:700}}>◄</button>
+                    <span style={{flex:1,textAlign:"center",fontSize:".62rem",color:"#c9a84c",fontWeight:700}}>Page {mushafPage||1} / 604</span>
+                    <button onClick={()=>setMushafPage(p=>Math.min(604,(p||1)+1))} style={{background:"rgba(201,168,76,.15)",border:"1px solid rgba(201,168,76,.3)",color:"#c9a84c",padding:"4px 10px",borderRadius:6,cursor:"pointer",fontWeight:700}}>►</button>
+                  </div>
+                  {/* Image page */}
+                  <div style={{flex:1,overflowY:"auto",background:"#f5f0e8",display:"flex",flexDirection:"column",alignItems:"center"}}>
+                    <img
+                      key={mushafPage||1}
+                      src={`https://dccirpngkozsexrzuzgy.supabase.co/storage/v1/object/public/mushaf/tajweed/${String((mushafPage||1)+7).padStart(3,"0")}.jpg`}
+                      alt={`Page ${mushafPage||1}`}
+                      style={{width:"100%",height:"auto",display:"block"}}
+                    />
                   </div>
                 </div>
               )}
