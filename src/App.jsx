@@ -1341,7 +1341,7 @@ function colorTajweed(html){
 
 // MushafTajweedView — rendu React direct depuis l'API qurancdn JSON
 // Tajweed view — images depuis Supabase Storage
-function MushafTajweedView({page,fullscreen,edition,nightMode}){
+function MushafTajweedView({page,fullscreen,edition}){
   const pg=page||1;
   const isFr=edition?.id==="tajwid_fr";
   const imgNum=pg+(isFr?7:7);
@@ -1354,7 +1354,7 @@ function MushafTajweedView({page,fullscreen,edition,nightMode}){
   const url=`https://dccirpngkozsexrzuzgy.supabase.co/storage/v1/object/public/mushaf/${folder}/${pad}.jpg`;
 
   return(
-    <div style={{flex:1,overflowY:"auto",background:nightMode?"#0d0d0d":"#f5f0e8",display:"flex",flexDirection:"column",alignItems:"center",position:"relative",transition:"background .3s"}}>
+    <div style={{flex:1,overflowY:"auto",background:nightMode?"#0d0d0d":"#f5f0e8",display:"flex",flexDirection:"column",alignItems:"center",position:"relative"}}>
       {!loaded&&!error&&(
         <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:14,background:nightMode?"#0d0d0d":"#f5f0e8",zIndex:1}}>
           <div style={{width:32,height:32,border:"3px solid #c9a84c",borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite"}}/>
@@ -1421,8 +1421,7 @@ const fetchMushafPageUrl=async(pg, editionId)=>{
 };
 function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onNext,onPrev,onGoTo,onRecite}) {
   const ed=edition||MUSHAF_EDITIONS[0];
-  const [nightMode,setNightMode]=React.useState(false);
-  const touchStart=useRef(null);
+    const touchStart=useRef(null);
   const touchStartY=useRef(null);
   const AC="#c9a84c";
 
@@ -1455,11 +1454,7 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
 
         {/* Boutons actions */}
         <div style={{display:"flex",gap:4,flexShrink:0}}>
-          {/* Mode nuit */}
-          <button onClick={()=>setNightMode(p=>!p)} title={nightMode?"Mode jour":"Mode nuit"} style={{background:nightMode?"rgba(201,168,76,.25)":"rgba(0,0,0,.3)",border:`1px solid rgba(201,168,76,${nightMode?".5":".2"})`,color:AC,padding:"5px 8px",borderRadius:8,cursor:"pointer",fontSize:".75rem"}}>
-            {nightMode?"☀️":"🌙"}
-          </button>
-          {/* Récitation */}
+                    {/* Récitation */}
           {onRecite&&<button onClick={()=>onRecite(page||1)} title="Réciter cette page" style={{background:"rgba(233,30,99,.15)",border:"1px solid rgba(233,30,99,.3)",color:"#e91e63",padding:"5px 8px",borderRadius:8,cursor:"pointer",fontSize:".75rem"}}>🎤</button>}
           {/* Plein écran */}
           <button onClick={onToggleFullscreen} style={{background:"rgba(201,168,76,.12)",border:"1px solid rgba(201,168,76,.3)",color:AC,padding:"5px 8px",borderRadius:8,cursor:"pointer",fontSize:".7rem",fontWeight:700}}>{fullscreen?"✕":"⛶"}</button>
