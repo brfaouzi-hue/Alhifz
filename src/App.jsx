@@ -4364,29 +4364,31 @@ return (
                                 </div>
                               )}
 
-                              {/* Score récitation inline */}
-                              {hasRecitScore&&(
-                                <div style={{display:"block",padding:"10px 14px",background:t.s2,borderRadius:10,border:`1px solid ${speechScore.pct>=80?t.gr:speechScore.pct>=50?t.acc:t.rd}44`,margin:"4px 0 10px",direction:"ltr"}}>
+                              {hasRecitScore&&(()=>{
+                                const bColor=speechScore.pct>=80?t.gr:speechScore.pct>=50?t.acc:t.rd;
+                                const bgColor=speechScore.pct>=80?t.gr:speechScore.pct>=50?t.acc:t.rd;
+                                return(
+                                <div style={{display:"block",padding:"10px 14px",background:t.s2,borderRadius:10,border:`1px solid ${bColor}`,margin:"4px 0 10px",direction:"ltr"}}>
                                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-                                    <div style={{flex:1,height:5,background:t.b1,borderRadius:99,overflow:"hidden"}}><div style={{height:"100%",width:`${speechScore.pct}%`,background:speechScore.pct>=80?t.gr:speechScore.pct>=50?t.acc:t.rd,borderRadius:99}}/></div>
-                                    <span style={{fontSize:".75rem",fontWeight:800,color:speechScore.pct>=80?t.gr:speechScore.pct>=50?t.acc:t.rd}}>{speechScore.pct}%</span>
+                                    <div style={{flex:1,height:5,background:t.b1,borderRadius:99,overflow:"hidden"}}><div style={{height:"100%",width:`${speechScore.pct}%`,background:bgColor,borderRadius:99}}/></div>
+                                    <span style={{fontSize:".75rem",fontWeight:800,color:bgColor}}>{speechScore.pct}%</span>
                                     <button style={{background:"none",border:"none",color:t.tx3,cursor:"pointer"}} onClick={()=>setSpeechScore(null)}>✕</button>
                                   </div>
                                   <div style={{direction:"rtl",fontFamily:"'Amiri',serif",fontSize:"1.2rem",lineHeight:2,marginBottom:6}}>
-                                    {speechScore.analysis?.map((w,wi)=><span key={wi} style={{color:w.status==="ok"?t.gr:"#e91e63",margin:"0 2px",textDecoration:w.status!=="ok"?"underline wavy #e91e63":"none"}}>{w.word} </span>)}
+                                    {speechScore.analysis?.map((w,wi)=><span key={wi} style={{color:w.status==="ok"?t.gr:"#e91e63",margin:"0 2px"}}>{w.word} </span>)}
                                   </div>
                                   <button className="vbtn" style={{borderColor:"#e91e63",color:"#e91e63"}} onClick={()=>{setSpeechScore(null);startListening(v.ar,v.n);}}>↺ Réessayer</button>
                                 </div>
-                              )}
+                                );
+                              })()}
                             </React.Fragment>
                           );
                         })}
                       </div>
                     )}
                   </div>
-                  </div>
-                  </div>
-                  </div>
+                </div>
+                </div>
                 </div>
               )}
             </div>
