@@ -4354,7 +4354,7 @@ return (
                                   <button className={`vbtn ${isMem?"mem":""}`} onClick={()=>{toggleV(selS.n,v.n,v.ar);setActiveVerseActions(null);}}>{isMem?<><Icons.Check size={10}/>Mémorisé</>:<>+ Mémoriser</>}</button>
                                   <button className="vbtn snd" onClick={()=>{setLoopCurrent(1);doPlay(v.n);addToHistory(selS.n,v.n);setActiveVerseActions(null);}}><Icons.Play size={10}/>{isPl?"Stop":"Écouter"}</button>
                                   <button className={`vbtn ${isFav(selS.n,v.n)?"mem":""}`} onClick={()=>{toggleFav(selS.n,v.n,v.ar,v.fr,selS.name);setActiveVerseActions(null);}}><Icons.Heart size={10} filled={isFav(selS.n,v.n)}/>{isFav(selS.n,v.n)?"Favori ✓":"Favori"}</button>
-                                  {(v.ar||"").replace(/<[^>]*>/g,"").split(/\s+/).filter(Boolean).length>4&&<button className="vbtn" style={{borderColor:t.bl,color:t.bl}} onClick={()=>{setPartialVerse({sn:selS.n,vn:v.n,words:(v.ar||"").replace(/<[^>]*>/g,"").split(/\s+/).filter(Boolean),from:0,to:(v.ar||"").replace(/<[^>]*>/g,"").split(/\s+/).filter(Boolean).length-1,fr:v.fr});setActiveVerseActions(null);}}>✂ Partiel</button>}
+                                  {(()=>{const arClean=(v.ar||"").replace(/<[^>]*>/g,"");const words=arClean.split(" ").filter(Boolean);return words.length>4&&<button className="vbtn" style={{borderColor:t.bl,color:t.bl}} onClick={()=>{setPartialVerse({sn:selS.n,vn:v.n,words,from:0,to:words.length-1,fr:v.fr});setActiveVerseActions(null);}}>✂ Partiel</button>;})()}
                                   <button className="vbtn" onClick={()=>{wbwVerseRef.current={sn:selS.n,vn:v.n};setWbwOpen(true);setActiveVerseActions(null);}}>📖 Mot à mot</button>
                                   <button className="vbtn" onClick={()=>{setShareVerse({sn:selS.n,vn:v.n,ar:v.ar,fr:v.fr,surah:selS.name,surahAr:selS.ar});setActiveVerseActions(null);}}><Icons.Share size={10}/>Partager</button>
                                   {speechSupported&&<button className="vbtn" onClick={()=>{setSpeechScore(null);startListening(v.ar,v.n);setActiveVerseActions(null);}}>🎤 Réciter</button>}
@@ -4382,9 +4382,10 @@ return (
                       </div>
                     )}
                   </div>
+                  </div>
+                  </div>
+                  </div>
                 </div>
-              </div>
-              </div>
               )}
             </div>
           </div>
