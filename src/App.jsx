@@ -280,14 +280,14 @@ const Q = {
 
 // Constants
 const FONTS = [
-  {id:"amiri-quran",name:"Amiri Quran",css:"'Amiri Quran',serif",desc:"Mushaf classique (Naskh)"},
-  {id:"amiri",name:"Amiri",css:"'Amiri',serif",desc:"Naskhi élégant"},
-  {id:"scheherazade",name:"Scheherazade",css:"'Scheherazade New',serif",desc:"Naskhi arabe raffiné"},
-  {id:"lateef",name:"Lateef",css:"'Lateef',serif",desc:"Style Nastaliq simplifié"},
-  {id:"noto-naskh",name:"Noto Naskh",css:"'Noto Naskh Arabic',serif",desc:"Moderne et lisible"},
-  {id:"noto-nastaliq",name:"Noto Nastaliq",css:"'Noto Nastaliq Urdu',serif",desc:"Style Nastaliq"},
-  {id:"reem-kufi",name:"Reem Kufi",css:"'Reem Kufi',serif",desc:"Style Kufique"},
-  {id:"cairo",name:"Cairo",css:"'Cairo',sans-serif",desc:"Moderne sans-serif"},
+  {id:"amiri-quran",name:"Amiri Quran",css:"Amiri Quran,serif",desc:"Mushaf classique (Naskh)"},
+  {id:"amiri",name:"Amiri",css:"Amiri,serif",desc:"Naskhi élégant"},
+  {id:"scheherazade",name:"Scheherazade",css:"Scheherazade New,serif",desc:"Naskhi arabe raffiné"},
+  {id:"lateef",name:"Lateef",css:"Lateef,serif",desc:"Style Nastaliq simplifié"},
+  {id:"noto-naskh",name:"Noto Naskh",css:"Noto Naskh Arabic,serif",desc:"Moderne et lisible"},
+  {id:"noto-nastaliq",name:"Noto Nastaliq",css:"Noto Nastaliq Urdu,serif",desc:"Style Nastaliq"},
+  {id:"reem-kufi",name:"Reem Kufi",css:"Reem Kufi,serif",desc:"Style Kufique"},
+  {id:"cairo",name:"Cairo",css:"Cairo,sans-serif",desc:"Moderne sans-serif"},
 ];
 
 const RECITERS = [
@@ -4363,14 +4363,13 @@ return (
                           );
                         })}
                       </div>
-                    )}
                   </div>
                 </div>
               </div>
             </div>
-              )}
-            </div>
+          )}
           </div>
+        </div>
         )}
 
         {/* PAGES */}
