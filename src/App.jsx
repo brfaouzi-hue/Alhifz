@@ -516,7 +516,7 @@ function CalligraphyBurst({text, onDone}) {
         borderRadius:20,
       }}>
         {text}
-        <div style={{fontSize:".75rem",color:"#c9a84c88",marginTop:8,fontFamily:"'DM Sans',sans-serif",textAlign:"center",direction:"ltr"}}>
+        <div style={{fontSize:".75rem",color:"#c9a84c88",marginTop:8,fontFamily:"DM Sans,sans-serif",textAlign:"center",direction:"ltr"}}>
           ✓ Mémorisé
         </div>
       </div>
@@ -1507,7 +1507,7 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
         </div>
 
         {/* Verset — affichage temps réel style Tarteel */}
-        <div key={idx} style={{fontFamily:"'Scheherazade New','Amiri Quran',serif",fontSize:"clamp(1.6rem,5vw,2.2rem)",direction:"rtl",textAlign:"center",lineHeight:2.4,width:"100%",maxWidth:540,animation:"scoreIn .25s ease"}}>
+        <div key={idx} style={{fontFamily:"Scheherazade New,Amiri Quran,serif",fontSize:"clamp(1.6rem,5vw,2.2rem)",direction:"rtl",textAlign:"center",lineHeight:2.4,width:"100%",maxWidth:540,animation:"scoreIn .25s ease"}}>
           {(()=>{
             const targetWords=stripTags(curV?.ar||"").replace(/[\u064B-\u065F\u0670]/g,"").split(" ").filter(Boolean);
             const spokenWords=speechResult?(speechResult).replace(/[ًٌٍَُِّْٰٓٔ]/g,"").replace(/[أإآٱ]/g,"ا").split(/\s+/).filter(Boolean):[];
@@ -3389,7 +3389,7 @@ return (
             )}
             {aiPlanResult&&(
               <div style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column",gap:10}}>
-                <div style={{padding:"12px 14px",background:t.s2,borderRadius:10,border:`1px solid ${t.b1}`,fontSize:".75rem",color:t.tx,lineHeight:1.8,whiteSpace:"pre-wrap",fontFamily:"'DM Sans',sans-serif"}}>
+                <div style={{padding:"12px 14px",background:t.s2,borderRadius:10,border:`1px solid ${t.b1}`,fontSize:".75rem",color:t.tx,lineHeight:1.8,whiteSpace:"pre-wrap",fontFamily:"DM Sans,sans-serif"}}>
                   {aiPlanResult}
                 </div>
                 <div style={{display:"flex",gap:8}}>
