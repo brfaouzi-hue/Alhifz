@@ -1354,9 +1354,9 @@ function MushafTajweedView({page,fullscreen,edition}){
   const url=`https://dccirpngkozsexrzuzgy.supabase.co/storage/v1/object/public/mushaf/${folder}/${pad}.jpg`;
 
   return(
-    <div style={{flex:1,overflowY:"auto",background:nightMode?"#0d0d0d":"#f5f0e8",display:"flex",flexDirection:"column",alignItems:"center",position:"relative"}}>
+    <div style={{flex:1,overflowY:"auto",background:"#f5f0e8",display:"flex",flexDirection:"column",alignItems:"center",position:"relative"}}>
       {!loaded&&!error&&(
-        <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:14,background:nightMode?"#0d0d0d":"#f5f0e8",zIndex:1}}>
+        <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:14,background:"#f5f0e8",zIndex:1}}>
           <div style={{width:32,height:32,border:"3px solid #c9a84c",borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite"}}/>
           <div style={{fontFamily:"'Amiri',serif",fontSize:".9rem",color:"#c9a84c"}}>جاري التحميل…</div>
         </div>
@@ -1382,7 +1382,6 @@ function MushafTajweedView({page,fullscreen,edition}){
           userSelect:"none",
           WebkitUserSelect:"none",
           // Mode nuit : inverser les couleurs de l'image
-          filter:nightMode?"invert(1) sepia(1) saturate(3) hue-rotate(90deg) brightness(.85)":"none",
           transition:"filter .3s",
         }}
         draggable={false}
@@ -1464,7 +1463,7 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
       </div>
 
       {/* Image Mushaf */}
-      <MushafTajweedView page={page||1} fullscreen={fullscreen} edition={ed} nightMode={nightMode}/>
+      <MushafTajweedView page={page||1} fullscreen={fullscreen} edition={ed}/>
     </div>
   );
 }
@@ -1562,7 +1561,7 @@ body>*{position:relative;z-index:1;}
 .snum.done{background:${t.grD};border-color:${t.gr};color:${t.gr};}
 .sname{font-size:.76rem;font-weight:500;}
 .smeta{font-size:.56rem;color:${t.tx3};margin-top:1px;}
-.sar{font-family:'Amiri',serif;font-size:.9rem;color:${acc};}
+.sar{font-family:Amiri,serif;font-size:.9rem;color:${acc};}
 .mbar{width:36px;height:3px;background:${t.b2};border-radius:99px;overflow:hidden;margin-top:3px;}
 .mfill{height:100%;background:${t.gr};border-radius:99px;}
 /* ── Juz grid ── */
@@ -1570,7 +1569,7 @@ body>*{position:relative;z-index:1;}
 .jc{background:${t.s2};border:1px solid ${t.b1};border-radius:7px;padding:6px 3px;text-align:center;cursor:pointer;transition:all .2s;}
 .jc:hover{border-color:${acc};transform:translateY(-2px);box-shadow:0 4px 12px ${acc}22;}
 .jc.sel{border-color:${acc};background:${t.s3};}
-.jn{font-family:'Amiri',serif;font-size:1.2rem;color:${acc};line-height:1;}
+.jn{font-family:Amiri,serif;font-size:1.2rem;color:${acc};line-height:1;}
 .jl{font-size:.48rem;color:${t.tx3};text-transform:uppercase;}
 .jb{height:3px;background:${t.b1};border-radius:99px;overflow:hidden;margin-top:3px;}
 .jf{height:100%;background:${t.gr};border-radius:99px;}
@@ -1601,7 +1600,7 @@ body>*{position:relative;z-index:1;}
 /* ── Immersive ── */
 .immersive{position:fixed;inset:0;z-index:100;background:${tn==="dark"?"#04060a":"#faf6ef"};display:flex;flex-direction:column;overflow:hidden;}
 .immersive-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid ${t.b1};}
-.immersive-title{font-family:'Amiri',serif;font-size:1.3rem;color:${acc};}
+.immersive-title{font-family:Amiri,serif;font-size:1.3rem;color:${acc};}
 .immersive-scroll{flex:1;overflow-y:auto;padding:20px 18px;display:flex;flex-direction:column;gap:24px;}
 .immersive-verse{text-align:center;padding:20px 0;transition:background .2s,border-radius .2s;}
 .immersive-verse:hover{background:${t.s2};border-radius:12px;}
@@ -1614,11 +1613,12 @@ body>*{position:relative;z-index:1;}
 .vnum.mem{background:${t.grD};border-color:${t.gr};color:${t.gr};}
 .vnum.pl{border-color:${acc};color:${acc};}
 .var-text{font-family:${arFont};font-size:1.65rem;direction:rtl;text-align:right;line-height:2.1;flex:1;}
-.vmark{margin-right:4px;font-size:.8rem;color:${t.tx3};font-family:'Amiri',serif;}
+.vmark{margin-right:4px;font-size:.8rem;color:${t.tx3};font-family:Amiri,serif;}
 .vfr{font-size:.74rem;color:${t.tx2};line-height:1.7;margin-top:6px;padding-top:6px;border-top:1px solid ${t.b1};font-style:italic;}
 .vtf{margin-top:7px;padding:8px 10px;background:rgba(168,85,247,.07);border-left:3px solid ${t.pu};border-radius:0 8px 8px 0;font-size:.7rem;color:${t.tx2};line-height:1.7;}
 .vtf-hd{font-size:.58rem;color:${t.pu};text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:3px;}
-.vacts{display:flex;gap:4px;margin-top:7px;flex-wrap:wrap;}
+.vacts{display:flex;gap:4px;margin-top:7px;flex-wrap:wrap;max-height:0;overflow:hidden;transition:max-height .25s ease,opacity .2s;opacity:0;pointer-events:none;}
+.vacts.open{max-height:200px;opacity:1;pointer-events:auto;}
 .vbtn{padding:3px 8px;border-radius:99px;border:1px solid ${t.b2};background:transparent;color:${t.tx3};font-size:.6rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:3px;}
 .vbtn:hover{border-color:${acc};color:${acc};transform:translateY(-1px);}
 .vbtn.mem{background:${t.grD};border-color:${t.gr};color:${t.gr};}
@@ -1659,7 +1659,7 @@ body>*{position:relative;z-index:1;}
 .kp-label{font-size:.85rem;font-weight:600;color:${t.tx};margin-bottom:4px;}
 .kp-desc{font-size:.65rem;color:${t.tx3};}
 .kp-icon{font-size:1.5rem;margin-bottom:6px;}
-.kh-title{font-family:'Amiri',serif;font-size:1.4rem;color:${acc};margin-bottom:4px;}
+.kh-title{font-family:Amiri,serif;font-size:1.4rem;color:${acc};margin-bottom:4px;}
 .kh-sub{font-size:.68rem;color:${t.tx3};margin-bottom:14px;}
 .kh-track{height:20px;background:${t.b1};border-radius:99px;overflow:hidden;margin-bottom:8px;position:relative;}
 .kh-fill{height:100%;background:linear-gradient(90deg,${acc},${acc2});border-radius:99px;transition:width .8s ease;}
@@ -1701,7 +1701,7 @@ body>*{position:relative;z-index:1;}
 /* ── Modal ── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);}
 .modal{background:${t.s1};border:1px solid ${acc};border-radius:18px;padding:26px;max-width:380px;width:92%;}
-.modal h2{font-family:'Amiri',serif;font-size:1.7rem;color:${acc};margin-bottom:5px;}
+.modal h2{font-family:Amiri,serif;font-size:1.7rem;color:${acc};margin-bottom:5px;}
 .modal p{font-size:.76rem;color:${t.tx2};line-height:1.65;margin-bottom:18px;}
 .modal label{display:block;font-size:.64rem;color:${t.tx3};text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
 .modal input{width:100%;background:${t.inputBg};border:1px solid ${t.b2};border-radius:8px;padding:8px 12px;color:${t.tx};font-size:.85rem;margin-bottom:10px;outline:none;transition:border-color .2s;}
@@ -3386,6 +3386,24 @@ return (
         )}
       </div>}
 
+      {/* MUSHAF — hors wrap, position fixed */}
+      {page==="mushaf"&&(
+        <div style={{position:"fixed",inset:0,zIndex:10,display:"flex",flexDirection:"column",background:"#0d1000",paddingTop:"env(safe-area-inset-top)",paddingBottom:"calc(62px + env(safe-area-inset-bottom))"}}>
+          {/* Sélecteur édition */}
+          <div style={{display:"flex",gap:6,padding:"6px 10px",background:"rgba(0,0,0,.8)",flexShrink:0,overflowX:"auto",borderBottom:"1px solid rgba(201,168,76,.15)",scrollbarWidth:"none"}}>
+            {MUSHAF_EDITIONS.map(ed=>(
+              <button key={ed.id} onClick={()=>setMushafEdition(ed.id)} style={{padding:"5px 12px",borderRadius:20,border:"1.5px solid "+(mushafEdition===ed.id?"#c9a84c":"rgba(201,168,76,.2)"),background:mushafEdition===ed.id?"rgba(201,168,76,.15)":"transparent",color:mushafEdition===ed.id?"#c9a84c":"rgba(201,168,76,.4)",fontSize:".6rem",fontWeight:mushafEdition===ed.id?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
+                {ed.name}
+              </button>
+            ))}
+          </div>
+          {/* Page mushaf */}
+          <div style={{flex:1,overflow:"hidden",display:"flex",flexDirection:"column"}}>
+            <MushafPage page={mushafPage||1} t={t} tjc={tjc} arFont={arFont} edition={MUSHAF_EDITIONS.find(e=>e.id===mushafEdition)||MUSHAF_EDITIONS[0]} fullscreen={false} onToggleFullscreen={()=>setMushafFullscreen(f=>!f)} onNext={()=>goToPage(Math.min(604,(mushafPage||1)+1))} onPrev={()=>goToPage(Math.max(1,(mushafPage||1)-1))} onGoTo={(pg)=>goToPage(pg)}/>
+          </div>
+        </div>
+      )}
+
       <div className={`wrap${pageTransition?" transitioning":""}`}>
 
         {/* ACCUEIL */}
@@ -4129,45 +4147,7 @@ return (
         )}
 
         {/* MUSHAF */}
-        {page==="mushaf"&&(
-          <div style={{display:"flex",flexDirection:"column",gap:12}}>
-            <div className="card">
-              <div className="ch"><span className="ct">Édition du Mushaf</span></div>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))",gap:10,padding:12}}>
-                {MUSHAF_EDITIONS.map(ed=>(
-                  <div key={ed.id} style={{borderRadius:12,border:`2px solid ${mushafEdition===ed.id?t.acc:t.b1}`,overflow:"hidden",cursor:"pointer",transition:"all .2s",transform:mushafEdition===ed.id?"translateY(-2px)":"none",boxShadow:mushafEdition===ed.id?`0 4px 16px ${t.acc}33`:"none"}} onMouseEnter={e=>{if(mushafEdition!==ed.id){e.currentTarget.style.borderColor=t.acc+"66";e.currentTarget.style.transform="translateY(-2px)";}}} onMouseLeave={e=>{if(mushafEdition!==ed.id){e.currentTarget.style.borderColor=t.b1;e.currentTarget.style.transform="none";}}} onClick={()=>setMushafEdition(ed.id)}>
-                    <div style={{height:60,background:ed.coverBg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
-                      <span style={{fontSize:"1.6rem"}}>{ed.coverIcon}</span>
-                      <span style={{fontFamily:"'Amiri',serif",fontSize:".7rem",color:"#fff",opacity:.8,marginTop:2}}>{ed.coverSub}</span>
-                    </div>
-                    <div style={{padding:"7px 10px",background:t.s2}}>
-                      <div style={{fontSize:".72rem",fontWeight:600,color:t.tx}}>{ed.name}</div>
-                      <div style={{fontSize:".58rem",color:t.tx3,marginTop:1}}>{ed.desc}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="card">
-              <div className="ch" style={{flexDirection:"column",gap:8,alignItems:"stretch"}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <span className="ct">Page {mushafPage||1} / 604</span>
-                  <div style={{display:"flex",gap:6}}>
-                    <button className="tbtn" onClick={()=>setMushafPage(p=>Math.max(1,(p||1)-1))}>← Précédente</button>
-                    <button className={`tbtn ${pageRead[String(mushafPage||1)]?"on":""}`} onClick={()=>togglePage(mushafPage||1)}>{pageRead[String(mushafPage||1)]?"Lue ✓":"Marquer lue"}</button>
-                    <button className="tbtn" onClick={()=>setMushafPage(p=>Math.min(604,(p||1)+1))}>Suivante →</button>
-                  </div>
-                </div>
-                <button onClick={()=>{setMushafSurahModal(true);setMushafSurahSearch("");}} style={{width:"100%",padding:"9px 14px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:10,color:t.tx2,fontSize:".75rem",cursor:"pointer",display:"flex",alignItems:"center",gap:8,transition:"all .2s"}} onMouseEnter={e=>{e.currentTarget.style.borderColor=t.acc;e.currentTarget.style.color=t.tx;}} onMouseLeave={e=>{e.currentTarget.style.borderColor=t.b2;e.currentTarget.style.color=t.tx2;}}>
-                  <span style={{fontSize:"1rem"}}>📖</span>
-                  <span style={{flex:1,textAlign:"left"}}>Aller à une sourate…</span>
-                  <span style={{fontSize:".7rem",opacity:.5}}>▼</span>
-                </button>
-              </div>
-              <MushafPage page={mushafPage||1} t={t} tjc={tjc} arFont={arFont} edition={MUSHAF_EDITIONS.find(e=>e.id===mushafEdition)||MUSHAF_EDITIONS[0]} fullscreen={mushafFullscreen} onToggleFullscreen={()=>setMushafFullscreen(f=>!f)} onNext={()=>goToPage(Math.min(604,(mushafPage||1)+1))} onPrev={()=>goToPage(Math.max(1,(mushafPage||1)-1))} onGoTo={(pg)=>goToPage(pg)}/>
-            </div>
-          </div>
-        )}
+
 
         {/* PAGES */}
         {page==="pages"&&(
