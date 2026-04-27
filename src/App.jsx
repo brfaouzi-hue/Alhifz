@@ -4381,10 +4381,15 @@ return (
                         })}
                       </div>
                     )}
-                  </div>{/* fin vscroll */}
-            </div>{/* fin rp */}
-          </div>{/* fin two */}
-        )}{/* fin quran */}
+                  </div>
+                </div>
+                </div>
+                </div>
+                </div>
+                </div>
+            </div>
+          </div>
+        )}
 
         {/* PAGES */}
         {page==="pages"&&(
