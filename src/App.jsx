@@ -507,7 +507,7 @@ function CalligraphyBurst({text, onDone}) {
       display:"flex",alignItems:"center",justifyContent:"center",
     }}>
       <div style={{
-        fontFamily:"'Amiri Quran',serif",fontSize:"clamp(1.5rem,5vw,3rem)",
+        fontFamily:"Amiri Quran,serif",fontSize:"clamp(1.5rem,5vw,3rem)",
         direction:"rtl",textAlign:"center",color:"#c9a84c",
         textShadow:"0 0 30px #c9a84c88,0 0 60px #c9a84c44",
         animation:"calligIn .6s cubic-bezier(.34,1.56,.64,1) forwards",
@@ -645,7 +645,7 @@ function HifzVerseText({ar, level, tjc, showTj, vmark, onRevealWord}) {
         // Mot visible — on reconstruis avec TajwidSpan si le tajweed était dans ar
         return <span key={i} style={{display:"inline"}}><TajwidSpan text={w} enabled={showTj} tjc={tjc}/>{" "}</span>;
       })}
-      <span style={{fontFamily:"'Amiri',serif",fontSize:".72rem",color:"#c9a84c",margin:"0 4px",verticalAlign:"middle"}}>﴿{vmark}﴾</span>
+      <span style={{fontFamily:"Amiri,serif",fontSize:".72rem",color:"#c9a84c",margin:"0 4px",verticalAlign:"middle"}}>﴿{vmark}﴾</span>
     </bdi>
   );
 }
@@ -1486,7 +1486,7 @@ return `
 @import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Lateef:wght@400&family=Noto+Naskh+Arabic:wght@400;600&family=Noto+Nastaliq+Urdu:wght@400;700&family=Reem+Kufi:wght@400;700&family=Cairo:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 *{box-sizing:border-box;}html{overflow-x:hidden;max-width:100vw;overscroll-behavior:none;}body{overflow-x:hidden;overscroll-behavior:none;}
-body{background:${bg};color:${t.tx};font-family:'DM Sans',sans-serif;min-height:100vh;min-height:100dvh;padding-bottom:80px;transition:background .4s,color .4s;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);}
+body{background:${bg};color:${t.tx};font-family:DM Sans,sans-serif;min-height:100vh;min-height:100dvh;padding-bottom:80px;transition:background .4s,color .4s;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);}
 :root{--sat:env(safe-area-inset-top);--sab:env(safe-area-inset-bottom);--sal:env(safe-area-inset-left);--sar:env(safe-area-inset-right);}
 ${t.arabesque ? (
 "body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.04;" +
@@ -1519,8 +1519,8 @@ body>*{position:relative;z-index:1;}
 .topbar{position:sticky;top:0;z-index:60;background:${t.navBg};border-bottom:1px solid ${t.b1};backdrop-filter:blur(16px);overflow:hidden;}
 .tb{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 12px;padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right));gap:8px;}
 .logo{display:flex;align-items:baseline;gap:6px;flex-shrink:0;white-space:nowrap;min-width:0;}
-.logo-h{font-family:'Amiri',serif;font-size:1.3rem;color:${acc};text-shadow:0 0 20px ${acc}44;white-space:nowrap;}
-.logo-ar{font-family:'Amiri Quran',serif;font-size:1rem;color:${acc2};white-space:nowrap;}
+.logo-h{font-family:Amiri,serif;font-size:1.3rem;color:${acc};text-shadow:0 0 20px ${acc}44;white-space:nowrap;}
+.logo-ar{font-family:Amiri Quran,serif;font-size:1rem;color:${acc2};white-space:nowrap;}
 .logo-sub{font-size:.5rem;color:${t.tx3};letter-spacing:2px;text-transform:uppercase;white-space:nowrap;}
 .tb-r{display:flex;gap:5px;align-items:center;flex-shrink:0;}
 .ib{background:transparent;border:1px solid ${t.b2};color:${t.tx2};padding:5px 10px;border-radius:8px;font-size:.68rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:4px;}
@@ -1623,8 +1623,7 @@ body>*{position:relative;z-index:1;}
 .vfr{font-size:.74rem;color:${t.tx2};line-height:1.7;margin-top:6px;padding-top:6px;border-top:1px solid ${t.b1};font-style:italic;}
 .vtf{margin-top:7px;padding:8px 10px;background:rgba(168,85,247,.07);border-left:3px solid ${t.pu};border-radius:0 8px 8px 0;font-size:.7rem;color:${t.tx2};line-height:1.7;}
 .vtf-hd{font-size:.58rem;color:${t.pu};text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:3px;}
-.vacts{display:flex;gap:4px;margin-top:7px;flex-wrap:wrap;max-height:0;overflow:hidden;transition:max-height .25s,opacity .2s;opacity:0;pointer-events:none;}
-.vacts.open{max-height:200px;opacity:1;pointer-events:auto;}
+.vacts{display:flex;gap:4px;margin-top:7px;flex-wrap:wrap;}
 .vbtn{padding:3px 8px;border-radius:99px;border:1px solid ${t.b2};background:transparent;color:${t.tx3};font-size:.6rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:3px;}
 .vbtn:hover{border-color:${acc};color:${acc};transform:translateY(-1px);}
 .vbtn.mem{background:${t.grD};border-color:${t.gr};color:${t.gr};}
@@ -1786,8 +1785,8 @@ const [password, setPassword] = useState("");
 const [authLoading, setAuthLoading] = useState(false);
 const [authError, setAuthError] = useState("");
  const [page,setPage]=useState("home");
+  const [hadithDismissed,setHadithDismissed]=useState(false);
   useEffect(()=>{document.body.style.overflow=page==="mushaf"?"hidden":"";return()=>{document.body.style.overflow="";};},[page]);
-  const [hadithDismissed,setHadithDismissed]=useState(()=>{try{return localStorage.getItem("qhd_"+new Date().toISOString().slice(0,10))==="1";}catch{return false;}});
   const [pageTransition,setPageTransition]=useState(false);
   const [ltab,setLtab]=useState("list");
   const [selS,setSelS]=useState(null);
@@ -3978,7 +3977,7 @@ return (
                       return (
                         <React.Fragment key={v.n}>
                           {showBismillah&&(<div style={{textAlign:"center",padding:"14px 8px 6px",direction:"rtl",fontFamily:"'Amiri Quran',serif",fontSize:"1.3rem",color:t.acc,letterSpacing:2,borderBottom:`1px solid ${t.b1}`,marginBottom:4,background:`linear-gradient(135deg,${t.acc}08,transparent)`}}>بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>)}
-                          <div id={`v-${selS?.n}-${v.n}`} className={`vitem ${isMem?"mem":""} ${isPl?"pl":""} ${isDue?"due":""}`}>
+                          <div id={`v-${selS?.n}-${v.n}`} className={`vitem ${isMem?"mem":""} ${isPl?"pl":""} ${isDue?"due":""}`} onTouchStart={()=>{longPressTimer.current=setTimeout(()=>setActiveVerseActions(n=>n===v.n?null:v.n),500);}} onTouchEnd={()=>clearTimeout(longPressTimer.current)} onTouchMove={()=>clearTimeout(longPressTimer.current)}>
                             <div className="vtop">
                               <div className={`vnum ${isMem?"mem":""} ${isPl?"pl":""}`} onClick={()=>toggleV(selS.n,v.n,v.ar)}>{isMem?<Icons.Check size={11} color={t.gr}/>:v.n}</div>
                               <div className="var-text" style={{fontSize:`${arabicSize}rem`}}>
@@ -4023,7 +4022,7 @@ return (
                                 }
                               </div>
                             )}
-                            <div className="vacts">
+                            <div className={"vacts"+(activeVerseActions===v.n?" open":"")}>
                               <button className={`vbtn ${isMem?"mem":""}`} onClick={()=>toggleV(selS.n,v.n,v.ar)}>{isMem?<><Icons.Check size={10}/>Mémorisé</>:<>+ Mémoriser</>}</button>
                               <button className="vbtn snd" onClick={()=>{setLoopCurrent(1);doPlay(v.n);addToHistory(selS.n,v.n);}}><Icons.Play size={10}/>{isPl?"Stop":"Écouter"}</button>
                               <button className={`vbtn ${isFav(selS.n,v.n)?"mem":""}`} onClick={()=>toggleFav(selS.n,v.n,v.ar,v.fr,selS.name)}><Icons.Heart size={10} filled={isFav(selS.n,v.n)}/>{isFav(selS.n,v.n)?"Favori ✓":"Favori"}</button>
