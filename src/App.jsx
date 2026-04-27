@@ -4290,97 +4290,75 @@ return (
                   {playing!==null&&(<div className="arow"><button className="vbtn snd" style={{flexShrink:0}} onClick={()=>doPlay(playing)}>{audioPlaying?"⏸":"▶ "+playing}</button><span style={{fontSize:".62rem",color:t.tx2,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{selS?.name} · v.{playing} · {rec.name}</span><button className="tbtn" style={{flexShrink:0}} onClick={()=>{setPlaying(null);partialPlayRef.current=null;if(audioRef.current){audioRef.current.pause();audioRef.current.src="";}}}>✕</button></div>)}
 
                   {/* Banner mode récitation continue */}
-                  <div className="vscroll" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-                    {loadState==="loading"&&(<div style={{textAlign:"center",padding:"30px 14px",color:t.tx3}}><div style={{display:"inline-block",width:22,height:22,border:`2px solid ${t.b2}`,borderTopColor:t.acc,borderRadius:"50%",animation:"spin .7s linear infinite",marginBottom:10}}/><div style={{fontSize:".8rem"}}>Chargement des versets…</div></div>)}
-                    {loadState==="error"&&(<div style={{textAlign:"center",padding:"24px 14px",color:t.rd,fontSize:".78rem"}}><div style={{fontSize:"1.8rem",marginBottom:8}}>⚠️</div>Impossible de charger cette sourate.<br/><button className="tbtn" style={{marginTop:10,borderColor:t.acc,color:t.acc}} onClick={()=>{const s=selS;setSelS(null);setTimeout(()=>setSelS(s),50);}}>↻ Réessayer</button></div>)}
+                   <div className="vscroll" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+                    {loadState==="loading"&&(<div style={{textAlign:"center",padding:"30px 14px",color:t.tx3}}><div style={{width:22,height:22,border:"2px solid #ccc",borderTopColor:"#c9a84c",borderRadius:"50%",animation:"spin .7s linear infinite",margin:"0 auto 10px"}}/><div style={{fontSize:".8rem"}}>Chargement…</div></div>)}
+                    {loadState==="error"&&(<div style={{textAlign:"center",padding:"24px",color:"#c62828",fontSize:".78rem"}}>Erreur de chargement.<br/><button className="tbtn" onClick={()=>{const s=selS;setSelS(null);setTimeout(()=>setSelS(s),50);}}>↻ Réessayer</button></div>)}
                     {loadState==="done"&&(
-                      <div style={{direction:"rtl",textAlign:"justify",fontFamily:arFont+",Scheherazade New,serif",fontSize:(arabicSize||1.7)+"rem",lineHeight:2.8,wordSpacing:"3px",padding:"16px 18px 80px",color:t.tx}}>
-                        {/* Bismillah en-tête sourate */}
+                      <div className="vscroll-inner">
                         {selS.n!==1&&selS.n!==9&&(
-                          <div style={{display:"block",textAlign:"center",padding:"8px 0 14px",fontFamily:"'Amiri Quran',serif",fontSize:"1.4rem",color:t.acc,letterSpacing:2,direction:"rtl"}}>
+                          <div style={{display:"block",textAlign:"center",padding:"8px 0 14px",fontSize:"1.4rem",color:t.acc,direction:"rtl"}}>
                             بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ
                           </div>
                         )}
-
-                        {/* Versets en flux inline continu */}
                         {verses.map(v=>{
                           const isMem=!!(mem[String(selS.n)]||{})[String(v.n)];
                           const isPl=playing===v.n;
-                          const isDue=spacedDue.includes(`${selS.n}_${v.n}`);
+                          const isDue=spacedDue.includes(selS.n+"_"+v.n);
                           const isActive=activeVerseActions===v.n;
                           const hasRecitScore=speechScore&&speechVerseTarget?.vn===v.n;
                           return(
                             <React.Fragment key={v.n}>
-                              {/* Verset inline */}
                               <span
-                                id={`v-${selS.n}-${v.n}`}
+                                id={"v-"+selS.n+"-"+v.n}
                                 onTouchStart={()=>{longPressTimer.current=setTimeout(()=>setActiveVerseActions(vn=>vn===v.n?null:v.n),500);}}
                                 onTouchEnd={()=>clearTimeout(longPressTimer.current)}
                                 onTouchMove={()=>clearTimeout(longPressTimer.current)}
                                 onMouseDown={()=>{longPressTimer.current=setTimeout(()=>setActiveVerseActions(vn=>vn===v.n?null:v.n),500);}}
                                 onMouseUp={()=>clearTimeout(longPressTimer.current)}
-                                style={{
-                                  display:"inline",
-                                  color:isMem?t.gr:isPl?t.acc:isDue?t.rd:t.tx,
-                                  background:isActive?`${t.acc}15`:"transparent",
-                                  borderRadius:4,
-                                  cursor:"pointer",
-                                  transition:"color .2s,background .2s",
-                                  WebkitUserSelect:"none",
-                                  userSelect:"none",
-                                }}
+                                style={{display:"inline",color:isMem?t.gr:isPl?t.acc:isDue?t.rd:t.tx,background:isActive?t.acc+"15":"transparent",borderRadius:4,cursor:"pointer",WebkitUserSelect:"none",userSelect:"none"}}
                               >
-                                {reviewMode&&!(revealedVerses[v.n])
+                                {reviewMode&&!revealedVerses[v.n]
                                   ?<span style={{background:t.b1,borderRadius:6,padding:"2px 8px",fontSize:".7rem",color:t.tx3,cursor:"pointer"}} onClick={()=>setRevealedVerses(p=>({...p,[v.n]:true}))}>▓▓▓▓▓</span>
                                   :hifzMode&&(hifzLevel[v.n]||0)>0
                                     ?<HifzVerseText ar={v.ar} level={hifzLevel[v.n]||0} tjc={tjc} showTj={showTj} vmark={v.n} onRevealWord={()=>setHifzLevel(p=>({...p,[v.n]:Math.max(0,(p[v.n]||0)-1)}))}/>
                                     :<TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/>
                                 }
                                 {" "}
-                                <span style={{fontFamily:"'Amiri',serif",fontSize:".58em",color:isMem?t.gr:t.acc,verticalAlign:"middle",direction:"ltr"}}>
-                                  {isMem?"﴿✓﴾":`﴿${v.n}﴾`}
+                                <span style={{fontFamily:"Amiri,serif",fontSize:".58em",color:isMem?t.gr:t.acc,verticalAlign:"middle"}}>
+                                  {isMem?"﴿✓﴾":"﴿"+v.n+"﴾"}
                                 </span>
                                 {" "}
                               </span>
-
-                              {/* Traduction — en bloc si activée */}
                               {showTr&&v.fr&&(
-                                <div style={{display:"block",fontSize:".72rem",color:t.tx2,fontStyle:"italic",lineHeight:1.6,margin:"4px 0 10px",paddingRight:8,direction:"ltr",textAlign:"left",borderRight:`2px solid ${t.acc}33`,paddingLeft:0}}>
-                                  {v.n}. {v.fr}
+                                <div style={{display:"block",fontSize:".72rem",color:t.tx2,fontStyle:"italic",lineHeight:1.6,margin:"4px 0 10px",direction:"ltr",textAlign:"left",borderRight:"2px solid "+t.acc+"33"}}>
+                                  {v.n+". "+v.fr}
                                 </div>
                               )}
-
-                              {/* Panneau actions long press */}
                               {isActive&&(
-                                <div style={{display:"flex",flexWrap:"wrap",gap:5,padding:"10px 14px",margin:"4px 0 10px",background:t.s2,borderRadius:12,border:`1px solid ${t.b1}`,animation:"fadeIn .2s ease",direction:"ltr"}}>
-                                  <button className={`vbtn ${isMem?"mem":""}`} onClick={()=>{toggleV(selS.n,v.n,v.ar);setActiveVerseActions(null);}}>{isMem?<><Icons.Check size={10}/>Mémorisé</>:<>+ Mémoriser</>}</button>
-                                  <button className="vbtn snd" onClick={()=>{setLoopCurrent(1);doPlay(v.n);addToHistory(selS.n,v.n);setActiveVerseActions(null);}}><Icons.Play size={10}/>{isPl?"Stop":"Écouter"}</button>
-                                  <button className={`vbtn ${isFav(selS.n,v.n)?"mem":""}`} onClick={()=>{toggleFav(selS.n,v.n,v.ar,v.fr,selS.name);setActiveVerseActions(null);}}><Icons.Heart size={10} filled={isFav(selS.n,v.n)}/>{isFav(selS.n,v.n)?"Favori ✓":"Favori"}</button>
+                                <div style={{display:"flex",flexWrap:"wrap",gap:5,padding:"10px 14px",margin:"4px 0 10px",background:t.s2,borderRadius:12,border:"1px solid "+t.b1,direction:"ltr"}}>
+                                  <button className={"vbtn"+(isMem?" mem":"")} onClick={()=>{toggleV(selS.n,v.n,v.ar);setActiveVerseActions(null);}}>{isMem?"✓ Mémorisé":"+ Mémoriser"}</button>
+                                  <button className="vbtn snd" onClick={()=>{setLoopCurrent(1);doPlay(v.n);addToHistory(selS.n,v.n);setActiveVerseActions(null);}}>{"▶ "+(isPl?"Stop":"Écouter")}</button>
+                                  <button className={"vbtn"+(isFav(selS.n,v.n)?" mem":"")} onClick={()=>{toggleFav(selS.n,v.n,v.ar,v.fr,selS.name);setActiveVerseActions(null);}}>{isFav(selS.n,v.n)?"♥ Favori":"♡ Favori"}</button>
                                   {(()=>{const words=stripTags(v.ar||"").split(" ").filter(Boolean);return words.length>4&&<button className="vbtn" style={{borderColor:t.bl,color:t.bl}} onClick={()=>{setPartialVerse({sn:selS.n,vn:v.n,words,from:0,to:words.length-1,fr:v.fr});setActiveVerseActions(null);}}>✂ Partiel</button>;})()}
                                   <button className="vbtn" onClick={()=>{wbwVerseRef.current={sn:selS.n,vn:v.n};setWbwOpen(true);setActiveVerseActions(null);}}>📖 Mot à mot</button>
-                                  <button className="vbtn" onClick={()=>{setShareVerse({sn:selS.n,vn:v.n,ar:v.ar,fr:v.fr,surah:selS.name,surahAr:selS.ar});setActiveVerseActions(null);}}><Icons.Share size={10}/>Partager</button>
+                                  <button className="vbtn" onClick={()=>{setShareVerse({sn:selS.n,vn:v.n,ar:v.ar,fr:v.fr,surah:selS.name,surahAr:selS.ar});setActiveVerseActions(null);}}>Partager</button>
                                   {speechSupported&&<button className="vbtn" onClick={()=>{setSpeechScore(null);startListening(v.ar,v.n);setActiveVerseActions(null);}}>🎤 Réciter</button>}
                                   <button className="vbtn" style={{marginLeft:"auto",borderColor:"#e91e63",color:"#e91e63"}} onClick={()=>setActiveVerseActions(null)}>✕</button>
                                 </div>
                               )}
-
-                              {hasRecitScore&&(()=>{
-                                const bColor=speechScore.pct>=80?t.gr:speechScore.pct>=50?t.acc:t.rd;
-                                const bgColor=speechScore.pct>=80?t.gr:speechScore.pct>=50?t.acc:t.rd;
-                                return(
-                                <div style={{display:"block",padding:"10px 14px",background:t.s2,borderRadius:10,border:`1px solid ${bColor}`,margin:"4px 0 10px",direction:"ltr"}}>
+                              {hasRecitScore&&(
+                                <div style={{display:"block",padding:"10px 14px",background:t.s2,borderRadius:10,border:"1px solid "+t.acc,margin:"4px 0 10px",direction:"ltr"}}>
                                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-                                    <div style={{flex:1,height:5,background:t.b1,borderRadius:99,overflow:"hidden"}}><div style={{height:"100%",width:`${speechScore.pct}%`,background:bgColor,borderRadius:99}}/></div>
-                                    <span style={{fontSize:".75rem",fontWeight:800,color:bgColor}}>{speechScore.pct}%</span>
+                                    <div style={{flex:1,height:5,background:t.b1,borderRadius:99,overflow:"hidden"}}><div style={{height:"100%",width:speechScore.pct+"%",background:t.gr,borderRadius:99}}/></div>
+                                    <span style={{fontSize:".75rem",fontWeight:800,color:t.gr}}>{speechScore.pct+"%"}</span>
                                     <button style={{background:"none",border:"none",color:t.tx3,cursor:"pointer"}} onClick={()=>setSpeechScore(null)}>✕</button>
                                   </div>
-                                  <div style={{direction:"rtl",fontFamily:"'Amiri',serif",fontSize:"1.2rem",lineHeight:2,marginBottom:6}}>
-                                    {speechScore.analysis?.map((w,wi)=><span key={wi} style={{color:w.status==="ok"?t.gr:"#e91e63",margin:"0 2px"}}>{w.word} </span>)}
+                                  <div style={{direction:"rtl",fontFamily:"Amiri,serif",fontSize:"1.2rem",lineHeight:2,marginBottom:6}}>
+                                    {speechScore.analysis?.map((w,wi)=><span key={wi} style={{color:w.status==="ok"?t.gr:"#e91e63",margin:"0 2px"}}>{w.word+" "}</span>)}
                                   </div>
-                                  <button className="vbtn" style={{borderColor:"#e91e63",color:"#e91e63"}} onClick={()=>{setSpeechScore(null);startListening(v.ar,v.n);}}>↺ Réessayer</button>
+                                  <button className="vbtn" style={{borderColor:"#e91e63",color:"#e91e63"}} onClick={()=>{setSpeechScore(null);startListening(v.ar,v.n);}}>Réessayer</button>
                                 </div>
-                                );
-                              })()}
+                              )}
                             </React.Fragment>
                           );
                         })}
@@ -4388,8 +4366,8 @@ return (
                     )}
                   </div>
                 </div>
-                </div>
-                </div>
+              </div>
+            </div>
               )}
             </div>
           </div>
