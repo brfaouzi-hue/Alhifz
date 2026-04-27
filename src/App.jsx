@@ -4381,13 +4381,11 @@ return (
                         })}
                       </div>
                     )}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+                  </div>{/* fin vscroll */}
+            </div>{/* fin rp */}
+          </div>{/* fin two */}
+        )}{/* fin quran */}
 
-        {/* MUSHAF */}
         {/* PAGES */}
         {page==="pages"&&(
           <div style={{display:"flex",flexDirection:"column",gap:14,overflow:"hidden"}}>
