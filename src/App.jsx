@@ -4294,7 +4294,7 @@ return (
                     {loadState==="loading"&&(<div style={{textAlign:"center",padding:"30px 14px",color:t.tx3}}><div style={{display:"inline-block",width:22,height:22,border:`2px solid ${t.b2}`,borderTopColor:t.acc,borderRadius:"50%",animation:"spin .7s linear infinite",marginBottom:10}}/><div style={{fontSize:".8rem"}}>Chargement des versets…</div></div>)}
                     {loadState==="error"&&(<div style={{textAlign:"center",padding:"24px 14px",color:t.rd,fontSize:".78rem"}}><div style={{fontSize:"1.8rem",marginBottom:8}}>⚠️</div>Impossible de charger cette sourate.<br/><button className="tbtn" style={{marginTop:10,borderColor:t.acc,color:t.acc}} onClick={()=>{const s=selS;setSelS(null);setTimeout(()=>setSelS(s),50);}}>↻ Réessayer</button></div>)}
                     {loadState==="done"&&(
-                      <div style={{direction:"rtl",textAlign:"justify",fontFamily:`${arFont},'Scheherazade New',serif`,fontSize:`${arabicSize||1.7}rem`,lineHeight:2.8,wordSpacing:"3px",padding:"16px 18px 80px",color:t.tx}}>
+                      <div style={{direction:"rtl",textAlign:"justify",fontFamily:arFont+",Scheherazade New,serif",fontSize:(arabicSize||1.7)+"rem",lineHeight:2.8,wordSpacing:"3px",padding:"16px 18px 80px",color:t.tx}}>
                         {/* Bismillah en-tête sourate */}
                         {selS.n!==1&&selS.n!==9&&(
                           <div style={{display:"block",textAlign:"center",padding:"8px 0 14px",fontFamily:"'Amiri Quran',serif",fontSize:"1.4rem",color:t.acc,letterSpacing:2,direction:"rtl"}}>
