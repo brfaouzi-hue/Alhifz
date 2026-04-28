@@ -4112,42 +4112,6 @@ return (
           </div>
         )}
 
-        {/* MUSHAF */}}>
-                {MUSHAF_EDITIONS.map(ed=>(
-                  <div key={ed.id} style={{borderRadius:12,border:`2px solid ${mushafEdition===ed.id?t.acc:t.b1}`,overflow:"hidden",cursor:"pointer",transition:"all .2s",transform:mushafEdition===ed.id?"translateY(-2px)":"none",boxShadow:mushafEdition===ed.id?`0 4px 16px ${t.acc}33`:"none"}} onMouseEnter={e=>{if(mushafEdition!==ed.id){e.currentTarget.style.borderColor=t.acc+"66";e.currentTarget.style.transform="translateY(-2px)";}}} onMouseLeave={e=>{if(mushafEdition!==ed.id){e.currentTarget.style.borderColor=t.b1;e.currentTarget.style.transform="none";}}} onClick={()=>setMushafEdition(ed.id)}>
-                    <div style={{height:60,background:ed.coverBg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
-                      <span style={{fontSize:"1.6rem"}}>{ed.coverIcon}</span>
-                      <span style={{fontFamily:"Amiri,serif",fontSize:".7rem",color:"#fff",opacity:.8,marginTop:2}}>{ed.coverSub}</span>
-                    </div>
-                    <div style={{padding:"7px 10px",background:t.s2}}>
-                      <div style={{fontSize:".72rem",fontWeight:600,color:t.tx}}>{ed.name}</div>
-                      <div style={{fontSize:".58rem",color:t.tx3,marginTop:1}}>{ed.desc}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="card">
-              <div className="ch" style={{flexDirection:"column",gap:8,alignItems:"stretch"}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <span className="ct">Page {mushafPage||1} / 604</span>
-                  <div style={{display:"flex",gap:6}}>
-                    <button className="tbtn" onClick={()=>setMushafPage(p=>Math.max(1,(p||1)-1))}>← Précédente</button>
-                    <button className={`tbtn ${pageRead[String(mushafPage||1)]?"on":""}`} onClick={()=>togglePage(mushafPage||1)}>{pageRead[String(mushafPage||1)]?"Lue ✓":"Marquer lue"}</button>
-                    <button className="tbtn" onClick={()=>setMushafPage(p=>Math.min(604,(p||1)+1))}>Suivante →</button>
-                  </div>
-                </div>
-                <button onClick={()=>{setMushafSurahModal(true);setMushafSurahSearch("");}} style={{width:"100%",padding:"9px 14px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:10,color:t.tx2,fontSize:".75rem",cursor:"pointer",display:"flex",alignItems:"center",gap:8,transition:"all .2s"}} onMouseEnter={e=>{e.currentTarget.style.borderColor=t.acc;e.currentTarget.style.color=t.tx;}} onMouseLeave={e=>{e.currentTarget.style.borderColor=t.b2;e.currentTarget.style.color=t.tx2;}}>
-                  <span style={{fontSize:"1rem"}}>📖</span>
-                  <span style={{flex:1,textAlign:"left"}}>Aller à une sourate…</span>
-                  <span style={{fontSize:".7rem",opacity:.5}}>▼</span>
-                </button>
-              </div>
-              <MushafPage page={mushafPage||1} t={t} tjc={tjc} arFont={arFont} edition={MUSHAF_EDITIONS.find(e=>e.id===mushafEdition)||MUSHAF_EDITIONS[0]} fullscreen={mushafFullscreen} onToggleFullscreen={()=>setMushafFullscreen(f=>!f)} onNext={()=>goToPage(Math.min(604,(mushafPage||1)+1))} onPrev={()=>goToPage(Math.max(1,(mushafPage||1)-1))} onGoTo={(pg)=>goToPage(pg)}/>
-            </div>
-          </div>
-        )}
-
         {/* PAGES */}
         {page==="pages"&&(
           <div style={{display:"flex",flexDirection:"column",gap:14,overflow:"hidden"}}>
