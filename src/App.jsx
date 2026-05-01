@@ -790,63 +790,106 @@ function TajwidSpan({text,enabled,tjc}) {
 // ═══════════════════════════════════════
 const ONBOARD_SLIDES=[
   {
-    icon:(acc)=>(
-      <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-        <circle cx="32" cy="32" r="30" fill={acc+"22"} stroke={acc} strokeWidth="1.5"/>
-        <path d="M20 44 Q32 12 44 44" stroke={acc} strokeWidth="2" strokeLinecap="round" fill="none"/>
-        <path d="M24 36 Q32 20 40 36" stroke={acc} strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-        <circle cx="32" cy="46" r="3" fill={acc}/>
+    visual:(c)=>(
+      <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="46" fill={c+"18"} stroke={c} strokeWidth="1.2" strokeDasharray="4 3"/>
+        {/* Lune et étoile */}
+        <path d="M50 20 C38 20 28 30 28 42 C28 56 40 64 52 62 C44 60 36 52 36 42 C36 32 44 24 54 22 C52.5 20.8 51.3 20 50 20Z" fill={c} opacity=".9"/>
+        <circle cx="62" cy="26" r="4" fill={c}/>
+        <circle cx="62" cy="26" r="2" fill={c+"44"}/>
+        {/* Texte arabe stylisé */}
+        <text x="50" y="80" textAnchor="middle" fontFamily="Amiri Quran,serif" fontSize="18" fill={c} opacity=".85">الحفظ</text>
+        <line x1="30" y1="88" x2="70" y2="88" stroke={c} strokeWidth="0.8" opacity=".3"/>
       </svg>
     ),
     title:"بِسْمِ اللَّهِ",
-    sub:"Bienvenue dans Al-Hifz",
-    desc:"Le mémorisateur de Coran le plus complet. Mémorise, révcite, révise — tout en un.",
+    badge:"Bienvenue",
+    desc:"Al-Hifz t'accompagne du premier verset mémorisé jusqu'à la khatma complète. Mémorisation, récitation, révision — tout en un.",
     color:"#16a34a",
+    emoji:"🌙",
   },
   {
-    icon:(acc)=>(
-      <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-        <rect x="12" y="8" width="40" height="48" rx="4" fill={acc+"18"} stroke={acc} strokeWidth="1.5"/>
-        <line x1="20" y1="20" x2="44" y2="20" stroke={acc} strokeWidth="1.5" strokeLinecap="round"/>
-        <line x1="20" y1="28" x2="44" y2="28" stroke={acc} strokeWidth="1.5" strokeLinecap="round"/>
-        <line x1="20" y1="36" x2="36" y2="36" stroke={acc} strokeWidth="1.5" strokeLinecap="round"/>
-        <circle cx="48" cy="48" r="10" fill={acc}/>
-        <polyline points="44 48 47 51 53 45" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none"/>
+    visual:(c)=>(
+      <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
+        {/* Anneau de progression */}
+        <circle cx="50" cy="50" r="36" fill="none" stroke={c+"20"} strokeWidth="8"/>
+        <circle cx="50" cy="50" r="36" fill="none" stroke={c} strokeWidth="8"
+          strokeDasharray="150 226" strokeLinecap="round" transform="rotate(-90 50 50)"/>
+        {/* Centre */}
+        <text x="50" y="46" textAnchor="middle" fontSize="14" fontWeight="bold" fill={c}>68%</text>
+        <text x="50" y="58" textAnchor="middle" fontSize="7" fill={c+"99"}>mémorisé</text>
+        {/* Étoiles autour */}
+        {[0,60,120,180,240,300].map((a,i)=>{
+          const rad=a*Math.PI/180;
+          const x=50+46*Math.cos(rad);
+          const y=50+46*Math.sin(rad);
+          return <circle key={i} cx={x} cy={y} r={i%2===0?2.5:1.5} fill={c} opacity={i%2===0?0.9:0.4}/>;
+        })}
       </svg>
     ),
-    title:"Mémorise verset par verset",
-    sub:"Progression intelligente",
-    desc:"Marque les versets mémorisés, suis ta progression par sourate et juz. La révision espacée (SM2) t'aide à ne rien oublier.",
+    title:"Suis ta progression",
+    badge:"Mémorisation",
+    desc:"Chaque verset mémorisé fait avancer ton anneau. Le système de révision espacée (SM-2) calcule exactement quand revoir pour ne jamais oublier.",
     color:"#2563eb",
+    emoji:"📿",
   },
   {
-    icon:(acc)=>(
-      <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-        <circle cx="32" cy="32" r="20" fill={acc+"18"} stroke={acc} strokeWidth="1.5"/>
-        <circle cx="32" cy="32" r="10" fill={acc+"30"}/>
-        <path d="M32 12 L32 8M32 56 L32 52M12 32 L8 32M56 32 L52 32" stroke={acc} strokeWidth="2" strokeLinecap="round"/>
-        <circle cx="32" cy="32" r="4" fill={acc}/>
-        <path d="M28 32a3 3 0 0 0-3 3v8" stroke="#e91e63" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+    visual:(c)=>(
+      <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
+        {/* Micro stylisé */}
+        <rect x="38" y="18" width="24" height="36" rx="12" fill={c+"25"} stroke={c} strokeWidth="1.5"/>
+        <rect x="43" y="23" width="14" height="26" rx="7" fill={c} opacity=".6"/>
+        {/* Bras du micro */}
+        <path d="M28 48 C28 64 72 64 72 48" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round"/>
+        <line x1="50" y1="64" x2="50" y2="75" stroke={c} strokeWidth="2" strokeLinecap="round"/>
+        <line x1="40" y1="75" x2="60" y2="75" stroke={c} strokeWidth="2" strokeLinecap="round"/>
+        {/* Ondes sonores */}
+        <path d="M20 38 Q16 50 20 62" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" opacity=".5"/>
+        <path d="M13 34 Q8 50 13 66" fill="none" stroke={c} strokeWidth="1" strokeLinecap="round" opacity=".3"/>
+        <path d="M80 38 Q84 50 80 62" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" opacity=".5"/>
+        <path d="M87 34 Q92 50 87 66" fill="none" stroke={c} strokeWidth="1" strokeLinecap="round" opacity=".3"/>
+        {/* Mots colorés */}
+        <rect x="28" y="82" width="12" height="5" rx="2.5" fill="#22c55e" opacity=".8"/>
+        <rect x="43" y="82" width="14" height="5" rx="2.5" fill="#ef4444" opacity=".8"/>
+        <rect x="60" y="82" width="10" height="5" rx="2.5" fill="#22c55e" opacity=".8"/>
       </svg>
     ),
-    title:"Récite et sois évalué",
-    sub:"Reconnaissance vocale arabe",
-    desc:"Appuie sur 🎤, récite le verset, et reçois un score mot par mot avec les erreurs surlignées. Mode enchaîné pour toute la sourate.",
+    title:"Récite à voix haute",
+    badge:"Récitation",
+    desc:"Appuie sur le micro, récite en arabe. L'app analyse mot par mot et colore les erreurs en rouge. Plus efficace que lire en silence.",
     color:"#e91e63",
+    emoji:"🎤",
   },
   {
-    icon:(acc)=>(
-      <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-        <rect x="8" y="16" width="48" height="36" rx="4" fill={acc+"18"} stroke={acc} strokeWidth="1.5"/>
-        <path d="M8 24 L56 24" stroke={acc} strokeWidth="1" opacity=".4"/>
-        <text x="32" y="38" textAnchor="middle" fontFamily="serif" fontSize="16" fill={acc}>القرآن</text>
-        <path d="M16 48 Q32 44 48 48" stroke={acc} strokeWidth="1" strokeLinecap="round" opacity=".4"/>
+    visual:(c)=>(
+      <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
+        {/* Mushaf ouvert */}
+        <rect x="12" y="22" width="36" height="56" rx="3" fill={c+"18"} stroke={c} strokeWidth="1.2"/>
+        <rect x="52" y="22" width="36" height="56" rx="3" fill={c+"18"} stroke={c} strokeWidth="1.2"/>
+        {/* Reliure centrale */}
+        <rect x="47" y="18" width="6" height="64" rx="3" fill={c} opacity=".4"/>
+        {/* Lignes de texte gauche */}
+        {[32,39,46,53,60,67].map((y,i)=>(
+          <line key={i} x1="18" y1={y} x2={i%3===2?36:42} y2={y} stroke={c} strokeWidth="1.2" opacity=".5" strokeLinecap="round"/>
+        ))}
+        {/* Lignes de texte droite */}
+        {[32,39,46,53,60,67].map((y,i)=>(
+          <line key={i} x1={i%3===0?62:58} y1={y} x2="82" y2={y} stroke={c} strokeWidth="1.2" opacity=".5" strokeLinecap="round"/>
+        ))}
+        {/* Numéro de page */}
+        <text x="30" y="84" textAnchor="middle" fontSize="7" fill={c} opacity=".6">604</text>
+        <text x="70" y="84" textAnchor="middle" fontSize="7" fill={c} opacity=".6">1</text>
+        {/* Couleurs tajweed */}
+        <circle cx="22" cy="46" r="3" fill="#537FFF" opacity=".8"/>
+        <circle cx="30" cy="46" r="3" fill="#169200" opacity=".8"/>
+        <circle cx="38" cy="46" r="3" fill="#DD8800" opacity=".8"/>
       </svg>
     ),
-    title:"Mushaf & Tajweed",
-    sub:"Lecture page par page",
-    desc:"Lis le Mushaf page par page, active le tajweed coloré, swipe pour naviguer. Lance une khatma pour lire le Coran complet.",
+    title:"Mushaf & Quiz",
+    badge:"Lecture & Test",
+    desc:"Lis le Mushaf avec les couleurs tajweed, swipe pour tourner les pages. Lance un quiz pour tester ce que tu as mémorisé — sans regarder.",
     color:"#7c3aed",
+    emoji:"📜",
   },
 ];
 
@@ -854,44 +897,109 @@ function OnboardModal({t,acc,tn,onDone,onSkip,onTutorial}){
   const [slide,setSlide]=React.useState(0);
   const s=ONBOARD_SLIDES[slide];
   const isLast=slide===ONBOARD_SLIDES.length-1;
-  const bg=tn==="light"?"#ffffff":"#0a150b";
+  const bg=tn==="light"?"#ffffff":"#060d07";
+
+  const goNext=()=>{ if(!isLast)setSlide(p=>p+1); };
+
   return(
-    <div style={{position:"fixed",inset:0,zIndex:500,background:bg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"space-between",padding:"env(safe-area-inset-top) 24px max(24px,env(safe-area-inset-bottom))",overflowY:"auto"}}>
-      <style>{`@keyframes fadeSlide{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}`}</style>
-      {/* Skip */}
-      <div style={{width:"100%",display:"flex",justifyContent:"flex-end",paddingTop:16}}>
-        {!isLast&&<button onClick={onSkip} style={{background:"none",border:"none",color:t.tx3,fontSize:".75rem",cursor:"pointer",padding:"4px 8px"}}>Passer →</button>}
-      </div>
-      {/* Contenu */}
-      <div key={slide} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:28,animation:"fadeSlide .35s ease",textAlign:"center",maxWidth:360,width:"100%"}}>
-        <div style={{width:120,height:120,borderRadius:28,background:`${s.color}12`,display:"flex",alignItems:"center",justifyContent:"center",border:`2px solid ${s.color}33`}}>
-          {s.icon(s.color)}
-        </div>
-        <div>
-          <div style={{fontFamily:"Amiri,serif",fontSize:"1.5rem",color:s.color,marginBottom:6,fontWeight:700}}>{s.title}</div>
-          <div style={{fontSize:".72rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"2px",marginBottom:14}}>{s.sub}</div>
-          <div style={{fontSize:".88rem",color:t.tx2,lineHeight:1.7}}>{s.desc}</div>
-        </div>
-        {/* Points de progression */}
-        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+    <div style={{position:"fixed",inset:0,zIndex:500,background:bg,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+      <style>{`
+        @keyframes ob-in{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes ob-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+      `}</style>
+
+      {/* Header skip */}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"max(18px,env(safe-area-inset-top)) 20px 12px",flexShrink:0}}>
+        <div style={{display:"flex",gap:6,alignItems:"center"}}>
           {ONBOARD_SLIDES.map((_,i)=>(
-            <div key={i} onClick={()=>setSlide(i)} style={{width:i===slide?24:8,height:8,borderRadius:99,background:i===slide?s.color:t.b2,transition:"all .3s",cursor:"pointer"}}/>
+            <div key={i} onClick={()=>setSlide(i)} style={{
+              height:4,width:i===slide?24:6,borderRadius:99,
+              background:i===slide?s.color:t.b2,
+              transition:"all .35s ease",cursor:"pointer",
+            }}/>
           ))}
         </div>
+        <button onClick={onSkip} style={{background:"none",border:"none",color:t.tx3,fontSize:".75rem",cursor:"pointer",padding:"6px 10px",borderRadius:8}}>
+          Passer
+        </button>
       </div>
+
+      {/* Visual area */}
+      <div key={slide} style={{
+        flex:1,display:"flex",flexDirection:"column",alignItems:"center",
+        justifyContent:"center",padding:"0 32px 20px",
+        animation:"ob-in .4s ease",gap:32,
+      }}>
+        {/* Badge */}
+        <div style={{
+          padding:"4px 14px",borderRadius:99,
+          background:`${s.color}18`,border:`1px solid ${s.color}44`,
+          fontSize:".62rem",fontWeight:700,color:s.color,
+          letterSpacing:"1.5px",textTransform:"uppercase",
+        }}>
+          {s.emoji} {s.badge}
+        </div>
+
+        {/* SVG illustration */}
+        <div style={{
+          width:160,height:160,borderRadius:40,
+          background:`${s.color}10`,
+          border:`1.5px solid ${s.color}25`,
+          display:"flex",alignItems:"center",justifyContent:"center",
+          boxShadow:`0 0 60px ${s.color}20`,
+          animation:"ob-pulse 3s ease-in-out infinite",
+          flexShrink:0,
+        }}>
+          {s.visual(s.color)}
+        </div>
+
+        {/* Text */}
+        <div style={{textAlign:"center",maxWidth:340}}>
+          <div style={{
+            fontFamily:"Amiri,serif",fontSize:"1.7rem",color:t.tx,
+            fontWeight:700,marginBottom:10,lineHeight:1.2,
+          }}>
+            {s.title}
+          </div>
+          <div style={{fontSize:".9rem",color:t.tx2,lineHeight:1.75}}>
+            {s.desc}
+          </div>
+        </div>
+      </div>
+
       {/* Footer */}
-      <div style={{width:"100%",maxWidth:360,display:"flex",flexDirection:"column",gap:10}}>
+      <div style={{
+        padding:"16px 24px",
+        paddingBottom:"max(24px,env(safe-area-inset-bottom))",
+        display:"flex",flexDirection:"column",gap:10,flexShrink:0,
+      }}>
         {isLast?(
           <>
-            <button onClick={onTutorial} style={{width:"100%",padding:"15px",background:`linear-gradient(135deg,${acc},${acc}cc)`,border:"none",borderRadius:14,color:"#000",fontWeight:800,fontSize:".9rem",cursor:"pointer"}}>
-              Voir le tutoriel complet
+            <button onClick={onTutorial} style={{
+              width:"100%",padding:"16px",
+              background:`linear-gradient(135deg,${s.color},${s.color}bb)`,
+              border:"none",borderRadius:16,color:"#fff",
+              fontWeight:800,fontSize:".95rem",cursor:"pointer",
+              boxShadow:`0 6px 24px ${s.color}44`,
+            }}>
+              Voir le guide complet →
             </button>
-            <button onClick={onDone} style={{width:"100%",padding:"13px",background:"none",border:`1.5px solid ${t.b2}`,borderRadius:14,color:t.tx2,fontWeight:600,fontSize:".85rem",cursor:"pointer"}}>
-              Commencer directement
+            <button onClick={onDone} style={{
+              width:"100%",padding:"14px",background:"transparent",
+              border:`1.5px solid ${t.b2}`,borderRadius:16,
+              color:t.tx2,fontWeight:600,fontSize:".85rem",cursor:"pointer",
+            }}>
+              Commencer maintenant
             </button>
           </>
         ):(
-          <button onClick={()=>setSlide(p=>p+1)} style={{width:"100%",padding:"15px",background:`linear-gradient(135deg,${s.color},${s.color}cc)`,border:"none",borderRadius:14,color:"#fff",fontWeight:800,fontSize:".9rem",cursor:"pointer"}}>
+          <button onClick={goNext} style={{
+            width:"100%",padding:"16px",
+            background:`linear-gradient(135deg,${s.color},${s.color}bb)`,
+            border:"none",borderRadius:16,color:"#fff",
+            fontWeight:800,fontSize:".95rem",cursor:"pointer",
+            boxShadow:`0 6px 24px ${s.color}44`,
+          }}>
             Suivant →
           </button>
         )}
@@ -903,64 +1011,419 @@ function OnboardModal({t,acc,tn,onDone,onSkip,onTutorial}){
 // ═══════════════════════════════════════
 // TUTORIEL COMPLET — Toutes les fonctionnalités
 // ═══════════════════════════════════════
+
+// Illustrations SVG par étape
+const TUTO_VISUALS = {
+  // MÉMORISATION
+  memo_0: (c) => (
+    <svg viewBox="0 0 200 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="10" y="10" width="180" height="110" rx="12" fill={c+"0d"} stroke={c+"30"} strokeWidth="1"/>
+      {/* Tabs */}
+      <rect x="20" y="20" width="50" height="18" rx="9" fill={c} />
+      <text x="45" y="32" textAnchor="middle" fontSize="8" fill="#fff" fontWeight="bold">Coran</text>
+      <rect x="76" y="20" width="50" height="18" rx="9" fill={c+"20"} />
+      <text x="101" y="32" textAnchor="middle" fontSize="8" fill={c}>Mushaf</text>
+      <rect x="132" y="20" width="50" height="18" rx="9" fill={c+"20"} />
+      <text x="157" y="32" textAnchor="middle" fontSize="8" fill={c}>Révision</text>
+      {/* Surah rows */}
+      {[0,1,2,3].map(i=>(
+        <g key={i}>
+          <rect x="20" y={50+i*17} width="160" height="13" rx="6" fill={i===0?c+"25":"#ffffff08"} stroke={i===0?c+"50":"transparent"} strokeWidth="1"/>
+          <circle cx="32" cy={56.5+i*17} r="4" fill={i===0?c:c+"30"}/>
+          <text x="42" y={59+i*17} fontSize="7" fill={i===0?c:c+"60"}>{["Al-Fatiha","Al-Baqara","Al-Imran","An-Nisa"][i]}</text>
+          <text x="170" y={59+i*17} textAnchor="end" fontSize="7" fill={i===0?c:c+"40"}>{["7v","286v","200v","176v"][i]}</text>
+        </g>
+      ))}
+      {/* Tap cursor */}
+      <circle cx="45" cy="56" r="6" fill={c} opacity=".25"/>
+      <circle cx="45" cy="56" r="3" fill={c}/>
+    </svg>
+  ),
+  memo_1: (c) => (
+    <svg viewBox="0 0 200 130" fill="none">
+      {/* Verse card */}
+      <rect x="10" y="8" width="180" height="60" rx="10" fill={c+"10"} stroke={c+"30"} strokeWidth="1"/>
+      <text x="100" y="30" textAnchor="middle" fontFamily="Amiri Quran,serif" fontSize="13" fill={c+"cc"}>بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</text>
+      <text x="100" y="48" textAnchor="middle" fontSize="7" fill={c+"66"}>Au nom d'Allah, le Tout Miséricordieux…</text>
+      {/* Action buttons */}
+      <rect x="20" y="78" width="70" height="22" rx="11" fill={c} />
+      <text x="55" y="91" textAnchor="middle" fontSize="7.5" fill="#fff" fontWeight="bold">✓ Mémoriser</text>
+      <rect x="98" y="78" width="46" height="22" rx="11" fill={c+"20"} stroke={c+"40"} strokeWidth="1"/>
+      <text x="121" y="91" textAnchor="middle" fontSize="7.5" fill={c}>▶ Écouter</text>
+      <rect x="150" y="78" width="40" height="22" rx="11" fill={c+"20"} stroke={c+"40"} strokeWidth="1"/>
+      <text x="170" y="91" textAnchor="middle" fontSize="7.5" fill={c}>♥</text>
+      {/* Check green */}
+      <circle cx="178" cy="25" r="12" fill="#22c55e"/>
+      <polyline points="172,25 176,29 184,20" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    </svg>
+  ),
+  memo_2: (c) => (
+    <svg viewBox="0 0 200 130" fill="none">
+      {/* Anneau de progression */}
+      <circle cx="70" cy="65" r="45" fill="none" stroke={c+"15"} strokeWidth="10"/>
+      <circle cx="70" cy="65" r="45" fill="none" stroke={c} strokeWidth="10"
+        strokeDasharray="170 283" strokeLinecap="round" transform="rotate(-90 70 65)"/>
+      <text x="70" y="60" textAnchor="middle" fontSize="16" fontWeight="bold" fill={c}>60%</text>
+      <text x="70" y="73" textAnchor="middle" fontSize="7" fill={c+"88"}>3 741 / 6 236</text>
+      {/* Stats à droite */}
+      {[["📿","3 741","Versets"],["📚","38","Sourates"],["🔥","12j","Streak"]].map(([ic,v,l],i)=>(
+        <g key={i}>
+          <rect x="128" y={15+i*35} width="60" height="28" rx="8" fill={c+"12"} stroke={c+"25"} strokeWidth="1"/>
+          <text x="142" y={32+i*35} fontSize="10">{ic}</text>
+          <text x="172" y={28+i*35} textAnchor="end" fontSize="10" fontWeight="bold" fill={c}>{v}</text>
+          <text x="172" y={38+i*35} textAnchor="end" fontSize="7" fill={c+"66"}>{l}</text>
+        </g>
+      ))}
+    </svg>
+  ),
+  memo_3: (c) => (
+    <svg viewBox="0 0 200 130" fill="none">
+      {/* Timeline révision */}
+      <line x1="30" y1="65" x2="170" y2="65" stroke={c+"30"} strokeWidth="2" strokeDasharray="4 3"/>
+      {[{x:40,d:"Auj.",col:"#ef4444"},{x:75,d:"J+3",col:c},{x:110,d:"J+8",col:c+"80"},{x:145,d:"J+21",col:c+"50"}].map((pt,i)=>(
+        <g key={i}>
+          <circle cx={pt.x} cy="65" r={i===0?9:6} fill={pt.col}/>
+          {i===0&&<text x={pt.x} y="69" textAnchor="middle" fontSize="7" fill="#fff" fontWeight="bold">!</text>}
+          <text x={pt.x} y="83" textAnchor="middle" fontSize="7" fill={i===0?"#ef4444":c+"88"}>{pt.d}</text>
+          {i>0&&<text x={pt.x} y="52" textAnchor="middle" fontSize="6" fill={c+"60"}>SM-2</text>}
+        </g>
+      ))}
+      {/* Verset en attente */}
+      <rect x="10" y="95" width="180" height="24" rx="8" fill="#ef444415" stroke="#ef444430" strokeWidth="1"/>
+      <text x="20" y="111" fontSize="7" fill="#ef4444" fontWeight="bold">🔔 Al-Fatiha v.3 — À réviser aujourd'hui</text>
+      <rect x="155" y="100" width="30" height="14" rx="7" fill="#ef4444"/>
+      <text x="170" y="110" textAnchor="middle" fontSize="6.5" fill="#fff" fontWeight="bold">Réviser</text>
+      {/* Label SM2 */}
+      <rect x="10" y="10" width="90" height="20" rx="10" fill={c+"15"} stroke={c+"30"} strokeWidth="1"/>
+      <text x="55" y="23" textAnchor="middle" fontSize="7.5" fill={c} fontWeight="bold">📊 Révision espacée SM-2</text>
+    </svg>
+  ),
+  // RÉCITATION
+  recit_0: (c) => (
+    <svg viewBox="0 0 200 130" fill="none">
+      {/* Fullscreen modal */}
+      <rect x="10" y="5" width="180" height="120" rx="14" fill="#050a06" stroke={c+"30"} strokeWidth="1"/>
+      <text x="100" y="30" textAnchor="middle" fontFamily="Amiri Quran,serif" fontSize="11" fill={c+"cc"}>ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَٰلَمِينَ</text>
+      <text x="100" y="45" textAnchor="middle" fontSize="7" fill="#ffffff55">Appuie sur le micro pour commencer</text>
+      {/* Micro button */}
+      <circle cx="100" cy="85" r="22" fill={c+"25"} stroke={c} strokeWidth="1.5"/>
+      <circle cx="100" cy="85" r="14" fill={c}/>
+      <rect x="96" y="76" width="8" height="14" rx="4" fill="#fff"/>
+      <path d="M94 87 C94 93 106 93 106 87" fill="none" stroke="#fff" strokeWidth="1.5"/>
+      <line x1="100" y1="93" x2="100" y2="97" stroke="#fff" strokeWidth="1.5"/>
+      {/* Ondes */}
+      <path d="M78 80 Q74 85 78 90" fill="none" stroke={c} strokeWidth="1.5" opacity=".5"/>
+      <path d="M122 80 Q126 85 122 90" fill="none" stroke={c} strokeWidth="1.5" opacity=".5"/>
+    </svg>
+  ),
+  recit_1: (c) => (
+    <svg viewBox="0 0 200 130" fill="none">
+      <rect x="10" y="5" width="180" height="120" rx="14" fill="#050a06" stroke={c+"30"} strokeWidth="1"/>
+      {/* Listening state */}
+      <text x="100" y="28" textAnchor="middle" fontSize="8" fill={c} fontWeight="bold">En écoute…</text>
+      {/* Waveform */}
+      {[8,14,10,18,12,20,8,16,11,19,9,15,13,17,10].map((h,i)=>(
+        <rect key={i} x={45+i*7} y={55-h/2} width="4" height={h} rx="2" fill={c} opacity={0.5+i*0.03}/>
+      ))}
+      {/* Spoken words */}
+      <rect x="20" y="78" width="160" height="20" rx="8" fill={c+"15"} stroke={c+"25"} strokeWidth="1"/>
+      <text x="100" y="92" textAnchor="middle" fontSize="8" fill={c} fontFamily="Amiri,serif">الحمد لله رب العالمين</text>
+      {/* Timer */}
+      <text x="100" y="115" textAnchor="middle" fontSize="9" fill={c+"66"}>0:04</text>
+    </svg>
+  ),
+  recit_2: (c) => (
+    <svg viewBox="0 0 200 130" fill="none">
+      <rect x="10" y="5" width="180" height="120" rx="14" fill="#050a06" stroke={c+"30"} strokeWidth="1"/>
+      {/* Score */}
+      <text x="100" y="28" textAnchor="middle" fontSize="8" fill="#fff">Résultat</text>
+      <circle cx="100" cy="58" r="28" fill="none" stroke="#22c55e" strokeWidth="4" strokeDasharray="146 176"/>
+      <text x="100" y="55" textAnchor="middle" fontSize="18" fontWeight="bold" fill="#22c55e">85</text>
+      <text x="100" y="67" textAnchor="middle" fontSize="7" fill="#22c55e66">%</text>
+      {/* Mots colorés */}
+      <text x="22" y="100" fontSize="9" fontFamily="Amiri,serif" fill="#22c55e">ٱلْحَمْدُ</text>
+      <text x="60" y="100" fontSize="9" fontFamily="Amiri,serif" fill="#22c55e">لِلَّهِ</text>
+      <text x="95" y="100" fontSize="9" fontFamily="Amiri,serif" fill="#ef4444" style={{textDecoration:"underline"}}>رَبِّ</text>
+      <text x="125" y="100" fontSize="9" fontFamily="Amiri,serif" fill="#22c55e">ٱلْعَٰلَمِينَ</text>
+      <text x="95" y="115" textAnchor="middle" fontSize="6" fill="#ef4444">mot manqué</text>
+    </svg>
+  ),
+  recit_3: (c) => (
+    <svg viewBox="0 0 200 130" fill="none">
+      <rect x="10" y="5" width="180" height="120" rx="14" fill="#050a06" stroke={c+"30"} strokeWidth="1"/>
+      {/* Chain mode */}
+      <rect x="15" y="12" width="80" height="16" rx="8" fill={c}/>
+      <text x="55" y="23" textAnchor="middle" fontSize="7" fill="#fff" fontWeight="bold">→ Enchaîné ✓</text>
+      {/* Versets en chaîne */}
+      {[{y:38,txt:"v.1 — 92% ✓",col:"#22c55e"},{y:60,txt:"v.2 — En cours…",col:c},{y:82,txt:"v.3 — En attente",col:"#ffffff30"},{y:104,txt:"v.4 — En attente",col:"#ffffff20"}].map((r,i)=>(
+        <g key={i}>
+          <rect x="20" y={r.y} width="160" height="15" rx="7" fill={i===1?c+"25":"#ffffff05"} stroke={i===1?c+"50":"transparent"} strokeWidth="1"/>
+          <text x="30" y={r.y+10} fontSize="7.5" fill={r.col}>{r.txt}</text>
+          {i===0&&<text x="172" y={r.y+10} textAnchor="end" fontSize="9" fill="#22c55e">✓</text>}
+        </g>
+      ))}
+    </svg>
+  ),
+  // MUSHAF
+  mushaf_0: (c) => (
+    <svg viewBox="0 0 200 130" fill="none">
+      {/* Two pages */}
+      <rect x="8" y="10" width="88" height="110" rx="6" fill="#f5f0e8" stroke={c+"50"} strokeWidth="1"/>
+      <rect x="104" y="10" width="88" height="110" rx="6" fill="#f5f0e8" stroke={c+"50"} strokeWidth="1"/>
+      <rect x="96" y="8" width="8" height="114" rx="4" fill={c} opacity=".3"/>
+      {/* Text lines */}
+      {[20,28,36,44,52,60,68,76,84,92,100].map((y,i)=>(
+        <g key={i}>
+          <line x1={i%4===0?20:16} y1={y} x2={88} y2={y} stroke={c} strokeWidth="1" opacity={i%5===2?0.8:0.3} strokeLinecap="round"/>
+          <line x1={104} y1={y} x2={i%4===0?184:188} y2={y} stroke={c} strokeWidth="1" opacity={i%5===2?0.8:0.3} strokeLinecap="round"/>
+        </g>
+      ))}
+      {/* Tajweed colors */}
+      <circle cx="30" cy="28" r="3" fill="#537FFF" opacity=".9"/>
+      <circle cx="50" cy="28" r="3" fill="#169200" opacity=".9"/>
+      <circle cx="70" cy="28" r="3" fill="#DD8800" opacity=".9"/>
+      {/* Swipe arrows */}
+      <text x="4" y="68" fontSize="14" fill={c} opacity=".7">‹</text>
+      <text x="192" y="68" fontSize="14" fill={c} opacity=".7">›</text>
+      {/* Page number */}
+      <text x="52" y="124" textAnchor="middle" fontSize="7" fill={c+"66"}>p. 1</text>
+      <text x="148" y="124" textAnchor="middle" fontSize="7" fill={c+"66"}>p. 2</text>
+    </svg>
+  ),
+  mushaf_1: (c) => (
+    <svg viewBox="0 0 200 130" fill="none">
+      {/* Edition selector */}
+      <rect x="10" y="10" width="180" height="30" rx="10" fill={c+"12"} stroke={c+"30"} strokeWidth="1"/>
+      <rect x="16" y="15" width="80" height="20" rx="8" fill={c}/>
+      <text x="56" y="28" textAnchor="middle" fontSize="7.5" fill="#fff" fontWeight="bold">Hafs (Tajweed)</text>
+      <rect x="104" y="15" width="80" height="20" rx="8" fill={c+"20"}/>
+      <text x="144" y="28" textAnchor="middle" fontSize="7.5" fill={c}>🇫🇷 Hafs + Traduction</text>
+      {/* Legend tajweed */}
+      {[["#537FFF","Madd naturel"],["#169200","Ghunna / Idgham"],["#DD8800","Qalqala"],["#D500B7","Ikhfa"]].map(([col,lbl],i)=>(
+        <g key={i}>
+          <circle cx="25" cy={56+i*16} r="5" fill={col}/>
+          <text x="36" y={60+i*16} fontSize="8" fill={col} fontWeight="bold">{lbl}</text>
+        </g>
+      ))}
+    </svg>
+  ),
+  mushaf_2: (c) => (
+    <svg viewBox="0 0 200 130" fill="none">
+      {/* Surah selector */}
+      <rect x="10" y="5" width="180" height="35" rx="10" fill="#000" stroke={c+"30"} strokeWidth="1"/>
+      <text x="100" y="20" textAnchor="middle" fontSize="7" fill={c+"80"}>Aller à une sourate…</text>
+      <rect x="20" y="26" width="160" height="8" rx="4" fill={c+"20"}/>
+      <rect x="20" y="26" width="60" height="8" rx="4" fill={c+"60"}/>
+      {/* Surah list */}
+      {[["1","Al-Fatiha","الفاتحة","p.1"],["18","Al-Kahf","الكهف","p.293"],["36","Ya-Sin","يس","p.440"],["67","Al-Mulk","الملك","p.562"]].map(([n,name,ar,pg],i)=>(
+        <g key={i}>
+          <rect x="10" y={46+i*20} width="180" height="17" rx="8" fill={i===0?c+"25":"#ffffff05"} stroke={i===0?c+"50":"transparent"} strokeWidth="1"/>
+          <text x="22" y={57+i*20} fontSize="8" fontWeight="bold" fill={i===0?c:"#ffffff80"}>{n}. {name}</text>
+          <text x="140" y={57+i*20} fontFamily="Amiri,serif" fontSize="9" fill={i===0?c:"#ffffff50"}>{ar}</text>
+          <text x="182" y={57+i*20} textAnchor="end" fontSize="7" fill={i===0?c:"#ffffff40"}>{pg}</text>
+        </g>
+      ))}
+    </svg>
+  ),
+  // KHATMA
+  khatma_0: (c) => (
+    <svg viewBox="0 0 200 130" fill="none">
+      {/* Preset cards */}
+      {[{x:10,y:10,l:"30 jours",d:"20 p/j",sel:true},{x:10,y:56,l:"60 jours",d:"10 p/j",sel:false},{x:104,y:10,l:"Ramadan",d:"20 p/j",sel:false},{x:104,y:56,l:"Perso.",d:"—",sel:false}].map((pr,i)=>(
+        <g key={i}>
+          <rect x={pr.x} y={pr.y} width="86" height="36" rx="10" fill={pr.sel?c+"25":"#ffffff06"} stroke={pr.sel?c:"#ffffff15"} strokeWidth={pr.sel?1.5:1}/>
+          <text x={pr.x+43} y={pr.y+17} textAnchor="middle" fontSize="10" fontWeight="bold" fill={pr.sel?c:"#ffffff60"}>{pr.l}</text>
+          <text x={pr.x+43} y={pr.y+30} textAnchor="middle" fontSize="7" fill={pr.sel?c+"88":"#ffffff30"}>{pr.d}</text>
+          {pr.sel&&<circle cx={pr.x+80} cy={pr.y+8} r="5" fill={c}/>}
+          {pr.sel&&<polyline points={`${pr.x+77},${pr.y+8} ${pr.x+79},${pr.y+10} ${pr.x+83},${pr.y+5}`} stroke="#fff" strokeWidth="1.5" strokeLinecap="round" fill="none"/>}
+        </g>
+      ))}
+      {/* Start button */}
+      <rect x="10" y="100" width="180" height="22" rx="11" fill={c}/>
+      <text x="100" y="114" textAnchor="middle" fontSize="9" fill="#fff" fontWeight="bold">Commencer la Khatma ✦</text>
+    </svg>
+  ),
+  khatma_1: (c) => (
+    <svg viewBox="0 0 200 130" fill="none">
+      {/* Progress bar */}
+      <rect x="10" y="10" width="180" height="20" rx="10" fill={c+"15"} stroke={c+"30"} strokeWidth="1"/>
+      <rect x="10" y="10" width="110" height="20" rx="10" fill={c}/>
+      <text x="65" y="23" textAnchor="middle" fontSize="8" fill="#fff" fontWeight="bold">60% — Jour 18/30</text>
+      {/* Calendar grid */}
+      {Array.from({length:30},(_,i)=>{
+        const x=15+(i%10)*18;
+        const y=42+Math.floor(i/10)*18;
+        const done=i<18;
+        return(
+          <g key={i}>
+            <rect x={x} y={y} width="14" height="14" rx="4" fill={done?c:c+"15"} stroke={done?c+"80":"#ffffff15"} strokeWidth="1"/>
+            <text x={x+7} y={y+10} textAnchor="middle" fontSize="6" fill={done?"#fff":c+"40"} fontWeight={done?"bold":"normal"}>{i+1}</text>
+          </g>
+        );
+      })}
+      {/* Today button */}
+      <rect x="10" y="100" width="86" height="22" rx="11" fill={c}/>
+      <text x="53" y="114" textAnchor="middle" fontSize="8" fill="#fff" fontWeight="bold">📖 Lire</text>
+      <rect x="104" y="100" width="86" height="22" rx="11" fill="#22c55e20" stroke="#22c55e50" strokeWidth="1"/>
+      <text x="147" y="114" textAnchor="middle" fontSize="8" fill="#22c55e" fontWeight="bold">👍 Journée lue</text>
+    </svg>
+  ),
+  // QUIZ
+  quiz_0: (c) => (
+    <svg viewBox="0 0 200 130" fill="none">
+      {/* Mode tabs */}
+      <rect x="10" y="10" width="86" height="24" rx="12" fill={c}/>
+      <text x="53" y="25" textAnchor="middle" fontSize="7.5" fill="#fff" fontWeight="bold">Quelle sourate ?</text>
+      <rect x="104" y="10" width="86" height="24" rx="12" fill={c+"20"} stroke={c+"40"} strokeWidth="1"/>
+      <text x="147" y="25" textAnchor="middle" fontSize="7.5" fill={c}>Complète le verset</text>
+      {/* Question */}
+      <rect x="10" y="42" width="180" height="32" rx="10" fill={c+"10"} stroke={c+"30"} strokeWidth="1"/>
+      <text x="100" y="55" textAnchor="middle" fontSize="7" fill={c+"88"}>Verset 1</text>
+      <text x="100" y="67" textAnchor="middle" fontFamily="Amiri Quran,serif" fontSize="11" fill="#ffffffcc">إِنَّٓا أَنزَلْنَٰهُ فِى لَيْلَةِ ٱلْقَدْرِ</text>
+      {/* Choices */}
+      {[{l:"Al-Qadr",ok:true},{l:"Al-Insan",ok:false},{l:"Al-Bayyina",ok:false},{l:"An-Naba",ok:false}].map((ch,i)=>(
+        <g key={i}>
+          <rect x={i<2?10:104} y={82+(i%2)*22} width="86" height="18" rx="9" fill={ch.ok?"#22c55e25":c+"10"} stroke={ch.ok?"#22c55e":c+"30"} strokeWidth={ch.ok?1.5:1}/>
+          <text x={i<2?53:147} y={82+(i%2)*22+11} textAnchor="middle" fontSize="8" fill={ch.ok?"#22c55e":c+"80"} fontWeight={ch.ok?"bold":"normal"}>{ch.ok?"✓ ":""}{ch.l}</text>
+        </g>
+      ))}
+    </svg>
+  ),
+  quiz_1: (c) => (
+    <svg viewBox="0 0 200 130" fill="none">
+      {/* Score card */}
+      <rect x="10" y="8" width="180" height="70" rx="12" fill={c+"10"} stroke={c+"30"} strokeWidth="1"/>
+      <text x="100" y="30" textAnchor="middle" fontSize="11" fontWeight="bold" fill={c}>📊 Session</text>
+      {/* Score bar */}
+      <rect x="25" y="40" width="150" height="12" rx="6" fill={c+"20"}/>
+      <rect x="25" y="40" width="112" height="12" rx="6" fill="#22c55e"/>
+      <text x="100" y="65" textAnchor="middle" fontSize="9" fill="#ffffffcc">7 correctes · 3 à revoir</text>
+      {/* Wrong items */}
+      {[{s:"Al-Insan v.3",txt:"يَوْمَ يَقُومُ ٱلنَّاسُ"},{ s:"Al-Qadr v.2",txt:"وَمَآ أَدْرَاكَ"}].map((w,i)=>(
+        <g key={i}>
+          <rect x="10" y={86+i*20} width="180" height="17" rx="8" fill="#ef444410" stroke="#ef444430" strokeWidth="1"/>
+          <text x="20" y={97+i*20} fontSize="7" fill="#ef4444">{w.s}</text>
+          <text x="180" y={97+i*20} textAnchor="end" fontFamily="Amiri,serif" fontSize="8" fill="#ef444488">{w.txt}</text>
+        </g>
+      ))}
+    </svg>
+  ),
+};
+
 const TUTORIAL_SECTIONS=[
   {
     id:"memo",label:"Mémorisation",icon:"📿",color:"#16a34a",
     steps:[
-      {title:"Ouvre une sourate",desc:"Dans l'onglet Coran → appuie sur une sourate pour voir ses versets.",visual:"coran"},
-      {title:"Marque un verset mémorisé",desc:"Sur chaque verset, appuie sur '+ Mémoriser'. Il devient vert avec une coche. Tu peux aussi mémoriser en glissant le verset vers la droite.",visual:"memorise"},
-      {title:"Suis ta progression",desc:"L'onglet Accueil montre ton anneau de progression, le nombre de versets et la date de fin estimée.",visual:"accueil"},
-      {title:"Révision espacée",desc:"L'onglet Révision te montre les versets dus pour révision. Le système SM2 calcule quand réviser pour ancrer la mémoire à long terme.",visual:"revision"},
+      {
+        title:"Choisis ta sourate",
+        tip:"Commence par Al-Fatiha ou les courtes sourates du Juz 30.",
+        desc:"Ouvre l'onglet Coran, parcours la liste ou filtre par Juz. Appuie sur n'importe quelle sourate pour afficher ses versets.",
+        visual:"memo_0",
+      },
+      {
+        title:"Marque un verset mémorisé",
+        tip:"Écoute le verset plusieurs fois avant de le marquer.",
+        desc:"Appuie sur « ✓ Mémoriser » sous le verset. Il passe au vert. Tu peux aussi mémoriser toute la sourate en une fois depuis le header.",
+        visual:"memo_1",
+      },
+      {
+        title:"Suis ta progression",
+        tip:"L'anneau sur l'accueil te montre ton % du Coran mémorisé.",
+        desc:"L'anneau de progression, les KPIs et la constellation des 114 sourates se mettent à jour en temps réel à chaque verset ajouté.",
+        visual:"memo_2",
+      },
+      {
+        title:"Révision espacée SM-2",
+        tip:"5 minutes de révision par jour valent mieux qu'1h par semaine.",
+        desc:"L'algorithme SM-2 calcule automatiquement quand revoir chaque verset. Plus tu révises correctement, plus l'intervalle s'allonge. Rien n'est oublié.",
+        visual:"memo_3",
+      },
     ],
   },
   {
     id:"recit",label:"Récitation",icon:"🎤",color:"#e91e63",
     steps:[
-      {title:"Lance la récitation",desc:"Dans une sourate, appuie sur '🎤 Récitation' en haut à droite. Un écran plein écran s'ouvre.",visual:"recit1"},
-      {title:"Appuie sur le micro",desc:"Le bouton rond démarre l'écoute. Récite le verset à voix haute en arabe. Le micro s'arrête automatiquement quand tu termines.",visual:"recit2"},
-      {title:"Lis ton score",desc:"Chaque mot est coloré en vert (correct) ou rouge souligné (erreur). Tu vois ce que tu as dit et combien de mots sont justes.",visual:"recit3"},
-      {title:"Mode enchaîné",desc:"Active '→ Enchaîné' pour enchaîner tous les versets automatiquement. Si tu dépasses 70%, le verset suivant se lance.",visual:"recit4"},
-    ],
-  },
-  {
-    id:"partial",label:"Lecture partielle",icon:"✂",color:"#0284c7",
-    steps:[
-      {title:"C'est quoi ?",desc:"Sur les versets longs (+5 mots), un bouton '✂ Partiel' apparaît dans les actions. Il permet de sélectionner une partie du verset.",visual:"partial1"},
-      {title:"Sélectionne les mots",desc:"Dans le modal, les mots sont affichés en arabe. Clique sur chaque mot pour l'inclure/exclure, ou utilise les sliders Début/Fin.",visual:"partial2"},
-      {title:"Utilisation",desc:"Idéal pour mémoriser bout par bout un verset difficile. Écoute et copie la partie sélectionnée.",visual:"partial3"},
-    ],
-  },
-  {
-    id:"wbw",label:"Mot à mot",icon:"📖",color:"#7c3aed",
-    steps:[
-      {title:"Accès mot à mot",desc:"Sur chaque verset, appuie sur '📖 Mot à mot'. Un panneau s'ouvre en bas avec chaque mot arabe et sa traduction française.",visual:"wbw1"},
-      {title:"Comprendre le Coran",desc:"Chaque mot est affiché en grand avec sa translittération et son sens. Idéal pour comprendre ce que tu mémorises.",visual:"wbw2"},
+      {
+        title:"Lance le mode récitation",
+        tip:"Autorise le micro la première fois — l'app ne stocke rien.",
+        desc:"Depuis une sourate, appuie sur « 🎤 Récitation » en haut. Un écran plein écran s'ouvre avec le verset à réciter.",
+        visual:"recit_0",
+      },
+      {
+        title:"Parle à voix haute",
+        tip:"Parle clairement, sans bruit de fond — la précision sera meilleure.",
+        desc:"Appuie sur le bouton micro et récite le verset en arabe. Les ondes t'indiquent que l'app t'écoute. Arrête-toi en fin de verset.",
+        visual:"recit_1",
+      },
+      {
+        title:"Analyse mot par mot",
+        tip:"Les mots rouges sont ceux à retravailler — pas de panique.",
+        desc:"Chaque mot reçoit une couleur : vert = correct, rouge souligné = à retravailler. Le score en % te donne une mesure objective.",
+        visual:"recit_2",
+      },
+      {
+        title:"Mode enchaîné — toute la sourate",
+        tip:"Vise 70% minimum pour que le verset suivant s'enchaîne.",
+        desc:"Active « → Enchaîné » pour réciter toute la sourate d'affilée. Si tu dépasses 70% sur un verset, le suivant se lance automatiquement.",
+        visual:"recit_3",
+      },
     ],
   },
   {
     id:"mushaf",label:"Mushaf",icon:"📜",color:"#b45309",
     steps:[
-      {title:"Naviguer",desc:"L'onglet Mushaf affiche les pages du Coran. Swipe gauche/droite ou utilise les boutons ◄ ► pour changer de page.",visual:"mushaf1"},
-      {title:"Mode Image vs Tajweed",desc:"'📖 Image' montre le Mushaf original. '🎨 Tajweed' affiche le texte avec les règles de tajweed colorées.",visual:"mushaf2"},
-      {title:"Aller à une sourate",desc:"En haut, un menu 'Aller à une sourate' te positionne directement sur la page de la sourate choisie.",visual:"mushaf3"},
-      {title:"Plein écran",desc:"Le bouton '⛶ Plein écran' t'offre une lecture immersive sans distraction.",visual:"mushaf4"},
+      {
+        title:"Navigue dans le Mushaf",
+        tip:"Swipe gauche = page suivante, swipe droite = page précédente.",
+        desc:"L'onglet Mushaf affiche les vraies pages du Coran en haute résolution. Swipe ou utilise ◄ ► pour tourner les pages. Appuie ⛶ pour le plein écran.",
+        visual:"mushaf_0",
+      },
+      {
+        title:"Choisir l'édition",
+        tip:"Hafs classique ou Hafs avec traduction française intégrée.",
+        desc:"Le sélecteur en haut de la barre permet de basculer entre l'édition Hafs standard et l'édition bilingue avec traduction française sous chaque verset.",
+        visual:"mushaf_1",
+      },
+      {
+        title:"Aller directement à une sourate",
+        tip:"Tape le nom ou le numéro dans la barre de recherche.",
+        desc:"Le menu déroulant « Aller à… » liste les 114 sourates avec leur page. Sélectionne et tu arrives instantanément à la bonne page du Mushaf.",
+        visual:"mushaf_2",
+      },
     ],
   },
   {
     id:"khatma",label:"Khatma",icon:"🌿",color:"#065f46",
     steps:[
-      {title:"Créer une khatma",desc:"Dans l'onglet Khatma, choisis un préset (30 jours, 60 jours…) ou personnalise. Lance ta khatma pour lire le Coran complet.",visual:"khatma1"},
-      {title:"Marquer les jours",desc:"Chaque jour, appuie sur '👍 Journée lue'. Ton streak de khatma s'incrémente et la progression avance.",visual:"khatma2"},
-      {title:"Lire depuis la khatma",desc:"Le bouton '📖 Lire maintenant' t'emmène directement à la page du Mushaf où tu t'es arrêté.",visual:"khatma3"},
-      {title:"Khatma collective",desc:"Invite des amis ou de la famille. Chacun couvre des juz différents. La khatma est complète quand les 30 juz sont couverts.",visual:"khatma4"},
+      {
+        title:"Lance une Khatma",
+        tip:"La khatma mensuelle (30 jours) est idéale pour commencer.",
+        desc:"Dans l'onglet Khatma, choisis un rythme : 30 jours, 60 jours, Ramadan ou personnalisé. Al-Hifz calcule combien de pages lire chaque jour.",
+        visual:"khatma_0",
+      },
+      {
+        title:"Suivi jour par jour",
+        tip:"Coche chaque jour pour maintenir ton streak.",
+        desc:"Le calendrier colore chaque journée cochée. « 📖 Lire » t'amène directement à ta page dans le Mushaf. « 👍 Journée lue » valide la journée.",
+        visual:"khatma_1",
+      },
     ],
   },
   {
     id:"quiz",label:"Quiz",icon:"🎯",color:"#1d4ed8",
     steps:[
-      {title:"Deux modes",desc:"'Quelle sourate ?' — tu vois un verset et tu choisis la sourate. 'Complète le verset' — tu dois finir un verset partiel.",visual:"quiz1"},
-      {title:"Filtrer par mémorisés",desc:"Par défaut le quiz porte sur tes versets mémorisés. Tu peux aussi choisir une sourate spécifique ou tout le Coran embarqué.",visual:"quiz2"},
-      {title:"Revoir tes erreurs",desc:"En bas de la session, chaque erreur est cliquable. Tu vois le verset complet avec sa traduction pour mieux l'ancrer.",visual:"quiz3"},
+      {
+        title:"Deux modes de quiz",
+        tip:"Commence par « Quelle sourate ? » — c'est le plus accessible.",
+        desc:"Mode 1 : tu vois un verset et tu devines la sourate parmi 4 choix. Mode 2 : tu vois le début d'un verset et tu dois en retrouver la suite.",
+        visual:"quiz_0",
+      },
+      {
+        title:"Revoir ses erreurs",
+        tip:"Les erreurs répétées signalent les versets à mémoriser en priorité.",
+        desc:"Après chaque question, les erreurs s'accumulent en bas. Clique dessus pour voir le verset complet avec sa traduction et l'ancrer davantage.",
+        visual:"quiz_1",
+      },
     ],
   },
 ];
@@ -972,7 +1435,9 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
   const currentStep=section?.steps[step];
   const isLastStep=step===section?.steps.length-1;
   const isLastSection=activeSection===TUTORIAL_SECTIONS.length-1;
-  const bg=tn==="light"?"#fafaf8":"#0a150b";
+  const totalSteps=TUTORIAL_SECTIONS.reduce((a,s)=>a+s.steps.length,0);
+  const completedSteps=TUTORIAL_SECTIONS.slice(0,activeSection).reduce((a,s)=>a+s.steps.length,0)+step+1;
+  const bg=tn==="light"?"#fafaf8":"#08100a";
 
   const goNext=()=>{
     if(!isLastStep){setStep(p=>p+1);}
@@ -984,81 +1449,165 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
     else if(activeSection>0){setActiveSection(p=>p-1);setStep(TUTORIAL_SECTIONS[activeSection-1].steps.length-1);}
   };
 
+  const VisualComp=TUTO_VISUALS[currentStep?.visual];
+
   return(
-    <div style={{position:"fixed",inset:0,zIndex:500,background:bg,display:"flex",flexDirection:"column",overflowY:"auto"}}>
-      <style>{`@keyframes tutoIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}`}</style>
+    <div style={{position:"fixed",inset:0,zIndex:500,background:bg,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+      <style>{`
+        @keyframes tutoIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes tutoSlide{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+      `}</style>
 
       {/* Header */}
-      <div style={{display:"flex",alignItems:"center",padding:"14px 16px",paddingTop:"max(14px,env(safe-area-inset-top))",borderBottom:`1px solid ${t.b1}`,flexShrink:0,gap:10}}>
-        <div style={{flex:1}}>
-          <div style={{fontSize:".54rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"2px",marginBottom:2}}>Tutoriel</div>
-          <div style={{fontSize:".9rem",fontWeight:700,color:t.tx}}>{section.icon} {section.label}</div>
+      <div style={{
+        display:"flex",alignItems:"center",gap:12,
+        padding:"14px 16px",paddingTop:"max(14px,env(safe-area-inset-top))",
+        borderBottom:`1px solid ${t.b1}`,flexShrink:0,
+        background:tn==="light"?"rgba(255,255,255,.95)":"rgba(8,16,10,.95)",
+        backdropFilter:"blur(12px)",
+      }}>
+        <button onClick={goPrev} disabled={activeSection===0&&step===0}
+          style={{width:34,height:34,borderRadius:"50%",border:`1px solid ${activeSection===0&&step===0?t.b1:t.b2}`,background:t.s2,color:activeSection===0&&step===0?t.tx3:t.tx,cursor:activeSection===0&&step===0?"default":"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:".85rem",opacity:activeSection===0&&step===0?.35:1,transition:"all .2s"}}>
+          ←
+        </button>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+            <span style={{fontSize:".65rem",color:section.color,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px"}}>{section.icon} {section.label}</span>
+            <span style={{fontSize:".58rem",color:t.tx3,marginLeft:"auto"}}>{completedSteps}/{totalSteps}</span>
+          </div>
+          {/* Progress bar */}
+          <div style={{height:4,background:t.b1,borderRadius:99,overflow:"hidden"}}>
+            <div style={{height:"100%",width:`${(completedSteps/totalSteps)*100}%`,background:`linear-gradient(90deg,${section.color},${section.color}aa)`,borderRadius:99,transition:"width .4s ease"}}/>
+          </div>
         </div>
-        <span style={{fontSize:".62rem",color:t.tx3}}>{step+1}{"/"}{section.steps.length}</span>
-        <button onClick={onClose} style={{width:30,height:30,borderRadius:"50%",border:`1px solid ${t.b2}`,background:t.s2,color:t.tx3,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <button onClick={onClose}
+          style={{width:34,height:34,borderRadius:"50%",border:`1px solid ${t.b2}`,background:t.s2,color:t.tx3,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:".75rem"}}>
+          ✕
         </button>
       </div>
 
-      {/* Navigation sections */}
-      <div style={{display:"flex",gap:6,padding:"10px 14px",overflowX:"auto",borderBottom:`1px solid ${t.b1}`,flexShrink:0,scrollbarWidth:"none"}}>
-        {TUTORIAL_SECTIONS.map((s,i)=>(
-          <button key={s.id} onClick={()=>{setActiveSection(i);setStep(0);}} style={{padding:"5px 12px",borderRadius:99,border:`1.5px solid ${i===activeSection?s.color:t.b2}`,background:i===activeSection?`${s.color}15`:t.s2,color:i===activeSection?s.color:t.tx3,fontSize:".62rem",fontWeight:i===activeSection?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,transition:"all .2s"}}>
-            {s.icon} {s.label}
-          </button>
-        ))}
+      {/* Section tabs */}
+      <div style={{display:"flex",gap:6,padding:"10px 14px",overflowX:"auto",borderBottom:`1px solid ${t.b1}`,flexShrink:0,scrollbarWidth:"none",WebkitOverflowScrolling:"touch"}}>
+        {TUTORIAL_SECTIONS.map((s,i)=>{
+          const done=i<activeSection;
+          const active=i===activeSection;
+          return(
+            <button key={s.id} onClick={()=>{setActiveSection(i);setStep(0);}} style={{
+              padding:"6px 14px",borderRadius:99,flexShrink:0,cursor:"pointer",
+              border:`1.5px solid ${active?s.color:done?"#22c55e44":t.b2}`,
+              background:active?`${s.color}18`:done?"#22c55e0a":t.s2,
+              color:active?s.color:done?"#22c55e":t.tx3,
+              fontSize:".65rem",fontWeight:active?700:400,
+              transition:"all .2s",display:"flex",alignItems:"center",gap:4,
+            }}>
+              {done?<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>:s.icon}
+              {s.label}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Barre de progression */}
-      <div style={{height:3,background:t.b1,flexShrink:0}}>
-        <div style={{height:"100%",width:`${((activeSection*10+step+1)/(TUTORIAL_SECTIONS.reduce((a,s)=>a+s.steps.length,0)))*100}%`,background:section.color,transition:"width .4s ease"}}/>
-      </div>
+      {/* Main content */}
+      <div key={`${activeSection}-${step}`} style={{
+        flex:1,display:"flex",flexDirection:"column",
+        padding:"20px 18px 8px",gap:16,overflowY:"auto",
+        animation:"tutoSlide .3s ease",
+      }}>
 
-      {/* Contenu du step */}
-      <div key={`${activeSection}-${step}`} style={{flex:1,display:"flex",flexDirection:"column",padding:"24px 20px",gap:20,animation:"tutoIn .3s ease",overflowY:"auto"}}>
-
-        {/* Illustration */}
-        <div style={{width:"100%",borderRadius:16,background:`${section.color}10`,border:`1.5px solid ${section.color}30`,padding:"28px 20px",display:"flex",alignItems:"center",justifyContent:"center",minHeight:160,position:"relative",overflow:"hidden"}}>
-          <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse at 50% 0%,${section.color}15,transparent 70%)`,pointerEvents:"none"}}/>
-          {/* Illustration basée sur la section */}
-          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:12,textAlign:"center",position:"relative",zIndex:1}}>
-            <div style={{fontSize:"3.5rem",lineHeight:1}}>{section.icon}</div>
-            <div style={{fontFamily:"Amiri,serif",fontSize:"1.1rem",color:section.color,fontWeight:700}}>{currentStep?.title}</div>
-            <div style={{fontSize:".65rem",color:t.tx3,maxWidth:280,lineHeight:1.5}}>
-              {step===0?"Étape 1 sur "+section.steps.length:`Étape ${step+1} sur ${section.steps.length}`}
+        {/* Visual */}
+        {VisualComp&&(
+          <div style={{
+            width:"100%",borderRadius:16,overflow:"hidden",
+            background:tn==="dark"?"#0d1a10":"#f0f7f0",
+            border:`1.5px solid ${section.color}25`,
+            padding:"16px 0 8px",
+            display:"flex",alignItems:"center",justifyContent:"center",
+            minHeight:140,flexShrink:0,
+            boxShadow:`inset 0 0 40px ${section.color}08`,
+          }}>
+            <div style={{width:"100%",maxWidth:260,padding:"0 16px"}}>
+              <VisualComp/>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Description */}
-        <div style={{padding:"18px 16px",background:t.s2,borderRadius:14,border:`1px solid ${t.b1}`}}>
-          <div style={{fontSize:".88rem",color:t.tx,lineHeight:1.8,fontWeight:500}}>{currentStep?.desc}</div>
-        </div>
-
-        {/* Liste de steps de la section */}
-        <div style={{display:"flex",flexDirection:"column",gap:8}}>
-          {section.steps.map((s,i)=>(
-            <div key={i} onClick={()=>setStep(i)} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 14px",borderRadius:10,border:`1.5px solid ${i===step?section.color:t.b1}`,background:i===step?`${section.color}10`:t.s2,cursor:"pointer",transition:"all .15s"}}>
-              <div style={{width:26,height:26,borderRadius:"50%",background:i<step?section.color:i===step?`${section.color}20`:t.b1,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                {i<step
-                  ?<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  :<span style={{fontSize:".65rem",fontWeight:700,color:i===step?section.color:t.tx3}}>{i+1}</span>
-                }
-              </div>
-              <span style={{fontSize:".78rem",fontWeight:i===step?700:400,color:i===step?section.color:t.tx2}}>{s.title}</span>
+        {/* Step content */}
+        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <div style={{
+              width:30,height:30,borderRadius:"50%",
+              background:`linear-gradient(135deg,${section.color},${section.color}88)`,
+              display:"flex",alignItems:"center",justifyContent:"center",
+              fontSize:".8rem",fontWeight:800,color:"#fff",flexShrink:0,
+            }}>
+              {step+1}
             </div>
+            <div style={{fontSize:"1rem",fontWeight:800,color:t.tx,lineHeight:1.2}}>
+              {currentStep?.title}
+            </div>
+          </div>
+
+          {/* Description */}
+          <div style={{
+            padding:"14px 16px",borderRadius:12,
+            background:t.s2,border:`1px solid ${t.b1}`,
+            fontSize:".85rem",color:t.tx2,lineHeight:1.75,
+          }}>
+            {currentStep?.desc}
+          </div>
+
+          {/* Pro tip */}
+          {currentStep?.tip&&(
+            <div style={{
+              display:"flex",alignItems:"flex-start",gap:10,
+              padding:"10px 14px",borderRadius:10,
+              background:`${section.color}0d`,
+              border:`1px solid ${section.color}30`,
+            }}>
+              <span style={{fontSize:"1rem",flexShrink:0,marginTop:1}}>💡</span>
+              <div style={{fontSize:".78rem",color:section.color,lineHeight:1.6,fontWeight:500}}>
+                {currentStep.tip}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Step dots for current section */}
+        <div style={{display:"flex",gap:8,justifyContent:"center",paddingBottom:4}}>
+          {section.steps.map((_,i)=>(
+            <div key={i} onClick={()=>setStep(i)} style={{
+              width:i===step?20:7,height:7,borderRadius:99,
+              background:i<step?"#22c55e":i===step?section.color:t.b2,
+              cursor:"pointer",transition:"all .3s",
+            }}/>
           ))}
         </div>
       </div>
 
-      {/* Footer navigation */}
-      <div style={{display:"flex",gap:8,padding:"12px 16px",paddingBottom:"max(12px,env(safe-area-inset-bottom))",borderTop:`1px solid ${t.b1}`,flexShrink:0,alignItems:"center"}}>
-        <button onClick={goPrev} disabled={activeSection===0&&step===0} style={{padding:"11px 16px",borderRadius:12,border:`1px solid ${t.b2}`,background:t.s2,color:t.tx2,cursor:"pointer",fontSize:".75rem",fontWeight:600,opacity:activeSection===0&&step===0?.35:1}}>←</button>
-        <div style={{flex:1,textAlign:"center",fontSize:".62rem",color:t.tx3}}>
-          {isLastSection&&isLastStep?"Fin du tutoriel !":isLastStep?"Section suivante : "+TUTORIAL_SECTIONS[activeSection+1]?.label:`${section.steps.length-step-1} étape${section.steps.length-step-1>1?"s":""} restante${section.steps.length-step-1>1?"s":""}`}
-        </div>
-        <button onClick={goNext} style={{padding:"11px 20px",borderRadius:12,border:"none",background:section.color,color:"#fff",cursor:"pointer",fontSize:".78rem",fontWeight:700}}>
-          {isLastSection&&isLastStep?"Terminer ✓":isLastStep?"Section suivante →":"Suivant →"}
+      {/* Footer */}
+      <div style={{
+        padding:"12px 18px",
+        paddingBottom:"max(16px,env(safe-area-inset-bottom))",
+        borderTop:`1px solid ${t.b1}`,flexShrink:0,
+        background:tn==="light"?"rgba(255,255,255,.95)":"rgba(8,16,10,.95)",
+        backdropFilter:"blur(12px)",
+      }}>
+        <button onClick={goNext} style={{
+          width:"100%",padding:"15px",
+          background:isLastSection&&isLastStep
+            ?`linear-gradient(135deg,#22c55e,#16a34a)`
+            :`linear-gradient(135deg,${section.color},${section.color}bb)`,
+          border:"none",borderRadius:14,color:"#fff",
+          fontWeight:800,fontSize:".9rem",cursor:"pointer",
+          boxShadow:`0 4px 20px ${section.color}44`,
+          transition:"all .2s",
+        }}>
+          {isLastSection&&isLastStep
+            ?"🎉 Terminer le guide"
+            :isLastStep
+            ?`${TUTORIAL_SECTIONS[activeSection+1]?.icon} ${TUTORIAL_SECTIONS[activeSection+1]?.label} →`
+            :"Suivant →"
+          }
         </button>
       </div>
     </div>
@@ -1384,8 +1933,7 @@ function MushafTajweedView({page,fullscreen,edition}){
           userSelect:"none",
           WebkitUserSelect:"none",
           // Mode nuit : inverser les couleurs de l'image
-          filter:nightMode?"invert(1) sepia(1) saturate(3) hue-rotate(90deg) brightness(.85)":"none",
-          transition:"filter .3s",
+          filter:"none",
         }}
         draggable={false}
       />
@@ -1421,7 +1969,7 @@ const fetchMushafPageUrl=async(pg, editionId)=>{
     return d?.page?.image_url||null;
   }catch{return null;}
 };
-function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onNext,onPrev,onGoTo,onRecite}) {
+function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onNext,onPrev,onGoTo,onRecite,mushafEdition,setMushafEdition,MUSHAF_EDITIONS}) {
   const ed=edition||MUSHAF_EDITIONS[0];
     const touchStart=useRef(null);
   const touchStartY=useRef(null);
@@ -1436,27 +1984,33 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
     touchStart.current=null;touchStartY.current=null;
   };
 
+  // iOS fix: always use position:fixed so MushafPage never scrolls with the body
   const outer=fullscreen
     ?{position:"fixed",inset:0,zIndex:200,background:"#0d1000",display:"flex",flexDirection:"column",overflow:"hidden"}
-    :{width:"100%",minHeight:480,background:"#0d1000",display:"flex",flexDirection:"column",borderRadius:"0 0 14px 14px"};
+    :{position:"fixed",top:0,left:0,right:0,bottom:"calc(60px + env(safe-area-inset-bottom))",zIndex:10,background:"#0d1000",display:"flex",flexDirection:"column",overflow:"hidden"};
 
   const SURAH_PAGES=[1,2,50,77,106,128,150,177,187,208,221,235,249,255,262,267,271,274,278,282,287,291,294,296,299,302,304,306,308,311,313,315,317,320,322,325,328,331,334,336,338,340,342,344,346,348,350,351,353,354,355,356,358,359,360,361,362,363,364,365,366,367,367,368,369,369,370,371,371,372,373,373,374,374,375,376,376,377,377,378,378,379,379,380,380,381,381,381,382,382,382,383,383,383,384,384,384,385,385,385,386,386,386,387,387,387,388,388,388,389,389,389,390,390,390,391,391,392,392,392,393,393,393,394,394,394,395,395,395,396,396,396,397,397,397,398,398,398,399,399,399,400,400,400,401,401,401,402,402,402,403,403,403,404,404,404,405,405,405,406,406,406,407,407,407,408,408,408,409,409,409,410,410,410,411,411,411,412,412,412,413,413,413,414,414,414,415,415,415,416,416,416,417,417,417,418,418,418,419,419,420,420,421,421,422,422,423,423,424,425,426,427,428,429,430,431,433,434,435,436,437,438,439,440,441,442,443,444,445,447,449,451,453,455,457,459,461,462,463,464,465,466,467,468,469,470,471,472,473,474,475,476,477,478,479,480,481,482,483,484,485,486,487,488,489,490,491,492,493,494,495,496,497,498,499,500,501,502,503,504,505,506,507,508,509,510,511,512,513,514,515,516,517,518,519,520,521,522,523,524,525,526,527,528,529,530,531,532,533,534,535,536,537,538,539,540,541,542,543,544,545,546,547,548,549,550,551,552,553,554,555,556,557,558,559,560,561,562,563,564,565,566,567,568,569,570,571,572,573,574,575,576,577,578,579,580,581,582,583,584,585,586,587,588,589,590,591,592,593,594,595,596,597,598,599,600,601,602,603,604];
 
   return (
     <div style={outer} onTouchStart={onTS} onTouchEnd={onTE}>
       {/* Barre nav propre */}
-      <div style={{display:"flex",alignItems:"center",gap:6,padding:"7px 10px",background:"rgba(0,0,0,.7)",flexShrink:0,borderBottom:"1px solid rgba(201,168,76,.15)"}}>
+      <div style={{display:"flex",alignItems:"center",gap:6,padding:"7px 10px",paddingTop:"max(7px,env(safe-area-inset-top))",background:"rgba(0,0,0,.7)",flexShrink:0,borderBottom:"1px solid rgba(201,168,76,.15)"}}>
         <button onClick={onPrev} style={{background:"rgba(201,168,76,.12)",border:"1px solid rgba(201,168,76,.22)",color:AC,padding:"5px 12px",borderRadius:8,cursor:"pointer",fontWeight:700,fontSize:".85rem"}}>◄</button>
 
         {/* Sélecteur sourate */}
         <select onChange={e=>{const sn=parseInt(e.target.value);if(!sn||!onGoTo)return;onGoTo(SURAH_PAGES[sn-1]||1);e.target.value="";}} style={{flex:1,padding:"4px 8px",borderRadius:7,border:"1px solid rgba(201,168,76,.3)",background:"rgba(0,0,0,.4)",color:AC,fontSize:".6rem",cursor:"pointer",outline:"none"}} defaultValue="">
-          <option value="">📖 p.{page||1} — Aller à une sourate…</option>
+          <option value="">📖 p.{page||1} — Aller à…</option>
           {SURAHS.map(s=><option key={s.n} value={s.n}>{s.n}. {s.name} · {s.ar}</option>)}
         </select>
 
         {/* Boutons actions */}
         <div style={{display:"flex",gap:4,flexShrink:0}}>
-                    {/* Récitation */}
+          {/* Sélecteur édition */}
+          <select value={mushafEdition||"hafs"} onChange={e=>setMushafEdition&&setMushafEdition(e.target.value)} style={{padding:"5px 6px",borderRadius:8,border:"1px solid rgba(201,168,76,.3)",background:"rgba(0,0,0,.5)",color:AC,fontSize:".58rem",cursor:"pointer",outline:"none"}}>
+            <option value="tajwid_hafs">Hafs</option>
+            <option value="tajwid_fr">🇫🇷 Français</option>
+          </select>
+          {/* Récitation */}
           {onRecite&&<button onClick={()=>onRecite(page||1)} title="Réciter cette page" style={{background:"rgba(233,30,99,.15)",border:"1px solid rgba(233,30,99,.3)",color:"#e91e63",padding:"5px 8px",borderRadius:8,cursor:"pointer",fontSize:".75rem"}}>🎤</button>}
           {/* Plein écran */}
           <button onClick={onToggleFullscreen} style={{background:"rgba(201,168,76,.12)",border:"1px solid rgba(201,168,76,.3)",color:AC,padding:"5px 8px",borderRadius:8,cursor:"pointer",fontSize:".7rem",fontWeight:700}}>{fullscreen?"✕":"⛶"}</button>
@@ -1528,14 +2082,14 @@ body>*{position:relative;z-index:1;}
 .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 10% 50%,${acc}08 0%,transparent 60%),radial-gradient(ellipse at 90% 50%,${acc}08 0%,transparent 60%);pointer-events:none;}
 .hero-i{max-width:1200px;margin:0 auto;position:relative;}
 /* ── Bottom nav ── */
-.bnav{position:fixed;bottom:0;left:0;right:0;z-index:60;background:${t.navBg}ee;border-top:1px solid ${t.b1};display:flex;align-items:stretch;height:calc(62px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 -4px 20px ${t.acc}10;}
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:60;background:${t.navBg}e8;border-top:1px solid ${t.b1};display:flex;align-items:stretch;height:calc(62px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);backdrop-filter:blur(32px) saturate(1.8);-webkit-backdrop-filter:blur(32px) saturate(1.8);box-shadow:0 -1px 0 ${acc}30, 0 -8px 40px rgba(0,0,0,.32), 0 -2px 12px rgba(0,0,0,.2);}
 .bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:transparent;color:${t.tx3};font-size:.58rem;font-weight:500;cursor:pointer;transition:all .25s;padding:6px 2px;position:relative;}
 .bn:hover{color:${t.tx2};transform:translateY(-2px);}
 .bn.on{color:${acc};}
 .bn.on::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:linear-gradient(90deg,${acc},${acc2});border-radius:0 0 99px 99px;box-shadow:0 0 6px ${acc};}
 .bn-lbl{font-size:.52rem;font-weight:500;}
 /* ── Layout ── */
-.wrap{max-width:1200px;margin:0 auto;padding:14px 16px calc(120px + env(safe-area-inset-bottom));padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));width:100%;box-sizing:border-box;overflow-x:hidden;overscroll-behavior-x:none;}
+.wrap{max-width:1200px;margin:0 auto;padding:14px 16px calc(120px + env(safe-area-inset-bottom));padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));width:100%;box-sizing:border-box;overflow-x:hidden;overscroll-behavior:none;}
 .two{display:grid;grid-template-columns:300px 1fr;gap:12px;align-items:start;}
 /* ── Cards — hover effect ── */
 .card{background:${t.cardBg};border:1px solid ${t.b1};border-radius:14px;overflow:hidden;transition:box-shadow .25s,border-color .25s;}
@@ -3390,727 +3944,9 @@ return (
       </div>}
 
       {page==="mushaf"&&(
-        <div style={{position:"fixed",inset:0,zIndex:10,display:"flex",flexDirection:"column",background:"#0a1200",paddingTop:"env(safe-area-inset-top)",paddingBottom:"calc(62px + env(safe-area-inset-bottom))"}}>
-          <div style={{display:"flex",gap:6,padding:"8px 12px",background:"rgba(0,0,0,.8)",flexShrink:0,overflowX:"auto",borderBottom:"1px solid rgba(201,168,76,.2)",scrollbarWidth:"none"}}>
-            {MUSHAF_EDITIONS.map(ed=>(
-              <button key={ed.id} onClick={()=>setMushafEdition(ed.id)} style={{display:"flex",alignItems:"center",gap:7,padding:"7px 14px",borderRadius:22,border:"1.5px solid "+(mushafEdition===ed.id?"#c9a84c":"rgba(201,168,76,.25)"),background:mushafEdition===ed.id?"rgba(201,168,76,.18)":"rgba(255,255,255,.04)",color:mushafEdition===ed.id?"#c9a84c":"rgba(201,168,76,.5)",fontSize:".62rem",fontWeight:mushafEdition===ed.id?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,transition:"all .2s"}}>
-                <span style={{fontSize:"1rem"}}>{ed.coverIcon}</span>
-                <span>{ed.name}</span>
-              </button>
-            ))}
-          </div>
-          <div style={{flex:1,overflow:"hidden",display:"flex",flexDirection:"column"}}>
-            <MushafPage page={mushafPage||1} t={t} tjc={tjc} arFont={arFont} edition={MUSHAF_EDITIONS.find(e=>e.id===mushafEdition)||MUSHAF_EDITIONS[0]} fullscreen={mushafFullscreen} onToggleFullscreen={()=>setMushafFullscreen(f=>!f)} onNext={()=>goToPage(Math.min(604,(mushafPage||1)+1))} onPrev={()=>goToPage(Math.max(1,(mushafPage||1)-1))} onGoTo={(pg)=>goToPage(pg)}/>
-          </div>
-        </div>
+        <MushafPage page={mushafPage||1} t={t} tjc={tjc} arFont={arFont} edition={MUSHAF_EDITIONS.find(e=>e.id===mushafEdition)||MUSHAF_EDITIONS[0]} fullscreen={mushafFullscreen} onToggleFullscreen={()=>setMushafFullscreen(f=>!f)} onNext={()=>goToPage(Math.min(604,(mushafPage||1)+1))} onPrev={()=>goToPage(Math.max(1,(mushafPage||1)-1))} onGoTo={(pg)=>goToPage(pg)} mushafEdition={mushafEdition} setMushafEdition={setMushafEdition} MUSHAF_EDITIONS={MUSHAF_EDITIONS}/>
       )}
-      <div className={`wrap${pageTransition?" transitioning":""}`}>
 
-        {/* ACCUEIL */}
-        {page==="home"&&(
-          <div style={{display:"flex",flexDirection:"column",gap:14}}>
-
-            {/* ── Bloc Al-Hifz exact ── */}
-            <div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,borderRadius:16,border:`1px solid ${t.b1}`,position:"relative",overflow:"hidden"}}>
-              {/* Décoration bordure haut */}
-              <svg style={{position:"absolute",top:0,left:0,width:"100%",height:12,display:"block"}} preserveAspectRatio="none" viewBox="0 0 800 12">
-                <defs><linearGradient id="bord2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="transparent"/><stop offset=".15" stopColor={acc}/><stop offset=".5" stopColor={acc3}/><stop offset=".85" stopColor={acc}/><stop offset="1" stopColor="transparent"/></linearGradient></defs>
-                <rect y="0" width="800" height="1.5" fill="url(#bord2)"/>
-              </svg>
-              <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse at 50% 100%,${acc}0e 0%,transparent 70%)`,pointerEvents:"none"}}/>
-
-              <div style={{padding:"18px 16px 14px"}}>
-                {/* Title */}
-                <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,marginBottom:14}}>
-                  <svg width="60" height="8" viewBox="0 0 80 10"><line x1="0" y1="5" x2="55" y2="5" stroke={acc} strokeWidth=".8" opacity=".4"/><circle cx="62" cy="5" r="2.5" fill="none" stroke={acc} strokeWidth=".8" opacity=".6"/><circle cx="72" cy="5" r="1.5" fill={acc} opacity=".5"/></svg>
-                  <div style={{textAlign:"center"}}>
-                    <div style={{fontFamily:"Amiri,serif",fontSize:"1.6rem",fontWeight:700,color:acc,lineHeight:1,letterSpacing:"1px",textShadow:`0 0 30px ${acc}55`}}>Al-Hifz</div>
-                    <div style={{fontSize:".46rem",textTransform:"uppercase",letterSpacing:"4px",color:t.tx3,marginTop:2}}>حفظ القرآن الكريم</div>
-                  </div>
-                  <svg width="60" height="8" viewBox="0 0 80 10" style={{transform:"scaleX(-1)"}}><line x1="0" y1="5" x2="55" y2="5" stroke={acc} strokeWidth=".8" opacity=".4"/><circle cx="62" cy="5" r="2.5" fill="none" stroke={acc} strokeWidth=".8" opacity=".6"/><circle cx="72" cy="5" r="1.5" fill={acc} opacity=".5"/></svg>
-                </div>
-
-                {/* Ring + KPIs */}
-                <div style={{display:"flex",gap:14,alignItems:"stretch"}}>
-                  {/* Circular progress */}
-                  <div style={{flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
-                    <div style={{position:"relative",width:88,height:88}}>
-                      <svg width="88" height="88" viewBox="0 0 88 88">
-                        <defs><linearGradient id="cg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor={acc}/><stop offset="1" stopColor={acc3}/></linearGradient><filter id="glow2h"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-                        <circle cx="44" cy="44" r="42" fill="none" stroke={acc} strokeWidth=".4" opacity=".2" strokeDasharray="3,4"/>
-                        <circle cx="44" cy="44" r="35" fill="none" stroke={t.b1} strokeWidth="7"/>
-                        <circle cx="44" cy="44" r="35" fill="none" stroke="url(#cg2)" strokeWidth="7" strokeDasharray={`${2*Math.PI*35*pct/100} ${2*Math.PI*35*(1-pct/100)}`} strokeLinecap="round" transform="rotate(-90 44 44)" filter="url(#glow2h)" style={{transition:"stroke-dasharray 1.2s cubic-bezier(.4,0,.2,1)"}}/>
-                        <g transform="translate(44,44)" opacity=".15">{[0,60,120,180,240,300].map(a=>(<line key={a} x1="0" y1="-12" x2="0" y2="-7" stroke={acc} strokeWidth=".8" transform={`rotate(${a})`}/>))}</g>
-                      </svg>
-                      <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
-                        <div style={{fontSize:"1.55rem",fontWeight:800,color:acc,lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{pct}<span style={{fontSize:".65rem",fontWeight:600}}>%</span></div>
-                        <div style={{fontSize:".46rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px"}}>mémorisé</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* KPIs droite */}
-                  <div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",gap:8}}>
-                    {/* Barre progression */}
-                    <div>
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}>
-                        <span style={{fontSize:".55rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1.5px"}}>Progression</span>
-                        <div style={{display:"flex",gap:5}}>
-                          <span style={{fontSize:".7rem",color:acc,fontWeight:800,fontVariantNumeric:"tabular-nums"}}>{pct}%</span>
-                          <span style={{fontSize:".55rem",color:t.tx3}}>{totalMem.toLocaleString()}{"/"}{TOTAL_VERSES}</span>
-                        </div>
-                      </div>
-                      <div style={{position:"relative",height:11,background:t.b1,borderRadius:99,overflow:"hidden",boxShadow:"inset 0 2px 6px rgba(0,0,0,.15)"}}>
-                        <div style={{height:"100%",width:`${pct}%`,borderRadius:99,background:`linear-gradient(90deg,${acc},${acc2},${acc3})`,boxShadow:`0 0 10px ${acc}99`,transition:"width 1.2s cubic-bezier(.4,0,.2,1)",position:"relative",minWidth:pct>0?"12px":"0"}}>
-                          <div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent)",backgroundSize:"200% 100%",animation:"shimmer 2.5s infinite",borderRadius:99}}/>
-                        </div>
-                        {pct>2&&<div style={{position:"absolute",top:"50%",transform:"translateY(-50%)",left:`calc(${pct}% - 6px)`,width:11,height:11,borderRadius:"50%",background:"#fff",boxShadow:`0 0 6px ${acc}`,opacity:.9}}/>}
-                      </div>
-                      <div style={{display:"flex",justifyContent:"space-between",marginTop:3}}>
-                        <span style={{fontSize:".5rem",color:t.tx3}}>0</span>
-                        {[25,50,75].map(m=><span key={m} style={{fontSize:".5rem",color:pct>=m?acc:t.tx3,fontWeight:pct>=m?700:400}}>{m}%</span>)}
-                        <span style={{fontSize:".5rem",color:pct>=100?t.gr:t.tx3,fontWeight:pct>=100?700:400}}>✓</span>
-                      </div>
-                    </div>
-                    {/* 4 KPIs */}
-                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"5px 6px"}}>
-                      <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:t.s3,borderRadius:7}}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.bl} strokeWidth="1.5" strokeLinecap="round" opacity=".8"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-5 0v-15A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 8A2.5 2.5 0 0 1 17 10.5v9a2.5 2.5 0 0 1-5 0v-9A2.5 2.5 0 0 1 14.5 8Z"/></svg>
-                        <div><div style={{fontSize:".8rem",fontWeight:700,color:t.bl,lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{vpd}<span style={{fontSize:".52rem",fontWeight:500}}> v/j</span></div><div style={{fontSize:".44rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Rythme</div></div>
-                      </div>
-                      <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:t.s3,borderRadius:7}}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round" opacity=".8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-                        <div><div style={{fontSize:".8rem",fontWeight:700,color:daysLeft<=0?t.gr:"#f97316",lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{daysLeft>0?(daysLeft>365?`~${(daysLeft/365).toFixed(1)}a`:`${daysLeft}j`):"Fini!"}</div><div style={{fontSize:".44rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Avant fin</div></div>
-                      </div>
-                      <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:t.s3,borderRadius:7}}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.gr} strokeWidth="1.5" strokeLinecap="round" opacity=".8"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                        <div><div style={{fontSize:".8rem",fontWeight:700,color:t.gr,lineHeight:1}}>{SURAHS.filter(s=>sPct(s)===100).length}</div><div style={{fontSize:".44rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Sourates</div></div>
-                      </div>
-                      <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:t.s3,borderRadius:7}}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.tx2} strokeWidth="1.5" strokeLinecap="round" opacity=".8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill={t.tx2}/></svg>
-                        <div><div style={{fontSize:".8rem",fontWeight:700,color:t.tx2,lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{remaining.toLocaleString()}</div><div style={{fontSize:".44rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Restants</div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* ETA */}
-                <div style={{marginTop:8,padding:"5px 10px",borderTop:`1px solid ${acc}15`,display:"flex",alignItems:"center",justifyContent:"center",gap:5,background:`${acc}04`,borderRadius:"0 0 8px 8px",marginLeft:-16,marginRight:-16,paddingLeft:16,paddingRight:16}}>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={acc} strokeWidth="1.5" strokeLinecap="round" opacity=".5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-                  <span style={{fontSize:".6rem",color:t.tx3,fontStyle:"italic"}}>{remaining>0?`Fin estimée · ${eta}`:"🎉 Coran complet !"}</span>
-                </div>
-
-                {/* Rappels */}
-                {!(hist[today()]||0)&&(<div style={{marginTop:7,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${t.bl}15`,borderRadius:8,border:`1px solid ${t.bl}30`,cursor:"pointer"}} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>sPct(x)<100);if(s)doSelect(s);}}><div style={{width:6,height:6,borderRadius:"50%",background:t.bl,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".63rem",color:t.bl,fontWeight:600,flex:1}}>Aucune mémorisation aujourd'hui — on commence ?</span><span style={{fontSize:".58rem",color:t.bl,opacity:.7}}>→</span></div>)}
-                {spacedDue.length>0&&(<div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${t.rd}15`,borderRadius:8,border:`1px solid ${t.rd}30`,cursor:"pointer"}} onClick={()=>setPage("pages")}><div style={{width:6,height:6,borderRadius:"50%",background:t.rd,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".63rem",color:t.rd,fontWeight:600,flex:1}}>{spacedDue.length} verset{spacedDue.length>1?"s":""} à réviser aujourd'hui</span><span style={{fontSize:".58rem",color:t.rd,opacity:.7}}>Voir →</span></div>)}
-                {bookmark&&(<div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${acc}10`,borderRadius:8,border:`1px solid ${acc}25`,cursor:"pointer"}} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>x.n===bookmark.sn);if(s)doSelect(s);}}><span style={{fontSize:".7rem",color:acc}}>◈</span><span style={{fontSize:".63rem",color:t.tx,fontWeight:600,flex:1}}>Reprendre : {bookmark.name}</span><span style={{fontSize:".58rem",color:t.tx3}}>→</span></div>)}
-                {/* Streak */}
-                {memStreak>0&&(<div onClick={()=>setPage("stats")} style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"6px 10px",background:"rgba(249,115,22,.08)",borderRadius:9,border:"1px solid rgba(249,115,22,.2)",cursor:"pointer"}}><span style={{fontSize:"1.1rem"}}>🔥</span><span style={{fontSize:".7rem",fontWeight:700,color:"#f97316",flex:1}}>{memStreak} jour{memStreak>1?"s":""} de suite</span><span style={{fontSize:".58rem",color:"#f97316",opacity:.7}}>Stats →</span></div>)}
-              </div>
-            </div>
-
-            {/* Verset du jour condensé */}
-            {versetDuJour&&!versetDuJourDismissed&&(
-              <div style={{background:`linear-gradient(135deg,${t.acc}12,${t.acc}06)`,borderRadius:12,padding:"14px 16px",border:`1px solid ${t.acc}30`}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-                  <span style={{fontSize:".6rem",color:t.acc,textTransform:"uppercase",letterSpacing:2,fontWeight:700}}>Verset du jour</span>
-                  <div style={{display:"flex",gap:6}}>
-                    <span style={{fontSize:".58rem",color:t.tx3}}>{versetDuJour.surah} · v.{versetDuJour.n}</span>
-                    <button onClick={()=>toggleFav(versetDuJour.sn,versetDuJour.n,versetDuJour.ar,versetDuJour.fr,versetDuJour.surah)} style={{background:"none",border:"none",cursor:"pointer",fontSize:".85rem",padding:0,color:isFav(versetDuJour.sn,versetDuJour.n)?t.rd:t.tx3}}>{isFav(versetDuJour.sn,versetDuJour.n)?"❤️":"🤍"}</button>
-                    <button onClick={()=>{setVersetDuJourDismissed(true);sv("qvdjdis",today());}} style={{background:"none",border:"none",cursor:"pointer",fontSize:".8rem",padding:0,color:t.tx3,opacity:.6}}>✕</button>
-                  </div>
-                </div>
-                <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.3rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx,cursor:"pointer"}} onClick={()=>{const s=SURAHS.find(x=>x.n===versetDuJour.sn);if(s){doSelect(s);setPage("quran");}}}>{stripTags(versetDuJour.ar||"")}</div>
-                {versetDuJour.fr&&<div style={{fontSize:".65rem",color:t.tx2,fontStyle:"italic",lineHeight:1.5,marginTop:4}}>{versetDuJour.fr}</div>}
-              </div>
-            )}
-
-            {/* Actions rapides */}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-              {[
-                {
-                  icon:(
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="4" y="2" width="16" height="20" rx="2" stroke={t.acc} strokeWidth="1.4"/>
-                      <line x1="8" y1="7" x2="16" y2="7" stroke={t.acc} strokeWidth="1.4"/>
-                      <line x1="8" y1="11" x2="16" y2="11" stroke={t.acc} strokeWidth="1.4"/>
-                      <line x1="8" y1="15" x2="13" y2="15" stroke={t.acc} strokeWidth="1.4"/>
-                    </svg>
-                  ),
-                  label:"Coran",sub:"Reprendre la lecture",action:()=>setPage("quran"),c:t.acc
-                },
-                {
-                  icon:(
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 3a9 9 0 1 1-9 9" stroke={spacedDue.length>0?t.rd:t.gr} strokeWidth="1.4"/>
-                      <polyline points="3 3 3 9 9 9" stroke={spacedDue.length>0?t.rd:t.gr} strokeWidth="1.4"/>
-                      <polyline points="9 12 11 14 15 10" stroke={spacedDue.length>0?t.rd:t.gr} strokeWidth="1.6"/>
-                    </svg>
-                  ),
-                  label:"Réviser",sub:spacedDue.length>0?`${spacedDue.length} verset${spacedDue.length>1?"s":""} dus`:"Tout à jour",action:()=>setPage("pages"),c:spacedDue.length>0?t.rd:t.gr,badge:spacedDue.length
-                },
-                {
-                  icon:(
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="5" width="18" height="14" rx="2" stroke={t.bl} strokeWidth="1.4"/>
-                      <polyline points="8 12 11 15 16 9" stroke={t.bl} strokeWidth="1.6"/>
-                    </svg>
-                  ),
-                  label:"Quiz",sub:"Teste ta mémoire",action:()=>setPage("quiz"),c:t.bl
-                },
-                {
-                  icon:(
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 2 L12 22" stroke={t.pu} strokeWidth="1.4"/>
-                      <path d="M4 6 Q12 2 20 6 L20 18 Q12 22 4 18 Z" stroke={t.pu} strokeWidth="1.4" fill={`${t.pu}10`}/>
-                      <path d="M4 6 L4 18" stroke={t.pu} strokeWidth="1.4"/>
-                    </svg>
-                  ),
-                  label:"Mushaf",sub:"Lire page par page",action:()=>setPage("mushaf"),c:t.pu
-                },
-              ].map((a,i)=>(
-                <div key={i} onClick={a.action} style={{background:t.cardBg,border:`1px solid ${t.b1}`,borderRadius:16,padding:"18px 14px",cursor:"pointer",transition:"all .2s",position:"relative",overflow:"hidden",display:"flex",flexDirection:"column",gap:6}} onMouseEnter={e=>{e.currentTarget.style.borderColor=a.c;e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow=`0 6px 20px ${a.c}22`;}} onMouseLeave={e=>{e.currentTarget.style.borderColor=t.b1;e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";}}>
-                  {a.badge>0&&<div style={{position:"absolute",top:10,right:10,background:t.rd,color:"#fff",borderRadius:99,fontSize:".5rem",fontWeight:800,minWidth:16,height:16,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4px"}}>{a.badge}</div>}
-                  <div style={{width:44,height:44,borderRadius:12,background:`${a.c}10`,display:"flex",alignItems:"center",justifyContent:"center"}}>{a.icon}</div>
-                  <div style={{fontSize:".8rem",fontWeight:700,color:t.tx}}>{a.label}</div>
-                  <div style={{fontSize:".62rem",color:t.tx3}}>{a.sub}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Dernière activité - Reprendre */}
-            {readHistory.length>0&&(()=>{
-              const last=readHistory[0];
-              const s=SURAHS.find(x=>x.n===last.sn);
-              return s?(
-                <div className="card" onClick={()=>{doSelect(s);setPage("quran");}} style={{cursor:"pointer"}} onMouseEnter={e=>{e.currentTarget.style.borderColor=t.acc;e.currentTarget.style.transform="translateY(-1px)";}} onMouseLeave={e=>{e.currentTarget.style.borderColor=t.b1;e.currentTarget.style.transform="";}}>
-                  <div style={{padding:"12px 14px",display:"flex",alignItems:"center",gap:12}}>
-                    <div style={{width:40,height:40,borderRadius:10,background:`${t.acc}12`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.acc} strokeWidth="1.6" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-                    </div>
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:".6rem",color:t.tx3,marginBottom:2}}>Reprendre là où tu t'es arrêté</div>
-                      <div style={{fontSize:".82rem",fontWeight:700,color:t.tx,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{s.name}</div>
-                      <div style={{fontFamily:"Amiri,serif",fontSize:".8rem",color:t.tx3,direction:"rtl",textAlign:"right"}}>v.{last.vn} · {s.ar}</div>
-                    </div>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.acc} strokeWidth="2" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </div>
-                </div>
-              ):null;
-            })()}
-
-            {/* Hadith / Citation du jour */}
-            {(()=>{
-              const hadiths=[
-                {ar:"خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ",fr:"Le meilleur d'entre vous est celui qui apprend le Coran et l'enseigne.",src:"Al-Bukhari"},
-                {ar:"مَثَلُ الَّذِي يَقْرَأُ الْقُرْآنَ وَهُوَ حَافِظٌ لَهُ مَعَ السَّفَرَةِ الْكِرَامِ الْبَرَرَةِ",fr:"Celui qui récite le Coran en le connaissant par cœur sera avec les nobles et pieux scribes.",src:"Al-Bukhari & Muslim"},
-                {ar:"إِنَّ الَّذِي لَيْسَ فِي جَوْفِهِ شَيْءٌ مِنَ الْقُرْآنِ كَالْبَيْتِ الْخَرِبِ",fr:"Celui qui n'a rien du Coran dans son cœur est comme une maison en ruine.",src:"At-Tirmidhi"},
-                {ar:"اقْرَءُوا الْقُرْآنَ فَإِنَّهُ يَأْتِي يَوْمَ الْقِيَامَةِ شَفِيعًا لأَصْحَابِهِ",fr:"Récitez le Coran car il sera un intercesseur pour ses compagnons le Jour du Jugement.",src:"Muslim"},
-                {ar:"أَهْلُ الْقُرْآنِ هُمْ أَهْلُ اللَّهِ وَخَاصَّتُهُ",fr:"Les gens du Coran sont les gens d'Allah et Ses élus.",src:"An-Nasa'i"},
-              ];
-              const h=hadiths[new Date().getDate()%hadiths.length];
-              return(
-                <div style={{padding:"14px 16px",background:`linear-gradient(135deg,${t.acc}08,${t.acc}04)`,borderRadius:14,border:`1px solid ${t.acc}20`}}>
-                  <div style={{fontSize:".54rem",color:t.acc,textTransform:"uppercase",letterSpacing:"2px",fontWeight:700,marginBottom:8}}>Hadith du jour</div>
-                  <div style={{fontFamily:"Amiri,serif",fontSize:"1.05rem",direction:"rtl",textAlign:"right",lineHeight:1.8,color:t.tx,marginBottom:8}}>{h.ar}</div>
-                  <div style={{fontSize:".68rem",color:t.tx2,fontStyle:"italic",lineHeight:1.5,marginBottom:6}}>{h.fr}</div>
-                  <div style={{fontSize:".56rem",color:t.tx3}}>— {h.src}</div>
-                </div>
-              );
-            })()}
-
-            {/* Prochain objectif */}
-            {(()=>{
-              const nextS=SURAHS.find(s=>sPct(s)>0&&sPct(s)<100);
-              const firstUnstarted=SURAHS.find(s=>sPct(s)===0);
-              const target=nextS||firstUnstarted;
-              if(!target) return null;
-              const pctV=sPct(target);
-              return(
-                <div className="card" onClick={()=>{doSelect(target);setPage("quran");}} style={{cursor:"pointer"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";}} onMouseLeave={e=>{e.currentTarget.style.transform="";}}>
-                  <div style={{padding:"12px 14px"}}>
-                    <div style={{fontSize:".58rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1.5px",marginBottom:8}}>
-                      {nextS?"En cours de mémorisation":"Prochaine sourate"}
-                    </div>
-                    <div style={{display:"flex",alignItems:"center",gap:12}}>
-                      <div style={{width:40,height:40,borderRadius:10,background:`${t.gr}12`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".75rem",fontWeight:800,color:t.gr,border:`1px solid ${t.gr}30`,flexShrink:0}}>{target.n}</div>
-                      <div style={{flex:1,minWidth:0}}>
-                        <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
-                          <span style={{fontSize:".8rem",fontWeight:700,color:t.tx}}>{target.name}</span>
-                          <span style={{fontFamily:"Amiri,serif",fontSize:".85rem",color:t.tx3}}>{target.ar}</span>
-                        </div>
-                        <div style={{height:5,background:t.b1,borderRadius:99,overflow:"hidden"}}>
-                          <div style={{height:"100%",width:`${pctV}%`,background:`linear-gradient(90deg,${t.gr},${t.acc})`,borderRadius:99,transition:"width .6s"}}/>
-                        </div>
-                        <div style={{fontSize:".58rem",color:t.tx3,marginTop:3}}>{sMem(target)}{"/"}{target.v} versets · {target.v-sMem(target)} restants</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
-          </div>
-        )}
-
-        {/* CORAN */}
-        {page==="quran"&&(
-          <div className="two">
-            <div className="lp card">
-              <div className="ltabs">
-                {[["list","Sourates"],["juz","Juz"],["pages-nav","Pages"],["vsearch","Versets"],["themes","Thèmes"]].map(([id,l])=>(
-                  <button key={id} className={`lt ${ltab===id?"on":""}`} onClick={()=>setLtab(id)}>{l}</button>
-                ))}
-              </div>
-              {ltab==="list"&&(<div className="sbox"><input className="sinp" placeholder="Chercher sourate…" value={search} onChange={e=>setSearch(e.target.value)} onInput={e=>setSearch(e.target.value)} inputMode="search" type="search" autoComplete="off" autoCorrect="off" spellCheck={false}/></div>)}
-              {ltab==="pages-nav"&&(
-                <div className="slist">
-                  <div style={{padding:"6px 10px",borderBottom:`1px solid ${t.b1}`,fontSize:".58rem",color:t.tx3,display:"flex",justifyContent:"space-between"}}>
-                    <span>604 pages · cliquer pour ouvrir</span>
-                    <span style={{color:t.gr}}>{Object.keys(pageRead).filter(k=>pageRead[k]).length} lues</span>
-                  </div>
-                  {/* Mini grid of pages in left panel */}
-                  <div style={{padding:"8px",display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:3,overflowY:"auto"}}>
-                    {Array.from({length:604},(_,i)=>i+1).map(pg=>{
-                      const isRead=pageRead[String(pg)];
-                      const isCur=(mushafPage||1)===pg;
-                      const surahEntry=Object.entries(SURAH_PAGE).find(([_,p])=>p===pg);
-                      return (
-                        <div key={pg}
-                          title={surahEntry?`Sourate ${surahEntry[0]} — page ${pg}`:`Page ${pg}`}
-                          style={{height:28,borderRadius:5,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:".55rem",fontWeight:700,
-                            border:`1px solid ${isCur?t.acc:surahEntry?`${t.acc}55`:isRead?t.gr:t.b1}`,
-                            background:isRead?`${t.gr}18`:isCur?`${t.acc}20`:surahEntry?`${t.acc}08`:t.s2,
-                            color:isCur?t.acc:isRead?t.gr:t.tx3,transition:"all .12s"}}
-                          onMouseEnter={e=>{e.currentTarget.style.borderColor=t.acc;e.currentTarget.style.transform="scale(1.1)";}}
-                          onMouseLeave={e=>{e.currentTarget.style.borderColor=isCur?t.acc:surahEntry?`${t.acc}55`:isRead?t.gr:t.b1;e.currentTarget.style.transform="";}}
-                          onClick={()=>{setMushafPage(pg);setPage("mushaf");}}>
-                          {pg}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-              {ltab==="vsearch"&&(
-                <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
-                  <div className="sbox" style={{borderBottom:`1px solid ${t.b1}`}}>
-                    <input className="sinp" placeholder="Chercher en arabe ou français…" value={verseSearch} onChange={e=>{setVerseSearch(e.target.value);searchVerses(e.target.value);}} autoFocus/>
-                  </div>
-                  <div className="slist">
-                    {verseSearchLoading&&<div style={{textAlign:"center",padding:20,color:t.tx3,fontSize:".75rem"}}>Recherche…</div>}
-                    {!verseSearchLoading&&verseSearch&&verseSearchResults.length===0&&(<div style={{textAlign:"center",padding:20,color:t.tx3,fontSize:".75rem"}}>Aucun résultat dans les sourates téléchargées</div>)}
-                    {verseSearchResults.map((r,i)=>(
-                      <div key={i} style={{padding:"10px 12px",borderBottom:`1px solid ${t.b1}`,cursor:"pointer"}} onMouseEnter={e=>e.currentTarget.style.background=t.s2} onMouseLeave={e=>e.currentTarget.style.background=""} onClick={()=>{const s=SURAHS.find(x=>x.n===r.sn);if(s)doSelect(s);addToHistory(r.sn,r.vn);}}>
-                        <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span style={{fontSize:".68rem",fontWeight:600,color:t.acc}}>{r.surah}</span><span style={{fontSize:".6rem",color:t.tx3}}>v.{r.vn}</span></div>
-                        <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1rem",direction:"rtl",textAlign:"right",color:t.tx,lineHeight:1.8,marginBottom:4}}>{r.ar}</div>
-                        {r.fr&&<div style={{fontSize:".65rem",color:t.tx2,fontStyle:"italic",overflow:"hidden",textOverflow:"ellipsis",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{r.fr}</div>}
-                      </div>
-                    ))}
-                    {!verseSearch&&(<div style={{padding:16,color:t.tx3,fontSize:".72rem",textAlign:"center"}}><div style={{fontSize:"1.5rem",marginBottom:8}}>🔍</div>Tape en arabe ou français pour chercher</div>)}
-                  </div>
-                </div>
-              )}
-              {ltab==="themes"&&(
-                <div className="slist">
-                  {QURAN_THEMES.map(th=>(
-                    <div key={th.id} style={{padding:"10px 12px",borderBottom:`1px solid ${t.b1}`,cursor:"pointer",background:selTheme===th.id?t.s3:"transparent"}} onClick={()=>setSelTheme(selTheme===th.id?null:th.id)}>
-                      <div style={{display:"flex",alignItems:"center",gap:10}}>
-                        <span style={{fontSize:"1.4rem",width:28,textAlign:"center",flexShrink:0}}>{th.icon}</span>
-                        <div style={{flex:1,minWidth:0}}><div style={{fontSize:".76rem",fontWeight:700,color:th.color,whiteSpace:"nowrap"}}>{th.label}</div><div style={{fontSize:".58rem",color:t.tx3,marginTop:1}}>{th.desc}</div></div>
-                        <span style={{fontSize:".6rem",color:t.tx3,background:t.s2,padding:"2px 6px",borderRadius:4,flexShrink:0}}>{th.verses.length}v</span>
-                      </div>
-                      {selTheme===th.id&&(
-                        <div style={{marginTop:8,display:"flex",flexDirection:"column",gap:4}}>
-                          {th.verses.map((ref,i)=>{const s=SURAHS.find(x=>x.n===ref.s);return(
-                            <div key={i} style={{padding:"6px 10px",background:t.s2,borderRadius:8,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",transition:"transform .15s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateX(3px)"} onMouseLeave={e=>e.currentTarget.style.transform=""} onClick={e=>{e.stopPropagation();const su=SURAHS.find(x=>x.n===ref.s);if(su){doSelect(su);setTimeout(()=>{const el=document.getElementById(`v-${ref.s}-${ref.v}`);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},600);}}}>
-                              <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:".62rem",color:th.color,fontWeight:600}}>{s?.name}</span><span style={{fontSize:".6rem",color:t.tx2,fontFamily:"Amiri,serif"}}>{s?.ar}</span></div>
-                              <span style={{fontSize:".6rem",color:t.tx3,background:t.s3,padding:"2px 6px",borderRadius:4}}>v.{ref.v}</span>
-                            </div>
-                          );})}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-              {ltab==="list"&&(
-                <div className="slist">
-                  {filtered.map(s=>{
-                    const p=sPct(s),emb=!!Q[s.n];
-                    const sw=swipeState[s.n]||{x:0,swiping:false};
-                    const revealed=sw.x<-50;
-                    const likeAction=sw.x<-130;
-                    return (
-                      <div key={s.n}
-                        className={`srow ${selS?.n===s.n?"sel":""} ${p===100?"done":""}`}
-                        style={{transform:`translateX(${Math.min(0,sw.x)}px)`,transition:sw.swiping?"none":"transform .25s ease"}}
-                        onClick={()=>{ if(Math.abs(sw.x||0)<8) doSelect(s); }}
-                        onTouchStart={e=>{
-                          swipeTouchStart.current[s.n]=e.touches[0].clientX;
-                          setSwipeState(prev=>({...prev,[s.n]:{...prev[s.n],swiping:true,x:0}}));
-                        }}
-                        onTouchMove={e=>{
-                          const dx=e.touches[0].clientX-(swipeTouchStart.current[s.n]||0);
-                          if(dx<0) setSwipeState(prev=>({...prev,[s.n]:{...prev[s.n],x:Math.max(-160,dx),swiping:true}}));
-                        }}
-                        onTouchEnd={()=>handleSwipeEnd(s.n,s)}
-                        onMouseDown={e=>{
-                          if(e.button!==0)return;
-                          swipeTouchStart.current[`m_${s.n}`]=e.clientX;
-                          swipeTouchStart.current[`md_${s.n}`]=true;
-                        }}
-                        onMouseMove={e=>{
-                          if(!swipeTouchStart.current[`md_${s.n}`])return;
-                          const dx=e.clientX-(swipeTouchStart.current[`m_${s.n}`]||0);
-                          if(dx<-8) setSwipeState(prev=>({...prev,[s.n]:{...prev[s.n],x:Math.max(-160,dx),swiping:true}}));
-                        }}
-                        onMouseUp={()=>{
-                          swipeTouchStart.current[`md_${s.n}`]=false;
-                          handleSwipeEnd(s.n,s);
-                        }}
-                        onMouseLeave={()=>{
-                          if(swipeTouchStart.current[`md_${s.n}`]){
-                            swipeTouchStart.current[`md_${s.n}`]=false;
-                            handleSwipeEnd(s.n,s);
-                          }
-                        }}>
-                        {revealed&&(
-                          <div className="srow-reveal" style={{right:0,left:`calc(100% + ${Math.min(0,sw.x)}px)`}}>
-                            {likeAction
-                              ?(<div className="srow-reveal-btn" style={{background:"#e91e63",color:"#fff",width:70}}>
-                                  <span style={{fontSize:"1rem"}}>♥</span>
-                                  <span>Favori</span>
-                                </div>)
-                              :(<div className="srow-reveal-btn" style={{background:revFlags[String(s.n)]==="active"?t.tx3:t.acc,color:"#fff",width:70}}>
-                                  <span style={{fontSize:"1rem"}}>{revFlags[String(s.n)]==="active"?"✕":"◈"}</span>
-                                  <span>{revFlags[String(s.n)]==="active"?"Retirer":"Révision"}</span>
-                                </div>)
-                            }
-                          </div>
-                        )}
-                        {/* Hint glissière visible au hover desktop */}
-                        <div className="srow-hint">← glisser</div>
-                        <div className={`snum ${p===100?"done":""}`} onClick={e=>{e.stopPropagation();toggleAll(s);}}>
-                          {p===100?<Icons.Check size={10} color={t.gr}/>:s.n}
-                        </div>
-                        <div style={{flex:1}}>
-                          <div className="sname" style={{display:"flex",alignItems:"center",gap:4}}>
-                            {s.name}
-                            {emb&&<span style={{fontSize:".45rem",color:t.gr}}>⬤</span>}
-                            {revFlags[String(s.n)]==="active"&&<span style={{fontSize:".5rem",background:`${t.acc}20`,color:t.acc,padding:"1px 4px",borderRadius:3}}>révision</span>}
-                            {revFlags[String(s.n)]==="mastered"&&<span style={{fontSize:".5rem",background:`${t.gr}20`,color:t.gr,padding:"1px 4px",borderRadius:3}}>✓</span>}
-                          </div>
-                          <div className="smeta">Juz {s.juz} · {s.v}v · {s.type}</div>
-                        </div>
-                        <div style={{textAlign:"right",flexShrink:0}}>
-                          <div className="sar">{s.ar}</div>
-                          <div className="mbar"><div className="mfill" style={{width:`${p}%`}}/></div>
-                          <div style={{fontSize:".52rem",color:t.tx3,marginTop:2}}>{sMem(s)}{"/"}{s.v}</div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-              {ltab==="juz"&&(
-                <>
-                  <div className="jg">
-                    {juzList.map(j=>{const p=juzPct(j);return(
-                      <div key={j} className={`jc ${selJuz===j?"sel":""}`} onClick={()=>{setSelJuz(j===selJuz?null:j);const firstS=SURAHS.find(s=>s.juz===j);if(firstS&&j!==selJuz)doSelect(firstS);}}>
-                        <div className="jl">Juz</div><div className="jn">{j}</div>
-                        <div className="jb"><div className="jf" style={{width:`${p}%`}}/></div>
-                        <div style={{fontSize:".56rem",color:p===100?t.gr:p>0?t.acc:t.tx3,marginTop:2}}>{p}%</div>
-                      </div>
-                    );})}
-                  </div>
-                  {selJuz&&(<div className="slist" style={{borderTop:`1px solid ${t.b1}`}}>
-                    {SURAHS.filter(s=>s.juz===selJuz).map(s=>(
-                      <div key={s.n} className={`srow ${selS?.n===s.n?"sel":""}`} onClick={()=>doSelect(s)}>
-                        <div className={`snum ${sPct(s)===100?"done":""}`} onClick={e=>{e.stopPropagation();toggleAll(s);}}>{sPct(s)===100?<Icons.Check size={10} color={t.gr}/>:s.n}</div>
-                        <div style={{flex:1}}><div className="sname">{s.name}</div><div className="smeta">{s.v}v{!!Q[s.n]&&<span style={{color:t.gr,marginLeft:4}}>⬤</span>}</div></div>
-                        <div className="sar">{s.ar}</div>
-                      </div>
-                    ))}
-                  </div>)}
-                </>
-              )}
-            </div>
-
-            {/* Verse panel */}
-            <div ref={vpRef} id="verse-panel" className="rp">
-              {!selS?(
-                <div className="card empty">
-                  <div className="big-ar">اختر سورة</div>
-                  Sélectionne une sourate pour lire, mémoriser et écouter
-                  <div style={{marginTop:8,fontSize:".65rem",color:t.acc}}>⬤ = embarqué · autres = chargés depuis internet</div>
-                </div>
-              ):(
-                <div className="card">
-                  <div className="vhd">
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10}}>
-                      <div>
-                        <div className="v-ar-title">{selS.ar}</div>
-                        <div className="v-info">Sourate {selS.n} · {selS.name} · Juz {selS.juz} · {selS.v} versets · {selS.type}</div>
-                        <div style={{fontSize:".6rem",color:t.tx3,marginTop:2}}>
-                          {sMem(selS)}{"/"}{selS.v} mémorisés ({sPct(selS)}%)
-                          {vpd>0&&sMem(selS)<selS.v&&<span style={{marginLeft:8,color:t.bl}}>· ~{Math.ceil((selS.v-sMem(selS))/vpd)} jours</span>}
-                          {loadState==="error"&&<span style={{marginLeft:8,color:t.rd}}>· erreur chargement</span>}
-                          {loadState==="loading"&&<span style={{marginLeft:8,color:t.tx3}}>· chargement…</span>}
-                        </div>
-                      </div>
-                      <div style={{display:"flex",gap:6,flexShrink:0}}>
-                        <button className="tbtn" onClick={()=>toggleAll(selS)}>{sMem(selS)===selS.v?"Tout décocher":"Tout cocher"}</button>
-                        {sMem(selS)>=2&&(<button className="tbtn" style={{borderColor:t.pu,color:t.pu}} onClick={()=>startTest(selS,verses)}>Test</button>)}
-                      </div>
-                    </div>
-                    <div className="vbar"><div className="vfill" style={{width:`${sPct(selS)}%`}}/></div>
-                  </div>
-
-                  <div className="vtoolbar">
-                    <button className={`tbtn ${showTj?"on":""}`} onClick={()=>setShowTj(v=>!v)}>Tajwid</button>
-                    <button className={`tbtn ${showTr?"on":""}`} onClick={()=>setShowTr(v=>!v)}>Traduction</button>
-                    <button className={`tbtn ${showTf?"on":""}`} onClick={()=>setShowTf(v=>!v)}>Tafsir</button>
-
-                    <button className={`tbtn ${reviewMode?"on":""}`} style={reviewMode?{background:t.rd,borderColor:t.rd,color:"#fff"}:{}} onClick={()=>{setReviewMode(v=>!v);setRevealedVerses({});}}>{reviewMode?"Quitter révision":"Révision"}</button>
-                    <button className={`tbtn ${karaokeMode?"on":""}`} style={karaokeMode?{background:"#e91e63",borderColor:"#e91e63",color:"#fff"}:{borderColor:t.b2}} onClick={()=>{setKaraokeMode(v=>!v);setActiveWordIdx(-1);}}>Tilawa</button>
-                    <button className={`tbtn ${hifzMode?"on":""}`} style={hifzMode?{background:t.pu,borderColor:t.pu,color:"#fff"}:{}} onClick={()=>{setHifzMode(v=>!v);setHifzLevel({});setRevealedVerses({});}}>Hifz</button>
-                    <button className="tbtn" onClick={()=>setImmersive(true)}>Immersif</button>
-                    <button className={`tbtn ${focusMode?"on":""}`} style={focusMode?{background:"#1a1a1a",borderColor:"#444",color:"#fff"}:{}} onClick={()=>{setFocusMode(v=>!v);setFocusIdx(0);}}>Concentration</button>
-                    <div style={{display:"flex",alignItems:"center",gap:4,marginLeft:"auto"}}>
-                      <button className="tbtn" onClick={()=>setArabicSize(s=>Math.max(1,s-0.15))}>A-</button>
-                      <button className="tbtn" onClick={()=>setArabicSize(s=>Math.min(3,s+0.15))}>A+</button>
-                    </div>
-                  </div>
-
-                  {SURAH_INFO[selS.n]&&(<div style={{padding:"10px 14px",background:t.s3,borderBottom:`1px solid ${t.b1}`,fontSize:".7rem",color:t.tx2,lineHeight:1.6}}><div style={{fontWeight:700,color:t.acc,marginBottom:3,fontSize:".65rem",textTransform:"uppercase",letterSpacing:"1px"}}>Vertus & occasions</div><div style={{marginBottom:4}}>{SURAH_INFO[selS.n].virtue}</div><div style={{color:t.gr,fontWeight:600}}>Quand réciter : {SURAH_INFO[selS.n].occasion}</div></div>)}
-
-                  {reviewMode&&(<div style={{padding:"8px 14px",background:`${t.rd}22`,borderBottom:`1px solid ${t.rd}44`,display:"flex",alignItems:"center",gap:8}}><div style={{fontSize:".72rem",color:t.rd,fontWeight:600,flex:1}}>Mode révision — appuie pour révéler</div><button className="tbtn" style={{borderColor:t.rd,color:t.rd}} onClick={()=>setRevealedVerses({})}>Tout masquer</button></div>)}
-                  {hifzMode&&(<div style={{padding:"8px 14px",background:`${t.pu}18`,borderBottom:`1px solid ${t.pu}44`,display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-                    <div style={{fontSize:".72rem",color:t.pu,fontWeight:600,flex:1}}>Mode Hifz — les derniers mots sont masqués. Clique pour révéler.</div>
-                    <div style={{display:"flex",gap:4,alignItems:"center"}}>
-                      <span style={{fontSize:".6rem",color:t.tx3}}>Difficulté :</span>
-                      {[1,2,3,4,5].map(l=>(
-                        <button key={l} className={`tbtn`} style={{minWidth:24,padding:"2px 6px",borderColor:l<=Object.values(hifzLevel).filter(v=>v===l).length?t.pu:t.b2}} onClick={()=>setHifzLevel(()=>{const nv={};verses.forEach(v=>{nv[v.n]=l;});return nv;})}>{l}</button>
-                      ))}
-                      <button className="tbtn" onClick={()=>setHifzLevel({})}>Reset</button>
-                    </div>
-                  </div>)}
-
-                  {/* Audio */}
-                  <div style={{padding:"10px 14px",background:t.s1,borderBottom:`1px solid ${t.b1}`,display:"flex",flexDirection:"column",gap:8}}>
-                    <div style={{display:"flex",alignItems:"center",gap:8}}>
-                      <span style={{fontSize:"1rem",flexShrink:0}}>🎙️</span>
-                      <div style={{flex:1,position:"relative"}}>
-                        <select value={rec.id} onChange={e=>setRec(RECITERS.find(r=>r.id===e.target.value)||RECITERS[0])} style={{width:"100%",appearance:"none",WebkitAppearance:"none",background:t.s2,border:`1.5px solid ${t.b1}`,borderRadius:10,padding:"8px 30px 8px 12px",fontSize:".72rem",color:t.tx,fontWeight:500,cursor:"pointer",outline:"none"}}>
-                          {RECITERS.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}
-                        </select>
-                        <span style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",color:t.tx3,fontSize:".75rem",pointerEvents:"none"}}>▾</span>
-                      </div>
-                      <button onClick={()=>{
-                        if(!verses.length)return;
-                        stopListening();
-                        setSpeechScore(null);
-                        setContinuousMode(false);
-                        setContinuousIdx(0);
-                        setRecitModal(true);
-                      }} style={{flexShrink:0,display:"flex",alignItems:"center",gap:5,background:`${t.acc}18`,border:`1px solid ${t.acc}`,borderRadius:10,padding:"7px 14px",color:t.acc,fontSize:".7rem",fontWeight:700,cursor:"pointer",transition:"all .2s"}} onMouseEnter={e=>{e.currentTarget.style.background=`${t.acc}30`;}} onMouseLeave={e=>{e.currentTarget.style.background=`${t.acc}18`;}}>
-                        🎤 Récitation
-                      </button>
-                    <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,1);}} style={{flexShrink:0,display:"flex",alignItems:"center",gap:5,background:playlistActive&&playlist[0]?.sn===selS.n?"#e53935":t.acc,border:"none",borderRadius:10,padding:"8px 14px",color:"#fff",fontSize:".72rem",fontWeight:700,cursor:"pointer",boxShadow:`0 2px 8px ${t.acc}44`,transition:"transform .15s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-1px)"} onMouseLeave={e=>e.currentTarget.style.transform=""}>{playlistActive&&playlist[0]?.sn===selS.n?"■ Stop":"▶ Sourate"}</button>
-                    </div>
-                    <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
-                      <span style={{fontSize:".6rem",color:t.tx3}}>Répét.</span>
-                      {[1,3,5,10].map(n=>(<button key={n} className={`tbtn ${loopCount===n&&!loopInfinite?"on":""}`} onClick={()=>{setLoopCount(n);setLoopInfinite(false);}} style={{minWidth:26,padding:"3px 6px"}}>{n}×</button>))}
-                      <button className={`tbtn ${loopInfinite?"on":""}`} onClick={()=>setLoopInfinite(p=>!p)} style={{minWidth:26,padding:"3px 8px",fontWeight:700,fontSize:".8rem",borderColor:loopInfinite?t.acc:t.b2,color:loopInfinite?t.acc:t.tx3}}>∞</button>
-                      {!loopInfinite&&loopCurrent>1&&<span style={{fontSize:".6rem",color:t.acc,fontWeight:700}}>{loopCurrent}{"/"}{loopCount}</span>}
-                      {loopInfinite&&playing!==null&&<span style={{fontSize:".6rem",color:t.acc,fontWeight:700,animation:"pulse 1s infinite"}}>∞ en boucle</span>}
-                      <span style={{fontSize:".6rem",color:t.tx3,marginLeft:4}}>Vitesse</span>
-                      {[0.75,1,1.25,1.5].map(s=>(<button key={s} className={`tbtn ${playbackRate===s?"on":""}`} onClick={()=>setPlaybackRate(s)} style={{minWidth:32,padding:"3px 5px"}}>{s}×</button>))}
-                      <button className="tbtn" style={{marginLeft:"auto",borderColor:bookmark?.sn===selS.n?t.acc:t.b2,color:bookmark?.sn===selS.n?t.acc:t.tx3,fontWeight:bookmark?.sn===selS.n?700:400}} onClick={()=>setBookmark(bookmark?.sn===selS.n?null:{sn:selS.n,name:selS.name})}>{bookmark?.sn===selS.n?"● Signet":"○ Signet"}</button>
-                    </div>
-                  </div>
-
-
-
-                  {showTj&&(<div className="tj-legend">
-                    {[
-                      [tjc.m,"Madd naturel"],[tjc.mr,"Madd permissible"],[tjc.mo,"Madd wajib"],
-                      [tjc.ml,"Madd lazim"],[tjc.g,"Ghunna/Idgham"],[tjc.q,"Qalqala"],
-                      [tjc.ikh,"Ikhfa"],[tjc.iql,"Iqlab"],[tjc.ls,"Lam shamsiyya"],
-                    ].map(([c,l])=>(<div key={l} className="tj-item"><div className="tj-dot" style={{background:c}}/><span style={{color:t.tx2,fontSize:".58rem"}}>{l}</span></div>))}
-                  </div>)}
-
-                  {playing!==null&&(<div className="arow"><button className="vbtn snd" style={{flexShrink:0}} onClick={()=>doPlay(playing)}>{audioPlaying?"⏸":"▶ "+playing}</button><span style={{fontSize:".62rem",color:t.tx2,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{selS?.name} · v.{playing} · {rec.name}</span><button className="tbtn" style={{flexShrink:0}} onClick={()=>{setPlaying(null);partialPlayRef.current=null;if(audioRef.current){audioRef.current.pause();audioRef.current.src="";}}}>✕</button></div>)}
-
-                  {/* Banner mode récitation continue */}
-                  <div className="vscroll" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-                    {loadState==="loading"&&(<div style={{textAlign:"center",padding:"30px 14px",color:t.tx3}}><div style={{display:"inline-block",width:22,height:22,border:`2px solid ${t.b2}`,borderTopColor:t.acc,borderRadius:"50%",animation:"spin .7s linear infinite",marginBottom:10}}/><div style={{fontSize:".8rem"}}>Chargement des versets…</div></div>)}
-                    {loadState==="error"&&(<div style={{textAlign:"center",padding:"24px 14px",color:t.rd,fontSize:".78rem"}}><div style={{fontSize:"1.8rem",marginBottom:8}}>⚠️</div>Impossible de charger cette sourate.<br/><button className="tbtn" style={{marginTop:10,borderColor:t.acc,color:t.acc}} onClick={()=>{const s=selS;setSelS(null);setTimeout(()=>setSelS(s),50);}}>↻ Réessayer</button></div>)}
-                    {loadState==="done"&&verses.map(v=>{
-                      const isMem=!!(mem[String(selS.n)]||{})[String(v.n)];
-                      const isPl=playing===v.n;
-                      const isRevealed=!!revealedVerses[v.n];
-                      const spacedKey=`${selS.n}_${v.n}`;
-                      const isDue=spacedDue.includes(spacedKey);
-                      const showBismillah=v.n===1&&selS.n!==1&&selS.n!==9;
-                      return (
-                        <React.Fragment key={v.n}>
-                          {showBismillah&&(<div style={{textAlign:"center",padding:"14px 8px 6px",direction:"rtl",fontFamily:"Amiri Quran,serif",fontSize:"1.3rem",color:t.acc,letterSpacing:2,borderBottom:`1px solid ${t.b1}`,marginBottom:4,background:`linear-gradient(135deg,${t.acc}08,transparent)`}}>بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>)}
-                          <div id={`v-${selS?.n}-${v.n}`} className={`vitem ${isMem?"mem":""} ${isPl?"pl":""} ${isDue?"due":""}`} onTouchStart={()=>{longPressTimer.current=setTimeout(()=>setActiveVerseActions(n=>n===v.n?null:v.n),500);}} onTouchEnd={()=>clearTimeout(longPressTimer.current)} onTouchMove={()=>clearTimeout(longPressTimer.current)}>
-                            <div className="vtop">
-                              <div className={`vnum ${isMem?"mem":""} ${isPl?"pl":""}`} onClick={()=>toggleV(selS.n,v.n,v.ar)}>{isMem?<Icons.Check size={11} color={t.gr}/>:v.n}</div>
-                              <div className="var-text" style={{fontSize:`${arabicSize}rem`}}>
-                                {reviewMode&&!isRevealed
-                                  ?(<div style={{background:t.b1,borderRadius:8,padding:"8px 14px",cursor:"pointer",textAlign:"center",color:t.tx3,fontSize:".75rem",userSelect:"none"}} onClick={()=>setRevealedVerses(p=>({...p,[v.n]:true}))}>Appuyer pour révéler le verset {v.n}</div>)
-                                  :hifzMode&&(hifzLevel[v.n]||0)>0
-                                    ?(<HifzVerseText ar={v.ar} level={hifzLevel[v.n]||0} tjc={tjc} showTj={showTj} vmark={v.n} onRevealWord={()=>setHifzLevel(p=>({...p,[v.n]:Math.max(0,(p[v.n]||0)-1)}))}/>)
-                                    :karaokeMode&&playing===v.n&&wordTimings[`${selS.n}_${v.n}`]?.length
-                                    ?(
-                                      <bdi style={{direction:"rtl",lineHeight:2.5,letterSpacing:0}}>
-                                        {wordTimings[`${selS.n}_${v.n}`].map((w,wi)=>(
-                                          <span key={wi} style={{
-                                            color:wi===activeWordIdx?"#e91e63":wi<activeWordIdx?t.tx2:t.tx,
-                                            fontWeight:wi===activeWordIdx?900:wi<activeWordIdx?400:500,
-                                            fontSize:wi===activeWordIdx?"1.1em":"1em",
-                                            transition:"all .15s ease",
-                                            textShadow:wi===activeWordIdx?`0 0 12px #e91e6388`:"none",
-                                            display:"inline",
-                                          }}>{w.text} </span>
-                                        ))}
-                                        <span className="vmark"> ﴿{v.n}﴾</span>
-                                      </bdi>
-                                    )
-                                    :(<><TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/><span className="vmark"> ﴿{v.n}﴾</span></>)                                }
-                              </div>
-                            </div>
-                            {showTr&&v.fr&&(!reviewMode||isRevealed)&&<div className="vfr">{v.fr}</div>}
-                            {showTf&&(!reviewMode||isRevealed)&&(
-                              <div className="vtf">
-                                <div className="vtf-hd" style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                                  <span>Tafsir Ibn Kathir</span>
-                                  {!tafsirData[`${selS.n}_${v.n}`]&&!tafsirLoading[`${selS.n}_${v.n}`]&&(
-                                    <button style={{background:"none",border:`1px solid ${t.pu}`,color:t.pu,fontSize:".58rem",cursor:"pointer",borderRadius:4,padding:"1px 6px",fontWeight:600}} onClick={()=>loadTafsir(selS.n,v.n)}>Charger</button>
-                                  )}
-                                </div>
-                                {tafsirLoading[`${selS.n}_${v.n}`]&&<div style={{color:t.tx3,fontSize:".65rem",fontStyle:"italic",marginTop:4}}>Chargement…</div>}
-                                {tafsirData[`${selS.n}_${v.n}`]
-                                  ?<div style={{lineHeight:1.7,marginTop:4}}>{tafsirData[`${selS.n}_${v.n}`]}</div>
-                                  :v.tf
-                                    ?<div style={{lineHeight:1.7,marginTop:4}}>{v.tf}</div>
-                                    :(!tafsirLoading[`${selS.n}_${v.n}`]&&<div style={{color:t.tx3,fontSize:".65rem",fontStyle:"italic",marginTop:4}}>Appuie sur "Charger" pour voir le tafsir.</div>)
-                                }
-                              </div>
-                            )}
-                            <div className={"vacts"+(activeVerseActions===v.n?" open":"")}>
-                              <button className={`vbtn ${isMem?"mem":""}`} onClick={()=>toggleV(selS.n,v.n,v.ar)}>{isMem?<><Icons.Check size={10}/>Mémorisé</>:<>+ Mémoriser</>}</button>
-                              <button className="vbtn snd" onClick={()=>{setLoopCurrent(1);doPlay(v.n);addToHistory(selS.n,v.n);}}><Icons.Play size={10}/>{isPl?"Stop":"Écouter"}</button>
-                              <button className={`vbtn ${isFav(selS.n,v.n)?"mem":""}`} onClick={()=>toggleFav(selS.n,v.n,v.ar,v.fr,selS.name)}><Icons.Heart size={10} filled={isFav(selS.n,v.n)}/>{isFav(selS.n,v.n)?"Favori ✓":"Favori"}</button>
-                              {(()=>{const words=stripTags(v.ar||"").split(" ").filter(Boolean);return words.length>4&&(<button className="vbtn" style={{borderColor:t.bl,color:t.bl}} onClick={()=>setPartialVerse({sn:selS.n,vn:v.n,words,from:0,to:words.length-1,fr:v.fr})}>✂ Partiel</button>);})()}
-                              <button className={`vbtn ${notes[`${selS.n}_${v.n}`]?"on":""}`} style={notes[`${selS.n}_${v.n}`]?{borderColor:t.pu,color:t.pu}:{}} onClick={()=>{setEditingNote(`${selS.n}_${v.n}`);setNoteText(notes[`${selS.n}_${v.n}`]||"");}}>Note{notes[`${selS.n}_${v.n}`]?" ✓":""}</button>
-<button className="vbtn" onClick={()=>setShareVerse({sn:selS.n,vn:v.n,ar:v.ar,fr:v.fr,surah:selS.name,surahAr:selS.ar})}><Icons.Share size={10}/>Partager</button><button className="vbtn" onClick={()=>{wbwVerseRef.current={sn:selS.n,vn:v.n};setWbwOpen(true);}}>📖 Mot à mot</button>                              {speechSupported&&(
-                              <button
-                                className="vbtn"
-                                style={{
-                                  borderColor: speechListening&&speechVerseTarget?.vn===v.n?"#e91e63":
-                                               speechCountdown>0&&speechVerseTarget?.vn===v.n?"#ff9800":
-                                               speechScore?.pct>=80&&speechVerseTarget?.vn===v.n?t.gr:
-                                               speechScore&&speechVerseTarget?.vn===v.n?t.rd:t.b2,
-                                  color: speechListening&&speechVerseTarget?.vn===v.n?"#e91e63":
-                                         speechCountdown>0&&speechVerseTarget?.vn===v.n?"#ff9800":
-                                         speechScore?.pct>=80&&speechVerseTarget?.vn===v.n?t.gr:
-                                         speechScore&&speechVerseTarget?.vn===v.n?t.rd:t.tx3,
-                                  background: speechListening&&speechVerseTarget?.vn===v.n?"rgba(233,30,99,.08)":"transparent",
-                                  fontWeight:600,
-                                  minWidth:80,
-                                  position:"relative",
-                                  overflow:"hidden",
-                                }}
-                                onClick={()=>{
-                                  if(speechListening&&speechVerseTarget?.vn===v.n) stopListening();
-                                  else if(speechCountdown>0) {clearInterval(countdownRef.current);setSpeechCountdown(0);}
-                                  else {setSpeechScore(null);startListening(v.ar,v.n);}
-                                }}>
-                                {/* Cercle countdown SVG */}
-                                {speechCountdown>0&&speechVerseTarget?.vn===v.n&&(
-                                  <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none"}} viewBox="0 0 100 100">
-                                    <circle cx="50" cy="50" r="48" fill="none" stroke="#ff9800" strokeWidth="3" strokeDasharray={`${(3-speechCountdown)/3*301} 301`} strokeLinecap="round" transform="rotate(-90 50 50)" opacity=".6"/>
-                                  </svg>
-                                )}
-                                 {speechListening&&speechVerseTarget?.vn===v.n
-                                   ? (<>
-                                       {speechResult
-                                         ?<span style={{fontFamily:"Amiri,serif",direction:"rtl",fontSize:".9rem",color:"#e91e63",display:"block",textAlign:"center"}}>{speechResult}</span>
-                                         :<><span style={{animation:"pulse .6s infinite",display:"inline-block"}}>●</span> Écoute…</>
-                                       }
-                                     </>)
-                                  : speechCountdown>0&&speechVerseTarget?.vn===v.n
-                                    ? `${speechCountdown}…`
-                                    : speechScore?.pct>=80&&speechVerseTarget?.vn===v.n
-                                      ? `✓ ${speechScore.pct}%`
-                                      : speechScore&&speechVerseTarget?.vn===v.n
-                                        ? `↺ ${speechScore.pct}%`
-                                        : "🎤 Réciter"
-                                }
-                              </button>
-                            )}
-                              {/* Feedback inline mot par mot */}
-                              {speechScore&&speechVerseTarget?.vn===v.n&&(
-                                <div style={{width:"100%",marginTop:8,padding:"12px 14px",background:t.s2,borderRadius:10,border:`1px solid ${speechScore.pct>=80?t.gr:speechScore.pct>=50?`${t.acc}`:t.rd}44`,animation:"fadeIn .25s ease"}}>
-                                  {/* Barre de score */}
-                                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-                                    <div style={{flex:1,height:6,background:t.b1,borderRadius:99,overflow:"hidden"}}>
-                                      <div style={{height:"100%",width:`${speechScore.pct}%`,background:speechScore.pct>=80?t.gr:speechScore.pct>=50?t.acc:t.rd,borderRadius:99,transition:"width .5s"}}/>
-                                    </div>
-                                    <span style={{fontSize:".75rem",fontWeight:800,color:speechScore.pct>=80?t.gr:speechScore.pct>=50?t.acc:t.rd,minWidth:36,textAlign:"right"}}>{speechScore.pct}%</span>
-                                    <button style={{background:"none",border:"none",color:t.tx3,cursor:"pointer",fontSize:".85rem",padding:"0 2px"}} onClick={()=>setSpeechScore(null)}>✕</button>
-                                  </div>
-                                  {/* Texte arabe coloré mot par mot */}
-                                  {/* Transcription en direct */}
-                                  <div style={{padding:"6px 10px",background:t.s3,borderRadius:7,marginBottom:8,direction:"rtl",textAlign:"right"}}>
-                                    <div style={{fontSize:".55rem",color:t.tx3,marginBottom:2,textAlign:"left",direction:"ltr",fontVariantCaps:"all-small-caps",letterSpacing:"1px"}}>Tu as récité</div>
-                                    <div style={{fontFamily:"Amiri,serif",fontSize:"1.05rem",color:t.tx,lineHeight:1.8}}>{speechResult||"—"}</div>
-                                  </div>
-                                  {speechScore.analysis&&(
-                                    <div style={{direction:"rtl",textAlign:"right",fontFamily:"Amiri Quran,serif",fontSize:"1.3rem",lineHeight:2.2,marginBottom:8}}>
-                                      {speechScore.analysis.map((w,wi)=>(
-                                        <span key={wi} style={{
-                                          color:w.status==="ok"?t.gr:w.status==="wrong"?"#e91e63":"#888",
-                                          fontWeight:w.status==="wrong"?700:400,
-                                          textDecoration:w.status==="wrong"?"underline":"none",
-                                          cursor:w.status==="wrong"?"pointer":"default",
-                                          display:"inline",
-                                        }}
-                                        title={w.status==="wrong"?"Appuie pour écouter":""}
-                                        onClick={()=>{ if(w.status==="wrong") doPlay(v.n); }}>
-                                          {w.word}{" "}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  )}
-                                  {/* Actions */}
-                                  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                                    <button className="vbtn" style={{borderColor:"#e91e63",color:"#e91e63"}} onClick={()=>{setSpeechScore(null);startListening(v.ar,v.n);}}>↺ Réessayer</button>
-                                    <button className="vbtn snd" onClick={()=>doPlay(v.n)}>▶ Écouter</button>
-                                    {speechScore.pct>=50&&(
-                                      <button className="vbtn" style={{borderColor:t.gr,color:t.gr}} onClick={()=>{markSpaced(selS.n,v.n,speechScore.pct>=85?5:speechScore.pct>=70?4:3);setSpeechScore(null);}}>
-                                        ✓ Sauvegarder {speechScore.pct>=85?"⭐⭐":"⭐"}
-                                      </button>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-                              {isMem&&(<button className={`vbtn ${isDue?"":"snd"}`} style={isDue?{borderColor:t.rd,color:t.rd}:{}} onClick={()=>markSpaced(selS.n,v.n)}>{isDue?"Révision due":"Révisé"}</button>)}
-                            </div>
-                          </div>
-                        </React.Fragment>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* PAGES */}
         {page==="pages"&&(
