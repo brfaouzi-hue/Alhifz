@@ -5121,7 +5121,7 @@ return (
             </div>
           </div>
         )}
-      </div>{/* end .wrap */}
+      </div>
 
       {/* Mode Concentration */}
       {focusMode&&selS&&verses.length>0&&(
