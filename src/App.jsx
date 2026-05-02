@@ -789,129 +789,67 @@ function TajwidSpan({text,enabled,tjc}) {
 // ONBOARDING — Premier lancement
 // ═══════════════════════════════════════
 const ONBOARD_SLIDES=[
-  {
-    visual:(c)=>(
-      <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
-        <circle cx="50" cy="50" r="46" fill={c+"18"} stroke={c} strokeWidth="1.2" strokeDasharray="4 3"/>
-        <path d="M50 20 C38 20 28 30 28 42 C28 56 40 64 52 62 C44 60 36 52 36 42 C36 32 44 24 54 22 C52.5 20.8 51.3 20 50 20Z" fill={c} opacity=".9"/>
-        <circle cx="62" cy="26" r="4" fill={c}/>
-        <text x="50" y="80" textAnchor="middle" fontFamily="Amiri Quran,serif" fontSize="18" fill={c} opacity=".85">الحفظ</text>
-      </svg>
-    ),
-    title:"بِسْمِ اللَّهِ",badge:"Bienvenue",
-    desc:"Al-Hifz t'accompagne du premier verset mémorisé jusqu'à la khatma complète.",
-    color:"#16a34a",emoji:"🌙",
-  },
-  {
-    visual:(c)=>(
-      <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
-        <circle cx="50" cy="50" r="36" fill="none" stroke={c+"20"} strokeWidth="8"/>
-        <circle cx="50" cy="50" r="36" fill="none" stroke={c} strokeWidth="8" strokeDasharray="150 226" strokeLinecap="round" transform="rotate(-90 50 50)"/>
-        <text x="50" y="46" textAnchor="middle" fontSize="14" fontWeight="bold" fill={c}>68%</text>
-        <text x="50" y="58" textAnchor="middle" fontSize="7" fill={c+"99"}>mémorisé</text>
-      </svg>
-    ),
-    title:"Suis ta progression",badge:"Mémorisation",
-    desc:"Chaque verset mémorisé fait avancer ton anneau. La révision espacée SM-2 calcule exactement quand revoir.",
-    color:"#2563eb",emoji:"📿",
-  },
-  {
-    visual:(c)=>(
-      <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
-        <rect x="38" y="18" width="24" height="36" rx="12" fill={c+"25"} stroke={c} strokeWidth="1.5"/>
-        <rect x="43" y="23" width="14" height="26" rx="7" fill={c} opacity=".6"/>
-        <path d="M28 48 C28 64 72 64 72 48" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round"/>
-        <line x1="50" y1="64" x2="50" y2="75" stroke={c} strokeWidth="2" strokeLinecap="round"/>
-        <line x1="40" y1="75" x2="60" y2="75" stroke={c} strokeWidth="2" strokeLinecap="round"/>
-      </svg>
-    ),
-    title:"Récite à voix haute",badge:"Récitation",
-    desc:"Appuie sur le micro, récite en arabe. L'app analyse mot par mot et colore les erreurs.",
-    color:"#e91e63",emoji:"🎤",
-  },
-  {
-    visual:(c)=>(
-      <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
-        <rect x="12" y="22" width="36" height="56" rx="3" fill={c+"18"} stroke={c} strokeWidth="1.2"/>
-        <rect x="52" y="22" width="36" height="56" rx="3" fill={c+"18"} stroke={c} strokeWidth="1.2"/>
-        <rect x="47" y="18" width="6" height="64" rx="3" fill={c} opacity=".4"/>
-        <circle cx="22" cy="46" r="3" fill="#537FFF" opacity=".8"/>
-        <circle cx="30" cy="46" r="3" fill="#169200" opacity=".8"/>
-        <circle cx="38" cy="46" r="3" fill="#DD8800" opacity=".8"/>
-      </svg>
-    ),
-    title:"Mushaf et Quiz",badge:"Lecture et Test",
-    desc:"Lis le Mushaf avec les couleurs tajweed. Lance un quiz pour tester ta mémorisation.",
-    color:"#7c3aed",emoji:"📜",
-  },
+  {visual:(c)=>(<svg width="100" height="100" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="46" fill={c+"18"} stroke={c} strokeWidth="1.2"/><path d="M50 20 C38 20 28 30 28 42 C28 56 40 64 52 62 C44 60 36 52 36 42 C36 32 44 24 54 22Z" fill={c} opacity=".9"/><text x="50" y="80" textAnchor="middle" fontFamily="Amiri Quran,serif" fontSize="18" fill={c} opacity=".85">الحفظ</text></svg>),
+    title:"بِسْمِ اللَّهِ",badge:"Bienvenue",desc:"Al-Hifz t'accompagne du premier verset mémorisé jusqu'à la khatma complète.",color:"#16a34a",emoji:"🌙"},
+  {visual:(c)=>(<svg width="100" height="100" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="36" fill="none" stroke={c+"20"} strokeWidth="8"/><circle cx="50" cy="50" r="36" fill="none" stroke={c} strokeWidth="8" strokeDasharray="150 226" strokeLinecap="round" transform="rotate(-90 50 50)"/><text x="50" y="46" textAnchor="middle" fontSize="14" fontWeight="bold" fill={c}>68%</text><text x="50" y="58" textAnchor="middle" fontSize="7" fill={c+"99"}>mémorisé</text></svg>),
+    title:"Suis ta progression",badge:"Mémorisation",desc:"Chaque verset mémorisé fait avancer ton anneau. La révision espacée SM-2 calcule quand revoir.",color:"#2563eb",emoji:"📿"},
+  {visual:(c)=>(<svg width="100" height="100" viewBox="0 0 100 100" fill="none"><rect x="38" y="18" width="24" height="36" rx="12" fill={c+"25"} stroke={c} strokeWidth="1.5"/><rect x="43" y="23" width="14" height="26" rx="7" fill={c} opacity=".6"/><path d="M28 48 C28 64 72 64 72 48" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round"/><line x1="50" y1="64" x2="50" y2="75" stroke={c} strokeWidth="2" strokeLinecap="round"/></svg>),
+    title:"Récite à voix haute",badge:"Récitation",desc:"Appuie sur le micro, récite en arabe. L'app analyse mot par mot et colore les erreurs.",color:"#e91e63",emoji:"🎤"},
+  {visual:(c)=>(<svg width="100" height="100" viewBox="0 0 100 100" fill="none"><rect x="12" y="22" width="36" height="56" rx="3" fill={c+"18"} stroke={c} strokeWidth="1.2"/><rect x="52" y="22" width="36" height="56" rx="3" fill={c+"18"} stroke={c} strokeWidth="1.2"/><rect x="47" y="18" width="6" height="64" rx="3" fill={c} opacity=".4"/><circle cx="22" cy="46" r="3" fill="#537FFF" opacity=".8"/></svg>),
+    title:"Mushaf et Quiz",badge:"Lecture et Test",desc:"Lis le Mushaf avec les couleurs tajweed. Lance un quiz pour tester ta mémorisation.",color:"#7c3aed",emoji:"📜"},
 ];
 function OnboardModal({t,acc,tn,onDone,onSkip,onTutorial}){
   const [slide,setSlide]=React.useState(0);
   const s=ONBOARD_SLIDES[slide];
   const isLast=slide===ONBOARD_SLIDES.length-1;
   const bg=tn==="light"?"#ffffff":"#060d07";
-  return(
-    <div style={{position:"fixed",inset:0,zIndex:500,background:bg,display:"flex",flexDirection:"column",overflow:"hidden"}}>
-      <style>{"@keyframes ob-in{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}@keyframes ob-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}"}</style>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"max(18px,env(safe-area-inset-top)) 20px 12px",flexShrink:0}}>
-        <div style={{display:"flex",gap:6,alignItems:"center"}}>
-          {ONBOARD_SLIDES.map((_,i)=>(
-            <div key={i} onClick={()=>setSlide(i)} style={{height:4,width:i===slide?24:6,borderRadius:99,background:i===slide?s.color:t.b2,transition:"all .35s ease",cursor:"pointer"}}/>
-          ))}
-        </div>
-        <button onClick={onSkip} style={{background:"none",border:"none",color:t.tx3,fontSize:".75rem",cursor:"pointer",padding:"6px 10px",borderRadius:8}}>Passer</button>
-      </div>
-      <div key={slide} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"0 32px 20px",animation:"ob-in .4s ease",gap:32}}>
-        <div style={{padding:"4px 14px",borderRadius:99,background:s.color+"18",border:"1px solid "+s.color+"44",fontSize:".62rem",fontWeight:700,color:s.color,letterSpacing:"1.5px",textTransform:"uppercase"}}>{s.emoji} {s.badge}</div>
-        <div style={{width:160,height:160,borderRadius:40,background:s.color+"10",border:"1.5px solid "+s.color+"25",display:"flex",alignItems:"center",justifyContent:"center",animation:"ob-pulse 3s ease-in-out infinite",flexShrink:0}}>
-          {s.visual(s.color)}
-        </div>
-        <div style={{textAlign:"center",maxWidth:340}}>
-          <div style={{fontFamily:"Amiri,serif",fontSize:"1.7rem",color:t.tx,fontWeight:700,marginBottom:10,lineHeight:1.2}}>{s.title}</div>
-          <div style={{fontSize:".9rem",color:t.tx2,lineHeight:1.75}}>{s.desc}</div>
-        </div>
-      </div>
-      <div style={{padding:"16px 24px",paddingBottom:"max(24px,env(safe-area-inset-bottom))",display:"flex",flexDirection:"column",gap:10,flexShrink:0}}>
-        {isLast?(
-          <>
-            <button onClick={onTutorial} style={{width:"100%",padding:"16px",background:"linear-gradient(135deg,"+s.color+","+s.color+"bb)",border:"none",borderRadius:16,color:"#fff",fontWeight:800,fontSize:".95rem",cursor:"pointer"}}>Voir le guide complet</button>
-            <button onClick={onDone} style={{width:"100%",padding:"14px",background:"transparent",border:"1.5px solid "+t.b2,borderRadius:16,color:t.tx2,fontWeight:600,fontSize:".85rem",cursor:"pointer"}}>Commencer maintenant</button>
-          </>
-        ):(
-          <button onClick={()=>setSlide(p=>p+1)} style={{width:"100%",padding:"16px",background:"linear-gradient(135deg,"+s.color+","+s.color+"bb)",border:"none",borderRadius:16,color:"#fff",fontWeight:800,fontSize:".95rem",cursor:"pointer"}}>Suivant</button>
-        )}
+  return(<div style={{position:"fixed",inset:0,zIndex:500,background:bg,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+    <style>{"@keyframes ob-in{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}@keyframes ob-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}"}</style>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"max(18px,env(safe-area-inset-top)) 20px 12px",flexShrink:0}}>
+      <div style={{display:"flex",gap:6}}>{ONBOARD_SLIDES.map((_,i)=>(<div key={i} onClick={()=>setSlide(i)} style={{height:4,width:i===slide?24:6,borderRadius:99,background:i===slide?s.color:t.b2,transition:"all .35s",cursor:"pointer"}}/>))}</div>
+      <button onClick={onSkip} style={{background:"none",border:"none",color:t.tx3,fontSize:".75rem",cursor:"pointer"}}>Passer</button>
+    </div>
+    <div key={slide} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"0 32px 20px",animation:"ob-in .4s ease",gap:32}}>
+      <div style={{padding:"4px 14px",borderRadius:99,background:s.color+"18",border:"1px solid "+s.color+"44",fontSize:".62rem",fontWeight:700,color:s.color,textTransform:"uppercase"}}>{s.emoji} {s.badge}</div>
+      <div style={{width:160,height:160,borderRadius:40,background:s.color+"10",border:"1.5px solid "+s.color+"25",display:"flex",alignItems:"center",justifyContent:"center",animation:"ob-pulse 3s ease-in-out infinite",flexShrink:0}}>{s.visual(s.color)}</div>
+      <div style={{textAlign:"center",maxWidth:340}}>
+        <div style={{fontFamily:"Amiri,serif",fontSize:"1.7rem",color:t.tx,fontWeight:700,marginBottom:10}}>{s.title}</div>
+        <div style={{fontSize:".9rem",color:t.tx2,lineHeight:1.75}}>{s.desc}</div>
       </div>
     </div>
-  );
+    <div style={{padding:"16px 24px",paddingBottom:"max(24px,env(safe-area-inset-bottom))",display:"flex",flexDirection:"column",gap:10,flexShrink:0}}>
+      {isLast?(<><button onClick={onTutorial} style={{width:"100%",padding:"16px",background:"linear-gradient(135deg,"+s.color+","+s.color+"bb)",border:"none",borderRadius:16,color:"#fff",fontWeight:800,fontSize:".95rem",cursor:"pointer"}}>Voir le guide</button><button onClick={onDone} style={{width:"100%",padding:"14px",background:"transparent",border:"1.5px solid "+t.b2,borderRadius:16,color:t.tx2,fontWeight:600,cursor:"pointer"}}>Commencer</button></>)
+      :(<button onClick={()=>setSlide(p=>p+1)} style={{width:"100%",padding:"16px",background:"linear-gradient(135deg,"+s.color+","+s.color+"bb)",border:"none",borderRadius:16,color:"#fff",fontWeight:800,cursor:"pointer"}}>Suivant</button>)}
+    </div>
+  </div>);
 }
 const TUTORIAL_SECTIONS=[
   {id:"memo",label:"Mémorisation",icon:"📿",color:"#16a34a",steps:[
     {title:"Choisis ta sourate",tip:"Commence par Al-Fatiha ou les courtes sourates du Juz 30.",desc:"Ouvre l'onglet Coran et appuie sur une sourate pour afficher ses versets."},
-    {title:"Marque un verset mémorisé",tip:"Écoute le verset plusieurs fois avant de le marquer.",desc:"Fais un appui long sur un verset pour faire apparaître les options, puis appuie sur Mémoriser."},
-    {title:"Suis ta progression",tip:"L'anneau sur l'accueil montre ton % du Coran mémorisé.",desc:"L'anneau de progression et les KPIs se mettent à jour en temps réel à chaque verset ajouté."},
-    {title:"Révision espacée SM-2",tip:"5 minutes par jour valent mieux qu'1h par semaine.",desc:"L'algorithme SM-2 calcule automatiquement quand revoir chaque verset. Plus tu révises correctement, plus l'intervalle s'allonge."},
+    {title:"Marque un verset mémorisé",tip:"Écoute le verset plusieurs fois avant.",desc:"Fais un appui long sur un verset puis appuie sur Mémoriser. Il passe au vert."},
+    {title:"Suis ta progression",tip:"L'anneau sur l'accueil montre ton pourcent du Coran mémorisé.",desc:"L'anneau de progression et les KPIs se mettent à jour en temps réel."},
+    {title:"Révision espacée SM-2",tip:"5 minutes par jour valent mieux qu'1h par semaine.",desc:"L'algorithme SM-2 calcule automatiquement quand revoir chaque verset."},
   ]},
   {id:"recit",label:"Récitation",icon:"🎤",color:"#e91e63",steps:[
-    {title:"Lance la récitation",tip:"Autorise le micro la première fois.",desc:"Fais un appui long sur un verset et appuie sur Réciter. Un écran s'ouvre avec le verset à réciter."},
-    {title:"Parle à voix haute",tip:"Parle clairement, sans bruit de fond.",desc:"Appuie sur le bouton micro et récite le verset en arabe. Les ondes indiquent que l'app t'écoute."},
-    {title:"Analyse mot par mot",tip:"Les mots rouges sont ceux à retravailler.",desc:"Chaque mot reçoit une couleur : vert est correct, rouge est à retravailler. Le score en pourcent donne une mesure objective."},
-    {title:"Mode enchaîné",tip:"Vise 70% minimum pour enchaîner.",desc:"Active le mode enchaîné pour réciter toute la sourate. Si tu dépasses 70% sur un verset, le suivant se lance automatiquement."},
+    {title:"Lance la récitation",tip:"Autorise le micro la première fois.",desc:"Fais un appui long sur un verset et appuie sur Réciter."},
+    {title:"Parle à voix haute",tip:"Parle clairement, sans bruit de fond.",desc:"Appuie sur le bouton micro et récite le verset en arabe."},
+    {title:"Analyse mot par mot",tip:"Les mots rouges sont à retravailler.",desc:"Chaque mot reçoit une couleur : vert est correct, rouge est à retravailler."},
+    {title:"Mode enchaîné",tip:"Vise 70 pourcent minimum pour enchaîner.",desc:"Active le mode enchaîné pour réciter toute la sourate automatiquement."},
   ]},
   {id:"mushaf",label:"Mushaf",icon:"📜",color:"#b45309",steps:[
-    {title:"Navigue dans le Mushaf",tip:"Swipe gauche pour la page suivante.",desc:"L'onglet Mushaf affiche les vraies pages du Coran. Swipe ou utilise les flèches pour tourner les pages."},
-    {title:"Choisir l'édition",tip:"Hafs classique ou avec traduction française.",desc:"Le sélecteur dans la barre permet de basculer entre l'édition Hafs standard et l'édition bilingue."},
-    {title:"Aller à une sourate",tip:"Tape le nom dans la barre.",desc:"Le menu déroulant liste les 114 sourates avec leur page. Sélectionne et tu arrives instantanément à la bonne page."},
+    {title:"Navigue dans le Mushaf",tip:"Swipe gauche pour la page suivante.",desc:"L'onglet Mushaf affiche les vraies pages du Coran. Swipe ou utilise les flèches."},
+    {title:"Choisir l'édition",tip:"Hafs classique ou avec traduction française.",desc:"Le sélecteur dans la barre permet de basculer entre les éditions."},
+    {title:"Aller à une sourate",tip:"Tape le nom dans la barre.",desc:"Le menu liste les 114 sourates avec leur page."},
   ]},
   {id:"khatma",label:"Khatma",icon:"🌿",color:"#065f46",steps:[
-    {title:"Lance une Khatma",tip:"La khatma mensuelle est idéale pour commencer.",desc:"Dans l'onglet Khatma, choisis un rythme. Al-Hifz calcule combien de pages lire chaque jour."},
-    {title:"Suivi jour par jour",tip:"Coche chaque jour pour maintenir ton streak.",desc:"Le calendrier colore chaque journée cochée. Valide la journée quand c'est fait."},
+    {title:"Lance une Khatma",tip:"La khatma mensuelle est idéale pour commencer.",desc:"Dans l'onglet Khatma, choisis un rythme. Al-Hifz calcule combien de pages lire par jour."},
+    {title:"Suivi jour par jour",tip:"Coche chaque jour pour maintenir ton streak.",desc:"Le calendrier colore chaque journée cochée."},
   ]},
   {id:"quiz",label:"Quiz",icon:"🎯",color:"#1d4ed8",steps:[
-    {title:"Deux modes de quiz",tip:"Commence par Quelle sourate.",desc:"Mode 1: tu vois un verset et tu devines la sourate. Mode 2: tu vois le début d'un verset et tu dois le compléter."},
-    {title:"Revoir ses erreurs",tip:"Les erreurs signalent les versets à mémoriser en priorité.",desc:"Après chaque question, les erreurs s'accumulent en bas. Clique pour voir le verset complet."},
+    {title:"Deux modes de quiz",tip:"Commence par Quelle sourate.",desc:"Mode 1: tu vois un verset et tu devines la sourate. Mode 2: tu complètes le verset."},
+    {title:"Revoir ses erreurs",tip:"Les erreurs signalent les versets à mémoriser en priorité.",desc:"Après chaque question, les erreurs s'accumulent en bas."},
   ]},
 ];
-
 function TutorialModal({t,acc,tn,onClose}){
   const [step,setStep]=React.useState(0);
   const [sec,setSec]=React.useState(0);
@@ -924,59 +862,51 @@ function TutorialModal({t,acc,tn,onClose}){
   const bg=tn==="light"?"#fafaf8":"#08100a";
   const goNext=()=>{if(!isLastStep)setStep(p=>p+1);else if(!isLastSec){setSec(p=>p+1);setStep(0);}else onClose();};
   const goPrev=()=>{if(step>0)setStep(p=>p-1);else if(sec>0){setSec(p=>p-1);setStep(TUTORIAL_SECTIONS[sec-1].steps.length-1);}};
-  return(
-    <div style={{position:"fixed",inset:0,zIndex:500,background:bg,display:"flex",flexDirection:"column",overflow:"hidden"}}>
-      <style>{"@keyframes tIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}"}</style>
-      <div style={{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",paddingTop:"max(14px,env(safe-area-inset-top))",borderBottom:"1px solid "+t.b1,flexShrink:0}}>
-        <button onClick={goPrev} disabled={sec===0&&step===0} style={{width:34,height:34,borderRadius:"50%",border:"1px solid "+t.b2,background:t.s2,color:t.tx,cursor:"pointer",opacity:sec===0&&step===0?.3:1}}>{"<"}</button>
-        <div style={{flex:1}}>
-          <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
-            <span style={{fontSize:".65rem",color:section.color,fontWeight:700,textTransform:"uppercase"}}>{section.icon} {section.label}</span>
-            <span style={{fontSize:".6rem",color:t.tx3}}>{done}/{total}</span>
-          </div>
-          <div style={{height:4,background:t.b1,borderRadius:99,overflow:"hidden"}}>
-            <div style={{height:"100%",width:(done/total*100)+"%",background:section.color,borderRadius:99,transition:"width .4s"}}/>
-          </div>
+  return(<div style={{position:"fixed",inset:0,zIndex:500,background:bg,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+    <style>{"@keyframes tIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}"}</style>
+    <div style={{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",paddingTop:"max(14px,env(safe-area-inset-top))",borderBottom:"1px solid "+t.b1,flexShrink:0}}>
+      <button onClick={goPrev} disabled={sec===0&&step===0} style={{width:34,height:34,borderRadius:"50%",border:"1px solid "+t.b2,background:t.s2,color:t.tx,cursor:"pointer",opacity:sec===0&&step===0?.3:1}}>{"<"}</button>
+      <div style={{flex:1}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
+          <span style={{fontSize:".65rem",color:section.color,fontWeight:700,textTransform:"uppercase"}}>{section.icon} {section.label}</span>
+          <span style={{fontSize:".6rem",color:t.tx3}}>{done+"/"+total}</span>
         </div>
-        <button onClick={onClose} style={{width:34,height:34,borderRadius:"50%",border:"1px solid "+t.b2,background:t.s2,color:t.tx3,cursor:"pointer"}}>{"x"}</button>
-      </div>
-      <div style={{display:"flex",gap:6,padding:"10px 14px",overflowX:"auto",borderBottom:"1px solid "+t.b1,flexShrink:0,scrollbarWidth:"none"}}>
-        {TUTORIAL_SECTIONS.map((s,i)=>(
-          <button key={s.id} onClick={()=>{setSec(i);setStep(0);}} style={{padding:"5px 12px",borderRadius:99,flexShrink:0,cursor:"pointer",border:"1.5px solid "+(i===sec?s.color:i<sec?"#22c55e44":t.b2),background:i===sec?s.color+"18":i<sec?"#22c55e0a":t.s2,color:i===sec?s.color:i<sec?"#22c55e":t.tx3,fontSize:".65rem",fontWeight:i===sec?700:400,transition:"all .2s"}}>
-            {i<sec?"✓ ":""}{s.icon} {s.label}
-          </button>
-        ))}
-      </div>
-      <div key={sec+"-"+step} style={{flex:1,display:"flex",flexDirection:"column",padding:"20px 18px",gap:16,overflowY:"auto",animation:"tIn .3s ease"}}>
-        <div style={{width:"100%",borderRadius:16,background:section.color+"10",border:"1.5px solid "+section.color+"25",padding:"32px 20px",display:"flex",alignItems:"center",justifyContent:"center",minHeight:120,flexShrink:0}}>
-          <div style={{textAlign:"center"}}>
-            <div style={{fontSize:"3rem",marginBottom:8}}>{section.icon}</div>
-            <div style={{fontFamily:"Amiri,serif",fontSize:"1.1rem",color:section.color,fontWeight:700}}>{cur.title}</div>
-            <div style={{fontSize:".65rem",color:t.tx3,marginTop:4}}>{"Étape "+(step+1)+" sur "+section.steps.length}</div>
-          </div>
-        </div>
-        <div style={{display:"flex",alignItems:"flex-start",gap:10}}>
-          <div style={{width:30,height:30,borderRadius:"50%",background:section.color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".8rem",fontWeight:800,color:"#fff",flexShrink:0}}>{step+1}</div>
-          <div style={{fontSize:"1rem",fontWeight:800,color:t.tx,lineHeight:1.2,paddingTop:4}}>{cur.title}</div>
-        </div>
-        <div style={{padding:"14px 16px",borderRadius:12,background:t.s2,border:"1px solid "+t.b1,fontSize:".85rem",color:t.tx2,lineHeight:1.75}}>{cur.desc}</div>
-        {cur.tip&&<div style={{display:"flex",alignItems:"flex-start",gap:10,padding:"10px 14px",borderRadius:10,background:section.color+"0d",border:"1px solid "+section.color+"30"}}>
-          <span style={{fontSize:"1rem",flexShrink:0}}>{"💡"}</span>
-          <div style={{fontSize:".78rem",color:section.color,lineHeight:1.6,fontWeight:500}}>{cur.tip}</div>
-        </div>}
-        <div style={{display:"flex",gap:8,justifyContent:"center"}}>
-          {section.steps.map((_,i)=>(
-            <div key={i} onClick={()=>setStep(i)} style={{width:i===step?20:7,height:7,borderRadius:99,background:i<step?"#22c55e":i===step?section.color:t.b2,cursor:"pointer",transition:"all .3s"}}/>
-          ))}
+        <div style={{height:4,background:t.b1,borderRadius:99,overflow:"hidden"}}>
+          <div style={{height:"100%",width:(done/total*100)+"%",background:section.color,borderRadius:99,transition:"width .4s"}}/>
         </div>
       </div>
-      <div style={{padding:"12px 18px",paddingBottom:"max(16px,env(safe-area-inset-bottom))",borderTop:"1px solid "+t.b1,flexShrink:0}}>
-        <button onClick={goNext} style={{width:"100%",padding:"15px",background:isLastSec&&isLastStep?"linear-gradient(135deg,#22c55e,#16a34a)":"linear-gradient(135deg,"+section.color+","+section.color+"bb)",border:"none",borderRadius:14,color:"#fff",fontWeight:800,fontSize:".9rem",cursor:"pointer"}}>
-          {isLastSec&&isLastStep?"Terminer le guide":isLastStep?TUTORIAL_SECTIONS[sec+1].icon+" "+TUTORIAL_SECTIONS[sec+1].label:"Suivant"}
-        </button>
+      <button onClick={onClose} style={{width:34,height:34,borderRadius:"50%",border:"1px solid "+t.b2,background:t.s2,color:t.tx3,cursor:"pointer"}}>{"x"}</button>
+    </div>
+    <div style={{display:"flex",gap:6,padding:"10px 14px",overflowX:"auto",borderBottom:"1px solid "+t.b1,flexShrink:0,scrollbarWidth:"none"}}>
+      {TUTORIAL_SECTIONS.map((s,i)=>(<button key={s.id} onClick={()=>{setSec(i);setStep(0);}} style={{padding:"5px 12px",borderRadius:99,flexShrink:0,cursor:"pointer",border:"1.5px solid "+(i===sec?s.color:i<sec?"#22c55e44":t.b2),background:i===sec?s.color+"18":i<sec?"#22c55e0a":t.s2,color:i===sec?s.color:i<sec?"#22c55e":t.tx3,fontSize:".65rem",fontWeight:i===sec?700:400}}>{i<sec?"✓ ":""}{s.icon} {s.label}</button>))}
+    </div>
+    <div key={sec+"-"+step} style={{flex:1,display:"flex",flexDirection:"column",padding:"20px 18px",gap:16,overflowY:"auto",animation:"tIn .3s ease"}}>
+      <div style={{width:"100%",borderRadius:16,background:section.color+"10",border:"1.5px solid "+section.color+"25",padding:"32px 20px",display:"flex",alignItems:"center",justifyContent:"center",minHeight:120,flexShrink:0}}>
+        <div style={{textAlign:"center"}}>
+          <div style={{fontSize:"3rem",marginBottom:8}}>{section.icon}</div>
+          <div style={{fontFamily:"Amiri,serif",fontSize:"1.1rem",color:section.color,fontWeight:700}}>{cur.title}</div>
+          <div style={{fontSize:".65rem",color:t.tx3,marginTop:4}}>{"Étape "+(step+1)+" sur "+section.steps.length}</div>
+        </div>
+      </div>
+      <div style={{display:"flex",alignItems:"flex-start",gap:10}}>
+        <div style={{width:30,height:30,borderRadius:"50%",background:section.color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".8rem",fontWeight:800,color:"#fff",flexShrink:0}}>{step+1}</div>
+        <div style={{fontSize:"1rem",fontWeight:800,color:t.tx,paddingTop:4}}>{cur.title}</div>
+      </div>
+      <div style={{padding:"14px 16px",borderRadius:12,background:t.s2,border:"1px solid "+t.b1,fontSize:".85rem",color:t.tx2,lineHeight:1.75}}>{cur.desc}</div>
+      {cur.tip&&<div style={{display:"flex",gap:10,padding:"10px 14px",borderRadius:10,background:section.color+"0d",border:"1px solid "+section.color+"30"}}>
+        <span style={{flexShrink:0}}>{"💡"}</span>
+        <div style={{fontSize:".78rem",color:section.color,lineHeight:1.6,fontWeight:500}}>{cur.tip}</div>
+      </div>}
+      <div style={{display:"flex",gap:8,justifyContent:"center"}}>
+        {section.steps.map((_,i)=>(<div key={i} onClick={()=>setStep(i)} style={{width:i===step?20:7,height:7,borderRadius:99,background:i<step?"#22c55e":i===step?section.color:t.b2,cursor:"pointer",transition:"all .3s"}}/>))}
       </div>
     </div>
-  );
+    <div style={{padding:"12px 18px",paddingBottom:"max(16px,env(safe-area-inset-bottom))",borderTop:"1px solid "+t.b1,flexShrink:0}}>
+      <button onClick={goNext} style={{width:"100%",padding:"15px",background:isLastSec&&isLastStep?"linear-gradient(135deg,#22c55e,#16a34a)":"linear-gradient(135deg,"+section.color+","+section.color+"bb)",border:"none",borderRadius:14,color:"#fff",fontWeight:800,fontSize:".9rem",cursor:"pointer"}}>
+        {isLastSec&&isLastStep?"Terminer":isLastStep?TUTORIAL_SECTIONS[sec+1].icon+" "+TUTORIAL_SECTIONS[sec+1].label:"Suivant"}
+      </button>
+    </div>
+  </div>);
 }
 function MushafTajweedView({page,fullscreen,edition}){
   const pg=page||1;
@@ -1087,11 +1017,7 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
         {/* Boutons actions */}
         <div style={{display:"flex",gap:4,flexShrink:0}}>
           {/* Récitation */}
-          <select value={mushafEdition||"hafs"} onChange={e=>setMushafEdition&&setMushafEdition(e.target.value)} style={{padding:"5px 6px",borderRadius:8,border:"1px solid rgba(201,168,76,.3)",background:"rgba(0,0,0,.5)",color:"#c9a84c",fontSize:".58rem",cursor:"pointer",outline:"none"}}>
-            <option value="hafs">Hafs</option>
-            <option value="hafs_fr">Traduction FR</option>
-          </select>
-          {onRecite&&<button onClick={()=>onRecite(page||1)} title="Réciter cette page" style={{background:"rgba(233,30,99,.15)",border:"1px solid rgba(233,30,99,.3)",color:"#e91e63",padding:"5px 8px",borderRadius:8,cursor:"pointer",fontSize:".75rem"}}>🎤</button>}
+          <select value={mushafEdition||"hafs"} onChange={e=>setMushafEdition&&setMushafEdition(e.target.value)} style={{padding:"5px 6px",borderRadius:8,border:"1px solid rgba(201,168,76,.3)",background:"rgba(0,0,0,.5)",color:"#c9a84c",fontSize:".58rem",cursor:"pointer",outline:"none"}}><option value="hafs">Hafs</option><option value="hafs_fr">Traduction FR</option></select>{onRecite&&<button onClick={()=>onRecite(page||1)} title="Réciter cette page" style={{background:"rgba(233,30,99,.15)",border:"1px solid rgba(233,30,99,.3)",color:"#e91e63",padding:"5px 8px",borderRadius:8,cursor:"pointer",fontSize:".75rem"}}>🎤</button>}
           {/* Plein écran */}
           <button onClick={onToggleFullscreen} style={{background:"rgba(201,168,76,.12)",border:"1px solid rgba(201,168,76,.3)",color:AC,padding:"5px 8px",borderRadius:8,cursor:"pointer",fontSize:".7rem",fontWeight:700}}>{fullscreen?"✕":"⛶"}</button>
         </div>
@@ -2710,7 +2636,7 @@ return (
           </svg>
           <div style={{fontFamily:"Amiri,serif",fontSize:"2.2rem",color:acc,textShadow:`0 0 30px ${acc}66`,letterSpacing:"2px",marginBottom:6}}>Al-Hifz</div>
           <div style={{fontFamily:"Amiri Quran,serif",fontSize:".9rem",color:acc2,letterSpacing:"3px",opacity:.7}}>حفظ القرآن الكريم</div>
-          <div style={{marginTop:20,display:"flex",gap:5}}>{[0,1,2].map(i=>(<div key={i} style={{width:5,height:5,borderRadius:"50%",background:acc,animation:`pulse 1s ${i*0.2}s infinite`,opacity:.6}}/>))}</div>
+          <div style={{marginTop:20,display:"flex",gap:5}}>{[0,1,2].map(i=>(<div key={i} style={{width:5,height:5,borderRadius:"50%",background:acc,animation:"pulse 1s "+(i*0.2)+"s infinite",opacity:.6}}/>))}</div>
         </div>
       )}
 
@@ -2884,13 +2810,13 @@ return (
 
       {/* Offline banner */}
       {isOffline&&(
-        <div style={{background:`${t.rd}CC`,color:"#fff",padding:"6px 16px",textAlign:"center",fontSize:".7rem",fontWeight:600,backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",gap:8,position:"sticky",top:0,zIndex:61}}>
+        <div style={{background:t.rd+"CC",color:"#fff",padding:"6px 16px",textAlign:"center",fontSize:".7rem",fontWeight:600,backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",gap:8,position:"sticky",top:0,zIndex:61}}>
           <span>●</span> Mode hors ligne — Coran embarqué et mémorisations disponibles
         </div>
       )}
       {/* Install banner */}
       {showInstallBanner&&(
-        <div style={{background:`linear-gradient(135deg,${t.acc}ee,${t.acc2}ee)`,padding:"8px 16px",display:"flex",alignItems:"center",gap:10,position:"sticky",top:0,zIndex:61,backdropFilter:"blur(8px)"}}>
+        <div style={{background:"linear-gradient(135deg,"+t.acc+"ee,"+t.acc2+"ee)",padding:"8px 16px",display:"flex",alignItems:"center",gap:10,position:"sticky",top:0,zIndex:61,backdropFilter:"blur(8px)"}}>
           <span style={{fontSize:".75rem",fontWeight:700,color:"#fff",flex:1}}>Installer Al-Hifz sur ton écran d'accueil</span>
           <button onClick={()=>{installPromptRef.current?.prompt();setShowInstallBanner(false);}} style={{background:"rgba(255,255,255,.25)",border:"1px solid rgba(255,255,255,.4)",color:"#fff",borderRadius:8,padding:"4px 12px",fontSize:".7rem",fontWeight:700,cursor:"pointer"}}>Installer</button>
           <button onClick={()=>setShowInstallBanner(false)} style={{background:"none",border:"none",color:"rgba(255,255,255,.7)",cursor:"pointer",fontSize:"1rem"}}>✕</button>
@@ -3062,7 +2988,7 @@ return (
                 <defs><linearGradient id="bord2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="transparent"/><stop offset=".15" stopColor={acc}/><stop offset=".5" stopColor={acc3}/><stop offset=".85" stopColor={acc}/><stop offset="1" stopColor="transparent"/></linearGradient></defs>
                 <rect y="0" width="800" height="1.5" fill="url(#bord2)"/>
               </svg>
-              <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse at 50% 100%,${acc}0e 0%,transparent 70%)`,pointerEvents:"none"}}/>
+              <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%,"+acc+"0e 0%,transparent 70%)",pointerEvents:"none"}}/>
 
               <div style={{padding:"18px 16px 14px"}}>
                 {/* Title */}
@@ -3390,7 +3316,7 @@ return (
                     return (
                       <div key={s.n}
                         className={`srow ${selS?.n===s.n?"sel":""} ${p===100?"done":""}`}
-                        style={{transform:`translateX(${Math.min(0,sw.x)}px)`,transition:sw.swiping?"none":"transform .25s ease"}}
+                        style={{transform:"translateX("+Math.min(0,sw.x)+"px)",transition:sw.swiping?"none":"transform .25s ease"}}
                         onClick={()=>{ if(Math.abs(sw.x||0)<8) doSelect(s); }}
                         onTouchStart={e=>{
                           swipeTouchStart.current[s.n]=e.touches[0].clientX;
@@ -3422,7 +3348,7 @@ return (
                           }
                         }}>
                         {revealed&&(
-                          <div className="srow-reveal" style={{right:0,left:`calc(100% + ${Math.min(0,sw.x)}px)`}}>
+                          <div className="srow-reveal" style={{right:0,left:"calc(100% + "+Math.min(0,sw.x)+"px)"}}>
                             {likeAction
                               ?(<div className="srow-reveal-btn" style={{background:"#e91e63",color:"#fff",width:70}}>
                                   <span style={{fontSize:"1rem"}}>♥</span>
@@ -3809,7 +3735,7 @@ return (
                     return (
                       <div key={d} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
                         {gain>0&&<span style={{fontSize:".48rem",color:t.acc,fontWeight:700}}>+{gain}</span>}
-                        <div style={{width:"100%",height:`${Math.max(Math.round(gain/maxG2*50),3)}px`,background:isToday?t.acc:`${t.acc}66`,borderRadius:"3px 3px 0 0",transition:"height .3s"}}/>
+                        <div style={{width:"100%",height:Math.max(Math.round(gain/maxG2*50),3)+"px",background:isToday?t.acc:`${t.acc}66`,borderRadius:"3px 3px 0 0",transition:"height .3s"}}/>
                         <span style={{fontSize:".48rem",color:isToday?t.acc:t.tx3,fontWeight:isToday?700:400}}>{lbl}</span>
                       </div>
                     );
@@ -4570,14 +4496,14 @@ return (
                 {chartView==="daily"&&(
                   <div>
                     <div style={{display:"flex",alignItems:"flex-end",gap:4,height:100,marginBottom:6}}>
-                      {gains.map((g,i)=>{const lbl=new Date(histKeys[i]).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric"});const isToday=histKeys[i]===today();return(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:`${Math.max(Math.round(g/maxG*100),4)}px`,background:isToday?`linear-gradient(180deg,${t.acc2},${t.acc})`:`linear-gradient(180deg,${t.acc}88,${t.acc}44)`}}/></div><div className="blbl" style={{color:isToday?t.acc:t.tx3}}>{lbl}</div>{g>0&&<div className="bval">+{g}</div>}</div>);})}</div>
+                      {gains.map((g,i)=>{const lbl=new Date(histKeys[i]).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric"});const isToday=histKeys[i]===today();return(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:Math.max(Math.round(g/maxG*100),4)+"px",background:isToday?`linear-gradient(180deg,${t.acc2},${t.acc})`:`linear-gradient(180deg,${t.acc}88,${t.acc}44)`}}/></div><div className="blbl" style={{color:isToday?t.acc:t.tx3}}>{lbl}</div>{g>0&&<div className="bval">+{g}</div>}</div>);})}</div>
                     <div style={{textAlign:"center",fontSize:".65rem",color:t.tx3}}>Versets mémorisés par jour (14 derniers jours)</div>
                   </div>
                 )}
                 {chartView==="weekly"&&(
                   <div>
                     <div style={{display:"flex",alignItems:"flex-end",gap:4,height:100,marginBottom:6}}>
-                      {weeklyData.map((w,i)=>(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:`${Math.max(Math.round(w.v/maxWeek*100),4)}px`,background:`linear-gradient(180deg,${t.acc2},${t.acc})`}}/></div><div className="blbl">{w.label}</div>{w.v>0&&<div className="bval">+{w.v}</div>}</div>))}
+                      {weeklyData.map((w,i)=>(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:Math.max(Math.round(w.v/maxWeek*100),4)+"px",background:`linear-gradient(180deg,${t.acc2},${t.acc})`}}/></div><div className="blbl">{w.label}</div>{w.v>0&&<div className="bval">+{w.v}</div>}</div>))}
                     </div>
                     <div style={{textAlign:"center",fontSize:".65rem",color:t.tx3}}>Versets mémorisés par semaine</div>
                   </div>
@@ -4585,7 +4511,7 @@ return (
                 {chartView==="monthly"&&(
                   <div>
                     <div style={{display:"flex",alignItems:"flex-end",gap:4,height:100,marginBottom:6}}>
-                      {monthlyData.map((m,i)=>(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:`${Math.max(Math.round(m.v/maxMonth*100),4)}px`,background:`linear-gradient(180deg,${t.acc2},${t.acc})`}}/></div><div className="blbl">{m.label}</div>{m.v>0&&<div className="bval">+{m.v}</div>}</div>))}
+                      {monthlyData.map((m,i)=>(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:Math.max(Math.round(m.v/maxMonth*100),4)+"px",background:`linear-gradient(180deg,${t.acc2},${t.acc})`}}/></div><div className="blbl">{m.label}</div>{m.v>0&&<div className="bval">+{m.v}</div>}</div>))}
                     </div>
                     <div style={{textAlign:"center",fontSize:".65rem",color:t.tx3}}>Versets mémorisés par mois</div>
                   </div>
@@ -4916,7 +4842,7 @@ return (
               const isPl=playing===v.n;
               return (
                 <div key={v.n} className="immersive-verse" id={`iv-${selS.n}-${v.n}`}>
-                  <div className="immersive-ar" style={{fontSize:`${arabicSize*1.2}rem`}}>
+                  <div className="immersive-ar" style={{fontSize:(arabicSize*1.2)+"rem"}}>
                     <TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/>
                     <span style={{color:t.acc,fontFamily:"Amiri,serif",fontSize:".75rem",marginRight:6}}> ﴿{v.n}﴾</span>
                   </div>
