@@ -2711,7 +2711,7 @@ return (
           </svg>
           <div style={{fontFamily:"Amiri,serif",fontSize:"2.2rem",color:acc,textShadow:`0 0 30px ${acc}66`,letterSpacing:"2px",marginBottom:6}}>Al-Hifz</div>
           <div style={{fontFamily:"Amiri Quran,serif",fontSize:".9rem",color:acc2,letterSpacing:"3px",opacity:.7}}>حفظ القرآن الكريم</div>
-          <div style={{marginTop:20,display:"flex",gap:5}}>{[0,1,2].map(i=>(<div key={i} style={{width:5,height:5,borderRadius:"50%",background:acc,animation:`pulse 1s ${i*0.2}s infinite`,opacity:.6}}/>))}</div>
+          <div style={{marginTop:20,display:"flex",gap:5}}>{[0,1,2].map(i=>(<div key={i} style={{width:5,height:5,borderRadius:"50%",background:acc,animation:"pulse 1s "+(i*0.2)+"s infinite",opacity:.6}}/>))}</div>
         </div>
       )}
 
@@ -3391,7 +3391,7 @@ return (
                     return (
                       <div key={s.n}
                         className={`srow ${selS?.n===s.n?"sel":""} ${p===100?"done":""}`}
-                        style={{transform:`translateX(${Math.min(0,sw.x)}px)`,transition:sw.swiping?"none":"transform .25s ease"}}
+                        style={{transform:"translateX("+Math.min(0,sw.x)+"px)",transition:sw.swiping?"none":"transform .25s ease"}}
                         onClick={()=>{ if(Math.abs(sw.x||0)<8) doSelect(s); }}
                         onTouchStart={e=>{
                           swipeTouchStart.current[s.n]=e.touches[0].clientX;
@@ -3423,7 +3423,7 @@ return (
                           }
                         }}>
                         {revealed&&(
-                          <div className="srow-reveal" style={{right:0,left:`calc(100% + ${Math.min(0,sw.x)}px)`}}>
+                          <div className="srow-reveal" style={{right:0,left:"calc(100% + "+Math.min(0,sw.x)+"px)"}}>
                             {likeAction
                               ?(<div className="srow-reveal-btn" style={{background:"#e91e63",color:"#fff",width:70}}>
                                   <span style={{fontSize:"1rem"}}>♥</span>
