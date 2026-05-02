@@ -552,18 +552,18 @@ function HourglassIcon({pct=0.5, color="#c9a84c", size=32}) {
           <polygon points="13,16 19,16 26,29 6,29"/>
         </clipPath>
       </defs>
-      {/* Outer frame */}
+      
       <polygon points="6,3 26,3 19,16 13,16" fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" opacity="0.7"/>
       <polygon points="13,16 19,16 26,29 6,29" fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" opacity="0.7"/>
-      {/* Top bar */}
+      
       <line x1="4" y1="2" x2="28" y2="2" stroke={color} strokeWidth="2.5" strokeLinecap="round"/>
-      {/* Bottom bar */}
+      
       <line x1="4" y1="30" x2="28" y2="30" stroke={color} strokeWidth="2.5" strokeLinecap="round"/>
-      {/* Top sand */}
+      
       <rect x="6" y={3 + (13 - topH)} width="20" height={topH} fill="url(#hg_grad)" clipPath="url(#hg_top_clip)" opacity="0.85"/>
-      {/* Bottom sand */}
+      
       <rect x="6" y={29 - botH * 0.6} width="20" height={botH * 0.6} fill={color} clipPath="url(#hg_bot_clip)" opacity="0.6"/>
-      {/* Drip particle */}
+      
       {sandFill > 0.05 && sandFill < 0.95 && (
         <circle cx="16" cy="17.5" r="1.2" fill={color} opacity="0.9">
           <animate attributeName="cy" values="16;19;16" dur="1.4s" repeatCount="indefinite"/>
@@ -793,11 +793,9 @@ const ONBOARD_SLIDES=[
     visual:(c)=>(
       <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
         <circle cx="50" cy="50" r="46" fill={c+"18"} stroke={c} strokeWidth="1.2" strokeDasharray="4 3"/>
-        {/* Lune et étoile */}
         <path d="M50 20 C38 20 28 30 28 42 C28 56 40 64 52 62 C44 60 36 52 36 42 C36 32 44 24 54 22 C52.5 20.8 51.3 20 50 20Z" fill={c} opacity=".9"/>
         <circle cx="62" cy="26" r="4" fill={c}/>
         <circle cx="62" cy="26" r="2" fill={c+"44"}/>
-        {/* Texte arabe stylisé */}
         <text x="50" y="80" textAnchor="middle" fontFamily="Amiri Quran,serif" fontSize="18" fill={c} opacity=".85">الحفظ</text>
         <line x1="30" y1="88" x2="70" y2="88" stroke={c} strokeWidth="0.8" opacity=".3"/>
       </svg>
@@ -811,14 +809,11 @@ const ONBOARD_SLIDES=[
   {
     visual:(c)=>(
       <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
-        {/* Anneau de progression */}
         <circle cx="50" cy="50" r="36" fill="none" stroke={c+"20"} strokeWidth="8"/>
         <circle cx="50" cy="50" r="36" fill="none" stroke={c} strokeWidth="8"
           strokeDasharray="150 226" strokeLinecap="round" transform="rotate(-90 50 50)"/>
-        {/* Centre */}
         <text x="50" y="46" textAnchor="middle" fontSize="14" fontWeight="bold" fill={c}>68%</text>
         <text x="50" y="58" textAnchor="middle" fontSize="7" fill={c+"99"}>mémorisé</text>
-        {/* Étoiles autour */}
         {[0,60,120,180,240,300].map((a,i)=>{
           const rad=a*Math.PI/180;
           const x=50+46*Math.cos(rad);
@@ -836,19 +831,15 @@ const ONBOARD_SLIDES=[
   {
     visual:(c)=>(
       <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
-        {/* Micro stylisé */}
         <rect x="38" y="18" width="24" height="36" rx="12" fill={c+"25"} stroke={c} strokeWidth="1.5"/>
         <rect x="43" y="23" width="14" height="26" rx="7" fill={c} opacity=".6"/>
-        {/* Bras du micro */}
         <path d="M28 48 C28 64 72 64 72 48" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round"/>
         <line x1="50" y1="64" x2="50" y2="75" stroke={c} strokeWidth="2" strokeLinecap="round"/>
         <line x1="40" y1="75" x2="60" y2="75" stroke={c} strokeWidth="2" strokeLinecap="round"/>
-        {/* Ondes sonores */}
         <path d="M20 38 Q16 50 20 62" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" opacity=".5"/>
         <path d="M13 34 Q8 50 13 66" fill="none" stroke={c} strokeWidth="1" strokeLinecap="round" opacity=".3"/>
         <path d="M80 38 Q84 50 80 62" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" opacity=".5"/>
         <path d="M87 34 Q92 50 87 66" fill="none" stroke={c} strokeWidth="1" strokeLinecap="round" opacity=".3"/>
-        {/* Mots colorés */}
         <rect x="28" y="82" width="12" height="5" rx="2.5" fill="#22c55e" opacity=".8"/>
         <rect x="43" y="82" width="14" height="5" rx="2.5" fill="#ef4444" opacity=".8"/>
         <rect x="60" y="82" width="10" height="5" rx="2.5" fill="#22c55e" opacity=".8"/>
@@ -863,23 +854,17 @@ const ONBOARD_SLIDES=[
   {
     visual:(c)=>(
       <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
-        {/* Mushaf ouvert */}
         <rect x="12" y="22" width="36" height="56" rx="3" fill={c+"18"} stroke={c} strokeWidth="1.2"/>
         <rect x="52" y="22" width="36" height="56" rx="3" fill={c+"18"} stroke={c} strokeWidth="1.2"/>
-        {/* Reliure centrale */}
         <rect x="47" y="18" width="6" height="64" rx="3" fill={c} opacity=".4"/>
-        {/* Lignes de texte gauche */}
         {[32,39,46,53,60,67].map((y,i)=>(
           <line key={i} x1="18" y1={y} x2={i%3===2?36:42} y2={y} stroke={c} strokeWidth="1.2" opacity=".5" strokeLinecap="round"/>
         ))}
-        {/* Lignes de texte droite */}
         {[32,39,46,53,60,67].map((y,i)=>(
           <line key={i} x1={i%3===0?62:58} y1={y} x2="82" y2={y} stroke={c} strokeWidth="1.2" opacity=".5" strokeLinecap="round"/>
         ))}
-        {/* Numéro de page */}
         <text x="30" y="84" textAnchor="middle" fontSize="7" fill={c} opacity=".6">604</text>
         <text x="70" y="84" textAnchor="middle" fontSize="7" fill={c} opacity=".6">1</text>
-        {/* Couleurs tajweed */}
         <circle cx="22" cy="46" r="3" fill="#537FFF" opacity=".8"/>
         <circle cx="30" cy="46" r="3" fill="#169200" opacity=".8"/>
         <circle cx="38" cy="46" r="3" fill="#DD8800" opacity=".8"/>
@@ -908,7 +893,7 @@ function OnboardModal({t,acc,tn,onDone,onSkip,onTutorial}){
         @keyframes ob-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
       `}</style>
 
-      {/* Header skip */}
+      
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"max(18px,env(safe-area-inset-top)) 20px 12px",flexShrink:0}}>
         <div style={{display:"flex",gap:6,alignItems:"center"}}>
           {ONBOARD_SLIDES.map((_,i)=>(
@@ -924,13 +909,13 @@ function OnboardModal({t,acc,tn,onDone,onSkip,onTutorial}){
         </button>
       </div>
 
-      {/* Visual area */}
+      
       <div key={slide} style={{
         flex:1,display:"flex",flexDirection:"column",alignItems:"center",
         justifyContent:"center",padding:"0 32px 20px",
         animation:"ob-in .4s ease",gap:32,
       }}>
-        {/* Badge */}
+        
         <div style={{
           padding:"4px 14px",borderRadius:99,
           background:`${s.color}18`,border:`1px solid ${s.color}44`,
@@ -940,7 +925,7 @@ function OnboardModal({t,acc,tn,onDone,onSkip,onTutorial}){
           {s.emoji} {s.badge}
         </div>
 
-        {/* SVG illustration */}
+        
         <div style={{
           width:160,height:160,borderRadius:40,
           background:`${s.color}10`,
@@ -953,7 +938,7 @@ function OnboardModal({t,acc,tn,onDone,onSkip,onTutorial}){
           {s.visual(s.color)}
         </div>
 
-        {/* Text */}
+        
         <div style={{textAlign:"center",maxWidth:340}}>
           <div style={{
             fontFamily:"Amiri,serif",fontSize:"1.7rem",color:t.tx,
@@ -967,7 +952,7 @@ function OnboardModal({t,acc,tn,onDone,onSkip,onTutorial}){
         </div>
       </div>
 
-      {/* Footer */}
+      
       <div style={{
         padding:"16px 24px",
         paddingBottom:"max(24px,env(safe-area-inset-bottom))",
@@ -1018,14 +1003,12 @@ const TUTO_VISUALS = {
   memo_0: (c) => (
     <svg viewBox="0 0 200 130" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="10" y="10" width="180" height="110" rx="12" fill={c+"0d"} stroke={c+"30"} strokeWidth="1"/>
-      {/* Tabs */}
       <rect x="20" y="20" width="50" height="18" rx="9" fill={c} />
       <text x="45" y="32" textAnchor="middle" fontSize="8" fill="#fff" fontWeight="bold">Coran</text>
       <rect x="76" y="20" width="50" height="18" rx="9" fill={c+"20"} />
       <text x="101" y="32" textAnchor="middle" fontSize="8" fill={c}>Mushaf</text>
       <rect x="132" y="20" width="50" height="18" rx="9" fill={c+"20"} />
       <text x="157" y="32" textAnchor="middle" fontSize="8" fill={c}>Révision</text>
-      {/* Surah rows */}
       {[0,1,2,3].map(i=>(
         <g key={i}>
           <rect x="20" y={50+i*17} width="160" height="13" rx="6" fill={i===0?c+"25":"#ffffff08"} stroke={i===0?c+"50":"transparent"} strokeWidth="1"/>
@@ -1034,38 +1017,32 @@ const TUTO_VISUALS = {
           <text x="170" y={59+i*17} textAnchor="end" fontSize="7" fill={i===0?c:c+"40"}>{["7v","286v","200v","176v"][i]}</text>
         </g>
       ))}
-      {/* Tap cursor */}
       <circle cx="45" cy="56" r="6" fill={c} opacity=".25"/>
       <circle cx="45" cy="56" r="3" fill={c}/>
     </svg>
   ),
   memo_1: (c) => (
     <svg viewBox="0 0 200 130" fill="none">
-      {/* Verse card */}
       <rect x="10" y="8" width="180" height="60" rx="10" fill={c+"10"} stroke={c+"30"} strokeWidth="1"/>
       <text x="100" y="30" textAnchor="middle" fontFamily="Amiri Quran,serif" fontSize="13" fill={c+"cc"}>بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</text>
       <text x="100" y="48" textAnchor="middle" fontSize="7" fill={c+"66"}>Au nom d'Allah, le Tout Miséricordieux…</text>
-      {/* Action buttons */}
       <rect x="20" y="78" width="70" height="22" rx="11" fill={c} />
       <text x="55" y="91" textAnchor="middle" fontSize="7.5" fill="#fff" fontWeight="bold">✓ Mémoriser</text>
       <rect x="98" y="78" width="46" height="22" rx="11" fill={c+"20"} stroke={c+"40"} strokeWidth="1"/>
       <text x="121" y="91" textAnchor="middle" fontSize="7.5" fill={c}>▶ Écouter</text>
       <rect x="150" y="78" width="40" height="22" rx="11" fill={c+"20"} stroke={c+"40"} strokeWidth="1"/>
       <text x="170" y="91" textAnchor="middle" fontSize="7.5" fill={c}>♥</text>
-      {/* Check green */}
       <circle cx="178" cy="25" r="12" fill="#22c55e"/>
       <polyline points="172,25 176,29 184,20" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
     </svg>
   ),
   memo_2: (c) => (
     <svg viewBox="0 0 200 130" fill="none">
-      {/* Anneau de progression */}
       <circle cx="70" cy="65" r="45" fill="none" stroke={c+"15"} strokeWidth="10"/>
       <circle cx="70" cy="65" r="45" fill="none" stroke={c} strokeWidth="10"
         strokeDasharray="170 283" strokeLinecap="round" transform="rotate(-90 70 65)"/>
       <text x="70" y="60" textAnchor="middle" fontSize="16" fontWeight="bold" fill={c}>60%</text>
       <text x="70" y="73" textAnchor="middle" fontSize="7" fill={c+"88"}>3 741 / 6 236</text>
-      {/* Stats à droite */}
       {[["📿","3 741","Versets"],["📚","38","Sourates"],["🔥","12j","Streak"]].map(([ic,v,l],i)=>(
         <g key={i}>
           <rect x="128" y={15+i*35} width="60" height="28" rx="8" fill={c+"12"} stroke={c+"25"} strokeWidth="1"/>
@@ -1078,7 +1055,6 @@ const TUTO_VISUALS = {
   ),
   memo_3: (c) => (
     <svg viewBox="0 0 200 130" fill="none">
-      {/* Timeline révision */}
       <line x1="30" y1="65" x2="170" y2="65" stroke={c+"30"} strokeWidth="2" strokeDasharray="4 3"/>
       {[{x:40,d:"Auj.",col:"#ef4444"},{x:75,d:"J+3",col:c},{x:110,d:"J+8",col:c+"80"},{x:145,d:"J+21",col:c+"50"}].map((pt,i)=>(
         <g key={i}>
@@ -1088,12 +1064,10 @@ const TUTO_VISUALS = {
           {i>0&&<text x={pt.x} y="52" textAnchor="middle" fontSize="6" fill={c+"60"}>SM-2</text>}
         </g>
       ))}
-      {/* Verset en attente */}
       <rect x="10" y="95" width="180" height="24" rx="8" fill="#ef444415" stroke="#ef444430" strokeWidth="1"/>
       <text x="20" y="111" fontSize="7" fill="#ef4444" fontWeight="bold">🔔 Al-Fatiha v.3 — À réviser aujourd'hui</text>
       <rect x="155" y="100" width="30" height="14" rx="7" fill="#ef4444"/>
       <text x="170" y="110" textAnchor="middle" fontSize="6.5" fill="#fff" fontWeight="bold">Réviser</text>
-      {/* Label SM2 */}
       <rect x="10" y="10" width="90" height="20" rx="10" fill={c+"15"} stroke={c+"30"} strokeWidth="1"/>
       <text x="55" y="23" textAnchor="middle" fontSize="7.5" fill={c} fontWeight="bold">📊 Révision espacée SM-2</text>
     </svg>
@@ -1101,17 +1075,14 @@ const TUTO_VISUALS = {
   // RÉCITATION
   recit_0: (c) => (
     <svg viewBox="0 0 200 130" fill="none">
-      {/* Fullscreen modal */}
       <rect x="10" y="5" width="180" height="120" rx="14" fill="#050a06" stroke={c+"30"} strokeWidth="1"/>
       <text x="100" y="30" textAnchor="middle" fontFamily="Amiri Quran,serif" fontSize="11" fill={c+"cc"}>ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَٰلَمِينَ</text>
       <text x="100" y="45" textAnchor="middle" fontSize="7" fill="#ffffff55">Appuie sur le micro pour commencer</text>
-      {/* Micro button */}
       <circle cx="100" cy="85" r="22" fill={c+"25"} stroke={c} strokeWidth="1.5"/>
       <circle cx="100" cy="85" r="14" fill={c}/>
       <rect x="96" y="76" width="8" height="14" rx="4" fill="#fff"/>
       <path d="M94 87 C94 93 106 93 106 87" fill="none" stroke="#fff" strokeWidth="1.5"/>
       <line x1="100" y1="93" x2="100" y2="97" stroke="#fff" strokeWidth="1.5"/>
-      {/* Ondes */}
       <path d="M78 80 Q74 85 78 90" fill="none" stroke={c} strokeWidth="1.5" opacity=".5"/>
       <path d="M122 80 Q126 85 122 90" fill="none" stroke={c} strokeWidth="1.5" opacity=".5"/>
     </svg>
@@ -1119,28 +1090,22 @@ const TUTO_VISUALS = {
   recit_1: (c) => (
     <svg viewBox="0 0 200 130" fill="none">
       <rect x="10" y="5" width="180" height="120" rx="14" fill="#050a06" stroke={c+"30"} strokeWidth="1"/>
-      {/* Listening state */}
       <text x="100" y="28" textAnchor="middle" fontSize="8" fill={c} fontWeight="bold">En écoute…</text>
-      {/* Waveform */}
       {[8,14,10,18,12,20,8,16,11,19,9,15,13,17,10].map((h,i)=>(
         <rect key={i} x={45+i*7} y={55-h/2} width="4" height={h} rx="2" fill={c} opacity={0.5+i*0.03}/>
       ))}
-      {/* Spoken words */}
       <rect x="20" y="78" width="160" height="20" rx="8" fill={c+"15"} stroke={c+"25"} strokeWidth="1"/>
       <text x="100" y="92" textAnchor="middle" fontSize="8" fill={c} fontFamily="Amiri,serif">الحمد لله رب العالمين</text>
-      {/* Timer */}
       <text x="100" y="115" textAnchor="middle" fontSize="9" fill={c+"66"}>0:04</text>
     </svg>
   ),
   recit_2: (c) => (
     <svg viewBox="0 0 200 130" fill="none">
       <rect x="10" y="5" width="180" height="120" rx="14" fill="#050a06" stroke={c+"30"} strokeWidth="1"/>
-      {/* Score */}
       <text x="100" y="28" textAnchor="middle" fontSize="8" fill="#fff">Résultat</text>
       <circle cx="100" cy="58" r="28" fill="none" stroke="#22c55e" strokeWidth="4" strokeDasharray="146 176"/>
       <text x="100" y="55" textAnchor="middle" fontSize="18" fontWeight="bold" fill="#22c55e">85</text>
       <text x="100" y="67" textAnchor="middle" fontSize="7" fill="#22c55e66">%</text>
-      {/* Mots colorés */}
       <text x="22" y="100" fontSize="9" fontFamily="Amiri,serif" fill="#22c55e">ٱلْحَمْدُ</text>
       <text x="60" y="100" fontSize="9" fontFamily="Amiri,serif" fill="#22c55e">لِلَّهِ</text>
       <text x="95" y="100" fontSize="9" fontFamily="Amiri,serif" fill="#ef4444" style={{textDecoration:"underline"}}>رَبِّ</text>
@@ -1151,10 +1116,8 @@ const TUTO_VISUALS = {
   recit_3: (c) => (
     <svg viewBox="0 0 200 130" fill="none">
       <rect x="10" y="5" width="180" height="120" rx="14" fill="#050a06" stroke={c+"30"} strokeWidth="1"/>
-      {/* Chain mode */}
       <rect x="15" y="12" width="80" height="16" rx="8" fill={c}/>
       <text x="55" y="23" textAnchor="middle" fontSize="7" fill="#fff" fontWeight="bold">→ Enchaîné ✓</text>
-      {/* Versets en chaîne */}
       {[{y:38,txt:"v.1 — 92% ✓",col:"#22c55e"},{y:60,txt:"v.2 — En cours…",col:c},{y:82,txt:"v.3 — En attente",col:"#ffffff30"},{y:104,txt:"v.4 — En attente",col:"#ffffff20"}].map((r,i)=>(
         <g key={i}>
           <rect x="20" y={r.y} width="160" height="15" rx="7" fill={i===1?c+"25":"#ffffff05"} stroke={i===1?c+"50":"transparent"} strokeWidth="1"/>
@@ -1167,38 +1130,31 @@ const TUTO_VISUALS = {
   // MUSHAF
   mushaf_0: (c) => (
     <svg viewBox="0 0 200 130" fill="none">
-      {/* Two pages */}
       <rect x="8" y="10" width="88" height="110" rx="6" fill="#f5f0e8" stroke={c+"50"} strokeWidth="1"/>
       <rect x="104" y="10" width="88" height="110" rx="6" fill="#f5f0e8" stroke={c+"50"} strokeWidth="1"/>
       <rect x="96" y="8" width="8" height="114" rx="4" fill={c} opacity=".3"/>
-      {/* Text lines */}
       {[20,28,36,44,52,60,68,76,84,92,100].map((y,i)=>(
         <g key={i}>
           <line x1={i%4===0?20:16} y1={y} x2={88} y2={y} stroke={c} strokeWidth="1" opacity={i%5===2?0.8:0.3} strokeLinecap="round"/>
           <line x1={104} y1={y} x2={i%4===0?184:188} y2={y} stroke={c} strokeWidth="1" opacity={i%5===2?0.8:0.3} strokeLinecap="round"/>
         </g>
       ))}
-      {/* Tajweed colors */}
       <circle cx="30" cy="28" r="3" fill="#537FFF" opacity=".9"/>
       <circle cx="50" cy="28" r="3" fill="#169200" opacity=".9"/>
       <circle cx="70" cy="28" r="3" fill="#DD8800" opacity=".9"/>
-      {/* Swipe arrows */}
       <text x="4" y="68" fontSize="14" fill={c} opacity=".7">‹</text>
       <text x="192" y="68" fontSize="14" fill={c} opacity=".7">›</text>
-      {/* Page number */}
       <text x="52" y="124" textAnchor="middle" fontSize="7" fill={c+"66"}>p. 1</text>
       <text x="148" y="124" textAnchor="middle" fontSize="7" fill={c+"66"}>p. 2</text>
     </svg>
   ),
   mushaf_1: (c) => (
     <svg viewBox="0 0 200 130" fill="none">
-      {/* Edition selector */}
       <rect x="10" y="10" width="180" height="30" rx="10" fill={c+"12"} stroke={c+"30"} strokeWidth="1"/>
       <rect x="16" y="15" width="80" height="20" rx="8" fill={c}/>
       <text x="56" y="28" textAnchor="middle" fontSize="7.5" fill="#fff" fontWeight="bold">Hafs (Tajweed)</text>
       <rect x="104" y="15" width="80" height="20" rx="8" fill={c+"20"}/>
       <text x="144" y="28" textAnchor="middle" fontSize="7.5" fill={c}>🇫🇷 Hafs + Traduction</text>
-      {/* Legend tajweed */}
       {[["#537FFF","Madd naturel"],["#169200","Ghunna / Idgham"],["#DD8800","Qalqala"],["#D500B7","Ikhfa"]].map(([col,lbl],i)=>(
         <g key={i}>
           <circle cx="25" cy={56+i*16} r="5" fill={col}/>
@@ -1209,12 +1165,10 @@ const TUTO_VISUALS = {
   ),
   mushaf_2: (c) => (
     <svg viewBox="0 0 200 130" fill="none">
-      {/* Surah selector */}
       <rect x="10" y="5" width="180" height="35" rx="10" fill="#000" stroke={c+"30"} strokeWidth="1"/>
       <text x="100" y="20" textAnchor="middle" fontSize="7" fill={c+"80"}>Aller à une sourate…</text>
       <rect x="20" y="26" width="160" height="8" rx="4" fill={c+"20"}/>
       <rect x="20" y="26" width="60" height="8" rx="4" fill={c+"60"}/>
-      {/* Surah list */}
       {[["1","Al-Fatiha","الفاتحة","p.1"],["18","Al-Kahf","الكهف","p.293"],["36","Ya-Sin","يس","p.440"],["67","Al-Mulk","الملك","p.562"]].map(([n,name,ar,pg],i)=>(
         <g key={i}>
           <rect x="10" y={46+i*20} width="180" height="17" rx="8" fill={i===0?c+"25":"#ffffff05"} stroke={i===0?c+"50":"transparent"} strokeWidth="1"/>
@@ -1228,7 +1182,6 @@ const TUTO_VISUALS = {
   // KHATMA
   khatma_0: (c) => (
     <svg viewBox="0 0 200 130" fill="none">
-      {/* Preset cards */}
       {[{x:10,y:10,l:"30 jours",d:"20 p/j",sel:true},{x:10,y:56,l:"60 jours",d:"10 p/j",sel:false},{x:104,y:10,l:"Ramadan",d:"20 p/j",sel:false},{x:104,y:56,l:"Perso.",d:"—",sel:false}].map((pr,i)=>(
         <g key={i}>
           <rect x={pr.x} y={pr.y} width="86" height="36" rx="10" fill={pr.sel?c+"25":"#ffffff06"} stroke={pr.sel?c:"#ffffff15"} strokeWidth={pr.sel?1.5:1}/>
@@ -1238,18 +1191,15 @@ const TUTO_VISUALS = {
           {pr.sel&&<polyline points={`${pr.x+77},${pr.y+8} ${pr.x+79},${pr.y+10} ${pr.x+83},${pr.y+5}`} stroke="#fff" strokeWidth="1.5" strokeLinecap="round" fill="none"/>}
         </g>
       ))}
-      {/* Start button */}
       <rect x="10" y="100" width="180" height="22" rx="11" fill={c}/>
       <text x="100" y="114" textAnchor="middle" fontSize="9" fill="#fff" fontWeight="bold">Commencer la Khatma ✦</text>
     </svg>
   ),
   khatma_1: (c) => (
     <svg viewBox="0 0 200 130" fill="none">
-      {/* Progress bar */}
       <rect x="10" y="10" width="180" height="20" rx="10" fill={c+"15"} stroke={c+"30"} strokeWidth="1"/>
       <rect x="10" y="10" width="110" height="20" rx="10" fill={c}/>
       <text x="65" y="23" textAnchor="middle" fontSize="8" fill="#fff" fontWeight="bold">60% — Jour 18/30</text>
-      {/* Calendar grid */}
       {Array.from({length:30},(_,i)=>{
         const x=15+(i%10)*18;
         const y=42+Math.floor(i/10)*18;
@@ -1261,7 +1211,6 @@ const TUTO_VISUALS = {
           </g>
         );
       })}
-      {/* Today button */}
       <rect x="10" y="100" width="86" height="22" rx="11" fill={c}/>
       <text x="53" y="114" textAnchor="middle" fontSize="8" fill="#fff" fontWeight="bold">📖 Lire</text>
       <rect x="104" y="100" width="86" height="22" rx="11" fill="#22c55e20" stroke="#22c55e50" strokeWidth="1"/>
@@ -1271,16 +1220,13 @@ const TUTO_VISUALS = {
   // QUIZ
   quiz_0: (c) => (
     <svg viewBox="0 0 200 130" fill="none">
-      {/* Mode tabs */}
       <rect x="10" y="10" width="86" height="24" rx="12" fill={c}/>
       <text x="53" y="25" textAnchor="middle" fontSize="7.5" fill="#fff" fontWeight="bold">Quelle sourate ?</text>
       <rect x="104" y="10" width="86" height="24" rx="12" fill={c+"20"} stroke={c+"40"} strokeWidth="1"/>
       <text x="147" y="25" textAnchor="middle" fontSize="7.5" fill={c}>Complète le verset</text>
-      {/* Question */}
       <rect x="10" y="42" width="180" height="32" rx="10" fill={c+"10"} stroke={c+"30"} strokeWidth="1"/>
       <text x="100" y="55" textAnchor="middle" fontSize="7" fill={c+"88"}>Verset 1</text>
       <text x="100" y="67" textAnchor="middle" fontFamily="Amiri Quran,serif" fontSize="11" fill="#ffffffcc">إِنَّٓا أَنزَلْنَٰهُ فِى لَيْلَةِ ٱلْقَدْرِ</text>
-      {/* Choices */}
       {[{l:"Al-Qadr",ok:true},{l:"Al-Insan",ok:false},{l:"Al-Bayyina",ok:false},{l:"An-Naba",ok:false}].map((ch,i)=>(
         <g key={i}>
           <rect x={i<2?10:104} y={82+(i%2)*22} width="86" height="18" rx="9" fill={ch.ok?"#22c55e25":c+"10"} stroke={ch.ok?"#22c55e":c+"30"} strokeWidth={ch.ok?1.5:1}/>
@@ -1291,14 +1237,11 @@ const TUTO_VISUALS = {
   ),
   quiz_1: (c) => (
     <svg viewBox="0 0 200 130" fill="none">
-      {/* Score card */}
       <rect x="10" y="8" width="180" height="70" rx="12" fill={c+"10"} stroke={c+"30"} strokeWidth="1"/>
       <text x="100" y="30" textAnchor="middle" fontSize="11" fontWeight="bold" fill={c}>📊 Session</text>
-      {/* Score bar */}
       <rect x="25" y="40" width="150" height="12" rx="6" fill={c+"20"}/>
       <rect x="25" y="40" width="112" height="12" rx="6" fill="#22c55e"/>
       <text x="100" y="65" textAnchor="middle" fontSize="9" fill="#ffffffcc">7 correctes · 3 à revoir</text>
-      {/* Wrong items */}
       {[{s:"Al-Insan v.3",txt:"يَوْمَ يَقُومُ ٱلنَّاسُ"},{ s:"Al-Qadr v.2",txt:"وَمَآ أَدْرَاكَ"}].map((w,i)=>(
         <g key={i}>
           <rect x="10" y={86+i*20} width="180" height="17" rx="8" fill="#ef444410" stroke="#ef444430" strokeWidth="1"/>
@@ -1457,8 +1400,6 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
         @keyframes tutoIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
         @keyframes tutoSlide{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
       `}</style>
-
-      {/* Header */}
       <div style={{
         display:"flex",alignItems:"center",gap:12,
         padding:"14px 16px",paddingTop:"max(14px,env(safe-area-inset-top))",
@@ -1475,7 +1416,6 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
             <span style={{fontSize:".65rem",color:section.color,fontWeight:700,textTransform:"uppercase",letterSpacing:"1px"}}>{section.icon} {section.label}</span>
             <span style={{fontSize:".58rem",color:t.tx3,marginLeft:"auto"}}>{completedSteps}/{totalSteps}</span>
           </div>
-          {/* Progress bar */}
           <div style={{height:4,background:t.b1,borderRadius:99,overflow:"hidden"}}>
             <div style={{height:"100%",width:`${(completedSteps/totalSteps)*100}%`,background:`linear-gradient(90deg,${section.color},${section.color}aa)`,borderRadius:99,transition:"width .4s ease"}}/>
           </div>
@@ -1485,8 +1425,6 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
           ✕
         </button>
       </div>
-
-      {/* Section tabs */}
       <div style={{display:"flex",gap:6,padding:"10px 14px",overflowX:"auto",borderBottom:`1px solid ${t.b1}`,flexShrink:0,scrollbarWidth:"none",WebkitOverflowScrolling:"touch"}}>
         {TUTORIAL_SECTIONS.map((s,i)=>{
           const done=i<activeSection;
@@ -1506,15 +1444,11 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
           );
         })}
       </div>
-
-      {/* Main content */}
       <div key={`${activeSection}-${step}`} style={{
         flex:1,display:"flex",flexDirection:"column",
         padding:"20px 18px 8px",gap:16,overflowY:"auto",
         animation:"tutoSlide .3s ease",
       }}>
-
-        {/* Visual */}
         {VisualComp&&(
           <div style={{
             width:"100%",borderRadius:16,overflow:"hidden",
@@ -1530,8 +1464,6 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
             </div>
           </div>
         )}
-
-        {/* Step content */}
         <div style={{display:"flex",flexDirection:"column",gap:10}}>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             <div style={{
@@ -1546,8 +1478,6 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
               {currentStep?.title}
             </div>
           </div>
-
-          {/* Description */}
           <div style={{
             padding:"14px 16px",borderRadius:12,
             background:t.s2,border:`1px solid ${t.b1}`,
@@ -1555,8 +1485,6 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
           }}>
             {currentStep?.desc}
           </div>
-
-          {/* Pro tip */}
           {currentStep?.tip&&(
             <div style={{
               display:"flex",alignItems:"flex-start",gap:10,
@@ -1571,8 +1499,6 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
             </div>
           )}
         </div>
-
-        {/* Step dots for current section */}
         <div style={{display:"flex",gap:8,justifyContent:"center",paddingBottom:4}}>
           {section.steps.map((_,i)=>(
             <div key={i} onClick={()=>setStep(i)} style={{
@@ -1583,8 +1509,6 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
           ))}
         </div>
       </div>
-
-      {/* Footer */}
       <div style={{
         padding:"12px 18px",
         paddingBottom:"max(16px,env(safe-area-inset-bottom))",
@@ -1704,14 +1628,11 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
         @keyframes scoreIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
         @keyframes wave{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
       `}</style>
-
-      {/* Header */}
       <div style={{display:"flex",alignItems:"center",padding:"14px 16px",borderBottom:`1px solid ${t.b1}`,flexShrink:0,gap:10,paddingTop:"max(14px,env(safe-area-inset-top))"}}>
         <div style={{flex:1}}>
           <div style={{fontSize:".52rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"2px",marginBottom:2}}>Récitation</div>
           <div style={{fontFamily:"Amiri,serif",fontSize:".95rem",color:acc,fontWeight:700,lineHeight:1.2}}>{selS.name}<span style={{color:t.tx3,fontWeight:400,fontSize:".8rem"}}> · {selS.ar}</span></div>
         </div>
-        {/* Mode enchaîné toggle */}
         <button onClick={toggleChain} style={{display:"flex",alignItems:"center",gap:5,padding:"5px 10px",borderRadius:20,border:`1px solid ${chain?acc:t.b2}`,background:chain?`${acc}18`:t.s2,color:chain?acc:t.tx3,fontSize:".6rem",fontWeight:700,cursor:"pointer",flexShrink:0,transition:"all .2s"}}>
           {chain
             ?<><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>Enchaîné</>
@@ -1723,24 +1644,16 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-
-      {/* Barre progression */}
       <div style={{height:3,background:t.b1,flexShrink:0}}>
         <div style={{height:"100%",width:`${progress}%`,background:`linear-gradient(90deg,${acc},${t.acc2||acc})`,transition:"width .5s ease",boxShadow:`0 0 6px ${acc}55`}}/>
       </div>
-
-      {/* Corps */}
       <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"20px",gap:20,overflowY:"auto"}}>
-
-        {/* Badge verset */}
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           <div style={{width:34,height:34,borderRadius:"50%",border:`2px solid ${isMem?t.gr:t.b2}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".7rem",fontWeight:800,color:isMem?t.gr:t.tx3,background:isMem?`${t.gr}12`:"transparent",transition:"all .3s"}}>{curV?.n}</div>
           {isMem&&<div style={{fontSize:".6rem",color:t.gr,fontWeight:700,display:"flex",alignItems:"center",gap:3}}>
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>Mémorisé
           </div>}
         </div>
-
-        {/* Verset */}
         <div key={idx} style={{fontFamily:"Scheherazade New,'Amiri Quran',serif",fontSize:"clamp(1.6rem,5vw,2.2rem)",direction:"rtl",textAlign:"center",lineHeight:2.2,color:t.tx,width:"100%",maxWidth:540,animation:"scoreIn .25s ease"}}>
           {hasScore
             ? speechScore.analysis?.map((w,wi)=>(
@@ -1750,11 +1663,7 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
           }
           <span style={{fontFamily:"Amiri,serif",fontSize:".65em",color:acc,margin:"0 3px"}}>﴿{curV?.n}﴾</span>
         </div>
-
-        {/* Traduction */}
         {curV?.fr&&<div style={{fontSize:".7rem",color:t.tx2,fontStyle:"italic",textAlign:"center",maxWidth:440,lineHeight:1.7,transition:"opacity .3s"}}>{curV.fr}</div>}
-
-        {/* Score */}
         {hasScore&&(
           <div style={{width:"100%",maxWidth:440,animation:"scoreIn .3s ease"}}>
             <div style={{display:"flex",gap:14,padding:"14px 16px",background:speechScore.pct>=80?`${t.gr}10`:speechScore.pct>=50?`${acc}10`:"rgba(233,30,99,.07)",borderRadius:14,border:`1.5px solid ${speechScore.pct>=80?t.gr:speechScore.pct>=50?acc:"#e91e63"}33`}}>
@@ -1781,8 +1690,6 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
             </div>
           </div>
         )}
-
-        {/* Micro */}
         <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:10}}>
           <button onClick={handleMic} style={{width:72,height:72,borderRadius:"50%",border:"none",cursor:"pointer",background:isListening?"#e91e63":isCountdown?"#f59e0b":hasScore&&speechScore?.pct>=80?t.gr:acc,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,animation:isListening?"micRing 1.4s infinite":"none",boxShadow:`0 4px 18px ${isListening?"rgba(233,30,99,.4)":isCountdown?"rgba(245,158,11,.4)":`${acc}44`}`}}>
             {isListening
@@ -1811,8 +1718,6 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
           </div>
         </div>
       </div>
-
-      {/* Footer */}
       <div style={{display:"flex",gap:8,padding:"12px 16px",borderTop:`1px solid ${t.b1}`,flexShrink:0,alignItems:"center",paddingBottom:"max(12px,env(safe-area-inset-bottom))"}}>
         <button onClick={()=>{if(idx>0)goTo(idx-1);}} disabled={idx===0} style={{padding:"10px 14px",borderRadius:10,border:`1px solid ${t.b2}`,background:t.s2,color:idx===0?t.tx3:t.tx,cursor:idx===0?"default":"pointer",fontSize:".72rem",fontWeight:600,opacity:idx===0?.35:1}}>←</button>
         <button onClick={()=>doPlay(curV?.n)} style={{flex:1,padding:"10px",borderRadius:10,border:`1px solid ${t.b2}`,background:t.s2,color:t.tx2,cursor:"pointer",fontSize:".7rem",fontWeight:600,display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
@@ -1993,33 +1898,33 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
 
   return (
     <div style={outer} onTouchStart={onTS} onTouchEnd={onTE}>
-      {/* Barre nav propre */}
+      
       <div style={{display:"flex",alignItems:"center",gap:6,padding:"7px 10px",paddingTop:"max(7px,env(safe-area-inset-top))",background:"rgba(0,0,0,.7)",flexShrink:0,borderBottom:"1px solid rgba(201,168,76,.15)"}}>
         <button onClick={onPrev} style={{background:"rgba(201,168,76,.12)",border:"1px solid rgba(201,168,76,.22)",color:AC,padding:"5px 12px",borderRadius:8,cursor:"pointer",fontWeight:700,fontSize:".85rem"}}>◄</button>
 
-        {/* Sélecteur sourate */}
+        
         <select onChange={e=>{const sn=parseInt(e.target.value);if(!sn||!onGoTo)return;onGoTo(SURAH_PAGES[sn-1]||1);e.target.value="";}} style={{flex:1,padding:"4px 8px",borderRadius:7,border:"1px solid rgba(201,168,76,.3)",background:"rgba(0,0,0,.4)",color:AC,fontSize:".6rem",cursor:"pointer",outline:"none"}} defaultValue="">
           <option value="">📖 p.{page||1} — Aller à…</option>
           {SURAHS.map(s=><option key={s.n} value={s.n}>{s.n}. {s.name} · {s.ar}</option>)}
         </select>
 
-        {/* Boutons actions */}
+        
         <div style={{display:"flex",gap:4,flexShrink:0}}>
-          {/* Sélecteur édition */}
+          
           <select value={mushafEdition||"hafs"} onChange={e=>setMushafEdition&&setMushafEdition(e.target.value)} style={{padding:"5px 6px",borderRadius:8,border:"1px solid rgba(201,168,76,.3)",background:"rgba(0,0,0,.5)",color:AC,fontSize:".58rem",cursor:"pointer",outline:"none"}}>
             <option value="tajwid_hafs">Hafs</option>
             <option value="tajwid_fr">🇫🇷 Français</option>
           </select>
-          {/* Récitation */}
+          
           {onRecite&&<button onClick={()=>onRecite(page||1)} title="Réciter cette page" style={{background:"rgba(233,30,99,.15)",border:"1px solid rgba(233,30,99,.3)",color:"#e91e63",padding:"5px 8px",borderRadius:8,cursor:"pointer",fontSize:".75rem"}}>🎤</button>}
-          {/* Plein écran */}
+          
           <button onClick={onToggleFullscreen} style={{background:"rgba(201,168,76,.12)",border:"1px solid rgba(201,168,76,.3)",color:AC,padding:"5px 8px",borderRadius:8,cursor:"pointer",fontSize:".7rem",fontWeight:700}}>{fullscreen?"✕":"⛶"}</button>
         </div>
 
         <button onClick={onNext} style={{background:"rgba(201,168,76,.12)",border:"1px solid rgba(201,168,76,.22)",color:AC,padding:"5px 12px",borderRadius:8,cursor:"pointer",fontWeight:700,fontSize:".85rem"}}>►</button>
       </div>
 
-      {/* Image Mushaf */}
+      
       <MushafTajweedView page={page||1} fullscreen={fullscreen} edition={ed}/>
     </div>
   );
@@ -3554,7 +3459,7 @@ return (
                     ))}
                   </div>
                 </div>
-                {/* Sélection fine par juz, sourate ou hizb */}
+                
                 <div>
                   <label style={{fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",display:"block",marginBottom:5}}>Ou choisir précisément</label>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
@@ -3716,7 +3621,7 @@ return (
           <div className="modal" onClick={e=>e.stopPropagation()} style={{maxWidth:480}}>
             <h2 style={{fontFamily:"Amiri,serif",color:acc,marginBottom:4}}>✂ Lecture partielle</h2>
             <p style={{fontSize:".68rem",color:t.tx3,marginBottom:16}}>Sélectionne les mots à lire — idéal pour mémoriser bout à bout</p>
-            {/* Aperçu du segment sélectionné */}
+            
             <div style={{background:t.s2,borderRadius:12,padding:"14px 16px",border:`1px solid ${t.b1}`,marginBottom:14,direction:"rtl",textAlign:"right"}}>
               <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.3rem",lineHeight:2.2,color:t.tx}}>
                 {partialVerse.words.map((w,i)=>(
@@ -3740,7 +3645,7 @@ return (
                 Mots {partialVerse.from+1} à {partialVerse.to+1} sur {partialVerse.words.length}
               </div>
             </div>
-            {/* Sliders début / fin */}
+            
             <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:16}}>
               <div>
                 <label style={{fontSize:".62rem",color:t.tx3,display:"block",marginBottom:4}}>Début — mot {partialVerse.from+1}</label>
@@ -3755,7 +3660,7 @@ return (
                   style={{width:"100%",accentColor:acc}}/>
               </div>
             </div>
-            {/* Actions */}
+            
             <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
               <button className="mbtn" style={{flex:1}} onClick={()=>{
                 const total=partialVerse.words.length;
@@ -3841,7 +3746,7 @@ return (
       {timerRunning&&timerLeft!==null&&timerLeft>0&&(
         <div style={{position:"fixed",top:0,left:0,right:0,zIndex:250,backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",background:tn==="light"?"rgba(255,255,255,.92)":"rgba(13,26,14,.92)",borderBottom:`1px solid ${t.b1}`,boxShadow:`0 2px 20px rgba(0,0,0,.15)`}}>
           <div style={{display:"flex",alignItems:"center",gap:10,padding:"7px 16px"}}>
-            {/* Icône séance */}
+            
             <div style={{width:28,height:28,borderRadius:"50%",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:`0 2px 8px ${t.acc}44`}}>
               <span style={{fontSize:".7rem"}}>⏱</span>
             </div>
@@ -3850,7 +3755,7 @@ return (
                 <span style={{fontSize:".56rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1.5px",fontWeight:600}}>Séance en cours</span>
                 <span style={{fontFamily:"monospace",fontWeight:900,fontSize:".85rem",color:t.acc,letterSpacing:"1px"}}>{fmtTime(timerLeft)}</span>
               </div>
-              {/* Barre de progression */}
+              
               <div style={{height:4,background:t.b1,borderRadius:99,overflow:"hidden"}}>
                 <div style={{
                   height:"100%",
@@ -3907,7 +3812,7 @@ return (
       </div>
 
       {page==="quran"&&<div className="hero" style={{padding:"12px 16px"}}>
-        {/* Verset du jour */}
+        
         {versetDuJour&&!versetDuJourDismissed&&(
           <div style={{padding:"10px 14px",background:`linear-gradient(135deg,${acc}12,${acc}06)`,borderRadius:10,border:`1px solid ${acc}30`,marginBottom:8}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
@@ -3926,7 +3831,7 @@ return (
             {versetDuJour.fr&&<div style={{fontSize:".62rem",color:t.tx2,fontStyle:"italic",lineHeight:1.5,marginTop:2,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{versetDuJour.fr}</div>}
           </div>
         )}
-        {/* Streak cliquable → Stats */}
+        
         {memStreak>0&&(
           <div onClick={()=>setPage("stats")} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 12px",background:"rgba(249,115,22,.08)",borderRadius:9,border:"1px solid rgba(249,115,22,.2)",cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>{e.currentTarget.style.background="rgba(249,115,22,.14)";e.currentTarget.style.transform="translateY(-1px)";}} onMouseLeave={e=>{e.currentTarget.style.background="rgba(249,115,22,.08)";e.currentTarget.style.transform="";}}>
             <span style={{fontSize:"1.1rem"}}>🔥</span>
@@ -3953,13 +3858,13 @@ return (
 
       <div className={`wrap${pageTransition?" transitioning":""}`}>
 
-        {/* ACCUEIL */}
+        
         {page==="home"&&(
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
 
-            {/* ── Bloc Al-Hifz exact ── */}
+            
             <div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,borderRadius:16,border:`1px solid ${t.b1}`,position:"relative",overflow:"hidden"}}>
-              {/* Décoration bordure haut */}
+              
               <svg style={{position:"absolute",top:0,left:0,width:"100%",height:12,display:"block"}} preserveAspectRatio="none" viewBox="0 0 800 12">
                 <defs><linearGradient id="bord2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="transparent"/><stop offset=".15" stopColor={acc}/><stop offset=".5" stopColor={acc3}/><stop offset=".85" stopColor={acc}/><stop offset="1" stopColor="transparent"/></linearGradient></defs>
                 <rect y="0" width="800" height="1.5" fill="url(#bord2)"/>
@@ -3967,7 +3872,7 @@ return (
               <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse at 50% 100%,${acc}0e 0%,transparent 70%)`,pointerEvents:"none"}}/>
 
               <div style={{padding:"18px 16px 14px"}}>
-                {/* Title */}
+                
                 <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,marginBottom:14}}>
                   <svg width="60" height="8" viewBox="0 0 80 10"><line x1="0" y1="5" x2="55" y2="5" stroke={acc} strokeWidth=".8" opacity=".4"/><circle cx="62" cy="5" r="2.5" fill="none" stroke={acc} strokeWidth=".8" opacity=".6"/><circle cx="72" cy="5" r="1.5" fill={acc} opacity=".5"/></svg>
                   <div style={{textAlign:"center"}}>
@@ -3977,9 +3882,9 @@ return (
                   <svg width="60" height="8" viewBox="0 0 80 10" style={{transform:"scaleX(-1)"}}><line x1="0" y1="5" x2="55" y2="5" stroke={acc} strokeWidth=".8" opacity=".4"/><circle cx="62" cy="5" r="2.5" fill="none" stroke={acc} strokeWidth=".8" opacity=".6"/><circle cx="72" cy="5" r="1.5" fill={acc} opacity=".5"/></svg>
                 </div>
 
-                {/* Ring + KPIs */}
+                
                 <div style={{display:"flex",gap:14,alignItems:"stretch"}}>
-                  {/* Circular progress */}
+                  
                   <div style={{flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
                     <div style={{position:"relative",width:88,height:88}}>
                       <svg width="88" height="88" viewBox="0 0 88 88">
@@ -3996,9 +3901,9 @@ return (
                     </div>
                   </div>
 
-                  {/* KPIs droite */}
+                  
                   <div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",gap:8}}>
-                    {/* Barre progression */}
+                    
                     <div>
                       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}>
                         <span style={{fontSize:".55rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1.5px"}}>Progression</span>
@@ -4019,7 +3924,7 @@ return (
                         <span style={{fontSize:".5rem",color:pct>=100?t.gr:t.tx3,fontWeight:pct>=100?700:400}}>✓</span>
                       </div>
                     </div>
-                    {/* 4 KPIs */}
+                    
                     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"5px 6px"}}>
                       <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:t.s3,borderRadius:7}}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.bl} strokeWidth="1.5" strokeLinecap="round" opacity=".8"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-5 0v-15A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 8A2.5 2.5 0 0 1 17 10.5v9a2.5 2.5 0 0 1-5 0v-9A2.5 2.5 0 0 1 14.5 8Z"/></svg>
@@ -4041,22 +3946,22 @@ return (
                   </div>
                 </div>
 
-                {/* ETA */}
+                
                 <div style={{marginTop:8,padding:"5px 10px",borderTop:`1px solid ${acc}15`,display:"flex",alignItems:"center",justifyContent:"center",gap:5,background:`${acc}04`,borderRadius:"0 0 8px 8px",marginLeft:-16,marginRight:-16,paddingLeft:16,paddingRight:16}}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={acc} strokeWidth="1.5" strokeLinecap="round" opacity=".5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
                   <span style={{fontSize:".6rem",color:t.tx3,fontStyle:"italic"}}>{remaining>0?`Fin estimée · ${eta}`:"🎉 Coran complet !"}</span>
                 </div>
 
-                {/* Rappels */}
+                
                 {!(hist[today()]||0)&&(<div style={{marginTop:7,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${t.bl}15`,borderRadius:8,border:`1px solid ${t.bl}30`,cursor:"pointer"}} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>sPct(x)<100);if(s)doSelect(s);}}><div style={{width:6,height:6,borderRadius:"50%",background:t.bl,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".63rem",color:t.bl,fontWeight:600,flex:1}}>Aucune mémorisation aujourd'hui — on commence ?</span><span style={{fontSize:".58rem",color:t.bl,opacity:.7}}>→</span></div>)}
                 {spacedDue.length>0&&(<div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${t.rd}15`,borderRadius:8,border:`1px solid ${t.rd}30`,cursor:"pointer"}} onClick={()=>setPage("pages")}><div style={{width:6,height:6,borderRadius:"50%",background:t.rd,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".63rem",color:t.rd,fontWeight:600,flex:1}}>{spacedDue.length} verset{spacedDue.length>1?"s":""} à réviser aujourd'hui</span><span style={{fontSize:".58rem",color:t.rd,opacity:.7}}>Voir →</span></div>)}
                 {bookmark&&(<div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${acc}10`,borderRadius:8,border:`1px solid ${acc}25`,cursor:"pointer"}} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>x.n===bookmark.sn);if(s)doSelect(s);}}><span style={{fontSize:".7rem",color:acc}}>◈</span><span style={{fontSize:".63rem",color:t.tx,fontWeight:600,flex:1}}>Reprendre : {bookmark.name}</span><span style={{fontSize:".58rem",color:t.tx3}}>→</span></div>)}
-                {/* Streak */}
+                
                 {memStreak>0&&(<div onClick={()=>setPage("stats")} style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"6px 10px",background:"rgba(249,115,22,.08)",borderRadius:9,border:"1px solid rgba(249,115,22,.2)",cursor:"pointer"}}><span style={{fontSize:"1.1rem"}}>🔥</span><span style={{fontSize:".7rem",fontWeight:700,color:"#f97316",flex:1}}>{memStreak} jour{memStreak>1?"s":""} de suite</span><span style={{fontSize:".58rem",color:"#f97316",opacity:.7}}>Stats →</span></div>)}
               </div>
             </div>
 
-            {/* Verset du jour condensé */}
+            
             {versetDuJour&&!versetDuJourDismissed&&(
               <div style={{background:`linear-gradient(135deg,${t.acc}12,${t.acc}06)`,borderRadius:12,padding:"14px 16px",border:`1px solid ${t.acc}30`}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
@@ -4072,7 +3977,7 @@ return (
               </div>
             )}
 
-            {/* Actions rapides */}
+            
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
               {[
                 {
@@ -4125,7 +4030,7 @@ return (
               ))}
             </div>
 
-            {/* Dernière activité / Reprendre */}
+            
             {readHistory.length>0&&(()=>{
               const last=readHistory[0];
               const s=SURAHS.find(x=>x.n===last.sn);
@@ -4146,8 +4051,8 @@ return (
               ):null;
             })()}
 
-            {/* Hadith / Citation du jour */}
-            {/* Hadith du jour */}
+            
+            
             {!hadithDismissed&&(()=>{
               const hadiths=[
                 {ar:"خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ",fr:"Le meilleur d'entre vous est celui qui apprend le Coran et l'enseigne.",src:"Al-Bukhari"},
@@ -4168,7 +4073,7 @@ return (
               );
             })()}
 
-            {/* Prochain objectif */}
+            
             {(()=>{
               const nextS=SURAHS.find(s=>sPct(s)>0&&sPct(s)<100);
               const firstUnstarted=SURAHS.find(s=>sPct(s)===0);
@@ -4201,7 +4106,7 @@ return (
           </div>
         )}
 
-        {/* CORAN */}
+        
         {page==="quran"&&(
           <div className="two">
             <div className="lp card">
@@ -4217,7 +4122,7 @@ return (
                     <span>604 pages · cliquer pour ouvrir</span>
                     <span style={{color:t.gr}}>{Object.keys(pageRead).filter(k=>pageRead[k]).length} lues</span>
                   </div>
-                  {/* Mini grid of pages in left panel */}
+                  
                   <div style={{padding:"8px",display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:3,overflowY:"auto"}}>
                     {Array.from({length:604},(_,i)=>i+1).map(pg=>{
                       const isRead=pageRead[String(pg)];
@@ -4337,7 +4242,7 @@ return (
                             }
                           </div>
                         )}
-                        {/* Hint glissière visible au hover desktop */}
+                        
                         <div className="srow-hint">← glisser</div>
                         <div className={`snum ${p===100?"done":""}`} onClick={e=>{e.stopPropagation();toggleAll(s);}}>
                           {p===100?<Icons.Check size={10} color={t.gr}/>:s.n}
@@ -4385,7 +4290,7 @@ return (
               )}
             </div>
 
-            {/* Verse panel */}
+            
             <div ref={vpRef} id="verse-panel" className="rp">
               {!selS?(
                 <div className="card empty">
@@ -4445,7 +4350,7 @@ return (
                     </div>
                   </div>)}
 
-                  {/* Audio */}
+                  
                   <div style={{padding:"10px 14px",background:t.s1,borderBottom:`1px solid ${t.b1}`,display:"flex",flexDirection:"column",gap:8}}>
                     <div style={{display:"flex",alignItems:"center",gap:8}}>
                       <span style={{fontSize:"1rem",flexShrink:0}}>🎙️</span>
@@ -4491,7 +4396,7 @@ return (
 
                   {playing!==null&&(<div className="arow"><button className="vbtn snd" style={{flexShrink:0}} onClick={()=>doPlay(playing)}>{audioPlaying?"⏸":"▶ "+playing}</button><span style={{fontSize:".62rem",color:t.tx2,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{selS?.name} · v.{playing} · {rec.name}</span><button className="tbtn" style={{flexShrink:0}} onClick={()=>{setPlaying(null);partialPlayRef.current=null;if(audioRef.current){audioRef.current.pause();audioRef.current.src="";}}}>✕</button></div>)}
 
-                  {/* Banner mode récitation continue */}
+                  
                    <div className="vscroll" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
                     {loadState==="loading"&&(<div style={{textAlign:"center",padding:"30px 14px",color:t.tx3}}><div style={{width:22,height:22,border:"2px solid #ccc",borderTopColor:"#c9a84c",borderRadius:"50%",animation:"spin .7s linear infinite",margin:"0 auto 10px"}}/><div style={{fontSize:".8rem"}}>Chargement…</div></div>)}
                     {loadState==="error"&&(<div style={{textAlign:"center",padding:"24px",color:"#c62828",fontSize:".78rem"}}>Erreur de chargement.<br/><button className="tbtn" onClick={()=>{const s=selS;setSelS(null);setTimeout(()=>setSelS(s),50);}}>↻ Réessayer</button></div>)}
@@ -4574,11 +4479,11 @@ return (
         </div>
         )}
 
-        {/* PAGES */}
+        
         {page==="pages"&&(
           <div style={{display:"flex",flexDirection:"column",gap:14,overflow:"hidden"}}>
 
-            {/* Stats rapides */}
+            
             <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,width:"100%",boxSizing:"border-box"}}>
               {[
                 {l:"En révision",v:Object.values(revFlags).filter(f=>f==="active").length,c:t.acc,icon:"◈"},
@@ -4593,7 +4498,7 @@ return (
               ))}
             </div>
 
-            {/* Sourates en révision active — affichage prioritaire */}
+            
             {Object.entries(revFlags).filter(([,f])=>f==="active").length>0&&(
               <div className="card">
                 <div className="ch">
@@ -4619,11 +4524,11 @@ return (
                           <div style={{fontSize:".6rem",color:t.tx3,marginTop:2,fontFamily:"Amiri,serif"}}>{s.ar} · Juz {s.juz} · {s.v}v</div>
                         </div>
                       </div>
-                      {/* Progress bar */}
+                      
                       <div style={{height:5,background:t.b1,borderRadius:99,overflow:"hidden",marginBottom:8}}>
                         <div style={{height:"100%",width:`${memPct}%`,background:memPct===100?t.gr:`linear-gradient(90deg,${t.acc},${t.acc2})`,borderRadius:99,boxShadow:memPct===100?`0 0 6px ${t.gr}66`:`0 0 4px ${t.acc}44`}}/>
                       </div>
-                      {/* Actions */}
+                      
                       <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
                         <button className="vbtn" style={{borderColor:t.bl,color:t.bl}} onClick={()=>{doSelect(s);setPage("quran");}}>Ouvrir</button>
                         {sMem(s)>=2&&(<button className="vbtn" style={{borderColor:t.pu,color:t.pu}} onClick={()=>startTest(s,selS?.n===s.n?verses:(Q[s.n]||[]))}>Test mémoire</button>)}
@@ -4638,7 +4543,7 @@ return (
               </div>
             )}
 
-            {/* Ajouter des sourates à réviser */}
+            
             <div className="card">
               <div className="ch">
                 <span className="ct">Toutes les sourates</span>
@@ -4681,7 +4586,7 @@ return (
                   </div>
             </div>
 
-            {/* Sourates maîtrisées */}
+            
             {Object.entries(revFlags).filter(([,f])=>f==="mastered").length>0&&(
               <div className="card">
                 <div className="ch"><span className="ct">Maîtrisées</span><span style={{fontSize:".65rem",color:t.gr,fontWeight:700}}>{Object.entries(revFlags).filter(([,f])=>f==="mastered").length} sourates</span></div>
@@ -4697,7 +4602,7 @@ return (
               </div>
             )}
 
-            {/* Heatmap progrès */}
+            
             <div className="card">
               <div className="ch"><span className="ct">Activité de mémorisation</span><span style={{fontSize:".62rem",color:t.tx3}}>14 derniers jours</span></div>
               <div style={{padding:"10px 14px"}}>
@@ -4723,12 +4628,12 @@ return (
           </div>
         )}
 
-        {/* KHATMA */}
+        
         {page==="khatma"&&(
           <div style={{display:"flex",flexDirection:"column",gap:16}}>
             {!activeKhatma?(
               <>
-                {/* Hero d'intro */}
+                
                 <div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,borderRadius:16,padding:"24px 20px",border:`1px solid ${t.b1}`,textAlign:"center",position:"relative",overflow:"hidden"}}>
                   <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse at 50% 0%,${t.acc}12,transparent 60%)`,pointerEvents:"none"}}/>
                   <div style={{fontFamily:"Amiri,serif",fontSize:"2.5rem",color:t.acc,marginBottom:4,textShadow:`0 0 20px ${t.acc}44`}}>ختمة القرآن</div>
@@ -4743,7 +4648,7 @@ return (
                   </div>
                 </div>
 
-                {/* Formulaire création */}
+                
                 <div className="card">
                   <div className="ch"><span className="ct">Nouvelle Khatma</span></div>
                   <div style={{padding:16}}>
@@ -4767,7 +4672,7 @@ return (
                             }}
                             onMouseEnter={e=>{if(!sel){e.currentTarget.style.borderColor=t.acc+"66";e.currentTarget.style.transform="translateX(3px)";}}}
                             onMouseLeave={e=>{if(!sel){e.currentTarget.style.borderColor=t.b1;e.currentTarget.style.transform="";}}}>
-                            {/* Bullet élégant */}
+                            
                             <div style={{width:36,height:36,borderRadius:"50%",border:`1.5px solid ${sel?t.acc:t.b2}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,background:sel?`${t.acc}15`:"transparent",transition:"all .18s"}}>
                               {sel
                                 ?<svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,10.5 12,3.5" stroke={t.acc} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -4797,7 +4702,7 @@ return (
                   </div>
                 </div>
 
-                {/* Khatmas précédentes */}
+                
                 {khatmas.length>0&&(
                   <div className="card">
                     <div className="ch"><span className="ct">Khatmas précédentes</span></div>
@@ -4820,7 +4725,7 @@ return (
             ):(
               /* Active Khatma view */
               <div style={{display:"flex",flexDirection:"column",gap:14}}>
-                {/* Header card */}
+                
                 <div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,borderRadius:16,padding:"20px 18px",border:`1px solid ${t.b1}`,position:"relative",overflow:"hidden"}}>
                   <div style={{position:"absolute",top:0,right:0,width:120,height:120,background:`radial-gradient(circle,${t.acc}10,transparent 70%)`,borderRadius:"0 16px 0 0",pointerEvents:"none"}}/>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
@@ -4830,7 +4735,7 @@ return (
                     </div>
                     <button onClick={()=>setActiveKhatma(null)} style={{background:"transparent",border:`1px solid ${t.rd}44`,color:t.rd,borderRadius:8,padding:"5px 10px",fontSize:".65rem",cursor:"pointer",transition:"all .2s"}} onMouseEnter={e=>{e.currentTarget.style.background=`${t.rd}12`;}} onMouseLeave={e=>{e.currentTarget.style.background="transparent";}}>Terminer</button>
                   </div>
-                  {/* Big progress */}
+                  
                   <div style={{marginBottom:10}}>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
                       <span style={{fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px"}}>Progression</span>
@@ -4842,13 +4747,13 @@ return (
                       </div>
                     </div>
                   </div>
-                  {/* KPIs */}
+                  
                   <div className="kh-stats">
                     <div className="khs"><div className="khs-v">{Object.values(activeKhatma.log).filter(Boolean).length}</div><div className="khs-l">Jours ✓</div></div>
                     <div className="khs"><div style={{fontSize:"1.4rem"}}>🔥</div><div className="khs-v">{khatmaStreak(activeKhatma)}j</div><div className="khs-l">Série ◈</div></div>
                     <div className="khs"><div className="khs-v" style={{color:t.rd}}>{Math.max(0,activeKhatma.totalDays-Object.values(activeKhatma.log).filter(Boolean).length)}</div><div className="khs-l">Restants</div></div>
                   </div>
-                  {/* Bouton Lire maintenant */}
+                  
                   <div style={{marginTop:14,display:"flex",gap:8}}>
                     <button onClick={()=>{
                       // Reprendre à la dernière page lue ou calculer la page du jour
@@ -4871,7 +4776,7 @@ return (
                   </div>
                 </div>
 
-                {/* Calendrier */}
+                
                 <div className="card">
                   <div className="ch"><span className="ct">Calendrier</span><span style={{fontSize:".65rem",color:t.tx3}}>{activeKhatma.totalDays} jours · page/jour ≈ {Math.ceil(604/activeKhatma.totalDays)}</span></div>
                   <div style={{padding:"10px 12px"}}>
@@ -4893,7 +4798,7 @@ return (
                   </div>
                 </div>
 
-                {/* Progression Coran */}
+                
                 <div className="card">
                   <div className="ch"><span className="ct">Progression du Coran</span></div>
                   <div style={{padding:"12px 16px",display:"flex",flexDirection:"column",gap:10}}>
@@ -4908,7 +4813,7 @@ return (
               </div>
             )}
 
-          {/* ═══ KHATMA COLLECTIVE ═══ */}
+          
           <div className="card" style={{marginTop:4}}>
             <div className="ch">
               <span className="ct">🤝 Khatma collective</span>
@@ -5002,10 +4907,10 @@ return (
           </div>
         )}
 
-        {/* COMMUNAUTÉ */}
+        
         {page==="communaute"&&(
           <div style={{display:"flex",flexDirection:"column",gap:12}}>
-            {/* Favoris */}
+            
             <div className="card">
               <div className="ch"><span className="ct">Versets favoris</span><span style={{fontSize:".65rem",color:t.tx3}}>{favorites.length} versets</span></div>
               {favorites.length===0?(<div className="empty"><div style={{fontSize:"1.8rem",marginBottom:8}}>💚</div>Marque des versets avec ♥ pour les retrouver ici</div>):(
@@ -5025,7 +4930,7 @@ return (
                 ))}</div>
               )}
             </div>
-            {/* Listes */}
+            
             <div className="card">
               <div className="ch"><span className="ct">Mes listes</span></div>
               <div style={{padding:12}}>
@@ -5053,7 +4958,7 @@ return (
                 )}
               </div>
             </div>
-            {/* Historique */}
+            
             {readHistory.length>0&&(
               <div className="card">
                 <div className="ch"><span className="ct">Historique de lecture</span><button className="tbtn" style={{borderColor:t.rd,color:t.rd,fontSize:".6rem"}} onClick={()=>setReadHistory([])}>Effacer</button></div>
@@ -5071,7 +4976,7 @@ return (
           </div>
         )}
 
-        {/* QUIZ */}
+        
         {page==="quiz"&&(
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
             <div className="card">
@@ -5083,13 +4988,13 @@ return (
                 </div>
               </div>
               <div style={{padding:12}}>
-                {/* Mode */}
+                
                 <div style={{display:"flex",gap:6,marginBottom:10}}>
                   {[["surah","Quelle sourate ?"],["complete","Complète le verset"]].map(([m,l])=>(
                     <button key={m} onClick={()=>{setQuizMode(m);setQuizQ(null);setQuizAnswer(null);}} style={{flex:1,padding:"8px",borderRadius:10,border:`1.5px solid ${quizMode===m?t.acc:t.b2}`,background:quizMode===m?`${t.acc}15`:t.s2,color:quizMode===m?t.acc:t.tx2,fontSize:".72rem",cursor:"pointer",fontWeight:quizMode===m?700:400}}>{l}</button>
                   ))}
                 </div>
-                {/* Filtre source */}
+                
                 <div style={{display:"flex",gap:5,marginBottom:12,flexWrap:"wrap"}}>
                   <button onClick={()=>{setQuizFilter("memorized");setQuizFilterSurah(null);setQuizQ(null);}} style={{padding:"4px 10px",borderRadius:99,border:`1px solid ${quizFilter==="memorized"&&!quizFilterSurah?t.acc:t.b2}`,background:quizFilter==="memorized"&&!quizFilterSurah?`${t.acc}15`:t.s2,color:quizFilter==="memorized"&&!quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer",fontWeight:600}}>Mes mémorisés</button>
                   <button onClick={()=>{setQuizFilter("all");setQuizFilterSurah(null);setQuizQ(null);}} style={{padding:"4px 10px",borderRadius:99,border:`1px solid ${quizFilter==="all"&&!quizFilterSurah?t.acc:t.b2}`,background:quizFilter==="all"&&!quizFilterSurah?`${t.acc}15`:t.s2,color:quizFilter==="all"&&!quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer"}}>Tout</button>
@@ -5177,7 +5082,7 @@ return (
               </div>
             </div>
 
-            {/* Score card avec détail des erreurs */}
+            
             {quizScore.total>0&&(
               <div className="card">
                 <div className="ch"><span className="ct">📊 Session en cours</span></div>
@@ -5193,7 +5098,7 @@ return (
                     </div>
                   ))}
                 </div>
-                {/* Erreurs cliquables */}
+                
                 {quizScore.wrongs?.length>0&&(
                   <div style={{padding:"0 12px 12px"}}>
                     <div style={{fontSize:".6rem",color:t.tx3,textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Mes erreurs — clique pour voir le verset</div>
@@ -5221,10 +5126,10 @@ return (
           </div>
         )}
 
-        {/* STATS */}
+        
         {page==="stats"&&(
           <div className="sp">
-            {/* ── Calendrier GitHub-style ── */}
+            
             {(()=>{
               const today2=new Date();
               const weeks=18;
@@ -5249,13 +5154,13 @@ return (
                   </div>
                   <div style={{padding:"10px 14px",overflowX:"auto"}}>
                     <div style={{display:"flex",gap:3,alignItems:"flex-start"}}>
-                      {/* Labels jours */}
+                      
                       <div style={{display:"flex",flexDirection:"column",gap:3,marginTop:18,marginRight:2}}>
                         {dayLabels.map((d,i)=>(
                           <div key={i} style={{fontSize:".45rem",color:t.tx3,height:11,display:"flex",alignItems:"center"}}>{i%2===0?d:""}</div>
                         ))}
                       </div>
-                      {/* Grille semaines */}
+                      
                       {Array.from({length:weeks},(_,wi)=>{
                         const weekCells=cells.slice(wi*7,(wi+1)*7);
                         const d=weekCells[0]?.d;
@@ -5275,7 +5180,7 @@ return (
                         );
                       })}
                     </div>
-                    {/* Légende */}
+                    
                     <div style={{display:"flex",alignItems:"center",gap:4,marginTop:8,justifyContent:"flex-end"}}>
                       <span style={{fontSize:".48rem",color:t.tx3}}>Moins</span>
                       {colors.map((c,i)=><div key={i} style={{width:10,height:10,borderRadius:2,background:c}}/>)}
@@ -5286,7 +5191,7 @@ return (
               );
             })()}
 
-            {/* ── Graphique hebdomadaire ── */}
+            
             {(()=>{
               const today2=new Date();
               const weeks=8;
@@ -5333,7 +5238,7 @@ return (
               );
             })()}
 
-            {/* ── Constellation ── */}
+            
             <div className="card" style={{overflow:"hidden"}}>
               <div className="ch"><span className="ct">Constellation du Coran</span><span style={{fontSize:".62rem",color:t.tx3}}>{SURAHS.filter(s=>sPct(s)===100).length} / 114 sourates allumées</span></div>
               <div style={{padding:"8px 4px 4px",position:"relative"}}>
@@ -5348,13 +5253,13 @@ return (
                       <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
                     </filter>
                   </defs>
-                  {/* Fond étoilé */}
+                  
                   {Array.from({length:40},(_,i)=>(
                     <circle key={`star-${i}`} cx={(i*97+13)%380} cy={(i*61+7)%260} r={0.3+((i*37)%10)*0.05} fill="white" opacity={0.15+((i*23)%30)*0.01}/>
                   ))}
-                  {/* Croissant de lune — guide de disposition */}
+                  
                   <path d="M 40 200 Q 120 20 200 15 Q 280 10 340 80 Q 370 130 340 190" fill="none" stroke={t.acc} strokeWidth="0.3" strokeDasharray="3,6" opacity="0.2"/>
-                  {/* Les 114 sourates disposées en arc */}
+                  
                   {SURAHS.map((s,i)=>{
                     const total=114;
                     // Disposition en S-curve élégante
@@ -5372,21 +5277,21 @@ return (
                     return (
                       <g key={s.n} style={{cursor:"pointer"}}
                         onClick={()=>{doSelect(s);setPage("quran");}}>
-                        {/* Halo pour les sourates complètes */}
+                        
                         {isComplete&&(
                           <circle cx={x} cy={y} r={r+3} fill="url(#starGlow)" opacity="0.4">
                             <animate attributeName="r" values={`${r+2};${r+5};${r+2}`} dur={`${2+i%3}s`} repeatCount="indefinite"/>
                             <animate attributeName="opacity" values="0.4;0.15;0.4" dur={`${2+i%3}s`} repeatCount="indefinite"/>
                           </circle>
                         )}
-                        {/* Point principal */}
+                        
                         <circle cx={x} cy={y} r={r}
                           fill={isComplete?"#c9a84c":hasProgress?`rgba(201,168,76,${pct2/100*0.6+0.1})`:"rgba(255,255,255,0.08)"}
                           stroke={isRevision?"#e91e63":isComplete?"#f5dc8c":hasProgress?`rgba(201,168,76,0.5)`:"rgba(255,255,255,0.15)"}
                           strokeWidth={isComplete?0.8:0.4}
                           filter={isComplete?"url(#glow2)":undefined}
                         />
-                        {/* Numéro pour les complètes seulement */}
+                        
                         {isComplete&&s.v<=10&&(
                           <text x={x} y={y+0.5} textAnchor="middle" dominantBaseline="middle" fontSize="2.5" fill="#0a0800" fontWeight="bold" style={{pointerEvents:"none"}}>{s.n}</text>
                         )}
@@ -5394,7 +5299,7 @@ return (
                     );
                   })}
                 </svg>
-                {/* Légende */}
+                
                 <div style={{display:"flex",gap:12,padding:"4px 12px 8px",justifyContent:"center",flexWrap:"wrap"}}>
                   {[[t.acc,"Mémorisée"],["rgba(201,168,76,0.4)","En cours"],["rgba(255,255,255,0.15)","À commencer"],["#e91e63","En révision"]].map(([c,l])=>(
                     <div key={l} style={{display:"flex",alignItems:"center",gap:4}}>
@@ -5421,7 +5326,7 @@ return (
               ))}
             </div>
 
-            {/* ── Stats Tarteel-style ── */}
+            
             {(()=>{
               const fmtDur=s=>{const h=Math.floor(s/3600);const m=Math.floor((s%3600)/60);const sec=s%60;return h>0?`${h}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`:`${m}:${String(sec).padStart(2,"0")}`;};
               const hassanat=totalMem*10+versesRecited*3; // estimation : 10/verset mémorisé + 3/récité
@@ -5458,7 +5363,7 @@ return (
               );
             })()}
 
-            {/* Graphique */}
+            
             <div className="card">
               <div className="ch">
                 <span className="ct">Progression</span>
@@ -5495,7 +5400,7 @@ return (
               </div>
             </div>
 
-            {/* Badges */}
+            
             <div className="card">
               <div className="ch"><span className="ct">Badges</span><span style={{fontSize:".65rem",color:t.acc,fontWeight:700}}>{badges.length}{"/"}{BADGE_DEFS.length}</span></div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(120px,1fr))",gap:8,padding:12}}>
@@ -5510,7 +5415,7 @@ return (
               </div>
             </div>
 
-            {/* Top sourates */}
+            
             {topS.length>0&&(
               <div className="card">
                 <div className="ch"><span className="ct">Progression par sourate</span></div>
@@ -5527,7 +5432,7 @@ return (
               </div>
             )}
 
-            {/* Révision espacée */}
+            
             {spacedDue.length>0&&(
               <div className="card" style={{border:`1px solid ${t.rd}44`}}>
                 <div className="ch" style={{background:`${t.rd}10`}}><span className="ct" style={{color:t.rd}}>Révision du jour — {spacedDue.length} versets</span></div>
@@ -5542,7 +5447,7 @@ return (
               </div>
             )}
 
-            {/* Countdown cards */}
+            
             {cdS.length>0&&(
               <div className="card">
                 <div className="ch"><span className="ct">Prochaines sourates à terminer</span></div>
@@ -5561,11 +5466,11 @@ return (
           </div>
         )}
 
-        {/* SETTINGS */}
+        
         {page==="settings"&&(
           <div className="settings-wrap" style={{paddingBottom:"calc(120px + env(safe-area-inset-bottom))",WebkitOverflowScrolling:"touch",overscrollBehavior:"none"}}>
 
-            {/* Compte */}
+            
             <div className="settings-section">
               <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -5581,7 +5486,7 @@ return (
               </div>
             </div>
 
-            {/* Notifications */}
+            
             <div className="settings-section">
               <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -5607,7 +5512,7 @@ return (
               </div>
             </div>
 
-            {/* Objectif & Profil */}
+            
             <div className="settings-section">
               <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
@@ -5627,7 +5532,7 @@ return (
               </div>
             </div>
 
-            {/* Apparence */}
+            
             <div className="settings-section">
               <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
@@ -5658,7 +5563,7 @@ return (
               </div>
             </div>
 
-            {/* Police arabe */}
+            
             <div className="settings-section">
               <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
@@ -5675,7 +5580,7 @@ return (
               </div>
             </div>
 
-            {/* Récitateurs */}
+            
             <div className="settings-section">
               <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
@@ -5694,7 +5599,7 @@ return (
               </div>
             </div>
 
-            {/* Données */}
+            
             <div className="settings-section">
               <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
@@ -5717,7 +5622,7 @@ return (
               </div>
             </div>
 
-            {/* Aide & Tutoriel */}
+            
             <div className="settings-section">
               <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" strokeWidth="2.5"/></svg>
@@ -5751,7 +5656,7 @@ return (
 
       {focusMode&&selS&&verses.length>0&&(
         <div style={{position:"fixed",inset:0,zIndex:150,background:"#050505",display:"flex",flexDirection:"column",overflow:"hidden"}}>
-          {/* Header minimal */}
+          
           <div style={{padding:"12px 18px",display:"flex",alignItems:"center",justifyContent:"space-between",borderBottom:"1px solid #1a1a1a"}}>
             <div>
               <div style={{fontFamily:"Amiri,serif",fontSize:"1rem",color:"#c9a84c"}}>{selS.ar} · v.{verses[focusIdx]?.n}</div>
@@ -5762,23 +5667,23 @@ return (
               <button onClick={()=>setFocusMode(false)} style={{background:"none",border:"1px solid #333",color:"#666",borderRadius:8,padding:"5px 12px",cursor:"pointer",fontSize:".75rem"}}>✕</button>
             </div>
           </div>
-          {/* Verset central */}
+          
           <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px 20px",gap:20}}>
-            {/* Numéro verset */}
+            
             <div style={{width:40,height:40,borderRadius:"50%",border:"1.5px solid rgba(201,168,76,.3)",display:"flex",alignItems:"center",justifyContent:"center",color:"rgba(201,168,76,.5)",fontSize:".75rem"}}>
               {verses[focusIdx]?.n}
             </div>
-            {/* Texte arabe — grand, centré */}
+            
             <div style={{fontFamily:"Amiri Quran,serif",fontSize:"clamp(1.6rem,5vw,2.6rem)",direction:"rtl",textAlign:"center",lineHeight:2.5,color:"#f0e8d0",maxWidth:600,transition:"opacity .3s"}}>
               {{stripTags(verses[focusIdx]?.ar||"")}
             </div>
-            {/* Traduction */}
+            
             {showTr&&verses[focusIdx]?.fr&&(
               <div style={{fontSize:"clamp(.75rem,2.5vw,1rem)",color:"#888",fontStyle:"italic",textAlign:"center",lineHeight:1.8,maxWidth:500}}>
                 {verses[focusIdx]?.fr}
               </div>
             )}
-            {/* Indicateur mémorisé */}
+            
             <div style={{display:"flex",alignItems:"center",gap:6}}>
               {!!(mem[String(selS.n)]||{})[String(verses[focusIdx]?.n)]
                 ?<span style={{fontSize:".7rem",color:"#22c55e",background:"rgba(34,197,94,.1)",padding:"3px 10px",borderRadius:99,border:"1px solid rgba(34,197,94,.2)"}}>✓ Mémorisé</span>
@@ -5786,10 +5691,10 @@ return (
               }
             </div>
           </div>
-          {/* Navigation bottom */}
+          
           <div style={{padding:"16px 24px",borderTop:"1px solid #111",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
             <button onClick={()=>setFocusIdx(i=>Math.max(0,i-1))} disabled={focusIdx===0} style={{flex:1,padding:"12px",background:"#111",border:"1px solid #222",color:focusIdx===0?"#333":"#888",borderRadius:10,cursor:focusIdx===0?"default":"pointer",fontSize:"1rem",transition:"all .2s"}}>◄</button>
-            {/* Barre de progression */}
+            
             <div style={{flex:3,height:4,background:"#1a1a1a",borderRadius:99,overflow:"hidden"}}>
               <div style={{height:"100%",width:`${(focusIdx+1)/verses.length*100}%`,background:"#c9a84c",borderRadius:99,transition:"width .3s"}}/>
             </div>
@@ -5894,13 +5799,13 @@ return (
         <div style={{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,.95)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:24,backdropFilter:"blur(20px)"}} onClick={()=>!timerRunning&&setTimerOpen(false)}>
           <style>{`@keyframes breathe{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.08);opacity:1}}`}</style>
 
-          {/* Header */}
+          
           <div style={{position:"absolute",top:"max(20px,env(safe-area-inset-top))",left:0,right:0,display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 20px"}}>
             <div style={{fontSize:".65rem",color:"rgba(255,255,255,.4)",textTransform:"uppercase",letterSpacing:3}}>Mode concentration</div>
             <button onClick={()=>setTimerOpen(false)} style={{background:"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.12)",color:"rgba(255,255,255,.5)",borderRadius:"50%",width:32,height:32,cursor:"pointer",fontSize:".8rem",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
           </div>
 
-          {/* Ring SVG animé */}
+          
           <div style={{position:"relative",width:200,height:200}} onClick={e=>e.stopPropagation()}>
             <svg width="200" height="200" viewBox="0 0 200 200">
               <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,.05)" strokeWidth="8"/>
@@ -5913,7 +5818,7 @@ return (
                 style={{transition:"stroke-dasharray 1s linear,stroke .5s"}}
               />
             </svg>
-            {/* Temps au centre */}
+            
             <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:4}}>
               <div style={{fontFamily:"monospace",fontSize:"3.2rem",fontWeight:800,color:timerLeft===0?"#4caf50":timerRunning?t.acc:"rgba(255,255,255,.9)",letterSpacing:2,lineHeight:1,animation:timerRunning?"breathe 4s ease-in-out infinite":"none"}}>
                 {fmtTime(timerLeft??timerDuration*60)}
@@ -5924,7 +5829,7 @@ return (
             </div>
           </div>
 
-          {/* Sélecteur durée */}
+          
           {!timerRunning&&timerLeft===null&&(
             <div style={{display:"flex",gap:8,flexWrap:"wrap",justifyContent:"center"}} onClick={e=>e.stopPropagation()}>
               {[5,10,15,20,25,30,45,60].map(m=>(
@@ -5935,7 +5840,7 @@ return (
             </div>
           )}
 
-          {/* Contrôles */}
+          
           <div style={{display:"flex",gap:12}} onClick={e=>e.stopPropagation()}>
             {!timerRunning&&timerLeft===null&&(
               <button onClick={startTimer} style={{padding:"14px 40px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:14,color:"#000",fontWeight:800,fontSize:"1rem",cursor:"pointer",boxShadow:`0 4px 20px ${t.acc}44`}}>
@@ -5964,7 +5869,7 @@ return (
             </div>
           )}
 
-          {/* Citation motivante */}
+          
           <div style={{position:"absolute",bottom:"max(30px,env(safe-area-inset-bottom))",left:20,right:20,textAlign:"center"}}>
             <div style={{fontFamily:"Amiri,serif",fontSize:"1rem",color:"rgba(201,168,76,.5)",lineHeight:1.6}}>وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا</div>
             <div style={{fontSize:".6rem",color:"rgba(255,255,255,.2)",marginTop:4}}>Quiconque craint Allah, Il lui ouvre une issue · At-Talaq 2</div>
