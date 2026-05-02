@@ -1,3 +1,4 @@
+// Al-Hifz App v2.1 - Build 202605021356
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";import { supabase } from './supabase'
 
 const SURAHS = [
