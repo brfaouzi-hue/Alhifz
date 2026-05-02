@@ -1,4 +1,3 @@
-// Al-Hifz App v2.1 - Build 202605021356
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";import { supabase } from './supabase'
 
 const SURAHS = [
@@ -119,7 +118,6 @@ const SURAHS = [
 ];
 const TOTAL_VERSES = SURAHS.reduce((s,x)=>s+x.v,0);
 
-// Embedded data
 const Q = {
 1:[
   {n:1,ar:"بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",fr:"Au nom d'Allah, le Tout Miséricordieux, le Très Miséricordieux.",tf:"La Basmala inaugure chaque sourate sauf At-Tawba. Ar-Rahman désigne la miséricorde universelle, Ar-Rahim la miséricorde particulière aux croyants dans l'au-delà."},
@@ -279,7 +277,6 @@ const Q = {
 ],
 };
 
-// Constants
 const FONTS = [
   {id:"amiri-quran",name:"Amiri Quran",css:"Amiri Quran,serif",desc:"Mushaf classique (Naskh)"},
   {id:"amiri",name:"Amiri",css:"Amiri,serif",desc:"Naskhi élégant"},
@@ -386,15 +383,11 @@ const ld=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}c
 const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
 const today=()=>new Date().toISOString().split("T")[0];
 
-// Calcul approximatif du début de Ramadan (Hijri → Grégorien)
 const getRamadanInfo=()=>{
   const now=new Date();
-  // Ramadan 1446 AH ≈ 1 mars 2025, Ramadan 1447 AH ≈ 18 fév 2026
-  // Calcul simplifié : cycle de 354.367 jours par an hijri
-  const KNOWN_RAMADAN=new Date("2026-02-18"); // début Ramadan 1447
+  const KNOWN_RAMADAN=new Date("2026-02-18");
   const HIJRI_YEAR=354.367;
   let start=new Date(KNOWN_RAMADAN);
-  // Trouver le Ramadan le plus proche
   while(start>now) start=new Date(start.getTime()-HIJRI_YEAR*86400000);
   while(new Date(start.getTime()+HIJRI_YEAR*86400000)<now) start=new Date(start.getTime()+HIJRI_YEAR*86400000);
   const nextStart=new Date(start.getTime()+HIJRI_YEAR*86400000);
@@ -416,28 +409,24 @@ const THEMES={
     acc:"#2e7d32",acc2:"#388e3c",acc3:"#43a047",gr:"#2e7d32",grD:"rgba(46,125,50,.12)",
     tx:"#1a2e1a",tx2:"#3d5c3d",tx3:"#6a8f6a",rd:"#c62828",bl:"#1565c0",pu:"#6a1b9a",
     navBg:"#ffffff",cardBg:"#ffffff",inputBg:"#f4faf4",hero:"linear-gradient(160deg,#e8f5e8,#c8e6c9)"},
-  // Andalousie — grenade, alhambra, azulejos
   andalous:{bg:"#0d0a06",s1:"#130e08",s2:"#1a1409",s3:"#221a0e",b1:"#2e2010",b2:"#3d2c15",
     acc:"#d4892a",acc2:"#e8a840",acc3:"#f5c860",gr:"#4e9c6a",grD:"rgba(78,156,106,.12)",
     tx:"#f0e8d8",tx2:"#c4a87a",tx3:"#7a5c35",rd:"#c0392b",bl:"#2980b9",pu:"#8e44ad",
     navBg:"#0d0a06",cardBg:"#130e08",inputBg:"#1a1409",
     hero:"linear-gradient(160deg,#1a0e06,#2a1a0a)",
     arabesque:true},
-  // Ottomane — tulipes, bleu iznik, rouge impérial
   ottoman:{bg:"#04080f",s1:"#070e18",s2:"#0a1420",s3:"#0e1c2e",b1:"#142438",b2:"#1c3050",
     acc:"#c8102e",acc2:"#e8203e",acc3:"#f5405a",gr:"#2ecc71",grD:"rgba(46,204,113,.12)",
     tx:"#e8f0f8",tx2:"#8aafcc",tx3:"#4a6a88",rd:"#e74c3c",bl:"#3498db",pu:"#9b59b6",
     navBg:"#04080f",cardBg:"#070e18",inputBg:"#0a1420",
     hero:"linear-gradient(160deg,#070e18,#0e1c2e)",
     arabesque:true},
-  // Abbasside — or sur noir de Bagdad, papier de Samarcande
   abbasid:{bg:"#080600",s1:"#100c00",s2:"#181200",s3:"#201800",b1:"#2a2000",b2:"#382a00",
     acc:"#f0c040",acc2:"#f8d860",acc3:"#fff080",gr:"#50c878",grD:"rgba(80,200,120,.12)",
     tx:"#fff8e8",tx2:"#d4b060",tx3:"#806030",rd:"#e74c3c",bl:"#3498db",pu:"#9b59b6",
     navBg:"#080600",cardBg:"#100c00",inputBg:"#181200",
     hero:"linear-gradient(160deg,#100c00,#201800)",
     arabesque:true},
-  // Émeraude — thème vert profond comme l'écran de login
   emerald:{bg:"#050f08",s1:"#081510",s2:"#0d1f15",s3:"#122a1c",b1:"#193d28",b2:"#1f4d33",
     acc:"#4ade80",acc2:"#22c55e",acc3:"#86efac",gr:"#4ade80",grD:"rgba(74,222,128,.12)",
     tx:"#e8fff2",tx2:"#86efac",tx3:"#4a7a5a",rd:"#f87171",bl:"#60a5fa",pu:"#c084fc",
@@ -445,7 +434,6 @@ const THEMES={
     hero:"linear-gradient(160deg,#081510,#122a1c)"},
 };
 
-// Métadonnées des thèmes pour l'UI de sélection
 const THEME_META={
   dark:{label:"Nuit",sub:"Sobre et élégant",preview:["#050608","#c9a84c","#22c55e"]},
   light:{label:"Clarté",sub:"Thème vert naturel",preview:["#f0f7f0","#2e7d32","#388e3c"]},
@@ -455,35 +443,34 @@ const THEME_META={
   emerald:{label:"Émeraude",sub:"Vert profond — login",preview:["#050f08","#4ade80","#22c55e"]},
 };
 const TJC_DARK={
-  m:"#4FC3F7",      // Madd naturel (2h) — bleu clair comme Mushaf
-  mr:"#0288D1",     // Madd permissible (2-4-6h) — bleu moyen
-  mo:"#880E4F",     // Madd wajib muttasil (4-5h) — bordeaux/magenta
-  ml:"#B71C1C",     // Madd lazim (6h) — rouge foncé comme Mushaf
-  g:"#2E7D32",      // Ghunna — vert foncé
-  idg:"#388E3C",    // Idgham avec ghunna — vert
-  q:"#B71C1C",      // Qalqala — rouge (comme Mushaf standard)
-  ikh:"#F57F17",    // Ikhfa — jaune-orange
-  iql:"#E65100",    // Iqlab — orange foncé
-  ls:"#01579B",     // Lam shamsiyya — bleu foncé
-  hw:"#546E7A",     // Ham Wasl — gris bleu
-  sl:"#607d8b",     // Silence/Sakt — gris bleu
+  m:"#4FC3F7",
+  mr:"#0288D1",
+  mo:"#880E4F",
+  ml:"#B71C1C",
+  g:"#2E7D32",
+  idg:"#388E3C",
+  q:"#B71C1C",
+  ikh:"#F57F17",
+  iql:"#E65100",
+  ls:"#01579B",
+  hw:"#546E7A",
+  sl:"#607d8b",
 };
 const TJC_LIGHT={
-  m:"#0277BD",      // Madd naturel — bleu
-  mr:"#01579B",     // Madd permissible — bleu foncé
-  mo:"#880E4F",     // Madd wajib — bordeaux
-  ml:"#B71C1C",     // Madd lazim — rouge foncé
-  g:"#1B5E20",      // Ghunna — vert très foncé
-  idg:"#2E7D32",    // Idgham — vert foncé
-  q:"#B71C1C",      // Qalqala — rouge
-  ikh:"#E65100",    // Ikhfa — orange
-  iql:"#BF360C",    // Iqlab — orange-rouge
-  ls:"#01579B",     // Lam shamsiyya
-  hw:"#37474F",     // Ham Wasl
+  m:"#0277BD",
+  mr:"#01579B",
+  mo:"#880E4F",
+  ml:"#B71C1C",
+  g:"#1B5E20",
+  idg:"#2E7D32",
+  q:"#B71C1C",
+  ikh:"#E65100",
+  iql:"#BF360C",
+  ls:"#01579B",
+  hw:"#37474F",
   sl:"#263238",
 };
 
-// Icons
 const Icons = {
   Book:({size=24,color="currentColor"})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>),
   Brain:({size=24,color="currentColor"})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>),
@@ -500,7 +487,6 @@ const Icons = {
   List:({size=24,color="currentColor"})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>),
 };
 
-// Animation Calligraphie — SVG qui s'écrit quand un verset est mémorisé
 function CalligraphyBurst({text, onDone}) {
   return (
     <div style={{
@@ -533,9 +519,7 @@ function CalligraphyBurst({text, onDone}) {
   );
 }
 
-// Sablier SVG animé
 function HourglassIcon({pct=0.5, color="#c9a84c", size=32}) {
-  // pct = 0 (plein) -> 1 (vide)
   const sandFill = Math.max(0, Math.min(1, 1 - pct));
   const topH = 14 * sandFill;
   const botH = 14 * (1 - sandFill * 0.3);
@@ -575,16 +559,12 @@ function HourglassIcon({pct=0.5, color="#c9a84c", size=32}) {
   );
 }
 
-// Tajweed parser
-// Mapping complet des classes tajweed de l'API qurancdn → couleurs Mushaf standard
 const TAJWID_CLASS_COLORS={
-  // Madd (مد) ── bleu/cyan selon durée
-  "madda_normal":        tjc=>tjc.m,   // Madd naturel (2 harakats)
-  "madda_permissible":   tjc=>tjc.mr,  // Madd permissible (2, 4 ou 6h)
-  "madda_necessary":     tjc=>tjc.ml,  // Madd lazim (6h obligatoire)
-  "madda_obligatory":    tjc=>tjc.mo,  // Madd wajib muttasil (4-5h)
+  "madda_normal":        tjc=>tjc.m,
+  "madda_permissible":   tjc=>tjc.mr,
+  "madda_necessary":     tjc=>tjc.ml,
+  "madda_obligatory":    tjc=>tjc.mo,
   "madda_wajib":         tjc=>tjc.mo,
-  // Ghunna / Idgham (غنة، إدغام) ── vert
   "ghunnah":             tjc=>tjc.g,
   "idgham_with_ghunnah": tjc=>tjc.g,
   "idgham_ghunnah":      tjc=>tjc.g,
@@ -592,31 +572,24 @@ const TAJWID_CLASS_COLORS={
   "idgham_mutaqaribayn": tjc=>tjc.idg,
   "idgham_without_ghunnah": tjc=>tjc.idg,
   "idgham_shafawi":      tjc=>tjc.g,
-  // Qalqala (قلقلة) ── violet
   "qalaqah":             tjc=>tjc.q,
-  // Ikhfa / Iqlab (إخفاء، إقلاب) ── orange / rouge
   "ikhafa":              tjc=>tjc.ikh,
   "ikhafa_shafawi":      tjc=>tjc.ikh,
   "ikhafa_with_ghunnah": tjc=>tjc.ikh,
   "iqlab":               tjc=>tjc.iql,
-  // Lam shamsiyya (لام شمسية) ── bleu clair
   "laam_shamsiyah":      tjc=>tjc.ls,
-  // Ham Wasl / Sakt ── gris (affiché mais sans couleur forte)
   "ham_wasl":            ()=>null,
   "silent":              ()=>null,
   "sakt":                tjc=>tjc.sl,
 };
 
-// HifzVerseText — affiche le verset en mode Hifz
-// Les derniers mots (selon level 1-5) sont masqués, les visibles gardent TajwidSpan
 function HifzVerseText({ar, level, tjc, showTj, vmark, onRevealWord}) {
   const clean=stripTags(ar||"");
   const words=clean.split(/\s+/).filter(Boolean);
   const total=words.length;
-  // level 1=20% caché, 2=40%, 3=60%, 4=80%, 5=100%
   const hiddenCount=Math.round(total*(level/5));
   const visibleCount=total-hiddenCount;
-  
+
   return (
     <bdi style={{direction:"rtl",lineHeight:2.4,letterSpacing:0}}>
       {words.map((w,i)=>{
@@ -643,7 +616,6 @@ function HifzVerseText({ar, level, tjc, showTj, vmark, onRevealWord}) {
             {w}
           </span>
         );
-        // Mot visible — on reconstruis avec TajwidSpan si le tajweed était dans ar
         return <span key={i} style={{display:"inline"}}><TajwidSpan text={w} enabled={showTj} tjc={tjc}/>{" "}</span>;
       })}
       <span style={{fontFamily:"Amiri,serif",fontSize:".72rem",color:"#c9a84c",margin:"0 4px",verticalAlign:"middle"}}>﴿{vmark}﴾</span>
@@ -651,7 +623,6 @@ function HifzVerseText({ar, level, tjc, showTj, vmark, onRevealWord}) {
   );
 }
 
-// TajwidSpan — rend le HTML tajweed de l'API qurancdn avec les couleurs du Mushaf standard
 function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,authLoading,authError,onLogin,onSignup,onReset}){  return (
     <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"linear-gradient(135deg,#0a0f0a 0%,#0d1a0f 50%,#0a0f0a 100%)",padding:20,position:"relative",overflow:"hidden"}}>
       <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",opacity:.04,fontSize:"clamp(8rem,20vw,18rem)",fontFamily:"Amiri Quran,serif",color:"#4ade80",pointerEvents:"none",userSelect:"none",direction:"rtl"}}>بسم الله</div>
@@ -742,7 +713,6 @@ function WbwModal({sn,vn,t}){
 }
 function TajwidSpan({text,enabled,tjc}) {
   const raw=text||"";
-  // Strip anciens tags de marquage [m]...[/m]
   const clean=raw.replace(/\[[a-z]+\](.*?)\[\/[a-z]+\]/g,"$1");
 
   if(!enabled){
@@ -752,7 +722,6 @@ function TajwidSpan({text,enabled,tjc}) {
     return <bdi style={{direction:"rtl",letterSpacing:0}}>{clean}</bdi>;
   }
 
-  // Parser robuste via DOMParser — gère tous les cas (imbriqués, sans guillemets, auto-fermants)
   try{
     const wrapped=`<span>${clean}</span>`;
     const doc=new DOMParser().parseFromString(wrapped,"text/html");
@@ -760,7 +729,7 @@ function TajwidSpan({text,enabled,tjc}) {
     if(!root) throw new Error("parse fail");
     let key=0;
     const renderNode=(node)=>{
-      if(node.nodeType===3){ // texte
+      if(node.nodeType===3){
         return node.textContent?<React.Fragment key={key++}>{node.textContent}</React.Fragment>:null;
       }
       if(node.nodeType===1){
@@ -770,10 +739,9 @@ function TajwidSpan({text,enabled,tjc}) {
           const cls=node.getAttribute("class")||"";
           const colorFn=TAJWID_CLASS_COLORS[cls];
           const color=colorFn?colorFn(tjc):null;
-          if(color) return <bdi key={key++} style={{color,fontWeight:"bold",letterSpacing:0}} title={cls.replace(/_/g," ")}>{children}</bdi>;
+          if(color) return <bdi key={key++} style={{color,fontWeight:"bold",letterSpacing:0}} title={cls.split("_").join(" ")}>{children}</bdi>;
           return <React.Fragment key={key++}>{children}</React.Fragment>;
         }
-        // Tout autre tag HTML — on prend juste le texte
         return <React.Fragment key={key++}>{children}</React.Fragment>;
       }
       return null;
@@ -781,14 +749,10 @@ function TajwidSpan({text,enabled,tjc}) {
     const parts=Array.from(root.childNodes).map(renderNode).filter(Boolean);
     return <bdi style={{direction:"rtl",letterSpacing:0,lineHeight:"inherit"}}>{parts}</bdi>;
   }catch{
-    // Fallback sécurisé : texte brut sans couleurs
     return <bdi style={{direction:"rtl",letterSpacing:0}}>{clean}</bdi>;
   }
 }
 
-// ═══════════════════════════════════════
-// ONBOARDING — Premier lancement
-// ═══════════════════════════════════════
 const ONBOARD_SLIDES=[
   {visual:(c)=>(<svg width="100" height="100" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="46" fill={c+"18"} stroke={c} strokeWidth="1.2"/><path d="M50 20 C38 20 28 30 28 42 C28 56 40 64 52 62 C44 60 36 52 36 42 C36 32 44 24 54 22Z" fill={c} opacity=".9"/><text x="50" y="80" textAnchor="middle" fontFamily="Amiri Quran,serif" fontSize="18" fill={c} opacity=".85">الحفظ</text></svg>),
     title:"بِسْمِ اللَّهِ",badge:"Bienvenue",desc:"Al-Hifz t'accompagne du premier verset mémorisé jusqu'à la khatma complète.",color:"#16a34a",emoji:"🌙"},
@@ -956,9 +920,6 @@ function MushafTajweedView({page,fullscreen,edition}){
 
 
 
-// MushafPage
-// Vraies URL par édition — plusieurs fallbacks pour fiabilité
-// URLs Mushaf — proxy Vercel en premier (pas de CORS), puis CDN directs en fallback
 const EDITION_IMGS = {
  hafs: pg => [
     `https://static.qurancdn.com/images/quran/pages/v4/en/hafs/page${String(pg).padStart(3,"0")}.png`,
@@ -974,7 +935,6 @@ const EDITION_IMGS = {
     `https://cdn.islamic.network/quran/images/high-resolution/${pg}.jpg`,
   ],
 };
-// Charge l'URL réelle depuis l'API qurancdn (contourne les problèmes CORS des CDN directs)
 const fetchMushafPageUrl=async(pg, editionId)=>{
   try{
     const r=await fetch(`https://api.qurancdn.com/api/qdc/pages/${pg}?book_name=${editionId==="warsh"?"warsh":"hafs"}`);
@@ -1032,7 +992,6 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
   );
 }
 
-// CSS builder
 function buildCSS(t,tjc,arFont,tn,ramadan){
 ramadan=ramadan||false;
 const bg=ramadan&&tn==="dark"?"#0a0518":t.bg;
@@ -1294,11 +1253,10 @@ body>*{position:relative;z-index:1;}
 }
 `;}
 
-// Main App
 export default function App() {
-  const [tn,setTn]=useState(()=>ld("qtheme2","light")); // qtheme2 = new key with new themes
+  const [tn,setTn]=useState(()=>ld("qtheme2","light"));
   const t=THEMES[tn]||THEMES.dark;
-  const tjc=(tn==="light")?TJC_LIGHT:TJC_DARK; // dark for all dark-bg themes
+  const tjc=(tn==="light")?TJC_LIGHT:TJC_DARK;
   const [fontId,setFontId]=useState(()=>ld("qfont","amiri-quran"));
   const arFont=(FONTS.find(f=>f.id===fontId)||FONTS[0]).css;
   const [mem,setMem]=useState(()=>ld("qmem6",{}));
@@ -1308,21 +1266,17 @@ export default function App() {
 const [user, setUser] = useState(null);
 const [authReady, setAuthReady] = useState(false);
 
-  // iOS viewport-fit=cover + PWA setup
   useEffect(()=>{
-    // viewport-fit for iPhone notch
     const meta=document.querySelector('meta[name="viewport"]');
     if(meta&&!meta.content.includes('viewport-fit')){
       meta.content=meta.content+', viewport-fit=cover';
     }
-    // PWA manifest link
     if(!document.querySelector('link[rel="manifest"]')){
       const link=document.createElement('link');
       link.rel='manifest';
       link.href='/manifest.json';
       document.head.appendChild(link);
     }
-    // Apple PWA meta tags
     const appleItems=[
       {name:'apple-mobile-web-app-capable',content:'yes'},
       {name:'apple-mobile-web-app-status-bar-style',content:'black-translucent'},
@@ -1344,7 +1298,6 @@ const [authLoading, setAuthLoading] = useState(false);
 const [authError, setAuthError] = useState("");
  const [page,setPage]=useState("home");
   useEffect(()=>{
-    // Bloquer le scroll du body sur mushaf pour éviter le saut iOS
     document.body.style.overflow=page==="mushaf"?"hidden":"";
     return()=>{document.body.style.overflow="";};
   },[page]);
@@ -1367,11 +1320,10 @@ const [authError, setAuthError] = useState("");
   const [mushafSurahSearch,setMushafSurahSearch]=useState("");
   const [rec,setRec]=useState(RECITERS[0]);
   const [playing,setPlaying]=useState(null);
-  const [audioPlaying,setAudioPlaying]=useState(false); // état réactif pour l'UI
+  const [audioPlaying,setAudioPlaying]=useState(false);
   const [audioPct,setAudioPct]=useState(0);
-  // Tilawa (تلاوة — lecture guidée)
   const [karaokeMode,setKaraokeMode]=useState(false);
-  const [wordTimings,setWordTimings]=useState({}); // {sn_vn: [{text,start,end}]}
+  const [wordTimings,setWordTimings]=useState({});
   const [activeWordIdx,setActiveWordIdx]=useState(-1);
   const karaokeRaf=useRef(null);
   const [khatmas,setKhatmas]=useState(()=>ld("qkhatmas",[]));
@@ -1379,14 +1331,13 @@ const [authError, setAuthError] = useState("");
   const [kPreset,setKPreset]=useState(null);
   const [kCustomDays,setKCustomDays]=useState("30");
   const [kName,setKName]=useState("Ma Khatma");
-  // Khatma collective
   const [collectiveKhatmas,setCollectiveKhatmas]=useState(()=>ld("qcolkhatmas",[]));
   const [showCollective,setShowCollective]=useState(false);
   const [newColKhatmaName,setNewColKhatmaName]=useState("Notre Khatma");
   const [joinCode,setJoinCode]=useState("");
   const [activeColKhatma,setActiveColKhatma]=useState(()=>ld("qactcolkhatma",null));
   const [goal,setGoal]=useState("5");
-  const [baselineInput,setBaselineInput]=useState("0"); // versets déjà connus à l'inscription
+  const [baselineInput,setBaselineInput]=useState("0");
   const [startDate,setStartDate]=useState(new Date().toISOString().split("T")[0]);
   const [arabicSize,setArabicSize]=useState(()=>ld("qasize",1.65));
   const [loopCount,setLoopCount]=useState(3);
@@ -1395,30 +1346,25 @@ const [authError, setAuthError] = useState("");
   const [reviewMode,setReviewMode]=useState(false);
   const [hifzMode,setHifzMode]=useState(false);
   const [hifzLevel,setHifzLevel]=useState({});
-  // Reconnaissance vocale
   const [speechMode,setSpeechMode]=useState(false);
   const [speechListening,setSpeechListening]=useState(false);
-  const [speechResult,setSpeechResult]=useState(""); // ce que l'utilisateur a dit
-  const [speechVerseTarget,setSpeechVerseTarget]=useState(null); // verset cible
-  const [speechScore,setSpeechScore]=useState(null); // {correct:[], wrong:[], pct}
+  const [speechResult,setSpeechResult]=useState("");
+  const [speechVerseTarget,setSpeechVerseTarget]=useState(null);
+  const [speechScore,setSpeechScore]=useState(null);
   const recognitionRef=useRef(null);
   const [revealedVerses,setRevealedVerses]=useState({});
   const [bookmark,setBookmark]=useState(()=>ld("qbookmark",null));
   const [spaced,setSpaced]=useState(()=>ld("qspaced",{}))
-  const [tafsirData,setTafsirData]=useState({}) // {sn_vn: text}
+  const [tafsirData,setTafsirData]=useState({})
   const [tafsirLoading,setTafsirLoading]=useState({});
-  // SM-2: {key: {interval, repetitions, ef, nextDate, lastDate}}
-  // ef = easiness factor (2.5 default), interval en jours
   const [badges,setBadges]=useState(()=>ld("qbadges",[]));
-  const [badgePopup,setBadgePopup]=useState(null); // {id, icon, label}
+  const [badgePopup,setBadgePopup]=useState(null);
   const [autoNight,setAutoNight]=useState(()=>ld("qautonight",false));
-  // Stats Tarteel-style
-  const [engagementTime,setEngagementTime]=useState(()=>ld("qengtime",0)); // secondes totales
-  const [recitTime,setRecitTime]=useState(()=>ld("qrecittime",0)); // secondes récitation
+  const [engagementTime,setEngagementTime]=useState(()=>ld("qengtime",0));
+  const [recitTime,setRecitTime]=useState(()=>ld("qrecittime",0));
   const [versesRecited,setVersesRecited]=useState(()=>ld("qvrecited",0));
   const sessionStartRef=useRef(Date.now());
   const lastEngRef=useRef(Date.now());
-  // Messages d'encouragement pages lues
   const [encouragementMsg,setEncouragementMsg]=useState(null);
   const [playbackRate,setPlaybackRate]=useState(1);
   const [favorites,setFavorites]=useState(()=>ld("qfavs",[]));
@@ -1430,9 +1376,8 @@ const [authError, setAuthError] = useState("");
  const wbwVerseRef=useRef(null);
 const [wbwOpen,setWbwOpen]=useState(false);
 const [wbwWords,setWbwWords]=useState(null);
-// Lecture partielle
-const [partialVerse,setPartialVerse]=useState(null); // {sn,vn,words:[],from:0,to:N}
-const partialPlayRef=useRef(null); // {stopAt: ratio 0-1}
+const [partialVerse,setPartialVerse]=useState(null);
+const partialPlayRef=useRef(null);
   const [newListName,setNewListName]=useState("");
   const [selList,setSelList]=useState(null);
   const [mushafFullscreen,setMushafFullscreen]=useState(false);
@@ -1460,22 +1405,18 @@ const partialPlayRef=useRef(null); // {stopAt: ratio 0-1}
   const [testScore,setTestScore]=useState({correct:0,wrong:0,total:0});
   const [testDone,setTestDone]=useState(false);
   const [splash,setSplash]=useState(true);
-  // Streak
 
-  // Quiz
   const [quizOpen,setQuizOpen]=useState(false);
-  const [quizMode,setQuizMode]=useState("surah"); // "surah" | "complete"
-  const [quizFilter,setQuizFilter]=useState("memorized"); // "memorized" | "all" | surah number
-  const [quizFilterSurah,setQuizFilterSurah]=useState(null); // sourate spécifique
+  const [quizMode,setQuizMode]=useState("surah");
+  const [quizFilter,setQuizFilter]=useState("memorized");
+  const [quizFilterSurah,setQuizFilterSurah]=useState(null);
   const [quizQ,setQuizQ]=useState(null);
   const [quizChoices,setQuizChoices]=useState([]);
   const [quizAnswer,setQuizAnswer]=useState(null);
   const [quizScore,setQuizScore]=useState({correct:0,total:0,wrongs:[]});
-  const [quizShowWrong,setQuizShowWrong]=useState(null); // affiche le détail d'une erreur
-  // Notifications
+  const [quizShowWrong,setQuizShowWrong]=useState(null);
   const [notifEnabled,setNotifEnabled]=useState(()=>ld("qnotif",false));
   const [notifHour,setNotifHour]=useState(()=>ld("qnotifhour","08:00"));
-  // Mushaf audio
   const [mushafAudioActive,setMushafAudioActive]=useState(false);
   const [timerOpen,setTimerOpen]=useState(false);
   const [timerDuration,setTimerDuration]=useState(20);
@@ -1485,26 +1426,24 @@ const partialPlayRef=useRef(null); // {stopAt: ratio 0-1}
   const [isOffline,setIsOffline]=useState(()=>!navigator.onLine);
   const [showInstallBanner,setShowInstallBanner]=useState(false);
   const installPromptRef=useRef(null);
-  // Plan IA
   const [showAIPlan,setShowAIPlan]=useState(false);
   const [aiPlanLoading,setAiPlanLoading]=useState(false);
   const [aiPlanResult,setAiPlanResult]=useState("");
   const [aiPlanParams,setAiPlanParams]=useState({goal:"juz30",months:"3",level:"debutant",dailyTime:"20"});
   const [ramadanTheme,setRamadanTheme]=useState(false);
-  const [calligAnim,setCalligAnim]=useState(null); // {ar, x, y} — animation sur mémorisation // always false on load — user toggles manually
+  const [calligAnim,setCalligAnim]=useState(null);
   const [pageRead,setPageRead]=useState(()=>ld("qpages",{}));
-  const [revFlags,setRevFlags]=useState(()=>ld("qrevflags",{})); // {surahN: "active"|"mastered"|"paused"}
-  const [revSessions,setRevSessions]=useState(()=>ld("qrevsessions",[])); // [{date,sn,score,mode}]
+  const [revFlags,setRevFlags]=useState(()=>ld("qrevflags",{}));
+  const [revSessions,setRevSessions]=useState(()=>ld("qrevsessions",[]));
   const [revFilter,setRevFilter]=useState("all");
   const [swipeState,setSwipeState]=useState({});
   const swipeTouchStart=useRef({});
   const [verses,setVerses]=useState([]);
   const [loadState,setLoadState]=useState("idle");
   const audioRef=useRef(null);
-  const preloadRef=useRef(new Audio()); // préchargement du verset suivant
+  const preloadRef=useRef(new Audio());
   const vpRef=useRef(null);
 
-  // Persist
   useEffect(()=>sv("qreadhist",readHistory),[readHistory]);
   useEffect(()=>sv("qbookmark",bookmark),[bookmark]);
   useEffect(()=>sv("qspaced",spaced),[spaced]);
@@ -1589,7 +1528,6 @@ const handleReset=async()=>{
 };
   useEffect(()=>{
     const t=setTimeout(()=>setSplash(false),2200);
-    // Migrate: clear old qv3 cache entries (had wrong tajweed data)
     try{
       Object.keys(localStorage).filter(k=>k.startsWith("qv3_")||k.startsWith("qv4_")).forEach(k=>localStorage.removeItem(k));
     }catch{}
@@ -1623,10 +1561,7 @@ const handleReset=async()=>{
     const baseline=settings.baselineVerses||0;
     const start=new Date(settings.startDate),now=new Date();
     const dp=Math.max(1,Math.floor((now-start)/86400000));
-    // Versets mémorisés APRÈS l'inscription (hors baseline déclaré)
     const earnedMem=Math.max(0,totalMem-baseline);
-    // Rythme réel = nouveaux versets / jours depuis début
-    // Si earnedMem=0 on utilise l'objectif défini dans les réglages
     const rate=earnedMem>0 ? earnedMem/dp : parseInt(settings.dailyGoal)||5;
     const eff=Math.max(rate,1);
     const days=remaining>0?Math.ceil(remaining/eff):0;
@@ -1638,7 +1573,6 @@ const handleReset=async()=>{
     };
   },[settings,totalMem,remaining]);
 
-  // hourglass pct: 0=début(plein), 1=fin(vide)
   const hourglassPct=useMemo(()=>{
     if(!settings||daysLeft<=0)return daysLeft<=0?1:0;
     const start=new Date(settings.startDate),now=new Date();
@@ -1687,14 +1621,12 @@ const handleReset=async()=>{
 
 
 
-  // Auto-scroll + chargement Tilawa
   useEffect(()=>{
     if(playing===null){
       setActiveWordIdx(-1);
       if(karaokeRaf.current){cancelAnimationFrame(karaokeRaf.current);karaokeRaf.current=null;}
       return;
     }
-    // Auto-scroll
     const el=document.getElementById(`v-${selS?.n}-${playing}`);
     if(el){
       const scroller=el.closest(".vscroll");
@@ -1704,12 +1636,10 @@ const handleReset=async()=>{
         scroller.scrollBy({top:elRect.top-boxRect.top-boxRect.height/3,behavior:"smooth"});
       } else el.scrollIntoView({behavior:"smooth",block:"center"});
     }
-    // Tilawa — charger les mots et lancer le RAF
     if(karaokeMode&&selS){
       loadWordTimings(selS.n,playing).then(words=>{
         const audio=audioRef.current;
         if(words.length&&audio){
-          // Attendre que la durée soit connue
           const onMeta=()=>{ startKaraokeLoop(words,audio.duration); };
           if(audio.duration) startKaraokeLoop(words,audio.duration);
           else{ audio.addEventListener("loadedmetadata",onMeta,{once:true}); }
@@ -1736,12 +1666,11 @@ const handleReset=async()=>{
 
   const memStreak=useMemo(()=>{let s=0,d=new Date();while(true){const key=d.toISOString().split("T")[0];if(!hist[key])break;s++;d.setDate(d.getDate()-1);}return s;},[hist]);
 
-  // Tracking temps d'engagement — toutes les 30s
   useEffect(()=>{
     const interval=setInterval(()=>{
       const now=Date.now();
       const delta=Math.round((now-lastEngRef.current)/1000);
-      if(delta>0&&delta<120){ // max 2min par tick pour éviter les faux positifs (écran éteint)
+      if(delta>0&&delta<120){
         setEngagementTime(p=>p+delta);
       }
       lastEngRef.current=now;
@@ -1749,7 +1678,6 @@ const handleReset=async()=>{
     return()=>clearInterval(interval);
   },[]);
 
-  // Tracking temps de récitation audio
   useEffect(()=>{
     if(!audioPlaying)return;
     const interval=setInterval(()=>{
@@ -1758,7 +1686,6 @@ const handleReset=async()=>{
     return()=>clearInterval(interval);
   },[audioPlaying]);
 
-  // Badge popup + messages encouragement pages
   useEffect(()=>{
     const newBadges=[];const completedSurahs=SURAHS.filter(s=>sMem(s)===s.v);
     const add=(id,cond)=>{if(cond&&!badges.includes(id))newBadges.push(id);};
@@ -1774,7 +1701,6 @@ const handleReset=async()=>{
     }
   },[mem,memStreak]);
 
-  // Messages d'encouragement quand on lit des pages (Khatma)
   useEffect(()=>{
     const pagesRead=Object.keys(pageRead).filter(k=>pageRead[k]).length;
     const milestones=[5,10,20,50,100,200,300,400,500,604];
@@ -1800,7 +1726,6 @@ const handleReset=async()=>{
     }
   },[pageRead]);
 
-  // SM-2 — calcule quels versets sont dus aujourd'hui
   const sm2Due=useMemo(()=>{
     const today2=new Date().toISOString().split("T")[0];
     return Object.entries(spaced).filter(([k,v])=>{
@@ -1808,11 +1733,9 @@ const handleReset=async()=>{
       return v.nextDate<=today2;
     }).map(([k])=>k);
   },[spaced]);
-  const spacedDue=sm2Due; // alias pour compatibilité
+  const spacedDue=sm2Due;
 
-  // SM-2 update function
   const sm2Update=(sn,vn,quality)=>{
-    // quality: 0=blackout, 1=wrong, 2=hard, 3=ok, 4=good, 5=perfect
     const key=`${sn}_${vn}`;
     setSpaced(prev=>{
       const card=prev[key]||{interval:1,repetitions:0,ef:2.5};
@@ -1826,7 +1749,6 @@ const handleReset=async()=>{
         repetitions=0;
         interval=1;
       }
-      // Update EF: EF' = EF + (0.1 - (5-q)*(0.08+(5-q)*0.02))
       ef=Math.max(1.3, ef + 0.1 - (5-quality)*(0.08+(5-quality)*0.02));
       const nextDate=new Date();
       nextDate.setDate(nextDate.getDate()+interval);
@@ -1838,10 +1760,8 @@ const handleReset=async()=>{
       }};
     });
   };
-  // markSpaced: garde compatibilité, utilise SM-2 quality=4 (good)
   const markSpaced=(sn,vn,quality=4)=>sm2Update(sn,vn,quality);
 
-  // Hifz helper: masque progressivement les mots d'un verset
   const getHifzText=(text,level)=>{
     if(!level||level===0)return text;
     const clean=stripTags(text||"");
@@ -1849,12 +1769,10 @@ const handleReset=async()=>{
     const total=words.length;
     const hiddenCount=Math.round(total*(level/5));
     const indices=new Set();
-    // Cacher depuis la fin progressivement
     for(let i=total-1;i>=total-hiddenCount;i--)indices.add(i);
     return words.map((w,i)=>indices.has(i)?<span key={i} style={{background:"#1a1a1a",color:"#1a1a1a",borderRadius:3,cursor:"pointer",userSelect:"none",transition:"all .2s"}} onClick={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color="inherit";}}>{"█".repeat(Math.max(2,Math.round(w.length*0.8)))}</span>:<span key={i}>{w} </span>);
   };
 
-  // FIX 1: doSelect — scroll uniquement sur mobile (<860px) — corrige le "saut" de page
   const doSelect=s=>{
     setSelS(s);setPlaying(null);
     setMushafPage(SURAH_PAGE[s.n]||1);
@@ -1877,7 +1795,6 @@ const handleReset=async()=>{
     if(wasMemorized) delete c[vk];
     else {
       c[vk]=true;
-      // Déclencher l'animation calligraphique
       if(verseAr){
         const clean=verseAr.slice(0,60);
         setCalligAnim(clean);
@@ -1892,14 +1809,12 @@ const handleReset=async()=>{
   const doPlay=vn=>{
     if(!selS||!audioRef.current)return;
     const audio=audioRef.current;
-    // Toggle pause/play si même verset
     if(playing===vn){
-      if(!audio.paused){audio.pause();} 
+      if(!audio.paused){audio.pause();}
       else{audio.play().catch(()=>{});}
       return;
     }
-    // Nouveau verset — vérifier si préchargé
-    setPlaylistActive(false); // on sort du mode playlist
+    setPlaylistActive(false);
     const url=buildUrl(selS.n,vn);
     const pre=preloadRef.current;
     audio.pause();
@@ -1911,15 +1826,12 @@ const handleReset=async()=>{
     setPlaying(vn);
     audio.load();
     audio.play().catch(()=>{
-      // fallback cdn
       audio.src=`https://cdn.islamic.network/quran/audio/128/${rec.id}/${String(selS.n).padStart(3,"0")}${String(vn).padStart(3,"0")}.mp3`;
       audio.load();
       audio.play().catch(()=>setPlaying(null));
     });
   };
 
-  // Moteur audio unifié — préchargement + zéro latence
-  // Charge le tafsir Ibn Kathir (FR) — 3 sources en cascade
   const tafsirLoadingRef=useRef({});
   const loadTafsir=useCallback(async(sn,vn)=>{
     const key=`${sn}_${vn}`;
@@ -1933,7 +1845,6 @@ const handleReset=async()=>{
     };
     const clean=(s)=>s.replace(/&amp;/g,"&").replace(/&nbsp;/g," ").replace(/&#\d+;/g,"").replace(/\s+/g," ").trim();
 
-    // Source 1 : quran.com API — essayer plusieurs IDs tafsir FR
     for(const tid of [31,169,817]){
       try{
         const r=await fetch(`https://api.quran.com/api/v4/tafsirs/${tid}/by_ayah/${sn}:${vn}`,{headers:{"Accept":"application/json"}});
@@ -1945,7 +1856,6 @@ const handleReset=async()=>{
         }
       }catch{}
     }
-    // Source 2 : raw GitHub spa5k (pas de cache CDN)
     try{
       const r=await fetch(`https://raw.githubusercontent.com/spa5k/tafsir_api/main/tafsir/fr-tafsir-ibn-kathir/${sn}/${vn}.json`);
       if(r.ok){
@@ -1954,7 +1864,6 @@ const handleReset=async()=>{
         if(text.length>40){done(text.slice(0,1000));return;}
       }
     }catch{}
-    // Source 3 : API alquran.cloud — tafsir jalalayn FR (bon fallback)
     try{
       const r=await fetch(`https://api.alquran.cloud/v1/ayah/${sn}:${vn}/fr.jalalayn`);
       if(r.ok){
@@ -1971,7 +1880,6 @@ const handleReset=async()=>{
     return `https://everyayah.com/data/${rec.everyayah||"Alafasy_128kbps"}/${s}${v}.mp3`;
   };
 
-  // Charge les timestamps par mot pour la Tilawa
   const loadWordTimings=useCallback(async(sn,vn)=>{
     const key=`${sn}_${vn}`;
     if(wordTimings[key])return wordTimings[key];
@@ -1981,14 +1889,11 @@ const handleReset=async()=>{
       const words=(d.verses?.[0]?.words||[])
         .filter(w=>w.char_type_name==="word")
         .map((w,i)=>({text:w.text_uthmani||w.text||"",idx:i}));
-      // Les timestamps exacts nécessitent l'audio — on utilise une estimation
-      // basée sur la durée totale divisée par le nombre de mots (suffisant pour le highlight)
       setWordTimings(p=>({...p,[key]:words}));
       return words;
     }catch{return[];}
   },[wordTimings]);
 
-  // RAF loop pour le highlight Tilawa (basé sur currentTime)
   const startKaraokeLoop=useCallback((words,duration)=>{
     if(karaokeRaf.current) cancelAnimationFrame(karaokeRaf.current);
     if(!words.length||!duration) return;
@@ -2003,7 +1908,6 @@ const handleReset=async()=>{
     karaokeRaf.current=requestAnimationFrame(tick);
   },[]);
 
-  // Précharge le verset N+1 dès que N commence à jouer
   useEffect(()=>{
     if(!playlistActive||playing===null)return;
     const curIdx=playlist.findIndex(p=>p.vn===playing);
@@ -2014,21 +1918,17 @@ const handleReset=async()=>{
     if(pre.src!==url){pre.src=url;pre.load();}
   },[playing,playlistActive,playlist,rec]);
 
-  // handleEnded unifié — playlist prioritaire, sinon loop
   useEffect(()=>{
     const audio=audioRef.current;
     if(!audio)return;
     const handleEnded=()=>{
-      // Mode playlist
       if(playlistActive){
         const curIdx=playlist.findIndex(p=>p.vn===playing);
         if(curIdx>=0&&curIdx<playlist.length-1){
           const next=playlist[curIdx+1];
           const pre=preloadRef.current;
           const url=buildUrl(next.sn,next.vn);
-          // Swap instantané si déjà préchargé, sinon chargement normal
           if(pre.src===url&&pre.readyState>=2){
-            // l'audio préchargé est prêt — on le bascule directement
             audio.src=url;
           } else {
             audio.src=url;
@@ -2039,7 +1939,6 @@ const handleReset=async()=>{
           setPlaylistIdx(curIdx+1);
           addToHistory(next.sn,next.vn);
         } else {
-          // fin de la playlist
           setPlaylistActive(false);
           setPlaying(null);
           setAudioPlaying(false);
@@ -2047,7 +1946,6 @@ const handleReset=async()=>{
         }
         return;
       }
-      // Mode loop verset unique
       if(loopInfinite||(loopCount>1&&loopCurrent<loopCount)){
         if(!loopInfinite)setLoopCurrent(p=>p+1);
         audio.currentTime=0;
@@ -2061,21 +1959,16 @@ const handleReset=async()=>{
     };
     audio.addEventListener("ended",handleEnded);
     return()=>audio.removeEventListener("ended",handleEnded);
-  // dépendances minimales pour éviter les ré-attachements inutiles
   },[playlistActive,playlist,playing,loopCount,loopCurrent,loopInfinite,rec]);
 
-  // Chargement versets — TOUJOURS depuis l'API pour avoir le tajweed HTML correct
-  // Q[s.n] utilisé uniquement comme fallback traduction hors ligne
   useEffect(()=>{
     if(!selS){setVerses([]);setLoadState("idle");return;}
-    const cacheKey=`qv5_${selS.n}`; // v4 = tajweed HTML + traduction fusionnée
-    // Check cache first
+    const cacheKey=`qv5_${selS.n}`;
     try{
       const cached=localStorage.getItem(cacheKey);
       if(cached){setVerses(JSON.parse(cached));setLoadState("done");return;}
     }catch{}
     setVerses([]);setLoadState("loading");
-    // Fetch tajweed Arabic + French translation in parallel
     const arFetch=fetch(`https://api.qurancdn.com/api/qdc/verses/by_chapter/${selS.n}?language=fr&words=false&per_page=300&fields=text_uthmani_tajweed,text_uthmani,translations&translations=31`)
       .then(r=>r.json());
     const frFetch=fetch(`https://api.alquran.cloud/v1/surah/${selS.n}/fr.hamidullah`)
@@ -2083,26 +1976,21 @@ const handleReset=async()=>{
     Promise.all([arFetch,frFetch]).then(([arData,frData])=>{
       const arAyahs=arData?.verses||[];
       const frAyahs=frData?.data?.ayahs||[];
-      // Local Q fallback for translation
       const localQ=Q[selS.n]||[];
       if(!arAyahs.length){
-        // Full offline fallback
         if(localQ.length){setVerses(localQ);setLoadState("done");}
         else setLoadState("error");
         return;
       }
       const result=arAyahs.map((a,i)=>({
         n:a.verse_number,
-        // tajweed HTML from API — crucial for correct coloring
         ar:a.text_uthmani_tajweed||a.text_uthmani||"",
-        // translation: API > local fallback
         fr:(a.translations?.[0]?.text||frAyahs[i]?.text||localQ[i]?.fr||""),
         tf:localQ[i]?.tf||"",
       }));
       setVerses(result);setLoadState("done");
       try{localStorage.setItem(cacheKey,JSON.stringify(result));}catch{}
     }).catch(()=>{
-      // Offline: use local Q data
       if(Q[selS.n]?.length){setVerses(Q[selS.n]);setLoadState("done");}
       else setLoadState("error");
     });
@@ -2111,7 +1999,6 @@ const handleReset=async()=>{
   const filtered=useMemo(()=>{const q=search.toLowerCase().trim();if(!q)return SURAHS;return SURAHS.filter(s=>s.name.toLowerCase().includes(q)||s.ar.includes(q)||String(s.n).includes(q));},[search]);
   const juzList=[...new Set(SURAHS.map(s=>s.juz))].sort((a,b)=>a-b);
 
-  // Fonction commune touch + mouse pour le swipe des sourates
   const handleSwipeEnd=(sn,s)=>{
     const x=swipeState[sn]?.x||0;
     if(x<-130){
@@ -2128,7 +2015,6 @@ const handleReset=async()=>{
 
   const createKhatma=()=>{if(!kPreset)return;const days=kPreset.id==="custom"?parseInt(kCustomDays)||30:kPreset.days;const nk={id:Date.now(),name:kName,preset:kPreset.id,totalDays:days,startDate:today(),log:{},pages:604};setKhatmas(p=>[...p,nk]);setActiveKhatma(nk);setKPreset(null);};
 
-  // Khatma collective — entièrement locale (partagée via code)
   const generateCode=()=>Math.random().toString(36).substring(2,8).toUpperCase();
   const createCollectiveKhatma=()=>{
     const code=generateCode();
@@ -2176,7 +2062,6 @@ const handleReset=async()=>{
   const togglePage=p=>setPageRead(prev=>({...prev,[String(p)]:!prev[String(p)]}));
   const goToPage=p=>{
     setMushafPage(p);
-    // Signet automatique — sauvegarder la dernière page lue
     sv("qmushaf_bookmark",p);
     if(activeKhatma){
       const updated={...activeKhatma,lastPage:p};
@@ -2187,7 +2072,6 @@ const handleReset=async()=>{
   const toggleFav=(sn,vn,ar,fr,surah)=>{const key=`${sn}_${vn}`;setFavorites(p=>p.find(f=>f.key===key)?p.filter(f=>f.key!==key):[...p,{key,sn,vn,ar,fr,surah}]);};
   const isFav=(sn,vn)=>favorites.some(f=>f.key===`${sn}_${vn}`);
   const saveNote=(sn,vn,text)=>{const k=`${sn}_${vn}`;if(text.trim())setNotes(p=>({...p,[k]:text.trim()}));else setNotes(p=>{const n={...p};delete n[k];return n;});setEditingNote(null);};
-  // Génération plan mémorisation via Anthropic API
   const generateAIPlan=async()=>{
     setAiPlanLoading(true);setAiPlanResult("");
     await new Promise(r=>setTimeout(r,800));
@@ -2262,14 +2146,11 @@ const handleReset=async()=>{
   };
 
 
-  // updateStreak is handled via hist/useMemo - no-op needed
   const updateStreak=useCallback(()=>{},[]);
 
-  // Quiz generation
   const generateQuiz=useCallback(async(filterSurah=null,filterMode="memorized")=>{
     let pool=[];
     if(filterSurah){
-      // Charger la sourate si pas dans Q
       let vs=Q[filterSurah]||[];
       if(vs.length===0){
         try{
@@ -2305,7 +2186,6 @@ const handleReset=async()=>{
     setQuizAnswer(null);
   },[mem]);
 
-  // Notifications
   const requestNotifications=async()=>{
     if(!("Notification" in window)){alert("Notifications non supportées sur ce navigateur.");return;}
     const perm=await Notification.requestPermission();
@@ -2350,11 +2230,9 @@ const handleReset=async()=>{
   const fmtTime=s=>s==null?`${timerDuration}:00`:`${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
   const removeFromList=(listId,sn,vn)=>setLists(p=>p.map(l=>l.id===listId?{...l,items:l.items.filter(i=>!(i.sn===sn&&i.vn===vn))}:l));
 
-  // Fonctions reconnaissance vocale
   const speechSupported=typeof window!=="undefined"&&("SpeechRecognition" in window||"webkitSpeechRecognition" in window);
 
-  // ── Moteur de récitation inline amélioré ─────────────────────────────────
-  const [speechCountdown,setSpeechCountdown]=useState(0); // 3,2,1,0
+  const [speechCountdown,setSpeechCountdown]=useState(0);
   const [continuousMode,setContinuousMode]=useState(false);
   const [continuousIdx,setContinuousIdx]=useState(0);
   const [recitModal,setRecitModal]=useState(false);
@@ -2363,23 +2241,19 @@ const handleReset=async()=>{
   const [hadithDismissed,setHadithDismissed]=useState(()=>ld("qhadith_dis_"+new Date().toISOString().slice(0,10),false));
   const countdownRef=useRef(null);
 
-  // Compare deux mots arabes en ignorant les diacritiques
   const arabicMatch=(a,b)=>{
-    // Normalisation complète — supprime diacritiques, harmonise les lettres similaires
     const clean=s=>s
-       // strip HTML tajweed
-      .replace(/[ًٌٍَُِّْٰٓٔءۭۨ]/g,"")  // strip toutes diacritiques et hamza flottante
-      .replace(/[أإآٱ]/g,"ا")              // toutes formes de alef → ا
-      .replace(/[ىة]/g,"ي")               // ta marbuta et alef maqsura → ي
-      .replace(/ؤ/g,"و")                  // waw avec hamza → و
-      .replace(/ئ/g,"ي")                  // ya avec hamza → ي
+      .replace(/[ًٌٍَُِّْٰٓٔءۭۨ]/g,"")
+      .replace(/[أإآٱ]/g,"ا")
+      .replace(/[ىة]/g,"ي")
+      .replace(/ؤ/g,"و")
+      .replace(/ئ/g,"ي")
       .replace(/\s+/g,"")
       .trim();
     const ca=clean(a),cb=clean(b);
     if(!ca||!cb) return false;
     if(ca===cb) return true;
     if(ca.includes(cb)||cb.includes(ca)) return true;
-    // Levenshtein tolérant — accepte 1 erreur par tranche de 4 caractères
     const maxDist=Math.floor(Math.max(ca.length,cb.length)/4);
     if(maxDist===0) return ca===cb;
     const dp=Array.from({length:ca.length+1},(_,i)=>Array.from({length:cb.length+1},(_,j)=>i===0?j:j===0?i:0));
@@ -2387,7 +2261,6 @@ const handleReset=async()=>{
     return dp[ca.length][cb.length]<=maxDist;
   };
 
-  // Analyse mot par mot — tolère l'ordre et les omissions mineures
   const analyzeRecitation=(targetAr,spoken)=>{
     const stripH=s=>(s||"").replace(/[ًٌٍَُِّْٰٓٔءۭۨ]/g,"").replace(/[أإآٱ]/g,"ا").replace(/[ىة]/g,"ي").replace(/ؤ/g,"و").replace(/ئ/g,"ي").trim();
     const target=stripH(targetAr).split(/\s+/).filter(Boolean);
@@ -2397,10 +2270,9 @@ const handleReset=async()=>{
     return target.map(tw=>{
       if(si>=said.length) return {word:tw,status:"missing"};
       if(arabicMatch(tw,said[si])){si++;return {word:tw,status:"ok"};}
-      // Cherche dans les 4 prochains mots (skip de mots)
       const ahead=said.slice(si,si+4).findIndex(w=>arabicMatch(tw,w));
       if(ahead>=0){si+=ahead+1;return {word:tw,status:"ok"};}
-      si++; // avance quand même pour ne pas bloquer
+      si++;
       return {word:tw,status:"wrong"};
     });
   };
@@ -2464,7 +2336,6 @@ const handleReset=async()=>{
     setSpeechCountdown(0);
   };
 
-  // Mode récitation continue
   const startContinuousRecitation=(startVn=0)=>{
     if(!speechSupported||!verses.length)return;
     setContinuousMode(true);
@@ -2475,7 +2346,6 @@ const handleReset=async()=>{
     const next=continuousIdx+1;
     if(next>=verses.length){setContinuousMode(false);return;}
     setContinuousIdx(next);
-    // Jouer l'audio du verset suivant puis écouter
     const v=verses[next];
     if(v){
       doPlay(v.n);
@@ -2501,10 +2371,8 @@ const handleReset=async()=>{
   const acc2=ramadanTheme?"#e8c87a":t.acc2;
   const acc3=ramadanTheme?"#f5e0a0":t.acc3;
 
-  // Ramadan info calculée avant return pour éviter les IIFEs dans le JSX
   const riInfo=getRamadanInfo();
 
-  // Verset du jour — seed basé sur la date, tiré parmi les mémorisés ou Juz 30 si rien
   const versetDuJour=useMemo(()=>{
     const seed=parseInt(today().replace(/-/g,""))%9999;
     const memList=[];
@@ -2515,7 +2383,6 @@ const handleReset=async()=>{
         if(localV) memList.push({...localV,sn:s.n,surah:s.name,surahAr:s.ar});
       });
     });
-    // Fallback: versets embarqués du Juz 30
     const fallbackList=[];
     [112,113,114,97,103,108].forEach(sn=>{
       (Q[sn]||[]).forEach(v=>fallbackList.push({...v,sn,surah:SURAHS.find(s=>s.n===sn)?.name||"",surahAr:SURAHS.find(s=>s.n===sn)?.ar||""}));
@@ -2523,7 +2390,6 @@ const handleReset=async()=>{
     const pool=memList.length>=3?memList:fallbackList;
     return pool.length?pool[seed%pool.length]:null;
   },[mem]);
-  // filtered2 pour l'onglet révision
   const filtered2=SURAHS.filter(s=>{
     if(revFilter==="memorized")return sPct(s)===100;
     if(revFilter==="active")return revFlags[String(s.n)]==="active";
@@ -2773,7 +2639,6 @@ return (
                 const total=partialVerse.words.length;
                 const startAt=partialVerse.from/total;
                 const stopAt=(partialVerse.to+1)/total;
-                // Joue le verset et stoppe au bon ratio de durée
                 const url=buildUrl(partialVerse.sn,partialVerse.vn);
                 const audio=audioRef.current;
                 partialPlayRef.current={startAt,stopAt};
@@ -3876,7 +3741,6 @@ return (
                   {/* Bouton Lire maintenant */}
                   <div style={{marginTop:14,display:"flex",gap:8}}>
                     <button onClick={()=>{
-                      // Reprendre à la dernière page lue ou calculer la page du jour
                       const doneCount=Object.values(activeKhatma.log).filter(Boolean).length;
                       const pagesPerDay=Math.ceil(604/activeKhatma.totalDays);
                       const lastPage=activeKhatma.lastPage||Math.min(604,doneCount*pagesPerDay+1);
@@ -4264,7 +4128,6 @@ return (
               }
               const maxCount=Math.max(...cells.map(c=>c.count),1);
               const colors=["#1a2a1a",`${t.gr}33`,`${t.gr}66`,`${t.gr}99`,t.gr];
-              // Jours de la semaine
               const dayLabels=["D","L","M","M","J","V","S"];
               return(
                 <div className="card">
@@ -4382,7 +4245,6 @@ return (
                   {/* Les 114 sourates disposées en arc */}
                   {SURAHS.map((s,i)=>{
                     const total=114;
-                    // Disposition en S-curve élégante
                     const row=Math.floor(i/19);
                     const col=i%19;
                     const x=22+col*18.5+(row%2)*9;
@@ -4391,7 +4253,6 @@ return (
                     const isComplete=pct2===100;
                     const hasProgress=pct2>0;
                     const isRevision=revFlags[String(s.n)]==="active";
-                    // Taille proportionnelle au nombre de versets
                     const baseR=1.5+Math.min(s.v/20,3);
                     const r=isComplete?baseR+1.5:baseR;
                     return (
@@ -4449,7 +4310,7 @@ return (
             {/* ── Stats Tarteel-style ── */}
             {(()=>{
               const fmtDur=s=>{const h=Math.floor(s/3600);const m=Math.floor((s%3600)/60);const sec=s%60;return h>0?`${h}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`:`${m}:${String(sec).padStart(2,"0")}`;};
-              const hassanat=totalMem*10+versesRecited*3; // estimation : 10/verset mémorisé + 3/récité
+              const hassanat=totalMem*10+versesRecited*3;
               const hassFmt=hassanat>=1000000?`${(hassanat/1000000).toFixed(2)}M`:hassanat>=1000?`${(hassanat/1000).toFixed(1)}k`:String(hassanat);
               const statsItems=[
                 {v:fmtDur(engagementTime),l:"Temps d'engagement",icon:"⏱",c:t.acc},
@@ -5059,10 +4920,8 @@ return (
           const a=e.target;
           if(a.duration>0){
             setAudioPct(Math.round(a.currentTime/a.duration*100));
-            // Lecture partielle — stopper à stopAt
-            if(partialPlayRef.current&&a.currentTime/a.duration>=partialPlayRef.current.stopAt){
+              if(partialPlayRef.current&&a.currentTime/a.duration>=partialPlayRef.current.stopAt){
               a.pause();
-              // Si loopInfinite ou loopCount > 1 — relancer depuis startAt
               if(loopInfinite||(loopCount>1&&loopCurrent<loopCount)){
                 if(!loopInfinite)setLoopCurrent(p=>p+1);
                 setTimeout(()=>{a.currentTime=a.duration*partialPlayRef.current.startAt;a.play().catch(()=>{});},200);
