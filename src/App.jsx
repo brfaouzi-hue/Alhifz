@@ -3522,6 +3522,7 @@ if(!user)return <AuthScreen authPage={authPage} setAuthPage={setAuthPage} email=
 return (
     <>
       <style>{buildCSS(t,tjc,arFont,tn,ramadanTheme)}</style>
+
       {showAIPlan&&(
         <div className="overlay" onClick={()=>setShowAIPlan(false)}>
           <div style={{background:t.s1,border:`1px solid ${t.acc}`,borderRadius:18,padding:24,maxWidth:520,width:"92%",maxHeight:"85vh",display:"flex",flexDirection:"column",gap:14}} onClick={e=>e.stopPropagation()}>
@@ -3542,6 +3543,7 @@ return (
                     ))}
                   </div>
                 </div>
+                {/* Sélection fine par juz, sourate ou hizb */}
                 <div>
                   <label style={{fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",display:"block",marginBottom:5}}>Ou choisir précisément</label>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
@@ -3603,6 +3605,7 @@ return (
           </div>
         </div>
       )}
+
       {splash&&(
         <div style={{position:"fixed",inset:0,zIndex:300,background:tn==="dark"?"#07090d":"#f0f7f0",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",animation:"fadeOut 0.5s ease 1.8s forwards"}}>
           <style>{`@keyframes fadeOut{to{opacity:0;pointer-events:none;}}`}</style>
@@ -3618,6 +3621,7 @@ return (
           <div style={{marginTop:20,display:"flex",gap:5}}>{[0,1,2].map(i=>(<div key={i} style={{width:5,height:5,borderRadius:"50%",background:acc,animation:`pulse 1s ${i*0.2}s infinite`,opacity:.6}}/>))}</div>
         </div>
       )}
+
       {testMode&&(
         <div style={{position:"fixed",inset:0,zIndex:100,background:tn==="dark"?"#04060a":"#faf6ef",display:"flex",flexDirection:"column",overflow:"hidden"}}>
           <div style={{padding:"14px 16px",borderBottom:`1px solid ${t.b1}`,display:"flex",alignItems:"center",gap:10,background:t.navBg}}>
@@ -3654,6 +3658,7 @@ return (
               </div>)}
         </div>
       )}
+
       {setup&&(
         <div className="overlay">
           <div className="modal">
@@ -3678,6 +3683,7 @@ return (
           </div>
         </div>
       )}
+
       {recitModal&&selS&&verses.length>0&&(
         <RecitModal
           verses={verses} selS={selS} t={t} acc={acc} tn={tn}
@@ -3693,11 +3699,13 @@ return (
           onClose={()=>{setRecitModal(false);stopListening();setContinuousMode(false);setSpeechScore(null);setSpeechResult("");}}
         />
       )}
+
       {partialVerse&&(
         <div className="overlay" onClick={()=>setPartialVerse(null)}>
           <div className="modal" onClick={e=>e.stopPropagation()} style={{maxWidth:480}}>
             <h2 style={{fontFamily:"Amiri,serif",color:acc,marginBottom:4}}>✂ Lecture partielle</h2>
             <p style={{fontSize:".68rem",color:t.tx3,marginBottom:16}}>Sélectionne les mots à lire — idéal pour mémoriser bout à bout</p>
+            {/* Aperçu du segment sélectionné */}
             <div style={{background:t.s2,borderRadius:12,padding:"14px 16px",border:`1px solid ${t.b1}`,marginBottom:14,direction:"rtl",textAlign:"right"}}>
               <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.3rem",lineHeight:2.2,color:t.tx}}>
                 {partialVerse.words.map((w,i)=>(
@@ -3721,6 +3729,7 @@ return (
                 Mots {partialVerse.from+1} à {partialVerse.to+1} sur {partialVerse.words.length}
               </div>
             </div>
+            {/* Sliders début / fin */}
             <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:16}}>
               <div>
                 <label style={{fontSize:".62rem",color:t.tx3,display:"block",marginBottom:4}}>Début — mot {partialVerse.from+1}</label>
@@ -3735,6 +3744,7 @@ return (
                   style={{width:"100%",accentColor:acc}}/>
               </div>
             </div>
+            {/* Actions */}
             <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
               <button className="mbtn" style={{flex:1}} onClick={()=>{
                 const total=partialVerse.words.length;
@@ -3766,9 +3776,13 @@ return (
           </div>
         </div>
       )}
+
       {editingNote&&(<div className="overlay" onClick={()=>setEditingNote(null)}><div className="modal" onClick={e=>e.stopPropagation()}><h2>Note personnelle</h2><p style={{fontSize:".72rem",color:t.tx3,marginBottom:12}}>{editingNote.replace("_"," · verset ")}</p><textarea value={noteText} onChange={e=>setNoteText(e.target.value)} placeholder="Écris ta note…" style={{width:"100%",minHeight:100,background:t.inputBg,border:`1px solid ${t.b2}`,borderRadius:8,padding:"10px 12px",color:t.tx,fontSize:".85rem",resize:"vertical",outline:"none",marginBottom:12}}/><div style={{display:"flex",gap:8}}><button className="mbtn" style={{flex:1}} onClick={()=>{const[sn,vn]=editingNote.split("_");saveNote(sn,vn,noteText);}}>Sauvegarder</button>{notes[editingNote]&&(<button className="tbtn" style={{borderColor:t.rd,color:t.rd}} onClick={()=>{const[sn,vn]=editingNote.split("_");saveNote(sn,vn,"");}}>Supprimer</button>)}</div></div></div>)}
+
       {shareVerse&&(<div className="overlay" onClick={()=>setShareVerse(null)}><div className="modal" onClick={e=>e.stopPropagation()}><h2 style={{fontFamily:"Amiri,serif",color:acc,marginBottom:4}}>{shareVerse.surahAr}</h2><p style={{fontSize:".68rem",color:t.tx3,marginBottom:14}}>{shareVerse.surah} · verset {shareVerse.vn}</p><div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,border:`2px solid ${acc}`,borderRadius:14,padding:"20px 18px",marginBottom:14,textAlign:"center"}}><div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.5rem",direction:"rtl",lineHeight:2.2,color:t.tx,marginBottom:10}}>{stripTags(shareVerse.ar)}</div><div style={{fontSize:".75rem",color:t.tx2,fontStyle:"italic",lineHeight:1.6}}>{shareVerse.fr}</div><div style={{marginTop:10,fontSize:".6rem",color:t.tx3}}>— {shareVerse.surah} ({shareVerse.sn}:{shareVerse.vn}) · Al-Hifz</div></div><button className="mbtn" onClick={()=>{const txt=`${stripTags(shareVerse.ar)}\n\n${shareVerse.fr}\n\n— ${shareVerse.surah} (${shareVerse.sn}:${shareVerse.vn})`;navigator.clipboard?.writeText(txt).catch(()=>{});setShareVerse(null);}}>Copier le verset</button></div></div>)}
+
       {showWeeklyReport&&(<div className="overlay" onClick={()=>setShowWeeklyReport(false)}><div className="modal" onClick={e=>e.stopPropagation()}><h2 style={{marginBottom:4}}>Rapport hebdomadaire</h2><p style={{marginBottom:16}}>{weeklyReport.totalWeek} versets · {weeklyReport.activeDays}/7 jours actifs</p><div style={{display:"flex",alignItems:"flex-end",gap:6,height:80,marginBottom:12}}>{weeklyReport.days.map((d,i)=>{const maxG=Math.max(...weeklyReport.days.map(x=>x.gained),1);const isToday=d.date===today();return(<div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}><div style={{fontSize:".52rem",color:acc}}>{d.gained||""}</div><div style={{width:"100%",height:60,display:"flex",alignItems:"flex-end"}}><div style={{width:"100%",height:`${Math.max(Math.round(d.gained/maxG*100),4)}%`,background:isToday?acc:`${acc}66`,borderRadius:"3px 3px 0 0",minHeight:3}}/></div><div style={{fontSize:".52rem",color:isToday?acc:t.tx3,fontWeight:isToday?700:400}}>{d.label}</div></div>);})}</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>{[{v:weeklyReport.totalWeek,l:"Versets",c:acc},{v:weeklyReport.activeDays,l:"Jours actifs",c:t.gr},{v:weeklyReport.best?.gained||0,l:"Meilleur jour",c:t.bl}].map((k,i)=>(<div key={i} style={{background:t.s2,borderRadius:10,padding:"10px",textAlign:"center"}}><div style={{fontSize:"1.4rem",fontWeight:700,color:k.c}}>{k.v}</div><div style={{fontSize:".58rem",color:t.tx3}}>{k.l}</div></div>))}</div><div style={{textAlign:"center",color:weeklyReport.totalWeek>0?t.gr:t.tx3,fontSize:".75rem",marginBottom:14,fontWeight:600}}>{weeklyReport.activeDays>=5?"Excellente semaine ! 🌟":weeklyReport.activeDays>=3?"Bonne progression, continue !":"Essaie de mémoriser chaque jour."}</div><button className="mbtn" onClick={()=>setShowWeeklyReport(false)}>Fermer</button></div></div>)}
+
       {isOffline&&(
         <div style={{background:`${t.rd}CC`,color:"#fff",padding:"6px 16px",textAlign:"center",fontSize:".7rem",fontWeight:600,backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",gap:8,position:"sticky",top:0,zIndex:61}}>
           <span>●</span> Mode hors ligne — Coran embarqué et mémorisations disponibles
@@ -3781,12 +3795,15 @@ return (
           <button onClick={()=>setShowInstallBanner(false)} style={{background:"none",border:"none",color:"rgba(255,255,255,.7)",cursor:"pointer",fontSize:"1rem"}}>✕</button>
         </div>
       )}
+
       {showOnboard&&(
         <OnboardModal t={t} acc={acc} tn={tn} onDone={()=>{setShowOnboard(false);setOnboardDone(true);sv("qonboard",true);}} onSkip={()=>{setShowOnboard(false);setOnboardDone(true);sv("qonboard",true);}} onTutorial={()=>{setShowOnboard(false);setOnboardDone(true);sv("qonboard",true);setShowTutorial(true);setTutorialPage(0);}}/>
       )}
+
       {showTutorial&&(
         <TutorialModal t={t} acc={acc} tn={tn} page={tutorialPage} setPage={setTutorialPage} onClose={()=>setShowTutorial(false)}/>
       )}
+
       {badgePopup&&(
         <div style={{position:"fixed",bottom:100,left:"50%",transform:"translateX(-50%)",zIndex:300,animation:"slideUp .4s ease"}} onClick={()=>setBadgePopup(null)}>
           <style>{`@keyframes slideUp{from{transform:translateX(-50%) translateY(30px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}`}</style>
@@ -3809,9 +3826,11 @@ return (
           </div>
         </div>
       )}
+
       {timerRunning&&timerLeft!==null&&timerLeft>0&&(
         <div style={{position:"fixed",top:0,left:0,right:0,zIndex:250,backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",background:tn==="light"?"rgba(255,255,255,.92)":"rgba(13,26,14,.92)",borderBottom:`1px solid ${t.b1}`,boxShadow:`0 2px 20px rgba(0,0,0,.15)`}}>
           <div style={{display:"flex",alignItems:"center",gap:10,padding:"7px 16px"}}>
+            {/* Icône séance */}
             <div style={{width:28,height:28,borderRadius:"50%",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:`0 2px 8px ${t.acc}44`}}>
               <span style={{fontSize:".7rem"}}>⏱</span>
             </div>
@@ -3820,6 +3839,7 @@ return (
                 <span style={{fontSize:".56rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1.5px",fontWeight:600}}>Séance en cours</span>
                 <span style={{fontFamily:"monospace",fontWeight:900,fontSize:".85rem",color:t.acc,letterSpacing:"1px"}}>{fmtTime(timerLeft)}</span>
               </div>
+              {/* Barre de progression */}
               <div style={{height:4,background:t.b1,borderRadius:99,overflow:"hidden"}}>
                 <div style={{
                   height:"100%",
@@ -3850,6 +3870,7 @@ return (
           </div>
         </div>
       )}
+
       <div className="topbar" style={{marginTop:(timerRunning&&timerLeft!==null&&timerLeft>0)||timerLeft===0?36:0,transition:"margin-top .2s"}}>
         <div className="tb">
           <div className="logo">
@@ -3873,7 +3894,9 @@ return (
           </div>
         </div>
       </div>
+
       {page==="quran"&&<div className="hero" style={{padding:"12px 16px"}}>
+        {/* Verset du jour */}
         {versetDuJour&&!versetDuJourDismissed&&(
           <div style={{padding:"10px 14px",background:`linear-gradient(135deg,${acc}12,${acc}06)`,borderRadius:10,border:`1px solid ${acc}30`,marginBottom:8}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
@@ -3892,6 +3915,7 @@ return (
             {versetDuJour.fr&&<div style={{fontSize:".62rem",color:t.tx2,fontStyle:"italic",lineHeight:1.5,marginTop:2,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{versetDuJour.fr}</div>}
           </div>
         )}
+        {/* Streak cliquable → Stats */}
         {memStreak>0&&(
           <div onClick={()=>setPage("stats")} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 12px",background:"rgba(249,115,22,.08)",borderRadius:9,border:"1px solid rgba(249,115,22,.2)",cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>{e.currentTarget.style.background="rgba(249,115,22,.14)";e.currentTarget.style.transform="translateY(-1px)";}} onMouseLeave={e=>{e.currentTarget.style.background="rgba(249,115,22,.08)";e.currentTarget.style.transform="";}}>
             <span style={{fontSize:"1.1rem"}}>🔥</span>
@@ -3904,8 +3928,13 @@ return (
       {page==="mushaf"&&(
         <MushafPage page={mushafPage||1} t={t} tjc={tjc} arFont={arFont} edition={MUSHAF_EDITIONS.find(e=>e.id===mushafEdition)||MUSHAF_EDITIONS[0]} fullscreen={mushafFullscreen} onToggleFullscreen={()=>setMushafFullscreen(f=>!f)} onNext={()=>goToPage(Math.min(604,(mushafPage||1)+1))} onPrev={()=>goToPage(Math.max(1,(mushafPage||1)-1))} onGoTo={(pg)=>goToPage(pg)} mushafEdition={mushafEdition} setMushafEdition={setMushafEdition} MUSHAF_EDITIONS={MUSHAF_EDITIONS}/>
       )}
+
+
+        {/* PAGES */}
         {page==="pages"&&(
           <div style={{display:"flex",flexDirection:"column",gap:14,overflow:"hidden"}}>
+
+            {/* Stats rapides */}
             <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,width:"100%",boxSizing:"border-box"}}>
               {[
                 {l:"En révision",v:Object.values(revFlags).filter(f=>f==="active").length,c:t.acc,icon:"◈"},
@@ -3919,6 +3948,8 @@ return (
                 </div>
               ))}
             </div>
+
+            {/* Sourates en révision active — affichage prioritaire */}
             {Object.entries(revFlags).filter(([,f])=>f==="active").length>0&&(
               <div className="card">
                 <div className="ch">
@@ -3944,9 +3975,11 @@ return (
                           <div style={{fontSize:".6rem",color:t.tx3,marginTop:2,fontFamily:"Amiri,serif"}}>{s.ar} · Juz {s.juz} · {s.v}v</div>
                         </div>
                       </div>
+                      {/* Progress bar */}
                       <div style={{height:5,background:t.b1,borderRadius:99,overflow:"hidden",marginBottom:8}}>
                         <div style={{height:"100%",width:`${memPct}%`,background:memPct===100?t.gr:`linear-gradient(90deg,${t.acc},${t.acc2})`,borderRadius:99,boxShadow:memPct===100?`0 0 6px ${t.gr}66`:`0 0 4px ${t.acc}44`}}/>
                       </div>
+                      {/* Actions */}
                       <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
                         <button className="vbtn" style={{borderColor:t.bl,color:t.bl}} onClick={()=>{doSelect(s);setPage("quran");}}>Ouvrir</button>
                         {sMem(s)>=2&&(<button className="vbtn" style={{borderColor:t.pu,color:t.pu}} onClick={()=>startTest(s,selS?.n===s.n?verses:(Q[s.n]||[]))}>Test mémoire</button>)}
@@ -3960,6 +3993,8 @@ return (
                 })}
               </div>
             )}
+
+            {/* Ajouter des sourates à réviser */}
             <div className="card">
               <div className="ch">
                 <span className="ct">Toutes les sourates</span>
@@ -4001,6 +4036,8 @@ return (
                     </div>
                   </div>
             </div>
+
+            {/* Sourates maîtrisées */}
             {Object.entries(revFlags).filter(([,f])=>f==="mastered").length>0&&(
               <div className="card">
                 <div className="ch"><span className="ct">Maîtrisées</span><span style={{fontSize:".65rem",color:t.gr,fontWeight:700}}>{Object.entries(revFlags).filter(([,f])=>f==="mastered").length} sourates</span></div>
@@ -4015,6 +4052,8 @@ return (
                 </div>
               </div>
             )}
+
+            {/* Heatmap progrès */}
             <div className="card">
               <div className="ch"><span className="ct">Activité de mémorisation</span><span style={{fontSize:".62rem",color:t.tx3}}>14 derniers jours</span></div>
               <div style={{padding:"10px 14px"}}>
@@ -4039,10 +4078,13 @@ return (
 
           </div>
         )}
+
+        {/* KHATMA */}
         {page==="khatma"&&(
           <div style={{display:"flex",flexDirection:"column",gap:16}}>
             {!activeKhatma?(
               <>
+                {/* Hero d'intro */}
                 <div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,borderRadius:16,padding:"24px 20px",border:`1px solid ${t.b1}`,textAlign:"center",position:"relative",overflow:"hidden"}}>
                   <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse at 50% 0%,${t.acc}12,transparent 60%)`,pointerEvents:"none"}}/>
                   <div style={{fontFamily:"Amiri,serif",fontSize:"2.5rem",color:t.acc,marginBottom:4,textShadow:`0 0 20px ${t.acc}44`}}>ختمة القرآن</div>
@@ -4056,6 +4098,8 @@ return (
                     ))}
                   </div>
                 </div>
+
+                {/* Formulaire création */}
                 <div className="card">
                   <div className="ch"><span className="ct">Nouvelle Khatma</span></div>
                   <div style={{padding:16}}>
@@ -4079,6 +4123,7 @@ return (
                             }}
                             onMouseEnter={e=>{if(!sel){e.currentTarget.style.borderColor=t.acc+"66";e.currentTarget.style.transform="translateX(3px)";}}}
                             onMouseLeave={e=>{if(!sel){e.currentTarget.style.borderColor=t.b1;e.currentTarget.style.transform="";}}}>
+                            {/* Bullet élégant */}
                             <div style={{width:36,height:36,borderRadius:"50%",border:`1.5px solid ${sel?t.acc:t.b2}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,background:sel?`${t.acc}15`:"transparent",transition:"all .18s"}}>
                               {sel
                                 ?<svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,10.5 12,3.5" stroke={t.acc} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -4107,6 +4152,8 @@ return (
                     )}
                   </div>
                 </div>
+
+                {/* Khatmas précédentes */}
                 {khatmas.length>0&&(
                   <div className="card">
                     <div className="ch"><span className="ct">Khatmas précédentes</span></div>
@@ -4129,6 +4176,7 @@ return (
             ):(
               /* Active Khatma view */
               <div style={{display:"flex",flexDirection:"column",gap:14}}>
+                {/* Header card */}
                 <div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,borderRadius:16,padding:"20px 18px",border:`1px solid ${t.b1}`,position:"relative",overflow:"hidden"}}>
                   <div style={{position:"absolute",top:0,right:0,width:120,height:120,background:`radial-gradient(circle,${t.acc}10,transparent 70%)`,borderRadius:"0 16px 0 0",pointerEvents:"none"}}/>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
@@ -4138,6 +4186,7 @@ return (
                     </div>
                     <button onClick={()=>setActiveKhatma(null)} style={{background:"transparent",border:`1px solid ${t.rd}44`,color:t.rd,borderRadius:8,padding:"5px 10px",fontSize:".65rem",cursor:"pointer",transition:"all .2s"}} onMouseEnter={e=>{e.currentTarget.style.background=`${t.rd}12`;}} onMouseLeave={e=>{e.currentTarget.style.background="transparent";}}>Terminer</button>
                   </div>
+                  {/* Big progress */}
                   <div style={{marginBottom:10}}>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
                       <span style={{fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px"}}>Progression</span>
@@ -4149,11 +4198,13 @@ return (
                       </div>
                     </div>
                   </div>
+                  {/* KPIs */}
                   <div className="kh-stats">
                     <div className="khs"><div className="khs-v">{Object.values(activeKhatma.log).filter(Boolean).length}</div><div className="khs-l">Jours ✓</div></div>
                     <div className="khs"><div style={{fontSize:"1.4rem"}}>🔥</div><div className="khs-v">{khatmaStreak(activeKhatma)}j</div><div className="khs-l">Série ◈</div></div>
                     <div className="khs"><div className="khs-v" style={{color:t.rd}}>{Math.max(0,activeKhatma.totalDays-Object.values(activeKhatma.log).filter(Boolean).length)}</div><div className="khs-l">Restants</div></div>
                   </div>
+                  {/* Bouton Lire maintenant */}
                   <div style={{marginTop:14,display:"flex",gap:8}}>
                     <button onClick={()=>{
                       // Reprendre à la dernière page lue ou calculer la page du jour
@@ -4175,6 +4226,8 @@ return (
                     </button>
                   </div>
                 </div>
+
+                {/* Calendrier */}
                 <div className="card">
                   <div className="ch"><span className="ct">Calendrier</span><span style={{fontSize:".65rem",color:t.tx3}}>{activeKhatma.totalDays} jours · page/jour ≈ {Math.ceil(604/activeKhatma.totalDays)}</span></div>
                   <div style={{padding:"10px 12px"}}>
@@ -4195,6 +4248,8 @@ return (
                     </div>
                   </div>
                 </div>
+
+                {/* Progression Coran */}
                 <div className="card">
                   <div className="ch"><span className="ct">Progression du Coran</span></div>
                   <div style={{padding:"12px 16px",display:"flex",flexDirection:"column",gap:10}}>
@@ -4208,6 +4263,8 @@ return (
                 </div>
               </div>
             )}
+
+          {/* ═══ KHATMA COLLECTIVE ═══ */}
           <div className="card" style={{marginTop:4}}>
             <div className="ch">
               <span className="ct">🤝 Khatma collective</span>
@@ -4300,8 +4357,11 @@ return (
           </div>
           </div>
         )}
+
+        {/* COMMUNAUTÉ */}
         {page==="communaute"&&(
           <div style={{display:"flex",flexDirection:"column",gap:12}}>
+            {/* Favoris */}
             <div className="card">
               <div className="ch"><span className="ct">Versets favoris</span><span style={{fontSize:".65rem",color:t.tx3}}>{favorites.length} versets</span></div>
               {favorites.length===0?(<div className="empty"><div style={{fontSize:"1.8rem",marginBottom:8}}>💚</div>Marque des versets avec ♥ pour les retrouver ici</div>):(
@@ -4321,6 +4381,7 @@ return (
                 ))}</div>
               )}
             </div>
+            {/* Listes */}
             <div className="card">
               <div className="ch"><span className="ct">Mes listes</span></div>
               <div style={{padding:12}}>
@@ -4348,6 +4409,7 @@ return (
                 )}
               </div>
             </div>
+            {/* Historique */}
             {readHistory.length>0&&(
               <div className="card">
                 <div className="ch"><span className="ct">Historique de lecture</span><button className="tbtn" style={{borderColor:t.rd,color:t.rd,fontSize:".6rem"}} onClick={()=>setReadHistory([])}>Effacer</button></div>
@@ -4364,6 +4426,8 @@ return (
             )}
           </div>
         )}
+
+        {/* QUIZ */}
         {page==="quiz"&&(
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
             <div className="card">
@@ -4375,11 +4439,13 @@ return (
                 </div>
               </div>
               <div style={{padding:12}}>
+                {/* Mode */}
                 <div style={{display:"flex",gap:6,marginBottom:10}}>
                   {[["surah","Quelle sourate ?"],["complete","Complète le verset"]].map(([m,l])=>(
                     <button key={m} onClick={()=>{setQuizMode(m);setQuizQ(null);setQuizAnswer(null);}} style={{flex:1,padding:"8px",borderRadius:10,border:`1.5px solid ${quizMode===m?t.acc:t.b2}`,background:quizMode===m?`${t.acc}15`:t.s2,color:quizMode===m?t.acc:t.tx2,fontSize:".72rem",cursor:"pointer",fontWeight:quizMode===m?700:400}}>{l}</button>
                   ))}
                 </div>
+                {/* Filtre source */}
                 <div style={{display:"flex",gap:5,marginBottom:12,flexWrap:"wrap"}}>
                   <button onClick={()=>{setQuizFilter("memorized");setQuizFilterSurah(null);setQuizQ(null);}} style={{padding:"4px 10px",borderRadius:99,border:`1px solid ${quizFilter==="memorized"&&!quizFilterSurah?t.acc:t.b2}`,background:quizFilter==="memorized"&&!quizFilterSurah?`${t.acc}15`:t.s2,color:quizFilter==="memorized"&&!quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer",fontWeight:600}}>Mes mémorisés</button>
                   <button onClick={()=>{setQuizFilter("all");setQuizFilterSurah(null);setQuizQ(null);}} style={{padding:"4px 10px",borderRadius:99,border:`1px solid ${quizFilter==="all"&&!quizFilterSurah?t.acc:t.b2}`,background:quizFilter==="all"&&!quizFilterSurah?`${t.acc}15`:t.s2,color:quizFilter==="all"&&!quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer"}}>Tout</button>
@@ -4466,6 +4532,8 @@ return (
                 )}
               </div>
             </div>
+
+            {/* Score card avec détail des erreurs */}
             {quizScore.total>0&&(
               <div className="card">
                 <div className="ch"><span className="ct">📊 Session en cours</span></div>
@@ -4481,6 +4549,7 @@ return (
                     </div>
                   ))}
                 </div>
+                {/* Erreurs cliquables */}
                 {quizScore.wrongs?.length>0&&(
                   <div style={{padding:"0 12px 12px"}}>
                     <div style={{fontSize:".6rem",color:t.tx3,textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Mes erreurs — clique pour voir le verset</div>
@@ -4507,8 +4576,11 @@ return (
             )}
           </div>
         )}
+
+        {/* STATS */}
         {page==="stats"&&(
           <div className="sp">
+            {/* ── Calendrier GitHub-style ── */}
             {(()=>{
               const today2=new Date();
               const weeks=18;
@@ -4533,11 +4605,13 @@ return (
                   </div>
                   <div style={{padding:"10px 14px",overflowX:"auto"}}>
                     <div style={{display:"flex",gap:3,alignItems:"flex-start"}}>
+                      {/* Labels jours */}
                       <div style={{display:"flex",flexDirection:"column",gap:3,marginTop:18,marginRight:2}}>
                         {dayLabels.map((d,i)=>(
                           <div key={i} style={{fontSize:".45rem",color:t.tx3,height:11,display:"flex",alignItems:"center"}}>{i%2===0?d:""}</div>
                         ))}
                       </div>
+                      {/* Grille semaines */}
                       {Array.from({length:weeks},(_,wi)=>{
                         const weekCells=cells.slice(wi*7,(wi+1)*7);
                         const d=weekCells[0]?.d;
@@ -4557,6 +4631,7 @@ return (
                         );
                       })}
                     </div>
+                    {/* Légende */}
                     <div style={{display:"flex",alignItems:"center",gap:4,marginTop:8,justifyContent:"flex-end"}}>
                       <span style={{fontSize:".48rem",color:t.tx3}}>Moins</span>
                       {colors.map((c,i)=><div key={i} style={{width:10,height:10,borderRadius:2,background:c}}/>)}
@@ -4566,6 +4641,8 @@ return (
                 </div>
               );
             })()}
+
+            {/* ── Graphique hebdomadaire ── */}
             {(()=>{
               const today2=new Date();
               const weeks=8;
@@ -4611,6 +4688,8 @@ return (
                 </div>
               );
             })()}
+
+            {/* ── Constellation ── */}
             <div className="card" style={{overflow:"hidden"}}>
               <div className="ch"><span className="ct">Constellation du Coran</span><span style={{fontSize:".62rem",color:t.tx3}}>{SURAHS.filter(s=>sPct(s)===100).length} / 114 sourates allumées</span></div>
               <div style={{padding:"8px 4px 4px",position:"relative"}}>
@@ -4625,10 +4704,13 @@ return (
                       <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
                     </filter>
                   </defs>
+                  {/* Fond étoilé */}
                   {Array.from({length:40},(_,i)=>(
                     <circle key={`star-${i}`} cx={(i*97+13)%380} cy={(i*61+7)%260} r={0.3+((i*37)%10)*0.05} fill="white" opacity={0.15+((i*23)%30)*0.01}/>
                   ))}
+                  {/* Croissant de lune — guide de disposition */}
                   <path d="M 40 200 Q 120 20 200 15 Q 280 10 340 80 Q 370 130 340 190" fill="none" stroke={t.acc} strokeWidth="0.3" strokeDasharray="3,6" opacity="0.2"/>
+                  {/* Les 114 sourates disposées en arc */}
                   {SURAHS.map((s,i)=>{
                     const total=114;
                     // Disposition en S-curve élégante
@@ -4646,18 +4728,21 @@ return (
                     return (
                       <g key={s.n} style={{cursor:"pointer"}}
                         onClick={()=>{doSelect(s);setPage("quran");}}>
+                        {/* Halo pour les sourates complètes */}
                         {isComplete&&(
                           <circle cx={x} cy={y} r={r+3} fill="url(#starGlow)" opacity="0.4">
                             <animate attributeName="r" values={`${r+2};${r+5};${r+2}`} dur={`${2+i%3}s`} repeatCount="indefinite"/>
                             <animate attributeName="opacity" values="0.4;0.15;0.4" dur={`${2+i%3}s`} repeatCount="indefinite"/>
                           </circle>
                         )}
+                        {/* Point principal */}
                         <circle cx={x} cy={y} r={r}
                           fill={isComplete?"#c9a84c":hasProgress?`rgba(201,168,76,${pct2/100*0.6+0.1})`:"rgba(255,255,255,0.08)"}
                           stroke={isRevision?"#e91e63":isComplete?"#f5dc8c":hasProgress?`rgba(201,168,76,0.5)`:"rgba(255,255,255,0.15)"}
                           strokeWidth={isComplete?0.8:0.4}
                           filter={isComplete?"url(#glow2)":undefined}
                         />
+                        {/* Numéro pour les complètes seulement */}
                         {isComplete&&s.v<=10&&(
                           <text x={x} y={y+0.5} textAnchor="middle" dominantBaseline="middle" fontSize="2.5" fill="#0a0800" fontWeight="bold" style={{pointerEvents:"none"}}>{s.n}</text>
                         )}
@@ -4665,6 +4750,7 @@ return (
                     );
                   })}
                 </svg>
+                {/* Légende */}
                 <div style={{display:"flex",gap:12,padding:"4px 12px 8px",justifyContent:"center",flexWrap:"wrap"}}>
                   {[[t.acc,"Mémorisée"],["rgba(201,168,76,0.4)","En cours"],["rgba(255,255,255,0.15)","À commencer"],["#e91e63","En révision"]].map(([c,l])=>(
                     <div key={l} style={{display:"flex",alignItems:"center",gap:4}}>
@@ -4690,6 +4776,8 @@ return (
                 </div>
               ))}
             </div>
+
+            {/* ── Stats Tarteel-style ── */}
             {(()=>{
               const fmtDur=s=>{const h=Math.floor(s/3600);const m=Math.floor((s%3600)/60);const sec=s%60;return h>0?`${h}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`:`${m}:${String(sec).padStart(2,"0")}`;};
               const hassanat=totalMem*10+versesRecited*3; // estimation : 10/verset mémorisé + 3/récité
@@ -4725,6 +4813,8 @@ return (
                 </div>
               );
             })()}
+
+            {/* Graphique */}
             <div className="card">
               <div className="ch">
                 <span className="ct">Progression</span>
@@ -4760,6 +4850,8 @@ return (
                 )}
               </div>
             </div>
+
+            {/* Badges */}
             <div className="card">
               <div className="ch"><span className="ct">Badges</span><span style={{fontSize:".65rem",color:t.acc,fontWeight:700}}>{badges.length}{"/"}{BADGE_DEFS.length}</span></div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(120px,1fr))",gap:8,padding:12}}>
@@ -4773,6 +4865,8 @@ return (
                 );})}
               </div>
             </div>
+
+            {/* Top sourates */}
             {topS.length>0&&(
               <div className="card">
                 <div className="ch"><span className="ct">Progression par sourate</span></div>
@@ -4788,6 +4882,8 @@ return (
                 </div>
               </div>
             )}
+
+            {/* Révision espacée */}
             {spacedDue.length>0&&(
               <div className="card" style={{border:`1px solid ${t.rd}44`}}>
                 <div className="ch" style={{background:`${t.rd}10`}}><span className="ct" style={{color:t.rd}}>Révision du jour — {spacedDue.length} versets</span></div>
@@ -4801,6 +4897,8 @@ return (
                 </div>
               </div>
             )}
+
+            {/* Countdown cards */}
             {cdS.length>0&&(
               <div className="card">
                 <div className="ch"><span className="ct">Prochaines sourates à terminer</span></div>
@@ -4818,8 +4916,12 @@ return (
             )}
           </div>
         )}
+
+        {/* SETTINGS */}
         {page==="settings"&&(
           <div className="settings-wrap" style={{paddingBottom:"env(safe-area-inset-bottom)"}}>
+
+            {/* Compte */}
             <div className="settings-section">
               <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -4834,6 +4936,8 @@ return (
                 </button>
               </div>
             </div>
+
+            {/* Notifications */}
             <div className="settings-section">
               <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -4858,6 +4962,8 @@ return (
                 </div>
               </div>
             </div>
+
+            {/* Objectif & Profil */}
             <div className="settings-section">
               <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
@@ -4876,6 +4982,8 @@ return (
                 <input className="set-inp" type="date" value={settings?.startDate||today()} onChange={e=>setSettings(s=>({...s,startDate:e.target.value}))}/>
               </div>
             </div>
+
+            {/* Apparence */}
             <div className="settings-section">
               <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
@@ -4905,6 +5013,8 @@ return (
                 <button className={`toggle ${ramadanTheme?"on":""}`} onClick={()=>setRamadanTheme(v=>!v)}/>
               </div>
             </div>
+
+            {/* Police arabe */}
             <div className="settings-section">
               <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
@@ -4920,6 +5030,8 @@ return (
                 ))}
               </div>
             </div>
+
+            {/* Récitateurs */}
             <div className="settings-section">
               <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
@@ -4937,6 +5049,8 @@ return (
                 ))}
               </div>
             </div>
+
+            {/* Données */}
             <div className="settings-section">
               <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
@@ -4958,6 +5072,8 @@ return (
                 <button className="tbtn" style={{borderColor:t.rd,color:t.rd}} onClick={()=>{if(window.confirm("Effacer toutes tes mémorisations ?  Action irréversible.")){setMem({});setHist({});setBadges([]);setSpaced({});setFavorites([]);setNotes({});setKhatmas([]);setActiveKhatma(null);setReadHistory([]);setPageRead({});}}}>Effacer</button>
               </div>
             </div>
+
+            {/* Aide & Tutoriel */}
             <div className="settings-section">
               <div className="ss-hd" style={{display:"flex",alignItems:"center",gap:8}}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" strokeWidth="2.5"/></svg>
@@ -4988,8 +5104,10 @@ return (
           </div>
         )}
       </div>
+
       {focusMode&&selS&&verses.length>0&&(
         <div style={{position:"fixed",inset:0,zIndex:150,background:"#050505",display:"flex",flexDirection:"column",overflow:"hidden"}}>
+          {/* Header minimal */}
           <div style={{padding:"12px 18px",display:"flex",alignItems:"center",justifyContent:"space-between",borderBottom:"1px solid #1a1a1a"}}>
             <div>
               <div style={{fontFamily:"Amiri,serif",fontSize:"1rem",color:"#c9a84c"}}>{selS.ar} · v.{verses[focusIdx]?.n}</div>
@@ -5000,18 +5118,23 @@ return (
               <button onClick={()=>setFocusMode(false)} style={{background:"none",border:"1px solid #333",color:"#666",borderRadius:8,padding:"5px 12px",cursor:"pointer",fontSize:".75rem"}}>✕</button>
             </div>
           </div>
+          {/* Verset central */}
           <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px 20px",gap:20}}>
+            {/* Numéro verset */}
             <div style={{width:40,height:40,borderRadius:"50%",border:"1.5px solid rgba(201,168,76,.3)",display:"flex",alignItems:"center",justifyContent:"center",color:"rgba(201,168,76,.5)",fontSize:".75rem"}}>
               {verses[focusIdx]?.n}
             </div>
+            {/* Texte arabe — grand, centré */}
             <div style={{fontFamily:"Amiri Quran,serif",fontSize:"clamp(1.6rem,5vw,2.6rem)",direction:"rtl",textAlign:"center",lineHeight:2.5,color:"#f0e8d0",maxWidth:600,transition:"opacity .3s"}}>
               {stripTags(verses[focusIdx]?.ar||"")}
             </div>
+            {/* Traduction */}
             {showTr&&verses[focusIdx]?.fr&&(
               <div style={{fontSize:"clamp(.75rem,2.5vw,1rem)",color:"#888",fontStyle:"italic",textAlign:"center",lineHeight:1.8,maxWidth:500}}>
                 {verses[focusIdx]?.fr}
               </div>
             )}
+            {/* Indicateur mémorisé */}
             <div style={{display:"flex",alignItems:"center",gap:6}}>
               {!!(mem[String(selS.n)]||{})[String(verses[focusIdx]?.n)]
                 ?<span style={{fontSize:".7rem",color:"#22c55e",background:"rgba(34,197,94,.1)",padding:"3px 10px",borderRadius:99,border:"1px solid rgba(34,197,94,.2)"}}>✓ Mémorisé</span>
@@ -5019,8 +5142,10 @@ return (
               }
             </div>
           </div>
+          {/* Navigation bottom */}
           <div style={{padding:"16px 24px",borderTop:"1px solid #111",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
             <button onClick={()=>setFocusIdx(i=>Math.max(0,i-1))} disabled={focusIdx===0} style={{flex:1,padding:"12px",background:"#111",border:"1px solid #222",color:focusIdx===0?"#333":"#888",borderRadius:10,cursor:focusIdx===0?"default":"pointer",fontSize:"1rem",transition:"all .2s"}}>◄</button>
+            {/* Barre de progression */}
             <div style={{flex:3,height:4,background:"#1a1a1a",borderRadius:99,overflow:"hidden"}}>
               <div style={{height:"100%",width:`${(focusIdx+1)/verses.length*100}%`,background:"#c9a84c",borderRadius:99,transition:"width .3s"}}/>
             </div>
@@ -5028,6 +5153,7 @@ return (
           </div>
         </div>
       )}
+
       {immersive&&selS&&(
         <div className="immersive">
           <div className="immersive-header">
@@ -5064,6 +5190,7 @@ return (
           </div>
         </div>
       )}
+
       {wbwOpen&&wbwVerseRef.current&&(
   <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.85)",display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>{setWbwOpen(false);}}>
     <div style={{width:"100%",maxWidth:600,background:"#111",borderRadius:"20px 20px 0 0",padding:24,maxHeight:"70vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
@@ -5122,10 +5249,14 @@ return (
       {timerOpen&&(
         <div style={{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,.95)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:24,backdropFilter:"blur(20px)"}} onClick={()=>!timerRunning&&setTimerOpen(false)}>
           <style>{`@keyframes breathe{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.08);opacity:1}}`}</style>
+
+          {/* Header */}
           <div style={{position:"absolute",top:"max(20px,env(safe-area-inset-top))",left:0,right:0,display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 20px"}}>
             <div style={{fontSize:".65rem",color:"rgba(255,255,255,.4)",textTransform:"uppercase",letterSpacing:3}}>Mode concentration</div>
             <button onClick={()=>setTimerOpen(false)} style={{background:"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.12)",color:"rgba(255,255,255,.5)",borderRadius:"50%",width:32,height:32,cursor:"pointer",fontSize:".8rem",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
           </div>
+
+          {/* Ring SVG animé */}
           <div style={{position:"relative",width:200,height:200}} onClick={e=>e.stopPropagation()}>
             <svg width="200" height="200" viewBox="0 0 200 200">
               <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,.05)" strokeWidth="8"/>
@@ -5138,6 +5269,7 @@ return (
                 style={{transition:"stroke-dasharray 1s linear,stroke .5s"}}
               />
             </svg>
+            {/* Temps au centre */}
             <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:4}}>
               <div style={{fontFamily:"monospace",fontSize:"3.2rem",fontWeight:800,color:timerLeft===0?"#4caf50":timerRunning?t.acc:"rgba(255,255,255,.9)",letterSpacing:2,lineHeight:1,animation:timerRunning?"breathe 4s ease-in-out infinite":"none"}}>
                 {fmtTime(timerLeft??timerDuration*60)}
@@ -5147,6 +5279,8 @@ return (
               </div>
             </div>
           </div>
+
+          {/* Sélecteur durée */}
           {!timerRunning&&timerLeft===null&&(
             <div style={{display:"flex",gap:8,flexWrap:"wrap",justifyContent:"center"}} onClick={e=>e.stopPropagation()}>
               {[5,10,15,20,25,30,45,60].map(m=>(
@@ -5156,6 +5290,8 @@ return (
               ))}
             </div>
           )}
+
+          {/* Contrôles */}
           <div style={{display:"flex",gap:12}} onClick={e=>e.stopPropagation()}>
             {!timerRunning&&timerLeft===null&&(
               <button onClick={startTimer} style={{padding:"14px 40px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:14,color:"#000",fontWeight:800,fontSize:"1rem",cursor:"pointer",boxShadow:`0 4px 20px ${t.acc}44`}}>
@@ -5183,6 +5319,8 @@ return (
               <span style={{fontFamily:"Amiri,serif",fontSize:"1.1rem",color:"#a5d6a7"}}>بارك الله فيك</span>
             </div>
           )}
+
+          {/* Citation motivante */}
           <div style={{position:"absolute",bottom:"max(30px,env(safe-area-inset-bottom))",left:20,right:20,textAlign:"center"}}>
             <div style={{fontFamily:"Amiri,serif",fontSize:"1rem",color:"rgba(201,168,76,.5)",lineHeight:1.6}}>وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا</div>
             <div style={{fontSize:".6rem",color:"rgba(255,255,255,.2)",marginTop:4}}>Quiconque craint Allah, Il lui ouvre une issue · At-Talaq 2</div>
@@ -5214,7 +5352,9 @@ return (
           </div>
         </div>
       )}
+
       <button onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{position:"fixed",bottom:"calc(76px + env(safe-area-inset-bottom))",right:14,zIndex:50,width:38,height:38,borderRadius:"50%",background:t.s2,border:`1px solid ${t.b2}`,color:t.tx2,fontSize:"1rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 8px rgba(0,0,0,.15)",transition:"all .2s",opacity:0.7}} onMouseEnter={e=>{e.currentTarget.style.opacity="1";e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.borderColor=t.acc;e.currentTarget.style.color=t.acc;}} onMouseLeave={e=>{e.currentTarget.style.opacity="0.7";e.currentTarget.style.transform="";e.currentTarget.style.borderColor=t.b2;e.currentTarget.style.color=t.tx2;}}>↑</button>
+
       <div className="bnav">
         {[
           {id:"home",icon:<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,label:"Accueil"},
@@ -5235,6 +5375,7 @@ return (
           </button>
         ))}
       </div>
+
       <audio ref={audioRef} style={{display:"none"}}
         onPlay={()=>setAudioPlaying(true)}
         onPause={()=>setAudioPlaying(false)}
