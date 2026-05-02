@@ -733,7 +733,7 @@ function WbwModal({sn,vn,t}){
         <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",background:"rgba(255,255,255,.04)",borderRadius:10,border:`1px solid ${t.b1}`}}>
           <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.4rem",color:"#fff",direction:"rtl"}}>{w.text_uthmani}</div>
           <div style={{fontSize:".75rem",color:t.acc,textAlign:"center",flex:1,padding:"0 12px"}}>{w.translation?.text||""}</div>
-          <button onClick={()=>new Audio(`https://audio.qurancdn.com/${w.audio_url}`).play()} style={{background:t.acc+"22",border:"1px solid "+t.acc+"44",borderRadius:8,padding:"6px 10px",color:t.acc,cursor:"pointer",fontSize:".7rem"}}>▶</button>
+          <button onClick={()=>new Audio(`https://audio.qurancdn.com/${w.audio_url}`).play()} style={{background:`${t.acc}22`,border:`1px solid ${t.acc}44`,borderRadius:8,padding:"6px 10px",color:t.acc,cursor:"pointer",fontSize:".7rem"}}>▶</button>
         </div>
       ))}
     </div>
@@ -798,22 +798,21 @@ const ONBOARD_SLIDES=[
         <text x="50" y="80" textAnchor="middle" fontFamily="Amiri Quran,serif" fontSize="18" fill={c} opacity=".85">الحفظ</text>
       </svg>
     ),
-    title:"بِسْمِ اللَّهِ",badge:"Bienvenue",
-    desc:"Al-Hifz t'accompagne du premier verset mémorisé jusqu'à la khatma complète. Mémorisation, récitation, révision — tout en un.",
+    title:"بِسْمِ اللَّهِ",badge:"Bienvenue",
+    desc:"Al-Hifz t'accompagne du premier verset mémorisé jusqu'à la khatma complète.",
     color:"#16a34a",emoji:"🌙",
   },
   {
     visual:(c)=>(
       <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
         <circle cx="50" cy="50" r="36" fill="none" stroke={c+"20"} strokeWidth="8"/>
-        <circle cx="50" cy="50" r="36" fill="none" stroke={c} strokeWidth="8"
-          strokeDasharray="150 226" strokeLinecap="round" transform="rotate(-90 50 50)"/>
+        <circle cx="50" cy="50" r="36" fill="none" stroke={c} strokeWidth="8" strokeDasharray="150 226" strokeLinecap="round" transform="rotate(-90 50 50)"/>
         <text x="50" y="46" textAnchor="middle" fontSize="14" fontWeight="bold" fill={c}>68%</text>
         <text x="50" y="58" textAnchor="middle" fontSize="7" fill={c+"99"}>mémorisé</text>
       </svg>
     ),
     title:"Suis ta progression",badge:"Mémorisation",
-    desc:"Chaque verset mémorisé fait avancer ton anneau. Le système de révision espacée SM-2 calcule exactement quand revoir pour ne jamais oublier.",
+    desc:"Chaque verset mémorisé fait avancer ton anneau. La révision espacée SM-2 calcule exactement quand revoir.",
     color:"#2563eb",emoji:"📿",
   },
   {
@@ -827,7 +826,7 @@ const ONBOARD_SLIDES=[
       </svg>
     ),
     title:"Récite à voix haute",badge:"Récitation",
-    desc:"Appuie sur le micro, récite en arabe. L'app analyse mot par mot et colore les erreurs en rouge. Plus efficace que lire en silence.",
+    desc:"Appuie sur le micro, récite en arabe. L'app analyse mot par mot et colore les erreurs.",
     color:"#e91e63",emoji:"🎤",
   },
   {
@@ -842,7 +841,7 @@ const ONBOARD_SLIDES=[
       </svg>
     ),
     title:"Mushaf et Quiz",badge:"Lecture et Test",
-    desc:"Lis le Mushaf avec les couleurs tajweed. Lance un quiz pour tester ce que tu as mémorisé — sans regarder.",
+    desc:"Lis le Mushaf avec les couleurs tajweed. Lance un quiz pour tester ta mémorisation.",
     color:"#7c3aed",emoji:"📜",
   },
 ];
@@ -853,7 +852,7 @@ function OnboardModal({t,acc,tn,onDone,onSkip,onTutorial}){
   const bg=tn==="light"?"#ffffff":"#060d07";
   return(
     <div style={{position:"fixed",inset:0,zIndex:500,background:bg,display:"flex",flexDirection:"column",overflow:"hidden"}}>
-      <style>{`@keyframes ob-in{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}@keyframes ob-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}`}</style>
+      <style>{"@keyframes ob-in{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}@keyframes ob-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}"}</style>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"max(18px,env(safe-area-inset-top)) 20px 12px",flexShrink:0}}>
         <div style={{display:"flex",gap:6,alignItems:"center"}}>
           {ONBOARD_SLIDES.map((_,i)=>(
@@ -864,7 +863,7 @@ function OnboardModal({t,acc,tn,onDone,onSkip,onTutorial}){
       </div>
       <div key={slide} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"0 32px 20px",animation:"ob-in .4s ease",gap:32}}>
         <div style={{padding:"4px 14px",borderRadius:99,background:s.color+"18",border:"1px solid "+s.color+"44",fontSize:".62rem",fontWeight:700,color:s.color,letterSpacing:"1.5px",textTransform:"uppercase"}}>{s.emoji} {s.badge}</div>
-        <div style={{width:160,height:160,borderRadius:40,background:s.color+"10",border:"1.5px solid "+s.color+"25",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 0 60px "+s.color+"20",animation:"ob-pulse 3s ease-in-out infinite",flexShrink:0}}>
+        <div style={{width:160,height:160,borderRadius:40,background:s.color+"10",border:"1.5px solid "+s.color+"25",display:"flex",alignItems:"center",justifyContent:"center",animation:"ob-pulse 3s ease-in-out infinite",flexShrink:0}}>
           {s.visual(s.color)}
         </div>
         <div style={{textAlign:"center",maxWidth:340}}>
@@ -875,11 +874,11 @@ function OnboardModal({t,acc,tn,onDone,onSkip,onTutorial}){
       <div style={{padding:"16px 24px",paddingBottom:"max(24px,env(safe-area-inset-bottom))",display:"flex",flexDirection:"column",gap:10,flexShrink:0}}>
         {isLast?(
           <>
-            <button onClick={onTutorial} style={{width:"100%",padding:"16px",background:"linear-gradient(135deg,"+s.color+","+s.color+"bb)",border:"none",borderRadius:16,color:"#fff",fontWeight:800,fontSize:".95rem",cursor:"pointer"}}>Voir le guide complet →</button>
+            <button onClick={onTutorial} style={{width:"100%",padding:"16px",background:"linear-gradient(135deg,"+s.color+","+s.color+"bb)",border:"none",borderRadius:16,color:"#fff",fontWeight:800,fontSize:".95rem",cursor:"pointer"}}>Voir le guide complet</button>
             <button onClick={onDone} style={{width:"100%",padding:"14px",background:"transparent",border:"1.5px solid "+t.b2,borderRadius:16,color:t.tx2,fontWeight:600,fontSize:".85rem",cursor:"pointer"}}>Commencer maintenant</button>
           </>
         ):(
-          <button onClick={()=>setSlide(p=>p+1)} style={{width:"100%",padding:"16px",background:"linear-gradient(135deg,"+s.color+","+s.color+"bb)",border:"none",borderRadius:16,color:"#fff",fontWeight:800,fontSize:".95rem",cursor:"pointer"}}>Suivant →</button>
+          <button onClick={()=>setSlide(p=>p+1)} style={{width:"100%",padding:"16px",background:"linear-gradient(135deg,"+s.color+","+s.color+"bb)",border:"none",borderRadius:16,color:"#fff",fontWeight:800,fontSize:".95rem",cursor:"pointer"}}>Suivant</button>
         )}
       </div>
     </div>
@@ -887,29 +886,29 @@ function OnboardModal({t,acc,tn,onDone,onSkip,onTutorial}){
 }
 const TUTORIAL_SECTIONS=[
   {id:"memo",label:"Mémorisation",icon:"📿",color:"#16a34a",steps:[
-    {title:"Choisis ta sourate",tip:"Commence par Al-Fatiha ou les courtes sourates du Juz 30.",desc:"Ouvre l'onglet Coran, parcours la liste ou filtre par Juz. Appuie sur une sourate pour afficher ses versets."},
-    {title:"Marque un verset mémorisé",tip:"Écoute le verset plusieurs fois avant de le marquer.",desc:"Fais un appui long sur un verset pour faire apparaître les options. Appuie sur + Mémoriser. Il passe au vert."},
-    {title:"Suis ta progression",tip:"L'anneau sur l'accueil te montre ton % du Coran mémorisé.",desc:"L'anneau de progression et les KPIs se mettent à jour en temps réel à chaque verset ajouté."},
-    {title:"Révision espacée SM-2",tip:"5 minutes de révision par jour valent mieux qu'1h par semaine.",desc:"L'algorithme SM-2 calcule automatiquement quand revoir chaque verset. Plus tu révises correctement, plus l'intervalle s'allonge."},
+    {title:"Choisis ta sourate",tip:"Commence par Al-Fatiha ou les courtes sourates du Juz 30.",desc:"Ouvre l'onglet Coran et appuie sur une sourate pour afficher ses versets."},
+    {title:"Marque un verset mémorisé",tip:"Écoute le verset plusieurs fois avant de le marquer.",desc:"Fais un appui long sur un verset pour faire apparaître les options, puis appuie sur Mémoriser."},
+    {title:"Suis ta progression",tip:"L'anneau sur l'accueil montre ton % du Coran mémorisé.",desc:"L'anneau de progression et les KPIs se mettent à jour en temps réel à chaque verset ajouté."},
+    {title:"Révision espacée SM-2",tip:"5 minutes par jour valent mieux qu'1h par semaine.",desc:"L'algorithme SM-2 calcule automatiquement quand revoir chaque verset. Plus tu révises correctement, plus l'intervalle s'allonge."},
   ]},
   {id:"recit",label:"Récitation",icon:"🎤",color:"#e91e63",steps:[
-    {title:"Lance le mode récitation",tip:"Autorise le micro la première fois — l'app ne stocke rien.",desc:"Depuis une sourate, fais un appui long sur un verset et appuie sur Réciter. Un écran s'ouvre avec le verset à réciter."},
+    {title:"Lance la récitation",tip:"Autorise le micro la première fois.",desc:"Fais un appui long sur un verset et appuie sur Réciter. Un écran s'ouvre avec le verset à réciter."},
     {title:"Parle à voix haute",tip:"Parle clairement, sans bruit de fond.",desc:"Appuie sur le bouton micro et récite le verset en arabe. Les ondes indiquent que l'app t'écoute."},
-    {title:"Analyse mot par mot",tip:"Les mots rouges sont ceux à retravailler.",desc:"Chaque mot reçoit une couleur : vert = correct, rouge = à retravailler. Le score en % donne une mesure objective."},
-    {title:"Mode enchaîné",tip:"Vise 70% minimum pour enchaîner au verset suivant.",desc:"Active Enchaîné pour réciter toute la sourate. Si tu dépasses 70% sur un verset, le suivant se lance automatiquement."},
+    {title:"Analyse mot par mot",tip:"Les mots rouges sont ceux à retravailler.",desc:"Chaque mot reçoit une couleur : vert est correct, rouge est à retravailler. Le score en pourcent donne une mesure objective."},
+    {title:"Mode enchaîné",tip:"Vise 70% minimum pour enchaîner.",desc:"Active le mode enchaîné pour réciter toute la sourate. Si tu dépasses 70% sur un verset, le suivant se lance automatiquement."},
   ]},
   {id:"mushaf",label:"Mushaf",icon:"📜",color:"#b45309",steps:[
-    {title:"Navigue dans le Mushaf",tip:"Swipe gauche = page suivante, swipe droite = page précédente.",desc:"L'onglet Mushaf affiche les vraies pages du Coran. Swipe ou utilise les flèches. Appuie sur l'icône plein écran pour une lecture immersive."},
-    {title:"Choisir l'édition",tip:"Hafs classique ou Hafs avec traduction française.",desc:"Le sélecteur dans la barre permet de basculer entre l'édition Hafs standard et l'édition bilingue avec traduction française."},
-    {title:"Aller à une sourate",tip:"Tape le nom dans la barre de recherche.",desc:"Le menu déroulant liste les 114 sourates avec leur page. Sélectionne et tu arrives instantanément à la bonne page."},
+    {title:"Navigue dans le Mushaf",tip:"Swipe gauche pour la page suivante.",desc:"L'onglet Mushaf affiche les vraies pages du Coran. Swipe ou utilise les flèches pour tourner les pages."},
+    {title:"Choisir l'édition",tip:"Hafs classique ou avec traduction française.",desc:"Le sélecteur dans la barre permet de basculer entre l'édition Hafs standard et l'édition bilingue."},
+    {title:"Aller à une sourate",tip:"Tape le nom dans la barre.",desc:"Le menu déroulant liste les 114 sourates avec leur page. Sélectionne et tu arrives instantanément à la bonne page."},
   ]},
   {id:"khatma",label:"Khatma",icon:"🌿",color:"#065f46",steps:[
-    {title:"Lance une Khatma",tip:"La khatma mensuelle (30 jours) est idéale pour commencer.",desc:"Dans l'onglet Khatma, choisis un rythme : 30 jours, 60 jours, Ramadan ou personnalisé. Al-Hifz calcule combien de pages lire chaque jour."},
-    {title:"Suivi jour par jour",tip:"Coche chaque jour pour maintenir ton streak.",desc:"Le calendrier colore chaque journée cochée. Lire t'amène directement à ta page dans le Mushaf. Valide la journée quand c'est fait."},
+    {title:"Lance une Khatma",tip:"La khatma mensuelle est idéale pour commencer.",desc:"Dans l'onglet Khatma, choisis un rythme. Al-Hifz calcule combien de pages lire chaque jour."},
+    {title:"Suivi jour par jour",tip:"Coche chaque jour pour maintenir ton streak.",desc:"Le calendrier colore chaque journée cochée. Valide la journée quand c'est fait."},
   ]},
   {id:"quiz",label:"Quiz",icon:"🎯",color:"#1d4ed8",steps:[
-    {title:"Deux modes de quiz",tip:"Commence par Quelle sourate — c'est le plus accessible.",desc:"Mode 1 : tu vois un verset et tu devines la sourate parmi 4 choix. Mode 2 : tu vois le début d'un verset et tu dois en retrouver la suite."},
-    {title:"Revoir ses erreurs",tip:"Les erreurs répétées signalent les versets à mémoriser en priorité.",desc:"Après chaque question, les erreurs s'accumulent en bas. Clique dessus pour voir le verset complet avec sa traduction."},
+    {title:"Deux modes de quiz",tip:"Commence par Quelle sourate.",desc:"Mode 1: tu vois un verset et tu devines la sourate. Mode 2: tu vois le début d'un verset et tu dois le compléter."},
+    {title:"Revoir ses erreurs",tip:"Les erreurs signalent les versets à mémoriser en priorité.",desc:"Après chaque question, les erreurs s'accumulent en bas. Clique pour voir le verset complet."},
   ]},
 ];
 
@@ -927,9 +926,9 @@ function TutorialModal({t,acc,tn,onClose}){
   const goPrev=()=>{if(step>0)setStep(p=>p-1);else if(sec>0){setSec(p=>p-1);setStep(TUTORIAL_SECTIONS[sec-1].steps.length-1);}};
   return(
     <div style={{position:"fixed",inset:0,zIndex:500,background:bg,display:"flex",flexDirection:"column",overflow:"hidden"}}>
-      <style>{`@keyframes tIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}`}</style>
+      <style>{"@keyframes tIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}"}</style>
       <div style={{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",paddingTop:"max(14px,env(safe-area-inset-top))",borderBottom:"1px solid "+t.b1,flexShrink:0}}>
-        <button onClick={goPrev} disabled={sec===0&&step===0} style={{width:34,height:34,borderRadius:"50%",border:"1px solid "+t.b2,background:t.s2,color:t.tx,cursor:"pointer",opacity:sec===0&&step===0?.3:1}}>←</button>
+        <button onClick={goPrev} disabled={sec===0&&step===0} style={{width:34,height:34,borderRadius:"50%",border:"1px solid "+t.b2,background:t.s2,color:t.tx,cursor:"pointer",opacity:sec===0&&step===0?.3:1}}>{"<"}</button>
         <div style={{flex:1}}>
           <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
             <span style={{fontSize:".65rem",color:section.color,fontWeight:700,textTransform:"uppercase"}}>{section.icon} {section.label}</span>
@@ -939,7 +938,7 @@ function TutorialModal({t,acc,tn,onClose}){
             <div style={{height:"100%",width:(done/total*100)+"%",background:section.color,borderRadius:99,transition:"width .4s"}}/>
           </div>
         </div>
-        <button onClick={onClose} style={{width:34,height:34,borderRadius:"50%",border:"1px solid "+t.b2,background:t.s2,color:t.tx3,cursor:"pointer"}}>✕</button>
+        <button onClick={onClose} style={{width:34,height:34,borderRadius:"50%",border:"1px solid "+t.b2,background:t.s2,color:t.tx3,cursor:"pointer"}}>{"x"}</button>
       </div>
       <div style={{display:"flex",gap:6,padding:"10px 14px",overflowX:"auto",borderBottom:"1px solid "+t.b1,flexShrink:0,scrollbarWidth:"none"}}>
         {TUTORIAL_SECTIONS.map((s,i)=>(
@@ -953,7 +952,7 @@ function TutorialModal({t,acc,tn,onClose}){
           <div style={{textAlign:"center"}}>
             <div style={{fontSize:"3rem",marginBottom:8}}>{section.icon}</div>
             <div style={{fontFamily:"Amiri,serif",fontSize:"1.1rem",color:section.color,fontWeight:700}}>{cur.title}</div>
-            <div style={{fontSize:".65rem",color:t.tx3,marginTop:4}}>Étape {step+1} sur {section.steps.length}</div>
+            <div style={{fontSize:".65rem",color:t.tx3,marginTop:4}}>{"Étape "+(step+1)+" sur "+section.steps.length}</div>
           </div>
         </div>
         <div style={{display:"flex",alignItems:"flex-start",gap:10}}>
@@ -962,7 +961,7 @@ function TutorialModal({t,acc,tn,onClose}){
         </div>
         <div style={{padding:"14px 16px",borderRadius:12,background:t.s2,border:"1px solid "+t.b1,fontSize:".85rem",color:t.tx2,lineHeight:1.75}}>{cur.desc}</div>
         {cur.tip&&<div style={{display:"flex",alignItems:"flex-start",gap:10,padding:"10px 14px",borderRadius:10,background:section.color+"0d",border:"1px solid "+section.color+"30"}}>
-          <span style={{fontSize:"1rem",flexShrink:0}}>💡</span>
+          <span style={{fontSize:"1rem",flexShrink:0}}>{"💡"}</span>
           <div style={{fontSize:".78rem",color:section.color,lineHeight:1.6,fontWeight:500}}>{cur.tip}</div>
         </div>}
         <div style={{display:"flex",gap:8,justifyContent:"center"}}>
@@ -973,7 +972,7 @@ function TutorialModal({t,acc,tn,onClose}){
       </div>
       <div style={{padding:"12px 18px",paddingBottom:"max(16px,env(safe-area-inset-bottom))",borderTop:"1px solid "+t.b1,flexShrink:0}}>
         <button onClick={goNext} style={{width:"100%",padding:"15px",background:isLastSec&&isLastStep?"linear-gradient(135deg,#22c55e,#16a34a)":"linear-gradient(135deg,"+section.color+","+section.color+"bb)",border:"none",borderRadius:14,color:"#fff",fontWeight:800,fontSize:".9rem",cursor:"pointer"}}>
-          {isLastSec&&isLastStep?"🎉 Terminer le guide":isLastStep?TUTORIAL_SECTIONS[sec+1].icon+" "+TUTORIAL_SECTIONS[sec+1].label+" →":"Suivant →"}
+          {isLastSec&&isLastStep?"Terminer le guide":isLastStep?TUTORIAL_SECTIONS[sec+1].icon+" "+TUTORIAL_SECTIONS[sec+1].label:"Suivant"}
         </button>
       </div>
     </div>
@@ -1131,7 +1130,7 @@ ${t.arabesque ? (
 ::-webkit-scrollbar-track{background:${t.s1};}
 ::-webkit-scrollbar-thumb{background:${t.b2};border-radius:99px;}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:${tn==="dark"?".018":".035"};background-image:repeating-linear-gradient(0deg,transparent,transparent 40px,${acc} 40px,${acc} 41px),repeating-linear-gradient(90deg,transparent,transparent 40px,${acc} 40px,${acc} 41px),repeating-linear-gradient(45deg,transparent,transparent 28px,${acc} 28px,${acc} 29px),repeating-linear-gradient(-45deg,transparent,transparent 28px,${acc} 28px,${acc} 29px);}
-${ramadan?`body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle,${acc}33 1px,transparent 1px);background-size:30px 30px;opacity:.4;}":}
+${ramadan?`body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle,${acc}33 1px,transparent 1px);background-size:30px 30px;opacity:.4;}`:""}
 body>*{position:relative;z-index:1;}
 .wrap{animation:pageIn .25s ease;}
 .wrap.transitioning{animation:pageOut .12s ease forwards;}
@@ -1139,7 +1138,7 @@ body>*{position:relative;z-index:1;}
 @keyframes pageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@keyframes memGlow{0%{box-shadow:0 0 0 0 "+ t.gr +"66}70%{box-shadow:0 0 0 10px "+ t.gr +"00}100%{box-shadow:0 0 0 0 "+ t.gr +"00}}
+@keyframes memGlow{0%{box-shadow:0 0 0 0 ${t.gr}66}70%{box-shadow:0 0 0 10px ${t.gr}00}100%{box-shadow:0 0 0 0 ${t.gr}00}}
 @keyframes confetti{0%{transform:scale(1) rotate(0deg);opacity:1}50%{transform:scale(1.4) rotate(10deg);opacity:.8}100%{transform:scale(1) rotate(0deg);opacity:1}}
 @keyframes slideIn{from{transform:translateX(30px);opacity:0}to{transform:translateX(0);opacity:1}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
@@ -1148,214 +1147,214 @@ body>*{position:relative;z-index:1;}
 @keyframes sandDrip{0%{transform:translateY(0);opacity:1}100%{transform:translateY(6px);opacity:0}}
 @keyframes hoverLift{from{transform:translateY(0) scale(1)}to{transform:translateY(-3px) scale(1.01)}}
 /* ── Topbar ── */
-.topbar{position:sticky;top:0;z-index:60;background:"+ t.navBg +";border-bottom:1px solid "+ t.b1 +";backdrop-filter:blur(16px);overflow:hidden;}
+.topbar{position:sticky;top:0;z-index:60;background:${t.navBg};border-bottom:1px solid ${t.b1};backdrop-filter:blur(16px);overflow:hidden;}
 .tb{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 12px;padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right));gap:8px;}
 .logo{display:flex;align-items:baseline;gap:6px;flex-shrink:0;white-space:nowrap;min-width:0;}
-.logo-h{font-family:'Amiri',serif;font-size:1.3rem;color:"+ acc +";text-shadow:0 0 20px "+ acc +"44;white-space:nowrap;}
-.logo-ar{font-family:'Amiri Quran',serif;font-size:1rem;color:"+ acc2 +";white-space:nowrap;}
-.logo-sub{font-size:.5rem;color:"+ t.tx3 +";letter-spacing:2px;text-transform:uppercase;white-space:nowrap;}
+.logo-h{font-family:'Amiri',serif;font-size:1.3rem;color:${acc};text-shadow:0 0 20px ${acc}44;white-space:nowrap;}
+.logo-ar{font-family:'Amiri Quran',serif;font-size:1rem;color:${acc2};white-space:nowrap;}
+.logo-sub{font-size:.5rem;color:${t.tx3};letter-spacing:2px;text-transform:uppercase;white-space:nowrap;}
 .tb-r{display:flex;gap:5px;align-items:center;flex-shrink:0;}
-.ib{background:transparent;border:1px solid "+ t.b2 +";color:"+ t.tx2 +";padding:5px 10px;border-radius:8px;font-size:.68rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:4px;}
-.ib:hover{border-color:"+ acc +";color:"+ acc +";}
-.ib.pri{background:"+ acc +";border-color:"+ acc +";color:#fff;font-weight:600;}
+.ib{background:transparent;border:1px solid ${t.b2};color:${t.tx2};padding:5px 10px;border-radius:8px;font-size:.68rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:4px;}
+.ib:hover{border-color:${acc};color:${acc};}
+.ib.pri{background:${acc};border-color:${acc};color:#fff;font-weight:600;}
 /* ── Hero ── */
-.hero{background:"+ hero +";border-bottom:1px solid "+ t.b1 +";padding:16px 16px 14px;padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));position:relative;overflow:hidden;}
-.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 10% 50%,"+ acc +"08 0%,transparent 60%),radial-gradient(ellipse at 90% 50%,"+ acc +"08 0%,transparent 60%);pointer-events:none;}
+.hero{background:${hero};border-bottom:1px solid ${t.b1};padding:16px 16px 14px;padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 10% 50%,${acc}08 0%,transparent 60%),radial-gradient(ellipse at 90% 50%,${acc}08 0%,transparent 60%);pointer-events:none;}
 .hero-i{max-width:1200px;margin:0 auto;position:relative;}
 /* ── Bottom nav ── */
-.bnav{position:fixed;bottom:0;left:0;right:0;z-index:60;background:"+ t.navBg +"ee;border-top:1px solid "+ t.b1 +";display:flex;align-items:stretch;height:calc(62px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);backdrop-filter:blur(32px) saturate(1.8);-webkit-backdrop-filter:blur(32px) saturate(1.8);box-shadow:0 -1px 0 "+ acc +"30,0 -8px 40px rgba(0,0,0,.32);}
-.bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:transparent;color:"+ t.tx3 +";font-size:.58rem;font-weight:500;cursor:pointer;transition:all .25s;padding:6px 2px;position:relative;}
-.bn:hover{color:"+ t.tx2 +";transform:translateY(-2px);}
-.bn.on{color:"+ acc +";}
-.bn.on::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:linear-gradient(90deg,"+ acc +","+ acc2 +");border-radius:0 0 99px 99px;box-shadow:0 0 6px "+ acc +";}
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:60;background:${t.navBg}ee;border-top:1px solid ${t.b1};display:flex;align-items:stretch;height:calc(62px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);backdrop-filter:blur(32px) saturate(1.8);-webkit-backdrop-filter:blur(32px) saturate(1.8);box-shadow:0 -1px 0 ${acc}30,0 -8px 40px rgba(0,0,0,.32);}
+.bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:transparent;color:${t.tx3};font-size:.58rem;font-weight:500;cursor:pointer;transition:all .25s;padding:6px 2px;position:relative;}
+.bn:hover{color:${t.tx2};transform:translateY(-2px);}
+.bn.on{color:${acc};}
+.bn.on::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:linear-gradient(90deg,${acc},${acc2});border-radius:0 0 99px 99px;box-shadow:0 0 6px ${acc};}
 .bn-lbl{font-size:.52rem;font-weight:500;}
 /* ── Layout ── */
 .wrap{max-width:1200px;margin:0 auto;padding:14px 16px calc(120px + env(safe-area-inset-bottom));padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));width:100%;box-sizing:border-box;overflow-x:hidden;overscroll-behavior:none;}
 .two{display:grid;grid-template-columns:300px 1fr;gap:12px;align-items:start;}
 /* ── Cards — hover effect ── */
-.card{background:"+ t.cardBg +";border:1px solid "+ t.b1 +";border-radius:14px;overflow:hidden;transition:box-shadow .25s,border-color .25s;}
-.card:hover{box-shadow:0 4px 24px "+ acc +"18;border-color:"+ acc +"44;}
-.ch{padding:10px 14px;border-bottom:1px solid "+ t.b1 +";display:flex;align-items:center;justify-content:space-between;}
-.ct{font-size:.63rem;text-transform:uppercase;letter-spacing:1.5px;color:"+ t.tx3 +";font-weight:600;}
+.card{background:${t.cardBg};border:1px solid ${t.b1};border-radius:14px;overflow:hidden;transition:box-shadow .25s,border-color .25s;}
+.card:hover{box-shadow:0 4px 24px ${acc}18;border-color:${acc}44;}
+.ch{padding:10px 14px;border-bottom:1px solid ${t.b1};display:flex;align-items:center;justify-content:space-between;}
+.ct{font-size:.63rem;text-transform:uppercase;letter-spacing:1.5px;color:${t.tx3};font-weight:600;}
 /* ── Left panel ── */
 .lp{display:flex;flex-direction:column;max-height:calc(100vh - 200px);max-height:calc(100dvh - 200px);position:sticky;top:58px;}
-.ltabs{display:flex;border-bottom:1px solid "+ t.b1 +";}
-.lt{flex:1;padding:9px 4px;border:none;background:transparent;color:"+ t.tx2 +";font-size:.68rem;font-weight:500;border-bottom:2px solid transparent;cursor:pointer;transition:all .15s;}
-.lt:hover{color:"+ t.tx +";}.lt.on{color:"+ acc +";border-bottom-color:"+ acc +";}
+.ltabs{display:flex;border-bottom:1px solid ${t.b1};}
+.lt{flex:1;padding:9px 4px;border:none;background:transparent;color:${t.tx2};font-size:.68rem;font-weight:500;border-bottom:2px solid transparent;cursor:pointer;transition:all .15s;}
+.lt:hover{color:${t.tx};}.lt.on{color:${acc};border-bottom-color:${acc};}
 .sbox{padding:8px;}
-.sinp{width:100%;background:"+ t.inputBg +";border:1px solid "+ t.b2 +";border-radius:8px;padding:7px 10px;color:"+ t.tx +";font-size:.76rem;outline:none;transition:border-color .2s;}
-.sinp:focus{border-color:"+ acc +";}.sinp::placeholder{color:"+ t.tx3 +";}
+.sinp{width:100%;background:${t.inputBg};border:1px solid ${t.b2};border-radius:8px;padding:7px 10px;color:${t.tx};font-size:.76rem;outline:none;transition:border-color .2s;}
+.sinp:focus{border-color:${acc};}.sinp::placeholder{color:${t.tx3};}
 .slist{flex:1;overflow-y:auto;}
 /* ── Surah rows — hover ── */
 .srow{padding:8px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:background .15s,border-left-color .15s;border-left:3px solid transparent;position:relative;overflow:hidden;touch-action:pan-y;user-select:none;}
-.srow:hover{background:"+ t.s2 +";}
+.srow:hover{background:${t.s2};}
 .srow:hover .srow-hint{opacity:1;}
-.srow.sel{background:"+ t.s2 +";border-left-color:"+ acc +";}.srow.done{border-left-color:"+ t.gr +";}
+.srow.sel{background:${t.s2};border-left-color:${acc};}.srow.done{border-left-color:${t.gr};}
 .srow-reveal{position:absolute;top:0;bottom:0;right:0;display:flex;align-items:stretch;pointer-events:none;}
 .srow-reveal-btn{width:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:.55rem;font-weight:700;border-radius:0;}
-.srow-hint{position:absolute;right:6px;top:50%;transform:translateY(-50%);opacity:0;transition:opacity .2s;font-size:.55rem;color:"+ t.tx3 +";pointer-events:none;}
-.snum{width:21px;height:21px;border-radius:50%;border:1px solid "+ t.b2 +";display:flex;align-items:center;justify-content:center;font-size:.56rem;color:"+ t.tx3 +";flex-shrink:0;cursor:pointer;transition:all .2s;}
-.snum:hover{border-color:"+ acc +";color:"+ acc +";transform:scale(1.15);}
-.snum.done{background:"+ t.grD +";border-color:"+ t.gr +";color:"+ t.gr +";}
+.srow-hint{position:absolute;right:6px;top:50%;transform:translateY(-50%);opacity:0;transition:opacity .2s;font-size:.55rem;color:${t.tx3};pointer-events:none;}
+.snum{width:21px;height:21px;border-radius:50%;border:1px solid ${t.b2};display:flex;align-items:center;justify-content:center;font-size:.56rem;color:${t.tx3};flex-shrink:0;cursor:pointer;transition:all .2s;}
+.snum:hover{border-color:${acc};color:${acc};transform:scale(1.15);}
+.snum.done{background:${t.grD};border-color:${t.gr};color:${t.gr};}
 .sname{font-size:.76rem;font-weight:500;}
-.smeta{font-size:.56rem;color:"+ t.tx3 +";margin-top:1px;}
-.sar{font-family:'Amiri',serif;font-size:.9rem;color:"+ acc +";}
-.mbar{width:36px;height:3px;background:"+ t.b2 +";border-radius:99px;overflow:hidden;margin-top:3px;}
-.mfill{height:100%;background:"+ t.gr +";border-radius:99px;}
+.smeta{font-size:.56rem;color:${t.tx3};margin-top:1px;}
+.sar{font-family:'Amiri',serif;font-size:.9rem;color:${acc};}
+.mbar{width:36px;height:3px;background:${t.b2};border-radius:99px;overflow:hidden;margin-top:3px;}
+.mfill{height:100%;background:${t.gr};border-radius:99px;}
 /* ── Juz grid ── */
 .jg{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:7px;}
-.jc{background:"+ t.s2 +";border:1px solid "+ t.b1 +";border-radius:7px;padding:6px 3px;text-align:center;cursor:pointer;transition:all .2s;}
-.jc:hover{border-color:"+ acc +";transform:translateY(-2px);box-shadow:0 4px 12px "+ acc +"22;}
-.jc.sel{border-color:"+ acc +";background:"+ t.s3 +";}
-.jn{font-family:'Amiri',serif;font-size:1.2rem;color:"+ acc +";line-height:1;}
-.jl{font-size:.48rem;color:"+ t.tx3 +";text-transform:uppercase;}
-.jb{height:3px;background:"+ t.b1 +";border-radius:99px;overflow:hidden;margin-top:3px;}
-.jf{height:100%;background:"+ t.gr +";border-radius:99px;}
+.jc{background:${t.s2};border:1px solid ${t.b1};border-radius:7px;padding:6px 3px;text-align:center;cursor:pointer;transition:all .2s;}
+.jc:hover{border-color:${acc};transform:translateY(-2px);box-shadow:0 4px 12px ${acc}22;}
+.jc.sel{border-color:${acc};background:${t.s3};}
+.jn{font-family:'Amiri',serif;font-size:1.2rem;color:${acc};line-height:1;}
+.jl{font-size:.48rem;color:${t.tx3};text-transform:uppercase;}
+.jb{height:3px;background:${t.b1};border-radius:99px;overflow:hidden;margin-top:3px;}
+.jf{height:100%;background:${t.gr};border-radius:99px;}
 /* ── Verse viewer ── */
 .rp{position:sticky;top:58px;}
-.vhd{padding:12px 14px;border-bottom:1px solid "+ t.b1 +";}
-.v-ar-title{font-family:"+ arFont +";font-size:1.9rem;color:"+ acc +";direction:rtl;text-align:right;line-height:1.5;margin-bottom:4px;}
-.v-info{font-size:.65rem;color:"+ t.tx3 +";}
-.vbar{height:4px;background:"+ t.b2 +";border-radius:99px;overflow:hidden;margin-top:7px;}
-.vfill{height:100%;background:"+ t.gr +";border-radius:99px;transition:width .5s;}
-.vtoolbar{padding:7px 12px;border-bottom:1px solid "+ t.b1 +";display:flex;align-items:center;gap:5px;flex-wrap:wrap;background:"+ t.s2 +";}
-.tbtn{padding:4px 9px;border-radius:99px;border:1px solid "+ t.b2 +";background:transparent;color:"+ t.tx2 +";font-size:.65rem;cursor:pointer;transition:all .2s;white-space:nowrap;}
-.tbtn:hover{border-color:"+ acc +";color:"+ acc +";transform:translateY(-1px);}
-.tbtn.on{background:"+ acc +";border-color:"+ acc +";color:#fff;font-weight:600;}
-.tsel{background:"+ t.inputBg +";border:1px solid "+ t.b2 +";color:"+ t.tx +";padding:4px 8px;border-radius:8px;font-size:.65rem;outline:none;}
-.tj-legend{display:flex;gap:10px;flex-wrap:wrap;padding:5px 12px;background:"+ t.s3 +";border-bottom:1px solid "+ t.b1 +";font-size:.58rem;}
+.vhd{padding:12px 14px;border-bottom:1px solid ${t.b1};}
+.v-ar-title{font-family:${arFont};font-size:1.9rem;color:${acc};direction:rtl;text-align:right;line-height:1.5;margin-bottom:4px;}
+.v-info{font-size:.65rem;color:${t.tx3};}
+.vbar{height:4px;background:${t.b2};border-radius:99px;overflow:hidden;margin-top:7px;}
+.vfill{height:100%;background:${t.gr};border-radius:99px;transition:width .5s;}
+.vtoolbar{padding:7px 12px;border-bottom:1px solid ${t.b1};display:flex;align-items:center;gap:5px;flex-wrap:wrap;background:${t.s2};}
+.tbtn{padding:4px 9px;border-radius:99px;border:1px solid ${t.b2};background:transparent;color:${t.tx2};font-size:.65rem;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.tbtn:hover{border-color:${acc};color:${acc};transform:translateY(-1px);}
+.tbtn.on{background:${acc};border-color:${acc};color:#fff;font-weight:600;}
+.tsel{background:${t.inputBg};border:1px solid ${t.b2};color:${t.tx};padding:4px 8px;border-radius:8px;font-size:.65rem;outline:none;}
+.tj-legend{display:flex;gap:10px;flex-wrap:wrap;padding:5px 12px;background:${t.s3};border-bottom:1px solid ${t.b1};font-size:.58rem;}
 .tj-item{display:flex;align-items:center;gap:3px;}
 .tj-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.arow{padding:6px 12px;border-bottom:1px solid "+ t.b1 +";background:"+ t.s2 +";display:flex;align-items:center;gap:7px;}
+.arow{padding:6px 12px;border-bottom:1px solid ${t.b1};background:${t.s2};display:flex;align-items:center;gap:7px;}
 .vscroll{overflow-y:auto;}
 /* ── Verse items — mode flux Tarteel ── */
-.vscroll-inner{direction:rtl;text-align:justify;padding:20px 18px 80px;font-family:"+ arFont +";font-size:1.7rem;line-height:2.8;word-spacing:3px;}
+.vscroll-inner{direction:rtl;text-align:justify;padding:20px 18px 80px;font-family:${arFont};font-size:1.7rem;line-height:2.8;word-spacing:3px;}
 .vitem{display:inline;}
-.vitem.mem .var-text{color:"+ t.gr +";}
-.vitem.pl .var-text{color:"+ acc +";}
-.vitem.due .var-text{color:"+ t.rd +";}
+.vitem.mem .var-text{color:${t.gr};}
+.vitem.pl .var-text{color:${acc};}
+.vitem.due .var-text{color:${t.rd};}
 /* ── Immersive ── */
-.immersive{position:fixed;inset:0;z-index:100;background:"+ tn==="dark"?"#04060a":"#faf6ef" +";display:flex;flex-direction:column;overflow:hidden;}
-.immersive-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid "+ t.b1 +";}
-.immersive-title{font-family:'Amiri',serif;font-size:1.3rem;color:"+ acc +";}
+.immersive{position:fixed;inset:0;z-index:100;background:${tn==="dark"?"#04060a":"#faf6ef"};display:flex;flex-direction:column;overflow:hidden;}
+.immersive-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid ${t.b1};}
+.immersive-title{font-family:'Amiri',serif;font-size:1.3rem;color:${acc};}
 .immersive-scroll{flex:1;overflow-y:auto;padding:20px 18px;display:flex;flex-direction:column;gap:24px;}
 .immersive-verse{text-align:center;padding:20px 0;transition:background .2s,border-radius .2s;}
-.immersive-verse:hover{background:"+ t.s2 +";border-radius:12px;}
-.immersive-ar{font-family:"+ arFont +";direction:rtl;text-align:center;line-height:2.5;color:"+ tn==="dark"?"#f0e6c8":"#2a1a00" +";}
-.immersive-fr{font-size:.82rem;color:"+ t.tx2 +";font-style:italic;line-height:1.8;margin-top:10px;text-align:center;}
-.immersive-num{font-size:.65rem;color:"+ t.tx3 +";margin-top:8px;}
+.immersive-verse:hover{background:${t.s2};border-radius:12px;}
+.immersive-ar{font-family:${arFont};direction:rtl;text-align:center;line-height:2.5;color:${tn==="dark"?"#f0e6c8":"#2a1a00"};}
+.immersive-fr{font-size:.82rem;color:${t.tx2};font-style:italic;line-height:1.8;margin-top:10px;text-align:center;}
+.immersive-num{font-size:.65rem;color:${t.tx3};margin-top:8px;}
 .vtop{display:flex;align-items:flex-start;gap:8px;}
-.vnum{min-width:24px;height:24px;border-radius:50%;border:1px solid "+ t.b2 +";display:flex;align-items:center;justify-content:center;font-size:.6rem;color:"+ t.tx3 +";flex-shrink:0;cursor:pointer;transition:all .2s;margin-top:6px;}
-.vnum:hover{border-color:"+ t.bl +";color:"+ t.bl +";transform:scale(1.15);}
-.vnum.mem{background:"+ t.grD +";border-color:"+ t.gr +";color:"+ t.gr +";}
-.vnum.pl{border-color:"+ acc +";color:"+ acc +";}
-.var-text{font-family:"+ arFont +";font-size:1.65rem;direction:rtl;text-align:right;line-height:2.1;flex:1;}
-.vmark{margin-right:4px;font-size:.8rem;color:"+ t.tx3 +";font-family:'Amiri',serif;}
-.vfr{font-size:.74rem;color:"+ t.tx2 +";line-height:1.7;margin-top:6px;padding-top:6px;border-top:1px solid "+ t.b1 +";font-style:italic;}
-.vtf{margin-top:7px;padding:8px 10px;background:rgba(168,85,247,.07);border-left:3px solid "+ t.pu +";border-radius:0 8px 8px 0;font-size:.7rem;color:"+ t.tx2 +";line-height:1.7;}
-.vtf-hd{font-size:.58rem;color:"+ t.pu +";text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:3px;}
+.vnum{min-width:24px;height:24px;border-radius:50%;border:1px solid ${t.b2};display:flex;align-items:center;justify-content:center;font-size:.6rem;color:${t.tx3};flex-shrink:0;cursor:pointer;transition:all .2s;margin-top:6px;}
+.vnum:hover{border-color:${t.bl};color:${t.bl};transform:scale(1.15);}
+.vnum.mem{background:${t.grD};border-color:${t.gr};color:${t.gr};}
+.vnum.pl{border-color:${acc};color:${acc};}
+.var-text{font-family:${arFont};font-size:1.65rem;direction:rtl;text-align:right;line-height:2.1;flex:1;}
+.vmark{margin-right:4px;font-size:.8rem;color:${t.tx3};font-family:'Amiri',serif;}
+.vfr{font-size:.74rem;color:${t.tx2};line-height:1.7;margin-top:6px;padding-top:6px;border-top:1px solid ${t.b1};font-style:italic;}
+.vtf{margin-top:7px;padding:8px 10px;background:rgba(168,85,247,.07);border-left:3px solid ${t.pu};border-radius:0 8px 8px 0;font-size:.7rem;color:${t.tx2};line-height:1.7;}
+.vtf-hd{font-size:.58rem;color:${t.pu};text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:3px;}
 .vacts{display:flex;gap:4px;margin-top:7px;flex-wrap:wrap;max-height:0;overflow:hidden;transition:max-height .25s ease,opacity .2s;opacity:0;pointer-events:none;}
 .vacts.open{max-height:120px;opacity:1;pointer-events:auto;}
-.vbtn{padding:3px 8px;border-radius:99px;border:1px solid "+ t.b2 +";background:transparent;color:"+ t.tx3 +";font-size:.6rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:3px;}
-.vbtn:hover{border-color:"+ acc +";color:"+ acc +";transform:translateY(-1px);}
-.vbtn.mem{background:"+ t.grD +";border-color:"+ t.gr +";color:"+ t.gr +";}
-.vbtn.snd{border-color:"+ t.bl +";color:"+ t.bl +";}
+.vbtn{padding:3px 8px;border-radius:99px;border:1px solid ${t.b2};background:transparent;color:${t.tx3};font-size:.6rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:3px;}
+.vbtn:hover{border-color:${acc};color:${acc};transform:translateY(-1px);}
+.vbtn.mem{background:${t.grD};border-color:${t.gr};color:${t.gr};}
+.vbtn.snd{border-color:${t.bl};color:${t.bl};}
 /* ── Stats ── */
 .sp{display:flex;flex-direction:column;gap:12px;}
 .sg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
-.sc{background:"+ t.cardBg +";border:1px solid "+ t.b1 +";border-radius:13px;padding:13px;transition:transform .2s,box-shadow .2s,border-color .2s;}
-.sc:hover{transform:translateY(-3px);box-shadow:0 8px 24px "+ acc +"22;border-color:"+ acc +"44;}
-.slbl{font-size:.58rem;text-transform:uppercase;letter-spacing:1.5px;color:"+ t.tx3 +";margin-bottom:6px;}
+.sc{background:${t.cardBg};border:1px solid ${t.b1};border-radius:13px;padding:13px;transition:transform .2s,box-shadow .2s,border-color .2s;}
+.sc:hover{transform:translateY(-3px);box-shadow:0 8px 24px ${acc}22;border-color:${acc}44;}
+.slbl{font-size:.58rem;text-transform:uppercase;letter-spacing:1.5px;color:${t.tx3};margin-bottom:6px;}
 .sval{font-size:1.4rem;font-weight:700;line-height:1;margin-bottom:3px;}
-.ssub{font-size:.62rem;color:"+ t.tx3 +";}
-.sc.a .sval{color:"+ acc +";}.sc.g .sval{color:"+ t.gr +";}.sc.b .sval{color:"+ t.bl +";}.sc.r .sval{color:"+ t.rd +";}
+.ssub{font-size:.62rem;color:${t.tx3};}
+.sc.a .sval{color:${acc};}.sc.g .sval{color:${t.gr};}.sc.b .sval{color:${t.bl};}.sc.r .sval{color:${t.rd};}
 .two-h{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .donut-w{position:relative;width:150px;height:150px;margin:0 auto;}
 .donut-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.d-pct{font-size:1.75rem;font-weight:700;color:"+ acc +";}.d-lbl{font-size:.58rem;color:"+ t.tx3 +";text-transform:uppercase;letter-spacing:1px;}
+.d-pct{font-size:1.75rem;font-weight:700;color:${acc};}.d-lbl{font-size:.58rem;color:${t.tx3};text-transform:uppercase;letter-spacing:1px;}
 .bc{display:flex;align-items:flex-end;gap:3px;height:100px;}
 .bcol{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;}
 .bfw{flex:1;width:100%;display:flex;flex-direction:column;justify-content:flex-end;}
-.bfi{background:linear-gradient(180deg,"+ acc2 +","+ acc +");border-radius:3px 3px 0 0;min-height:2px;transition:height .4s;}
+.bfi{background:linear-gradient(180deg,${acc2},${acc});border-radius:3px 3px 0 0;min-height:2px;transition:height .4s;}
 .bfi:hover{filter:brightness(1.2);}
-.blbl{font-size:.48rem;color:"+ t.tx3 +";}.bval{font-size:.48rem;color:"+ acc +";}
+.blbl{font-size:.48rem;color:${t.tx3};}.bval{font-size:.48rem;color:${acc};}
 .trow{display:flex;align-items:center;gap:8px;padding:5px 0;transition:background .15s,transform .15s;border-radius:6px;}
-.trow:hover{background:"+ t.s2 +";transform:translateX(3px);}
-.tbar{flex:2;height:5px;background:"+ t.b1 +";border-radius:99px;overflow:hidden;}
-.tfill{height:100%;background:"+ t.gr +";border-radius:99px;}
+.trow:hover{background:${t.s2};transform:translateX(3px);}
+.tbar{flex:2;height:5px;background:${t.b1};border-radius:99px;overflow:hidden;}
+.tfill{height:100%;background:${t.gr};border-radius:99px;}
 .cd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;padding:12px;}
-.cdc{background:"+ t.s2 +";border:1px solid "+ t.b1 +";border-radius:10px;padding:11px;cursor:pointer;transition:all .2s;}
-.cdc:hover{border-color:"+ acc +";transform:translateY(-2px);box-shadow:0 4px 12px "+ acc +"22;}
+.cdc{background:${t.s2};border:1px solid ${t.b1};border-radius:10px;padding:11px;cursor:pointer;transition:all .2s;}
+.cdc:hover{border-color:${acc};transform:translateY(-2px);box-shadow:0 4px 12px ${acc}22;}
 /* ── Khatma ── */
 .khatma-wrap{display:flex;flex-direction:column;gap:14px;padding-bottom:20px;}
-.kh-active{background:"+ t.cardBg +";border:1px solid "+ t.b1 +";border-radius:14px;padding:18px;overflow:visible;}
+.kh-active{background:${t.cardBg};border:1px solid ${t.b1};border-radius:14px;padding:18px;overflow:visible;}
 .kp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;}
-.kp-card{background:"+ t.s2 +";border:2px solid "+ t.b1 +";border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;text-align:center;}
-.kp-card:hover{border-color:"+ acc +";transform:translateY(-2px);box-shadow:0 4px 16px "+ acc +"22;}
-.kp-card.sel{border-color:"+ acc +";background:"+ t.s3 +";}
-.kp-label{font-size:.85rem;font-weight:600;color:"+ t.tx +";margin-bottom:4px;}
-.kp-desc{font-size:.65rem;color:"+ t.tx3 +";}
+.kp-card{background:${t.s2};border:2px solid ${t.b1};border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;text-align:center;}
+.kp-card:hover{border-color:${acc};transform:translateY(-2px);box-shadow:0 4px 16px ${acc}22;}
+.kp-card.sel{border-color:${acc};background:${t.s3};}
+.kp-label{font-size:.85rem;font-weight:600;color:${t.tx};margin-bottom:4px;}
+.kp-desc{font-size:.65rem;color:${t.tx3};}
 .kp-icon{font-size:1.5rem;margin-bottom:6px;}
-.kh-title{font-family:'Amiri',serif;font-size:1.4rem;color:"+ acc +";margin-bottom:4px;}
-.kh-sub{font-size:.68rem;color:"+ t.tx3 +";margin-bottom:14px;}
-.kh-track{height:20px;background:"+ t.b1 +";border-radius:99px;overflow:hidden;margin-bottom:8px;position:relative;}
-.kh-fill{height:100%;background:linear-gradient(90deg,"+ acc +","+ acc2 +");border-radius:99px;transition:width .8s ease;}
+.kh-title{font-family:'Amiri',serif;font-size:1.4rem;color:${acc};margin-bottom:4px;}
+.kh-sub{font-size:.68rem;color:${t.tx3};margin-bottom:14px;}
+.kh-track{height:20px;background:${t.b1};border-radius:99px;overflow:hidden;margin-bottom:8px;position:relative;}
+.kh-fill{height:100%;background:linear-gradient(90deg,${acc},${acc2});border-radius:99px;transition:width .8s ease;}
 .kh-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5);}
 .kd-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:12px;}
-.kd-cell{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;cursor:pointer;transition:all .15s;border:1.5px solid "+ t.b2 +";background:"+ t.s2 +";color:"+ t.tx3 +";min-height:32px;}
-.kd-cell.done{background:"+ t.gr +";border-color:"+ t.gr +";color:#fff;}
-.kd-cell.today{border-color:"+ acc +";color:"+ acc +";background:"+ t.s3 +";font-weight:800;}
-.kd-cell:hover{border-color:"+ acc +";transform:scale(1.08);box-shadow:0 2px 8px "+ acc +"33;}
+.kd-cell{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;cursor:pointer;transition:all .15s;border:1.5px solid ${t.b2};background:${t.s2};color:${t.tx3};min-height:32px;}
+.kd-cell.done{background:${t.gr};border-color:${t.gr};color:#fff;}
+.kd-cell.today{border-color:${acc};color:${acc};background:${t.s3};font-weight:800;}
+.kd-cell:hover{border-color:${acc};transform:scale(1.08);box-shadow:0 2px 8px ${acc}33;}
 .kh-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}
-.khs{background:"+ t.s2 +";border-radius:10px;padding:12px;text-align:center;transition:transform .2s;}
+.khs{background:${t.s2};border-radius:10px;padding:12px;text-align:center;transition:transform .2s;}
 .khs:hover{transform:translateY(-2px);}
-.khs-v{font-size:1.3rem;font-weight:700;color:"+ acc +";}
-.khs-l{font-size:.6rem;color:"+ t.tx3 +";text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.khs-v{font-size:1.3rem;font-weight:700;color:${acc};}
+.khs-l{font-size:.6rem;color:${t.tx3};text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
 .streak-fire{font-size:1.8rem;}
 /* ── Settings ── */
 .settings-wrap{display:flex;flex-direction:column;gap:14px;max-width:600px;margin:0 auto;overflow-x:hidden;overscroll-behavior:none;-webkit-overflow-scrolling:touch;}
-.settings-section{background:"+ t.cardBg +";border:1px solid "+ t.b1 +";border-radius:14px;overflow:hidden;transition:box-shadow .2s;}
-.settings-section:hover{box-shadow:0 4px 20px "+ acc +"14;}
-.ss-hd{padding:12px 16px;border-bottom:1px solid "+ t.b1 +";font-size:.68rem;text-transform:uppercase;letter-spacing:1.5px;color:"+ t.tx3 +";font-weight:600;}
+.settings-section{background:${t.cardBg};border:1px solid ${t.b1};border-radius:14px;overflow:hidden;transition:box-shadow .2s;}
+.settings-section:hover{box-shadow:0 4px 20px ${acc}14;}
+.ss-hd{padding:12px 16px;border-bottom:1px solid ${t.b1};font-size:.68rem;text-transform:uppercase;letter-spacing:1.5px;color:${t.tx3};font-weight:600;}
 .font-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:12px;}
-.font-card{border:2px solid "+ t.b1 +";border-radius:10px;padding:10px;cursor:pointer;transition:all .2s;}
-.font-card:hover{border-color:"+ acc +";transform:translateY(-2px);box-shadow:0 4px 12px "+ acc +"22;}
-.font-card.sel{border-color:"+ acc +";background:"+ t.s3 +";}
+.font-card{border:2px solid ${t.b1};border-radius:10px;padding:10px;cursor:pointer;transition:all .2s;}
+.font-card:hover{border-color:${acc};transform:translateY(-2px);box-shadow:0 4px 12px ${acc}22;}
+.font-card.sel{border-color:${acc};background:${t.s3};}
 .font-preview{font-size:1.4rem;direction:rtl;text-align:center;margin-bottom:4px;line-height:1.6;}
-.font-name{font-size:.68rem;font-weight:600;color:"+ t.tx +";text-align:center;}
-.font-desc{font-size:.58rem;color:"+ t.tx3 +";text-align:center;}
-.set-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid "+ t.b1 +";transition:background .15s;}
-.set-row:hover{background:"+ t.s2 +";}
+.font-name{font-size:.68rem;font-weight:600;color:${t.tx};text-align:center;}
+.font-desc{font-size:.58rem;color:${t.tx3};text-align:center;}
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid ${t.b1};transition:background .15s;}
+.set-row:hover{background:${t.s2};}
 .set-row:last-child{border-bottom:none;}
-.set-lbl{font-size:.78rem;color:"+ t.tx +";}
-.set-sub{font-size:.63rem;color:"+ t.tx3 +";margin-top:2px;}
-.set-inp{background:"+ t.inputBg +";border:1px solid "+ t.b2 +";color:"+ t.tx +";padding:6px 10px;border-radius:8px;font-size:.76rem;outline:none;width:100px;transition:border-color .2s;}
-.set-inp:focus{border-color:"+ acc +";}
-.toggle{width:42px;height:24px;background:"+ t.b2 +";border-radius:99px;cursor:pointer;position:relative;transition:background .2s;border:none;flex-shrink:0;}
+.set-lbl{font-size:.78rem;color:${t.tx};}
+.set-sub{font-size:.63rem;color:${t.tx3};margin-top:2px;}
+.set-inp{background:${t.inputBg};border:1px solid ${t.b2};color:${t.tx};padding:6px 10px;border-radius:8px;font-size:.76rem;outline:none;width:100px;transition:border-color .2s;}
+.set-inp:focus{border-color:${acc};}
+.toggle{width:42px;height:24px;background:${t.b2};border-radius:99px;cursor:pointer;position:relative;transition:background .2s;border:none;flex-shrink:0;}
 .toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:white;border-radius:50%;transition:transform .2s;}
-.toggle.on{background:"+ acc +";}
+.toggle.on{background:${acc};}
 .toggle.on::after{transform:translateX(18px);}
 /* ── Modal ── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);}
-.modal{background:"+ t.s1 +";border:1px solid "+ acc +";border-radius:18px;padding:26px;max-width:380px;width:92%;}
-.modal h2{font-family:'Amiri',serif;font-size:1.7rem;color:"+ acc +";margin-bottom:5px;}
-.modal p{font-size:.76rem;color:"+ t.tx2 +";line-height:1.65;margin-bottom:18px;}
-.modal label{display:block;font-size:.64rem;color:"+ t.tx3 +";text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
-.modal input{width:100%;background:"+ t.inputBg +";border:1px solid "+ t.b2 +";border-radius:8px;padding:8px 12px;color:"+ t.tx +";font-size:.85rem;margin-bottom:10px;outline:none;transition:border-color .2s;}
-.modal input:focus{border-color:"+ acc +";}
-.mbtn{width:100%;padding:11px;background:"+ acc +";border:none;border-radius:8px;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer;transition:opacity .2s,transform .15s;}
+.modal{background:${t.s1};border:1px solid ${acc};border-radius:18px;padding:26px;max-width:380px;width:92%;}
+.modal h2{font-family:'Amiri',serif;font-size:1.7rem;color:${acc};margin-bottom:5px;}
+.modal p{font-size:.76rem;color:${t.tx2};line-height:1.65;margin-bottom:18px;}
+.modal label{display:block;font-size:.64rem;color:${t.tx3};text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.modal input{width:100%;background:${t.inputBg};border:1px solid ${t.b2};border-radius:8px;padding:8px 12px;color:${t.tx};font-size:.85rem;margin-bottom:10px;outline:none;transition:border-color .2s;}
+.modal input:focus{border-color:${acc};}
+.mbtn{width:100%;padding:11px;background:${acc};border:none;border-radius:8px;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer;transition:opacity .2s,transform .15s;}
 .mbtn:hover{opacity:.92;transform:translateY(-1px);}
 /* ── Hourglass KPI ── */
-.hg-kpi{display:flex;align-items:center;gap:8px;padding:8px 12px;background:"+ t.s2 +";border-radius:12px;border:1px solid "+ t.b1 +";transition:all .2s;cursor:default;}
-.hg-kpi:hover{border-color:"+ acc +"44;background:"+ t.s3 +";transform:translateY(-2px);box-shadow:0 4px 16px "+ acc +"18;}
-.hg-kpi-v{font-size:1.1rem;font-weight:800;color:"+ acc +";line-height:1;font-variant-numeric:tabular-nums;}
-.hg-kpi-l{font-size:.48rem;color:"+ t.tx3 +";text-transform:uppercase;letter-spacing:1.5px;margin-top:1px;}
+.hg-kpi{display:flex;align-items:center;gap:8px;padding:8px 12px;background:${t.s2};border-radius:12px;border:1px solid ${t.b1};transition:all .2s;cursor:default;}
+.hg-kpi:hover{border-color:${acc}44;background:${t.s3};transform:translateY(-2px);box-shadow:0 4px 16px ${acc}18;}
+.hg-kpi-v{font-size:1.1rem;font-weight:800;color:${acc};line-height:1;font-variant-numeric:tabular-nums;}
+.hg-kpi-l{font-size:.48rem;color:${t.tx3};text-transform:uppercase;letter-spacing:1.5px;margin-top:1px;}
 /* ── Badge cards ── */
 .badge-card{padding:12px;border-radius:12px;text-align:center;transition:all .25s;}
 .badge-card:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 8px 24px rgba(0,0,0,.15);}
 /* ── Misc ── */
-.empty{text-align:center;padding:36px 14px;color:"+ t.tx3 +";font-size:.8rem;}
-.big-ar{font-family:"+ arFont +";font-size:2rem;color:"+ acc +";margin-bottom:8px;}
+.empty{text-align:center;padding:36px 14px;color:${t.tx3};font-size:.8rem;}
+.big-ar{font-family:${arFont};font-size:2rem;color:${acc};margin-bottom:8px;}
 @media(max-width:860px){
   .two{grid-template-columns:1fr;}.rp,.lp{position:static;max-height:none;}.vscroll{max-height:none;}
   .sg{grid-template-columns:repeat(2,1fr);}.two-h{grid-template-columns:1fr;}
@@ -1366,7 +1365,7 @@ body>*{position:relative;z-index:1;}
   .logo-h{font-size:1.2rem;}
   .wrap{padding-bottom:calc(130px + env(safe-area-inset-bottom));}
 }
-";}
+`;}
 
 // Main App
 export default function App() {
@@ -2631,7 +2630,7 @@ return (
                   <label style={{fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",display:"block",marginBottom:5}}>Objectif global</label>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
                     {[["juz30","Juz 30"],["juz29","Juz 29-30"],["halfquran","Demi-Coran"],["fullquran","Coran complet"]].map(([v,l])=>(
-                      <button key={v} onClick={()=>setAiPlanParams(p=>({...p,goal:v,customGoal:null}))} style={{padding:"8px 10px",borderRadius:8,border:`1.5px solid ${aiPlanParams.goal===v&&!aiPlanParams.customGoal?t.acc:t.b2}`,background:aiPlanParams.goal===v&&!aiPlanParams.customGoal?t.acc+"15":t.s2,color:aiPlanParams.goal===v&&!aiPlanParams.customGoal?t.acc:t.tx,fontSize:".72rem",cursor:"pointer",fontWeight:aiPlanParams.goal===v&&!aiPlanParams.customGoal?700:400,transition:"all .15s"}}>{l}</button>
+                      <button key={v} onClick={()=>setAiPlanParams(p=>({...p,goal:v,customGoal:null}))} style={{padding:"8px 10px",borderRadius:8,border:`1.5px solid ${aiPlanParams.goal===v&&!aiPlanParams.customGoal?t.acc:t.b2}`,background:aiPlanParams.goal===v&&!aiPlanParams.customGoal?`${t.acc}15`:t.s2,color:aiPlanParams.goal===v&&!aiPlanParams.customGoal?t.acc:t.tx,fontSize:".72rem",cursor:"pointer",fontWeight:aiPlanParams.goal===v&&!aiPlanParams.customGoal?700:400,transition:"all .15s"}}>{l}</button>
                     ))}
                   </div>
                 </div>
@@ -2639,15 +2638,15 @@ return (
                 <div>
                   <label style={{fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",display:"block",marginBottom:5}}>Ou choisir précisément</label>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
-                    <select onChange={e=>{const v=+e.target.value;if(v)setAiPlanParams(p=>({...p,customGoal:`juz_${v}`,goal:null}));}} style={{padding:"7px 6px",borderRadius:8,border:`1px solid ${aiPlanParams.customGoal?.startsWith("juz_")?t.acc:t.b2}`,background:aiPlanParams.customGoal?.startsWith("juz_")?t.acc+"15":t.s2,color:aiPlanParams.customGoal?.startsWith("juz_")?t.acc:t.tx,fontSize:".65rem",cursor:"pointer",outline:"none"}}>
+                    <select onChange={e=>{const v=+e.target.value;if(v)setAiPlanParams(p=>({...p,customGoal:`juz_${v}`,goal:null}));}} style={{padding:"7px 6px",borderRadius:8,border:`1px solid ${aiPlanParams.customGoal?.startsWith("juz_")?t.acc:t.b2}`,background:aiPlanParams.customGoal?.startsWith("juz_")?`${t.acc}15`:t.s2,color:aiPlanParams.customGoal?.startsWith("juz_")?t.acc:t.tx,fontSize:".65rem",cursor:"pointer",outline:"none"}}>
                       <option value="">Juz…</option>
                       {Array.from({length:30},(_,i)=>i+1).map(j=><option key={j} value={j}>Juz {j}</option>)}
                     </select>
-                    <select onChange={e=>{const v=+e.target.value;if(v)setAiPlanParams(p=>({...p,customGoal:`surah_${v}`,goal:null}));}} style={{padding:"7px 6px",borderRadius:8,border:`1px solid ${aiPlanParams.customGoal?.startsWith("surah_")?t.acc:t.b2}`,background:aiPlanParams.customGoal?.startsWith("surah_")?t.acc+"15":t.s2,color:aiPlanParams.customGoal?.startsWith("surah_")?t.acc:t.tx,fontSize:".65rem",cursor:"pointer",outline:"none"}}>
+                    <select onChange={e=>{const v=+e.target.value;if(v)setAiPlanParams(p=>({...p,customGoal:`surah_${v}`,goal:null}));}} style={{padding:"7px 6px",borderRadius:8,border:`1px solid ${aiPlanParams.customGoal?.startsWith("surah_")?t.acc:t.b2}`,background:aiPlanParams.customGoal?.startsWith("surah_")?`${t.acc}15`:t.s2,color:aiPlanParams.customGoal?.startsWith("surah_")?t.acc:t.tx,fontSize:".65rem",cursor:"pointer",outline:"none"}}>
                       <option value="">Sourate…</option>
                       {SURAHS.map(s=><option key={s.n} value={s.n}>{s.name}</option>)}
                     </select>
-                    <select onChange={e=>{const v=+e.target.value;if(v)setAiPlanParams(p=>({...p,customGoal:`hizb_${v}`,goal:null}));}} style={{padding:"7px 6px",borderRadius:8,border:`1px solid ${aiPlanParams.customGoal?.startsWith("hizb_")?t.acc:t.b2}`,background:aiPlanParams.customGoal?.startsWith("hizb_")?t.acc+"15":t.s2,color:aiPlanParams.customGoal?.startsWith("hizb_")?t.acc:t.tx,fontSize:".65rem",cursor:"pointer",outline:"none"}}>
+                    <select onChange={e=>{const v=+e.target.value;if(v)setAiPlanParams(p=>({...p,customGoal:`hizb_${v}`,goal:null}));}} style={{padding:"7px 6px",borderRadius:8,border:`1px solid ${aiPlanParams.customGoal?.startsWith("hizb_")?t.acc:t.b2}`,background:aiPlanParams.customGoal?.startsWith("hizb_")?`${t.acc}15`:t.s2,color:aiPlanParams.customGoal?.startsWith("hizb_")?t.acc:t.tx,fontSize:".65rem",cursor:"pointer",outline:"none"}}>
                       <option value="">Hizb…</option>
                       {Array.from({length:60},(_,i)=>i+1).map(h=><option key={h} value={h}>Hizb {h}</option>)}
                     </select>
@@ -2668,7 +2667,7 @@ return (
                   <label style={{fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",display:"block",marginBottom:5}}>Niveau</label>
                   <div style={{display:"flex",gap:6}}>
                     {[["debutant","Débutant"],["intermediaire","Intermédiaire"],["avance","Avancé"]].map(([v,l])=>(
-                      <button key={v} onClick={()=>setAiPlanParams(p=>({...p,level:v}))} style={{flex:1,padding:"7px",borderRadius:8,border:`1.5px solid ${aiPlanParams.level===v?t.acc:t.b2}`,background:aiPlanParams.level===v?t.acc+"15":t.s2,color:aiPlanParams.level===v?t.acc:t.tx,fontSize:".7rem",cursor:"pointer",fontWeight:aiPlanParams.level===v?700:400,transition:"all .15s"}}>{l}</button>
+                      <button key={v} onClick={()=>setAiPlanParams(p=>({...p,level:v}))} style={{flex:1,padding:"7px",borderRadius:8,border:`1.5px solid ${aiPlanParams.level===v?t.acc:t.b2}`,background:aiPlanParams.level===v?`${t.acc}15`:t.s2,color:aiPlanParams.level===v?t.acc:t.tx,fontSize:".7rem",cursor:"pointer",fontWeight:aiPlanParams.level===v?700:400,transition:"all .15s"}}>{l}</button>
                     ))}
                   </div>
                 </div>
@@ -2689,7 +2688,7 @@ return (
                   {aiPlanResult}
                 </div>
                 <div style={{display:"flex",gap:8}}>
-                  <button onClick={()=>{navigator.clipboard?.writeText(aiPlanResult);}} style={{flex:1,padding:"9px",background:t.acc+"18",border:`1px solid ${t.acc}`,borderRadius:8,color:t.acc,fontSize:".75rem",cursor:"pointer",fontWeight:600}}>Copier le plan</button>
+                  <button onClick={()=>{navigator.clipboard?.writeText(aiPlanResult);}} style={{flex:1,padding:"9px",background:`${t.acc}18`,border:`1px solid ${t.acc}`,borderRadius:8,color:t.acc,fontSize:".75rem",cursor:"pointer",fontWeight:600}}>Copier le plan</button>
                   <button onClick={()=>setAiPlanResult("")} style={{flex:1,padding:"9px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:8,color:t.tx2,fontSize:".75rem",cursor:"pointer"}}>Nouveau plan</button>
                 </div>
               </div>
@@ -2709,9 +2708,9 @@ return (
             <circle cx="60" cy="60" r="18" fill="none" stroke="url(#sg)" strokeWidth="2"/>
             <circle cx="60" cy="60" r="10" fill={acc} opacity=".15"/>
           </svg>
-          <div style={{fontFamily:"Amiri,serif",fontSize:"2.2rem",color:acc,textShadow:"0 0 30px "+acc+"66",letterSpacing:"2px",marginBottom:6}}>Al-Hifz</div>
+          <div style={{fontFamily:"Amiri,serif",fontSize:"2.2rem",color:acc,textShadow:`0 0 30px ${acc}66`,letterSpacing:"2px",marginBottom:6}}>Al-Hifz</div>
           <div style={{fontFamily:"Amiri Quran,serif",fontSize:".9rem",color:acc2,letterSpacing:"3px",opacity:.7}}>حفظ القرآن الكريم</div>
-          <div style={{marginTop:20,display:"flex",gap:5}}>{[0,1,2].map(i=>(<div key={i} style={{width:5,height:5,borderRadius:"50%",background:acc,animation:"pulse 1s "+(i*0.2)+"s infinite",opacity:.6}}/>))}</div>
+          <div style={{marginTop:20,display:"flex",gap:5}}>{[0,1,2].map(i=>(<div key={i} style={{width:5,height:5,borderRadius:"50%",background:acc,animation:`pulse 1s ${i*0.2}s infinite`,opacity:.6}}/>))}</div>
         </div>
       )}
 
@@ -2737,7 +2736,7 @@ return (
                   <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.6rem",direction:"rtl",textAlign:"right",lineHeight:2.2,color:t.acc}}>{(testVerses[testIdx]?.ar||"").split(" ").slice(0,3).join(" ")}…</div>
                   <div style={{fontSize:".68rem",color:t.tx3,marginTop:6,fontStyle:"italic"}}>{testVerses[testIdx]?.fr?.split(" ").slice(0,6).join(" ")}…</div>
                 </div>
-                {testRevealed&&(<div style={{background:t.s3,borderRadius:14,padding:16,border:"2px solid "+t.acc+"44"}}>
+                {testRevealed&&(<div style={{background:t.s3,borderRadius:14,padding:16,border:`2px solid ${t.acc}44`}}>
                   <div style={{fontSize:".6rem",color:t.acc,marginBottom:8,textTransform:"uppercase"}}>Verset complet</div>
                   <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.6rem",direction:"rtl",textAlign:"right",lineHeight:2.2,color:t.tx}}>{(testVerses[testIdx]?.ar||"")} ﴿{testVerses[testIdx]?.n}﴾</div>
                   <div style={{fontSize:".75rem",color:t.tx2,marginTop:8,fontStyle:"italic"}}>{testVerses[testIdx]?.fr}</div>
@@ -2745,8 +2744,8 @@ return (
                 {!testRevealed
                   ?(<button className="mbtn" onClick={()=>setTestRevealed(true)}>Révéler le verset</button>)
                   :(<div style={{display:"flex",gap:10}}>
-                      <button style={{flex:1,padding:"14px",borderRadius:12,border:"none",background:t.rd+"22",color:t.rd,fontSize:".85rem",fontWeight:700,cursor:"pointer"}} onClick={()=>{setTestScore(p=>({...p,wrong:p.wrong+1,total:p.total+1}));if(testIdx+1>=testVerses.length)setTestDone(true);else{setTestIdx(i=>i+1);setTestRevealed(false);}}}>✗ Difficile</button>
-                      <button style={{flex:1,padding:"14px",borderRadius:12,border:"none",background:t.gr+"22",color:t.gr,fontSize:".85rem",fontWeight:700,cursor:"pointer"}} onClick={()=>{markSpaced(testSurah.n,testVerses[testIdx]?.n,4);setTestScore(p=>({...p,correct:p.correct+1,total:p.total+1}));if(testIdx+1>=testVerses.length)setTestDone(true);else{setTestIdx(i=>i+1);setTestRevealed(false);}}}>✓ Maîtrisé</button>
+                      <button style={{flex:1,padding:"14px",borderRadius:12,border:"none",background:`${t.rd}22`,color:t.rd,fontSize:".85rem",fontWeight:700,cursor:"pointer"}} onClick={()=>{setTestScore(p=>({...p,wrong:p.wrong+1,total:p.total+1}));if(testIdx+1>=testVerses.length)setTestDone(true);else{setTestIdx(i=>i+1);setTestRevealed(false);}}}>✗ Difficile</button>
+                      <button style={{flex:1,padding:"14px",borderRadius:12,border:"none",background:`${t.gr}22`,color:t.gr,fontSize:".85rem",fontWeight:700,cursor:"pointer"}} onClick={()=>{markSpaced(testSurah.n,testVerses[testIdx]?.n,4);setTestScore(p=>({...p,correct:p.correct+1,total:p.total+1}));if(testIdx+1>=testVerses.length)setTestDone(true);else{setTestIdx(i=>i+1);setTestRevealed(false);}}}>✓ Maîtrisé</button>
                     </div>)
                 }
               </div>)}
@@ -2881,17 +2880,17 @@ return (
       {shareVerse&&(<div className="overlay" onClick={()=>setShareVerse(null)}><div className="modal" onClick={e=>e.stopPropagation()}><h2 style={{fontFamily:"Amiri,serif",color:acc,marginBottom:4}}>{shareVerse.surahAr}</h2><p style={{fontSize:".68rem",color:t.tx3,marginBottom:14}}>{shareVerse.surah} · verset {shareVerse.vn}</p><div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,border:`2px solid ${acc}`,borderRadius:14,padding:"20px 18px",marginBottom:14,textAlign:"center"}}><div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.5rem",direction:"rtl",lineHeight:2.2,color:t.tx,marginBottom:10}}>{shareVerse.ar}</div><div style={{fontSize:".75rem",color:t.tx2,fontStyle:"italic",lineHeight:1.6}}>{shareVerse.fr}</div><div style={{marginTop:10,fontSize:".6rem",color:t.tx3}}>— {shareVerse.surah} ({shareVerse.sn}:{shareVerse.vn}) · Al-Hifz</div></div><button className="mbtn" onClick={()=>{const txt=`${shareVerse.ar}\n\n${shareVerse.fr}\n\n— ${shareVerse.surah} (${shareVerse.sn}:${shareVerse.vn})`;navigator.clipboard?.writeText(txt).catch(()=>{});setShareVerse(null);}}>Copier le verset</button></div></div>)}
 
       {/* Weekly report */}
-      {showWeeklyReport&&(<div className="overlay" onClick={()=>setShowWeeklyReport(false)}><div className="modal" onClick={e=>e.stopPropagation()}><h2 style={{marginBottom:4}}>Rapport hebdomadaire</h2><p style={{marginBottom:16}}>{weeklyReport.totalWeek} versets · {weeklyReport.activeDays}/7 jours actifs</p><div style={{display:"flex",alignItems:"flex-end",gap:6,height:80,marginBottom:12}}>{weeklyReport.days.map((d,i)=>{const maxG=Math.max(...weeklyReport.days.map(x=>x.gained),1);const isToday=d.date===today();return(<div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}><div style={{fontSize:".52rem",color:acc}}>{d.gained||""}</div><div style={{width:"100%",height:60,display:"flex",alignItems:"flex-end"}}><div style={{width:"100%",height:`${Math.max(Math.round(d.gained/maxG*100),4)}%`,background:isToday?acc:acc+"66",borderRadius:"3px 3px 0 0",minHeight:3}}/></div><div style={{fontSize:".52rem",color:isToday?acc:t.tx3,fontWeight:isToday?700:400}}>{d.label}</div></div>);})}</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>{[{v:weeklyReport.totalWeek,l:"Versets",c:acc},{v:weeklyReport.activeDays,l:"Jours actifs",c:t.gr},{v:weeklyReport.best?.gained||0,l:"Meilleur jour",c:t.bl}].map((k,i)=>(<div key={i} style={{background:t.s2,borderRadius:10,padding:"10px",textAlign:"center"}}><div style={{fontSize:"1.4rem",fontWeight:700,color:k.c}}>{k.v}</div><div style={{fontSize:".58rem",color:t.tx3}}>{k.l}</div></div>))}</div><div style={{textAlign:"center",color:weeklyReport.totalWeek>0?t.gr:t.tx3,fontSize:".75rem",marginBottom:14,fontWeight:600}}>{weeklyReport.activeDays>=5?"Excellente semaine ! 🌟":weeklyReport.activeDays>=3?"Bonne progression, continue !":"Essaie de mémoriser chaque jour."}</div><button className="mbtn" onClick={()=>setShowWeeklyReport(false)}>Fermer</button></div></div>)}
+      {showWeeklyReport&&(<div className="overlay" onClick={()=>setShowWeeklyReport(false)}><div className="modal" onClick={e=>e.stopPropagation()}><h2 style={{marginBottom:4}}>Rapport hebdomadaire</h2><p style={{marginBottom:16}}>{weeklyReport.totalWeek} versets · {weeklyReport.activeDays}/7 jours actifs</p><div style={{display:"flex",alignItems:"flex-end",gap:6,height:80,marginBottom:12}}>{weeklyReport.days.map((d,i)=>{const maxG=Math.max(...weeklyReport.days.map(x=>x.gained),1);const isToday=d.date===today();return(<div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}><div style={{fontSize:".52rem",color:acc}}>{d.gained||""}</div><div style={{width:"100%",height:60,display:"flex",alignItems:"flex-end"}}><div style={{width:"100%",height:`${Math.max(Math.round(d.gained/maxG*100),4)}%`,background:isToday?acc:`${acc}66`,borderRadius:"3px 3px 0 0",minHeight:3}}/></div><div style={{fontSize:".52rem",color:isToday?acc:t.tx3,fontWeight:isToday?700:400}}>{d.label}</div></div>);})}</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>{[{v:weeklyReport.totalWeek,l:"Versets",c:acc},{v:weeklyReport.activeDays,l:"Jours actifs",c:t.gr},{v:weeklyReport.best?.gained||0,l:"Meilleur jour",c:t.bl}].map((k,i)=>(<div key={i} style={{background:t.s2,borderRadius:10,padding:"10px",textAlign:"center"}}><div style={{fontSize:"1.4rem",fontWeight:700,color:k.c}}>{k.v}</div><div style={{fontSize:".58rem",color:t.tx3}}>{k.l}</div></div>))}</div><div style={{textAlign:"center",color:weeklyReport.totalWeek>0?t.gr:t.tx3,fontSize:".75rem",marginBottom:14,fontWeight:600}}>{weeklyReport.activeDays>=5?"Excellente semaine ! 🌟":weeklyReport.activeDays>=3?"Bonne progression, continue !":"Essaie de mémoriser chaque jour."}</div><button className="mbtn" onClick={()=>setShowWeeklyReport(false)}>Fermer</button></div></div>)}
 
       {/* Offline banner */}
       {isOffline&&(
-        <div style={{background:t.rd+"CC",color:"#fff",padding:"6px 16px",textAlign:"center",fontSize:".7rem",fontWeight:600,backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",gap:8,position:"sticky",top:0,zIndex:61}}>
+        <div style={{background:`${t.rd}CC`,color:"#fff",padding:"6px 16px",textAlign:"center",fontSize:".7rem",fontWeight:600,backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",gap:8,position:"sticky",top:0,zIndex:61}}>
           <span>●</span> Mode hors ligne — Coran embarqué et mémorisations disponibles
         </div>
       )}
       {/* Install banner */}
       {showInstallBanner&&(
-        <div style={{background:"linear-gradient(135deg,"+t.acc+"ee,"+t.acc2+"ee)",padding:"8px 16px",display:"flex",alignItems:"center",gap:10,position:"sticky",top:0,zIndex:61,backdropFilter:"blur(8px)"}}>
+        <div style={{background:`linear-gradient(135deg,${t.acc}ee,${t.acc2}ee)`,padding:"8px 16px",display:"flex",alignItems:"center",gap:10,position:"sticky",top:0,zIndex:61,backdropFilter:"blur(8px)"}}>
           <span style={{fontSize:".75rem",fontWeight:700,color:"#fff",flex:1}}>Installer Al-Hifz sur ton écran d'accueil</span>
           <button onClick={()=>{installPromptRef.current?.prompt();setShowInstallBanner(false);}} style={{background:"rgba(255,255,255,.25)",border:"1px solid rgba(255,255,255,.4)",color:"#fff",borderRadius:8,padding:"4px 12px",fontSize:".7rem",fontWeight:700,cursor:"pointer"}}>Installer</button>
           <button onClick={()=>setShowInstallBanner(false)} style={{background:"none",border:"none",color:"rgba(255,255,255,.7)",cursor:"pointer",fontSize:"1rem"}}>✕</button>
@@ -2912,7 +2911,7 @@ return (
       {badgePopup&&(
         <div style={{position:"fixed",bottom:100,left:"50%",transform:"translateX(-50%)",zIndex:300,animation:"slideUp .4s ease"}} onClick={()=>setBadgePopup(null)}>
           <style>{`@keyframes slideUp{from{transform:translateX(-50%) translateY(30px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}`}</style>
-          <div style={{background:`linear-gradient(135deg,${t.s1},${t.s2})`,border:`2px solid ${t.acc}`,borderRadius:18,padding:"16px 24px",textAlign:"center",boxShadow:"0 8px 32px "+t.acc+"44",backdropFilter:"blur(16px)",minWidth:220,cursor:"pointer"}}>
+          <div style={{background:`linear-gradient(135deg,${t.s1},${t.s2})`,border:`2px solid ${t.acc}`,borderRadius:18,padding:"16px 24px",textAlign:"center",boxShadow:`0 8px 32px ${t.acc}44`,backdropFilter:"blur(16px)",minWidth:220,cursor:"pointer"}}>
             <div style={{fontSize:"2.5rem",marginBottom:6}}>{badgePopup.icon}</div>
             <div style={{fontSize:".6rem",color:t.acc,textTransform:"uppercase",letterSpacing:2,fontWeight:700,marginBottom:4}}>Badge débloqué !</div>
             <div style={{fontSize:".9rem",fontWeight:800,color:t.tx,marginBottom:2}}>{badgePopup.label}</div>
@@ -2924,7 +2923,7 @@ return (
       {/* Popup encouragement pages */}
       {encouragementMsg&&(
         <div style={{position:"fixed",bottom:100,left:"50%",transform:"translateX(-50%)",zIndex:300,animation:"slideUp .4s ease"}} onClick={()=>setEncouragementMsg(null)}>
-          <div style={{background:`linear-gradient(135deg,${t.s1},${t.s2})`,border:`2px solid ${t.gr}`,borderRadius:18,padding:"14px 22px",textAlign:"center",boxShadow:"0 8px 32px "+t.gr+"44",backdropFilter:"blur(16px)",minWidth:240,cursor:"pointer"}}>
+          <div style={{background:`linear-gradient(135deg,${t.s1},${t.s2})`,border:`2px solid ${t.gr}`,borderRadius:18,padding:"14px 22px",textAlign:"center",boxShadow:`0 8px 32px ${t.gr}44`,backdropFilter:"blur(16px)",minWidth:240,cursor:"pointer"}}>
             <div style={{fontSize:"2rem",marginBottom:6}}>📖</div>
             <div style={{fontSize:".6rem",color:t.gr,textTransform:"uppercase",letterSpacing:2,fontWeight:700,marginBottom:4}}>{encouragementMsg.pages} pages lues</div>
             <div style={{fontSize:".8rem",fontWeight:700,color:t.tx,lineHeight:1.5}}>{encouragementMsg.msg}</div>
@@ -2938,7 +2937,7 @@ return (
         <div style={{position:"fixed",top:0,left:0,right:0,zIndex:250,backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",background:tn==="light"?"rgba(255,255,255,.92)":"rgba(13,26,14,.92)",borderBottom:`1px solid ${t.b1}`,boxShadow:`0 2px 20px rgba(0,0,0,.15)`}}>
           <div style={{display:"flex",alignItems:"center",gap:10,padding:"7px 16px"}}>
             {/* Icône séance */}
-            <div style={{width:28,height:28,borderRadius:"50%",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:"0 2px 8px "+t.acc+"44"}}>
+            <div style={{width:28,height:28,borderRadius:"50%",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:`0 2px 8px ${t.acc}44`}}>
               <span style={{fontSize:".7rem"}}>⏱</span>
             </div>
             <div style={{flex:1,display:"flex",flexDirection:"column",gap:3,minWidth:0}}>
@@ -2954,17 +2953,17 @@ return (
                   background:`linear-gradient(90deg,${t.acc},${t.acc2})`,
                   borderRadius:99,
                   transition:"width 1s linear",
-                  boxShadow:"0 0 6px "+t.acc+"66",
+                  boxShadow:`0 0 6px ${t.acc}66`,
                 }}/>
               </div>
             </div>
             <button onClick={pauseTimer} style={{background:t.s2,border:`1px solid ${t.b2}`,borderRadius:8,padding:"5px 10px",color:t.tx2,cursor:"pointer",fontSize:".65rem",fontWeight:700,flexShrink:0}}>⏸</button>
-            <button onClick={()=>setTimerOpen(true)} style={{background:t.acc+"15",border:"1px solid "+t.acc+"44",borderRadius:8,padding:"5px 10px",color:t.acc,cursor:"pointer",fontSize:".65rem",fontWeight:700,flexShrink:0}}>↗</button>
+            <button onClick={()=>setTimerOpen(true)} style={{background:`${t.acc}15`,border:`1px solid ${t.acc}44`,borderRadius:8,padding:"5px 10px",color:t.acc,cursor:"pointer",fontSize:".65rem",fontWeight:700,flexShrink:0}}>↗</button>
           </div>
         </div>
       )}
       {timerLeft===0&&(
-        <div style={{position:"fixed",top:0,left:0,right:0,zIndex:250,backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",background:tn==="light"?"rgba(232,255,235,.95)":"rgba(13,40,18,.95)",borderBottom:"1px solid "+t.gr+"44"}}>
+        <div style={{position:"fixed",top:0,left:0,right:0,zIndex:250,backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",background:tn==="light"?"rgba(232,255,235,.95)":"rgba(13,40,18,.95)",borderBottom:`1px solid ${t.gr}44`}}>
           <div style={{display:"flex",alignItems:"center",gap:10,padding:"7px 16px"}}>
             <div style={{width:28,height:28,borderRadius:"50%",background:`linear-gradient(135deg,${t.gr},#43a047)`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
               <span style={{fontSize:".75rem"}}>✓</span>
@@ -2973,7 +2972,7 @@ return (
               <div style={{fontSize:".72rem",fontWeight:700,color:t.gr}}>Séance terminée</div>
               <div style={{fontSize:".58rem",color:t.tx3,marginTop:1}}>بارك الله فيك — que Allah bénisse ton effort</div>
             </div>
-            <button onClick={resetTimer} style={{background:"none",border:"1px solid "+t.gr+"44",borderRadius:8,padding:"5px 10px",color:t.gr,cursor:"pointer",fontSize:".65rem",fontWeight:700}}>✕</button>
+            <button onClick={resetTimer} style={{background:"none",border:`1px solid ${t.gr}44`,borderRadius:8,padding:"5px 10px",color:t.gr,cursor:"pointer",fontSize:".65rem",fontWeight:700}}>✕</button>
           </div>
         </div>
       )}
@@ -2998,7 +2997,7 @@ return (
               <span style={{fontSize:".85rem",lineHeight:1}}>🔥</span>
               <span style={{fontSize:".65rem",fontWeight:800,color:"#f97316"}}>{memStreak}</span>
             </div>}
-            {user&&<button onClick={()=>setPage("settings")} title={user.email} style={{width:30,height:30,borderRadius:"50%",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".8rem",fontWeight:800,color:"#000",flexShrink:0,boxShadow:"0 0 8px "+t.acc+"66"}}>{(user.email||"?")[0].toUpperCase()}</button>}
+            {user&&<button onClick={()=>setPage("settings")} title={user.email} style={{width:30,height:30,borderRadius:"50%",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".8rem",fontWeight:800,color:"#000",flexShrink:0,boxShadow:`0 0 8px ${t.acc}66`}}>{(user.email||"?")[0].toUpperCase()}</button>}
           </div>
         </div>
       </div>
@@ -3007,7 +3006,7 @@ return (
       {page==="quran"&&<div className="hero" style={{padding:"12px 16px"}}>
         {/* Verset du jour */}
         {versetDuJour&&!versetDuJourDismissed&&(
-          <div style={{padding:"10px 14px",background:"linear-gradient(135deg,"+ acc +"12,"+ acc +"06)",borderRadius:10,border:"1px solid "+acc+"30",marginBottom:8}}>
+          <div style={{padding:"10px 14px",background:`linear-gradient(135deg,${acc}12,${acc}06)`,borderRadius:10,border:`1px solid ${acc}30`,marginBottom:8}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
               <span style={{fontSize:".58rem",color:acc,textTransform:"uppercase",letterSpacing:"1.5px",fontWeight:700}}>Verset du jour</span>
               <div style={{display:"flex",gap:6,alignItems:"center"}}>
@@ -3063,14 +3062,14 @@ return (
                 <defs><linearGradient id="bord2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="transparent"/><stop offset=".15" stopColor={acc}/><stop offset=".5" stopColor={acc3}/><stop offset=".85" stopColor={acc}/><stop offset="1" stopColor="transparent"/></linearGradient></defs>
                 <rect y="0" width="800" height="1.5" fill="url(#bord2)"/>
               </svg>
-              <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%,"+acc+"0e 0%,transparent 70%)",pointerEvents:"none"}}/>
+              <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse at 50% 100%,${acc}0e 0%,transparent 70%)`,pointerEvents:"none"}}/>
 
               <div style={{padding:"18px 16px 14px"}}>
                 {/* Title */}
                 <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,marginBottom:14}}>
                   <svg width="60" height="8" viewBox="0 0 80 10"><line x1="0" y1="5" x2="55" y2="5" stroke={acc} strokeWidth=".8" opacity=".4"/><circle cx="62" cy="5" r="2.5" fill="none" stroke={acc} strokeWidth=".8" opacity=".6"/><circle cx="72" cy="5" r="1.5" fill={acc} opacity=".5"/></svg>
                   <div style={{textAlign:"center"}}>
-                    <div style={{fontFamily:"Amiri,serif",fontSize:"1.6rem",fontWeight:700,color:acc,lineHeight:1,letterSpacing:"1px",textShadow:"0 0 30px "+acc+"55"}}>Al-Hifz</div>
+                    <div style={{fontFamily:"Amiri,serif",fontSize:"1.6rem",fontWeight:700,color:acc,lineHeight:1,letterSpacing:"1px",textShadow:`0 0 30px ${acc}55`}}>Al-Hifz</div>
                     <div style={{fontSize:".46rem",textTransform:"uppercase",letterSpacing:"4px",color:t.tx3,marginTop:2}}>حفظ القرآن الكريم</div>
                   </div>
                   <svg width="60" height="8" viewBox="0 0 80 10" style={{transform:"scaleX(-1)"}}><line x1="0" y1="5" x2="55" y2="5" stroke={acc} strokeWidth=".8" opacity=".4"/><circle cx="62" cy="5" r="2.5" fill="none" stroke={acc} strokeWidth=".8" opacity=".6"/><circle cx="72" cy="5" r="1.5" fill={acc} opacity=".5"/></svg>
@@ -3107,7 +3106,7 @@ return (
                         </div>
                       </div>
                       <div style={{position:"relative",height:11,background:t.b1,borderRadius:99,overflow:"hidden",boxShadow:"inset 0 2px 6px rgba(0,0,0,.15)"}}>
-                        <div style={{height:"100%",width:`${pct}%`,borderRadius:99,background:`linear-gradient(90deg,${acc},${acc2},${acc3})`,boxShadow:"0 0 10px "+acc+"99",transition:"width 1.2s cubic-bezier(.4,0,.2,1)",position:"relative",minWidth:pct>0?"12px":"0"}}>
+                        <div style={{height:"100%",width:`${pct}%`,borderRadius:99,background:`linear-gradient(90deg,${acc},${acc2},${acc3})`,boxShadow:`0 0 10px ${acc}99`,transition:"width 1.2s cubic-bezier(.4,0,.2,1)",position:"relative",minWidth:pct>0?"12px":"0"}}>
                           <div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent)",backgroundSize:"200% 100%",animation:"shimmer 2.5s infinite",borderRadius:99}}/>
                         </div>
                         {pct>2&&<div style={{position:"absolute",top:"50%",transform:"translateY(-50%)",left:`calc(${pct}% - 6px)`,width:11,height:11,borderRadius:"50%",background:"#fff",boxShadow:`0 0 6px ${acc}`,opacity:.9}}/>}
@@ -3126,7 +3125,7 @@ return (
                       </div>
                       <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:t.s3,borderRadius:7}}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round" opacity=".8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-                        <div><div style={{fontSize:".8rem",fontWeight:700,color:daysLeft<=0?t.gr:"#f97316",lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{daysLeft>0?(daysLeft>365?"~"+(daysLeft/365).toFixed(1)+"a":daysLeft+"j"):"Fini!"}</div><div style={{fontSize:".44rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Avant fin</div></div>
+                        <div><div style={{fontSize:".8rem",fontWeight:700,color:daysLeft<=0?t.gr:"#f97316",lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{daysLeft>0?(daysLeft>365?`~${(daysLeft/365).toFixed(1)}a`:`${daysLeft}j`):"Fini!"}</div><div style={{fontSize:".44rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Avant fin</div></div>
                       </div>
                       <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:t.s3,borderRadius:7}}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.gr} strokeWidth="1.5" strokeLinecap="round" opacity=".8"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
@@ -3141,15 +3140,15 @@ return (
                 </div>
 
                 {/* ETA */}
-                <div style={{marginTop:8,padding:"5px 10px",borderTop:"1px solid "+acc+"15",display:"flex",alignItems:"center",justifyContent:"center",gap:5,background:acc+"04",borderRadius:"0 0 8px 8px",marginLeft:-16,marginRight:-16,paddingLeft:16,paddingRight:16}}>
+                <div style={{marginTop:8,padding:"5px 10px",borderTop:`1px solid ${acc}15`,display:"flex",alignItems:"center",justifyContent:"center",gap:5,background:`${acc}04`,borderRadius:"0 0 8px 8px",marginLeft:-16,marginRight:-16,paddingLeft:16,paddingRight:16}}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={acc} strokeWidth="1.5" strokeLinecap="round" opacity=".5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
                   <span style={{fontSize:".6rem",color:t.tx3,fontStyle:"italic"}}>{remaining>0?`Fin estimée · ${eta}`:"🎉 Coran complet !"}</span>
                 </div>
 
                 {/* Rappels */}
-                {!(hist[today()]||0)&&(<div style={{marginTop:7,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:t.bl+"15",borderRadius:8,border:"1px solid "+t.bl+"30",cursor:"pointer"}} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>sPct(x)<100);if(s)doSelect(s);}}><div style={{width:6,height:6,borderRadius:"50%",background:t.bl,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".63rem",color:t.bl,fontWeight:600,flex:1}}>Aucune mémorisation aujourd'hui — on commence ?</span><span style={{fontSize:".58rem",color:t.bl,opacity:.7}}>→</span></div>)}
-                {spacedDue.length>0&&(<div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:t.rd+"15",borderRadius:8,border:"1px solid "+t.rd+"30",cursor:"pointer"}} onClick={()=>setPage("pages")}><div style={{width:6,height:6,borderRadius:"50%",background:t.rd,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".63rem",color:t.rd,fontWeight:600,flex:1}}>{spacedDue.length} verset{spacedDue.length>1?"s":""} à réviser aujourd'hui</span><span style={{fontSize:".58rem",color:t.rd,opacity:.7}}>Voir →</span></div>)}
-                {bookmark&&(<div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:acc+"10",borderRadius:8,border:"1px solid "+acc+"25",cursor:"pointer"}} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>x.n===bookmark.sn);if(s)doSelect(s);}}><span style={{fontSize:".7rem",color:acc}}>◈</span><span style={{fontSize:".63rem",color:t.tx,fontWeight:600,flex:1}}>Reprendre : {bookmark.name}</span><span style={{fontSize:".58rem",color:t.tx3}}>→</span></div>)}
+                {!(hist[today()]||0)&&(<div style={{marginTop:7,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${t.bl}15`,borderRadius:8,border:`1px solid ${t.bl}30`,cursor:"pointer"}} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>sPct(x)<100);if(s)doSelect(s);}}><div style={{width:6,height:6,borderRadius:"50%",background:t.bl,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".63rem",color:t.bl,fontWeight:600,flex:1}}>Aucune mémorisation aujourd'hui — on commence ?</span><span style={{fontSize:".58rem",color:t.bl,opacity:.7}}>→</span></div>)}
+                {spacedDue.length>0&&(<div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${t.rd}15`,borderRadius:8,border:`1px solid ${t.rd}30`,cursor:"pointer"}} onClick={()=>setPage("pages")}><div style={{width:6,height:6,borderRadius:"50%",background:t.rd,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".63rem",color:t.rd,fontWeight:600,flex:1}}>{spacedDue.length} verset{spacedDue.length>1?"s":""} à réviser aujourd'hui</span><span style={{fontSize:".58rem",color:t.rd,opacity:.7}}>Voir →</span></div>)}
+                {bookmark&&(<div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${acc}10`,borderRadius:8,border:`1px solid ${acc}25`,cursor:"pointer"}} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>x.n===bookmark.sn);if(s)doSelect(s);}}><span style={{fontSize:".7rem",color:acc}}>◈</span><span style={{fontSize:".63rem",color:t.tx,fontWeight:600,flex:1}}>Reprendre : {bookmark.name}</span><span style={{fontSize:".58rem",color:t.tx3}}>→</span></div>)}
                 {/* Streak */}
                 {memStreak>0&&(<div onClick={()=>setPage("stats")} style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"6px 10px",background:"rgba(249,115,22,.08)",borderRadius:9,border:"1px solid rgba(249,115,22,.2)",cursor:"pointer"}}><span style={{fontSize:"1.1rem"}}>🔥</span><span style={{fontSize:".7rem",fontWeight:700,color:"#f97316",flex:1}}>{memStreak} jour{memStreak>1?"s":""} de suite</span><span style={{fontSize:".58rem",color:"#f97316",opacity:.7}}>Stats →</span></div>)}
               </div>
@@ -3157,7 +3156,7 @@ return (
 
             {/* Verset du jour condensé */}
             {versetDuJour&&!versetDuJourDismissed&&(
-              <div style={{background:"linear-gradient(135deg,"+ t.acc +"12,"+ t.acc +"06)",borderRadius:12,padding:"14px 16px",border:"1px solid "+t.acc+"30"}}>
+              <div style={{background:`linear-gradient(135deg,${t.acc}12,${t.acc}06)`,borderRadius:12,padding:"14px 16px",border:`1px solid ${t.acc}30`}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
                   <span style={{fontSize:".6rem",color:t.acc,textTransform:"uppercase",letterSpacing:2,fontWeight:700}}>Verset du jour</span>
                   <div style={{display:"flex",gap:6}}>
@@ -3208,16 +3207,16 @@ return (
                   icon:(
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12 2 L12 22" stroke={t.pu} strokeWidth="1.4"/>
-                      <path d="M4 6 Q12 2 20 6 L20 18 Q12 22 4 18 Z" stroke={t.pu} strokeWidth="1.4" fill={(t.pu)+"10"}/>
+                      <path d="M4 6 Q12 2 20 6 L20 18 Q12 22 4 18 Z" stroke={t.pu} strokeWidth="1.4" fill={`${t.pu}10`}/>
                       <path d="M4 6 L4 18" stroke={t.pu} strokeWidth="1.4"/>
                     </svg>
                   ),
                   label:"Mushaf",sub:"Lire page par page",action:()=>setPage("mushaf"),c:t.pu
                 },
               ].map((a,i)=>(
-                <div key={i} onClick={a.action} style={{background:t.cardBg,border:`1px solid ${t.b1}`,borderRadius:16,padding:"18px 14px",cursor:"pointer",transition:"all .2s",position:"relative",overflow:"hidden",display:"flex",flexDirection:"column",gap:6}} onMouseEnter={e=>{e.currentTarget.style.borderColor=a.c;e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 6px 20px "+a.c+"22";}} onMouseLeave={e=>{e.currentTarget.style.borderColor=t.b1;e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";}}>
+                <div key={i} onClick={a.action} style={{background:t.cardBg,border:`1px solid ${t.b1}`,borderRadius:16,padding:"18px 14px",cursor:"pointer",transition:"all .2s",position:"relative",overflow:"hidden",display:"flex",flexDirection:"column",gap:6}} onMouseEnter={e=>{e.currentTarget.style.borderColor=a.c;e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow=`0 6px 20px ${a.c}22`;}} onMouseLeave={e=>{e.currentTarget.style.borderColor=t.b1;e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";}}>
                   {a.badge>0&&<div style={{position:"absolute",top:10,right:10,background:t.rd,color:"#fff",borderRadius:99,fontSize:".5rem",fontWeight:800,minWidth:16,height:16,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4px"}}>{a.badge}</div>}
-                  <div style={{width:44,height:44,borderRadius:12,background:a.c+"10",display:"flex",alignItems:"center",justifyContent:"center"}}>{a.icon}</div>
+                  <div style={{width:44,height:44,borderRadius:12,background:`${a.c}10`,display:"flex",alignItems:"center",justifyContent:"center"}}>{a.icon}</div>
                   <div style={{fontSize:".8rem",fontWeight:700,color:t.tx}}>{a.label}</div>
                   <div style={{fontSize:".62rem",color:t.tx3}}>{a.sub}</div>
                 </div>
@@ -3231,7 +3230,7 @@ return (
               return s?(
                 <div className="card" onClick={()=>{doSelect(s);setPage("quran");}} style={{cursor:"pointer"}} onMouseEnter={e=>{e.currentTarget.style.borderColor=t.acc;e.currentTarget.style.transform="translateY(-1px)";}} onMouseLeave={e=>{e.currentTarget.style.borderColor=t.b1;e.currentTarget.style.transform="";}}>
                   <div style={{padding:"12px 14px",display:"flex",alignItems:"center",gap:12}}>
-                    <div style={{width:40,height:40,borderRadius:10,background:t.acc+"12",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                    <div style={{width:40,height:40,borderRadius:10,background:`${t.acc}12`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.acc} strokeWidth="1.6" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
                     </div>
                     <div style={{flex:1,minWidth:0}}>
@@ -3257,7 +3256,7 @@ return (
               ];
               const h=hadiths[new Date().getDate()%hadiths.length];
               return(
-                <div style={{padding:"14px 16px",background:"linear-gradient(135deg,"+ t.acc +"08,"+ t.acc +"04)",borderRadius:14,border:"1px solid "+t.acc+"20",position:"relative"}}>
+                <div style={{padding:"14px 16px",background:`linear-gradient(135deg,${t.acc}08,${t.acc}04)`,borderRadius:14,border:`1px solid ${t.acc}20`,position:"relative"}}>
                   <button onClick={()=>{setHadithDismissed(true);sv("qhadith_dis_"+today(),true);}} style={{position:"absolute",top:10,right:10,background:"none",border:"none",cursor:"pointer",color:t.tx3,fontSize:".8rem",lineHeight:1,padding:4}}>✕</button>
                   <div style={{fontSize:".54rem",color:t.acc,textTransform:"uppercase",letterSpacing:"2px",fontWeight:700,marginBottom:8}}>Hadith du jour</div>
                   <div style={{fontFamily:"Amiri,serif",fontSize:"1.05rem",direction:"rtl",textAlign:"right",lineHeight:1.8,color:t.tx,marginBottom:8}}>{h.ar}</div>
@@ -3281,7 +3280,7 @@ return (
                       {nextS?"En cours de mémorisation":"Prochaine sourate"}
                     </div>
                     <div style={{display:"flex",alignItems:"center",gap:12}}>
-                      <div style={{width:40,height:40,borderRadius:10,background:t.gr+"12",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".75rem",fontWeight:800,color:t.gr,border:"1px solid "+t.gr+"30",flexShrink:0}}>{target.n}</div>
+                      <div style={{width:40,height:40,borderRadius:10,background:`${t.gr}12`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".75rem",fontWeight:800,color:t.gr,border:`1px solid ${t.gr}30`,flexShrink:0}}>{target.n}</div>
                       <div style={{flex:1,minWidth:0}}>
                         <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
                           <span style={{fontSize:".8rem",fontWeight:700,color:t.tx}}>{target.name}</span>
@@ -3326,11 +3325,11 @@ return (
                         <div key={pg}
                           title={surahEntry?`Sourate ${surahEntry[0]} — page ${pg}`:`Page ${pg}`}
                           style={{height:28,borderRadius:5,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:".55rem",fontWeight:700,
-                            border:`1px solid ${isCur?t.acc:surahEntry?t.acc+"55":isRead?t.gr:t.b1}`,
-                            background:isRead?t.gr+"18":isCur?t.acc+"20":surahEntry?t.acc+"08":t.s2,
+                            border:`1px solid ${isCur?t.acc:surahEntry?`${t.acc}55`:isRead?t.gr:t.b1}`,
+                            background:isRead?`${t.gr}18`:isCur?`${t.acc}20`:surahEntry?`${t.acc}08`:t.s2,
                             color:isCur?t.acc:isRead?t.gr:t.tx3,transition:"all .12s"}}
                           onMouseEnter={e=>{e.currentTarget.style.borderColor=t.acc;e.currentTarget.style.transform="scale(1.1)";}}
-                          onMouseLeave={e=>{e.currentTarget.style.borderColor=isCur?t.acc:surahEntry?t.acc+"55":isRead?t.gr:t.b1;e.currentTarget.style.transform="";}}
+                          onMouseLeave={e=>{e.currentTarget.style.borderColor=isCur?t.acc:surahEntry?`${t.acc}55`:isRead?t.gr:t.b1;e.currentTarget.style.transform="";}}
                           onClick={()=>{setMushafPage(pg);setPage("mushaf");}}>
                           {pg}
                         </div>
@@ -3391,7 +3390,7 @@ return (
                     return (
                       <div key={s.n}
                         className={`srow ${selS?.n===s.n?"sel":""} ${p===100?"done":""}`}
-                        style={{transform:"translateX("+Math.min(0,sw.x)+"px)",transition:sw.swiping?"none":"transform .25s ease"}}
+                        style={{transform:`translateX(${Math.min(0,sw.x)}px)`,transition:sw.swiping?"none":"transform .25s ease"}}
                         onClick={()=>{ if(Math.abs(sw.x||0)<8) doSelect(s); }}
                         onTouchStart={e=>{
                           swipeTouchStart.current[s.n]=e.touches[0].clientX;
@@ -3423,7 +3422,7 @@ return (
                           }
                         }}>
                         {revealed&&(
-                          <div className="srow-reveal" style={{right:0,left:"calc(100% + "+Math.min(0,sw.x)+"px)"}}>
+                          <div className="srow-reveal" style={{right:0,left:`calc(100% + ${Math.min(0,sw.x)}px)`}}>
                             {likeAction
                               ?(<div className="srow-reveal-btn" style={{background:"#e91e63",color:"#fff",width:70}}>
                                   <span style={{fontSize:"1rem"}}>♥</span>
@@ -3445,8 +3444,8 @@ return (
                           <div className="sname" style={{display:"flex",alignItems:"center",gap:4}}>
                             {s.name}
                             {emb&&<span style={{fontSize:".45rem",color:t.gr}}>⬤</span>}
-                            {revFlags[String(s.n)]==="active"&&<span style={{fontSize:".5rem",background:t.acc+"20",color:t.acc,padding:"1px 4px",borderRadius:3}}>révision</span>}
-                            {revFlags[String(s.n)]==="mastered"&&<span style={{fontSize:".5rem",background:t.gr+"20",color:t.gr,padding:"1px 4px",borderRadius:3}}>✓</span>}
+                            {revFlags[String(s.n)]==="active"&&<span style={{fontSize:".5rem",background:`${t.acc}20`,color:t.acc,padding:"1px 4px",borderRadius:3}}>révision</span>}
+                            {revFlags[String(s.n)]==="mastered"&&<span style={{fontSize:".5rem",background:`${t.gr}20`,color:t.gr,padding:"1px 4px",borderRadius:3}}>✓</span>}
                           </div>
                           <div className="smeta">Juz {s.juz} · {s.v}v · {s.type}</div>
                         </div>
@@ -3532,8 +3531,8 @@ return (
 
                   {SURAH_INFO[selS.n]&&(<div style={{padding:"10px 14px",background:t.s3,borderBottom:`1px solid ${t.b1}`,fontSize:".7rem",color:t.tx2,lineHeight:1.6}}><div style={{fontWeight:700,color:t.acc,marginBottom:3,fontSize:".65rem",textTransform:"uppercase",letterSpacing:"1px"}}>Vertus & occasions</div><div style={{marginBottom:4}}>{SURAH_INFO[selS.n].virtue}</div><div style={{color:t.gr,fontWeight:600}}>Quand réciter : {SURAH_INFO[selS.n].occasion}</div></div>)}
 
-                  {reviewMode&&(<div style={{padding:"8px 14px",background:t.rd+"22",borderBottom:"1px solid "+t.rd+"44",display:"flex",alignItems:"center",gap:8}}><div style={{fontSize:".72rem",color:t.rd,fontWeight:600,flex:1}}>Mode révision — appuie pour révéler</div><button className="tbtn" style={{borderColor:t.rd,color:t.rd}} onClick={()=>setRevealedVerses({})}>Tout masquer</button></div>)}
-                  {hifzMode&&(<div style={{padding:"8px 14px",background:t.pu+"18",borderBottom:"1px solid "+t.pu+"44",display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                  {reviewMode&&(<div style={{padding:"8px 14px",background:`${t.rd}22`,borderBottom:`1px solid ${t.rd}44`,display:"flex",alignItems:"center",gap:8}}><div style={{fontSize:".72rem",color:t.rd,fontWeight:600,flex:1}}>Mode révision — appuie pour révéler</div><button className="tbtn" style={{borderColor:t.rd,color:t.rd}} onClick={()=>setRevealedVerses({})}>Tout masquer</button></div>)}
+                  {hifzMode&&(<div style={{padding:"8px 14px",background:`${t.pu}18`,borderBottom:`1px solid ${t.pu}44`,display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
                     <div style={{fontSize:".72rem",color:t.pu,fontWeight:600,flex:1}}>Mode Hifz — les derniers mots sont masqués. Clique pour révéler.</div>
                     <div style={{display:"flex",gap:4,alignItems:"center"}}>
                       <span style={{fontSize:".6rem",color:t.tx3}}>Difficulté :</span>
@@ -3561,10 +3560,10 @@ return (
                         setContinuousMode(false);
                         setContinuousIdx(0);
                         setRecitModal(true);
-                      }} style={{flexShrink:0,display:"flex",alignItems:"center",gap:5,background:t.acc+"18",border:`1px solid ${t.acc}`,borderRadius:10,padding:"7px 14px",color:t.acc,fontSize:".7rem",fontWeight:700,cursor:"pointer",transition:"all .2s"}} onMouseEnter={e=>{e.currentTarget.style.background=t.acc+"30";}} onMouseLeave={e=>{e.currentTarget.style.background=t.acc+"18";}}>
+                      }} style={{flexShrink:0,display:"flex",alignItems:"center",gap:5,background:`${t.acc}18`,border:`1px solid ${t.acc}`,borderRadius:10,padding:"7px 14px",color:t.acc,fontSize:".7rem",fontWeight:700,cursor:"pointer",transition:"all .2s"}} onMouseEnter={e=>{e.currentTarget.style.background=`${t.acc}30`;}} onMouseLeave={e=>{e.currentTarget.style.background=`${t.acc}18`;}}>
                         🎤 Récitation
                       </button>
-                    <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,1);}} style={{flexShrink:0,display:"flex",alignItems:"center",gap:5,background:playlistActive&&playlist[0]?.sn===selS.n?"#e53935":t.acc,border:"none",borderRadius:10,padding:"8px 14px",color:"#fff",fontSize:".72rem",fontWeight:700,cursor:"pointer",boxShadow:"0 2px 8px "+t.acc+"44",transition:"transform .15s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-1px)"} onMouseLeave={e=>e.currentTarget.style.transform=""}>{playlistActive&&playlist[0]?.sn===selS.n?"■ Stop":"▶ Sourate"}</button>
+                    <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,1);}} style={{flexShrink:0,display:"flex",alignItems:"center",gap:5,background:playlistActive&&playlist[0]?.sn===selS.n?"#e53935":t.acc,border:"none",borderRadius:10,padding:"8px 14px",color:"#fff",fontSize:".72rem",fontWeight:700,cursor:"pointer",boxShadow:`0 2px 8px ${t.acc}44`,transition:"transform .15s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-1px)"} onMouseLeave={e=>e.currentTarget.style.transform=""}>{playlistActive&&playlist[0]?.sn===selS.n?"■ Stop":"▶ Sourate"}</button>
                     </div>
                     <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
                       <span style={{fontSize:".6rem",color:t.tx3}}>Répét.</span>
@@ -3711,8 +3710,8 @@ return (
                           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                             <div style={{fontWeight:700,color:t.tx,fontSize:".82rem"}}>{s.name}</div>
                             <div style={{display:"flex",gap:4}}>
-                              {spacedKeys.length>0&&(<span style={{fontSize:".6rem",background:t.rd+"18",color:t.rd,padding:"1px 7px",borderRadius:99,fontWeight:700}}>{spacedKeys.length} dus</span>)}
-                              <span style={{fontSize:".6rem",background:t.acc+"15",color:t.acc,padding:"1px 7px",borderRadius:99}}>{memPct}%</span>
+                              {spacedKeys.length>0&&(<span style={{fontSize:".6rem",background:`${t.rd}18`,color:t.rd,padding:"1px 7px",borderRadius:99,fontWeight:700}}>{spacedKeys.length} dus</span>)}
+                              <span style={{fontSize:".6rem",background:`${t.acc}15`,color:t.acc,padding:"1px 7px",borderRadius:99}}>{memPct}%</span>
                             </div>
                           </div>
                           <div style={{fontSize:".6rem",color:t.tx3,marginTop:2,fontFamily:"Amiri,serif"}}>{s.ar} · Juz {s.juz} · {s.v}v</div>
@@ -3720,7 +3719,7 @@ return (
                       </div>
                       {/* Progress bar */}
                       <div style={{height:5,background:t.b1,borderRadius:99,overflow:"hidden",marginBottom:8}}>
-                        <div style={{height:"100%",width:`${memPct}%`,background:memPct===100?t.gr:`linear-gradient(90deg,${t.acc},${t.acc2})`,borderRadius:99,boxShadow:memPct===100?"0 0 6px "+t.gr+"66":"0 0 4px "+t.acc+"44"}}/>
+                        <div style={{height:"100%",width:`${memPct}%`,background:memPct===100?t.gr:`linear-gradient(90deg,${t.acc},${t.acc2})`,borderRadius:99,boxShadow:memPct===100?`0 0 6px ${t.gr}66`:`0 0 4px ${t.acc}44`}}/>
                       </div>
                       {/* Actions */}
                       <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
@@ -3747,7 +3746,7 @@ return (
               <div>
                     <div style={{display:"flex",gap:4,padding:"8px 12px",borderBottom:`1px solid ${t.b1}`,overflowX:"auto"}}>
                       {[["all","Toutes",SURAHS.length],["memorized","Mémorisées",SURAHS.filter(s=>sPct(s)===100).length],["active","En révision",Object.values(revFlags).filter(f=>f==="active").length],["none","Sans progrès",SURAHS.filter(s=>sMem(s)===0).length]].map(([f,l,cnt])=>(
-                        <button key={f} onClick={()=>setRevFilter(f)} style={{padding:"3px 10px",borderRadius:99,border:`1px solid ${revFilter===f?t.acc:t.b2}`,background:revFilter===f?t.acc+"18":"transparent",color:revFilter===f?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer",whiteSpace:"nowrap",fontWeight:revFilter===f?700:400,transition:"all .15s"}}>{l} <span style={{opacity:.7}}>({cnt})</span></button>
+                        <button key={f} onClick={()=>setRevFilter(f)} style={{padding:"3px 10px",borderRadius:99,border:`1px solid ${revFilter===f?t.acc:t.b2}`,background:revFilter===f?`${t.acc}18`:"transparent",color:revFilter===f?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer",whiteSpace:"nowrap",fontWeight:revFilter===f?700:400,transition:"all .15s"}}>{l} <span style={{opacity:.7}}>({cnt})</span></button>
                       ))}
                     </div>
                     <div style={{maxHeight:400,overflowY:"auto"}}>
@@ -3770,7 +3769,7 @@ return (
                               <div style={{fontSize:".55rem",color:t.tx3,marginTop:2}}>{sMem(s)}{"/"}{s.v}v · Juz {s.juz}</div>
                             </div>
                             <button onClick={()=>setRevFlags(p=>{const n={...p};const cur=n[String(s.n)];if(cur==="active")n[String(s.n)]="mastered";else if(cur==="mastered")n[String(s.n)]="paused";else if(cur==="paused")delete n[String(s.n)];else n[String(s.n)]="active";return n;})}
-                              style={{padding:"4px 10px",borderRadius:8,border:`1px solid ${flag?flagColors[flag]:t.b2}`,background:flag?flagColors[flag]+"15":"transparent",color:flag?flagColors[flag]:t.tx3,fontSize:".6rem",cursor:"pointer",flexShrink:0,fontWeight:flag?700:400,transition:"all .15s",whiteSpace:"nowrap"}}>
+                              style={{padding:"4px 10px",borderRadius:8,border:`1px solid ${flag?flagColors[flag]:t.b2}`,background:flag?`${flagColors[flag]}15`:"transparent",color:flag?flagColors[flag]:t.tx3,fontSize:".6rem",cursor:"pointer",flexShrink:0,fontWeight:flag?700:400,transition:"all .15s",whiteSpace:"nowrap"}}>
                               {flag?flagLabels[flag]:"+ Ajouter"}
                             </button>
                           </div>
@@ -3786,10 +3785,10 @@ return (
                 <div className="ch"><span className="ct">Maîtrisées</span><span style={{fontSize:".65rem",color:t.gr,fontWeight:700}}>{Object.entries(revFlags).filter(([,f])=>f==="mastered").length} sourates</span></div>
                 <div style={{display:"flex",flexWrap:"wrap",gap:6,padding:12}}>
                   {SURAHS.filter(s=>revFlags[String(s.n)]==="mastered").map(s=>(
-                    <div key={s.n} style={{padding:"5px 12px",borderRadius:99,background:t.gr+"15",border:"1px solid "+t.gr+"44",display:"flex",alignItems:"center",gap:6,cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";}} onMouseLeave={e=>{e.currentTarget.style.transform="";}} onClick={()=>{doSelect(s);setPage("quran");}}>
+                    <div key={s.n} style={{padding:"5px 12px",borderRadius:99,background:`${t.gr}15`,border:`1px solid ${t.gr}44`,display:"flex",alignItems:"center",gap:6,cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";}} onMouseLeave={e=>{e.currentTarget.style.transform="";}} onClick={()=>{doSelect(s);setPage("quran");}}>
                       <span style={{fontSize:".68rem",fontWeight:700,color:t.gr}}>{s.name}</span>
                       <span style={{fontFamily:"Amiri,serif",fontSize:".78rem",color:t.acc}}>{s.ar}</span>
-                      <button onClick={e=>{e.stopPropagation();setRevFlags(p=>{const n={...p};delete n[String(s.n)];return n;});}} style={{background:"none",border:"none",color:t.gr+"77",cursor:"pointer",fontSize:".65rem",padding:"0 0 0 2px",lineHeight:1}}>✕</button>
+                      <button onClick={e=>{e.stopPropagation();setRevFlags(p=>{const n={...p};delete n[String(s.n)];return n;});}} style={{background:"none",border:"none",color:`${t.gr}77`,cursor:"pointer",fontSize:".65rem",padding:"0 0 0 2px",lineHeight:1}}>✕</button>
                     </div>
                   ))}
                 </div>
@@ -3810,7 +3809,7 @@ return (
                     return (
                       <div key={d} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
                         {gain>0&&<span style={{fontSize:".48rem",color:t.acc,fontWeight:700}}>+{gain}</span>}
-                        <div style={{width:"100%",height:Math.max(Math.round(gain/maxG2*50),3)+"px",background:isToday?t.acc:t.acc+"66",borderRadius:"3px 3px 0 0",transition:"height .3s"}}/>
+                        <div style={{width:"100%",height:`${Math.max(Math.round(gain/maxG2*50),3)}px`,background:isToday?t.acc:`${t.acc}66`,borderRadius:"3px 3px 0 0",transition:"height .3s"}}/>
                         <span style={{fontSize:".48rem",color:isToday?t.acc:t.tx3,fontWeight:isToday?700:400}}>{lbl}</span>
                       </div>
                     );
@@ -3829,12 +3828,12 @@ return (
               <>
                 {/* Hero d'intro */}
                 <div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,borderRadius:16,padding:"24px 20px",border:`1px solid ${t.b1}`,textAlign:"center",position:"relative",overflow:"hidden"}}>
-                  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 0%,"+t.acc+"12,transparent 60%)",pointerEvents:"none"}}/>
-                  <div style={{fontFamily:"Amiri,serif",fontSize:"2.5rem",color:t.acc,marginBottom:4,textShadow:"0 0 20px "+t.acc+"44"}}>ختمة القرآن</div>
+                  <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse at 50% 0%,${t.acc}12,transparent 60%)`,pointerEvents:"none"}}/>
+                  <div style={{fontFamily:"Amiri,serif",fontSize:"2.5rem",color:t.acc,marginBottom:4,textShadow:`0 0 20px ${t.acc}44`}}>ختمة القرآن</div>
                   <div style={{fontSize:".75rem",color:t.tx2,marginBottom:16,lineHeight:1.7}}>Commence une Khatma pour suivre ta lecture complète du Coran.<br/>Chaque jour compté, chaque page une victoire.</div>
                   <div style={{display:"flex",justifyContent:"center",gap:16,flexWrap:"wrap"}}>
                     {[{v:SURAHS.filter(s=>sMem(s)===s.v).length,l:"Sourates mémorisées",c:t.gr},{v:totalMem,l:"Versets mémorisés",c:t.acc},{v:Object.keys(pageRead).filter(k=>pageRead[k]).length,l:"Pages lues",c:t.bl}].map((k,i)=>(
-                      <div key={i} style={{textAlign:"center",padding:"10px 16px",background:k.c+"12",borderRadius:12,border:"1px solid "+k.c+"30"}}>
+                      <div key={i} style={{textAlign:"center",padding:"10px 16px",background:`${k.c}12`,borderRadius:12,border:`1px solid ${k.c}30`}}>
                         <div style={{fontSize:"1.4rem",fontWeight:800,color:k.c}}>{k.v}</div>
                         <div style={{fontSize:".58rem",color:t.tx3,marginTop:2}}>{k.l}</div>
                       </div>
@@ -3860,14 +3859,14 @@ return (
                           <div key={kp.id} onClick={()=>setKPreset(kp)}
                             style={{display:"flex",alignItems:"center",gap:14,padding:"13px 16px",borderRadius:12,
                               border:`2px solid ${sel?t.acc:t.b1}`,
-                              background:sel?"linear-gradient(135deg,"+ t.acc +"12,"+ t.acc2 +"06)":t.s2,
+                              background:sel?`linear-gradient(135deg,${t.acc}12,${t.acc2}06)`:t.s2,
                               cursor:"pointer",transition:"all .18s",
-                              boxShadow:sel?"0 4px 16px "+t.acc+"22":"none",
+                              boxShadow:sel?`0 4px 16px ${t.acc}22`:"none",
                             }}
                             onMouseEnter={e=>{if(!sel){e.currentTarget.style.borderColor=t.acc+"66";e.currentTarget.style.transform="translateX(3px)";}}}
                             onMouseLeave={e=>{if(!sel){e.currentTarget.style.borderColor=t.b1;e.currentTarget.style.transform="";}}}>
                             {/* Bullet élégant */}
-                            <div style={{width:36,height:36,borderRadius:"50%",border:`1.5px solid ${sel?t.acc:t.b2}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,background:sel?t.acc+"15":"transparent",transition:"all .18s"}}>
+                            <div style={{width:36,height:36,borderRadius:"50%",border:`1.5px solid ${sel?t.acc:t.b2}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,background:sel?`${t.acc}15`:"transparent",transition:"all .18s"}}>
                               {sel
                                 ?<svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,10.5 12,3.5" stroke={t.acc} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
                                 :<div style={{width:6,height:6,borderRadius:"50%",background:t.b2}}/>
@@ -3889,7 +3888,7 @@ return (
                       </div>
                     )}
                     {kPreset&&(
-                      <button onClick={createKhatma} style={{width:"100%",padding:"13px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:12,color:"#fff",fontSize:".88rem",fontWeight:700,cursor:"pointer",boxShadow:"0 4px 16px "+t.acc+"44",transition:"transform .15s,box-shadow .15s"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow="0 6px 20px "+t.acc+"55";}} onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="0 4px 16px "+t.acc+"44";}}>
+                      <button onClick={createKhatma} style={{width:"100%",padding:"13px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:12,color:"#fff",fontSize:".88rem",fontWeight:700,cursor:"pointer",boxShadow:`0 4px 16px ${t.acc}44`,transition:"transform .15s,box-shadow .15s"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow=`0 6px 20px ${t.acc}55`;}} onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow=`0 4px 16px ${t.acc}44`;}}>
                         Commencer la Khatma ✦
                       </button>
                     )}
@@ -3921,13 +3920,13 @@ return (
               <div style={{display:"flex",flexDirection:"column",gap:14}}>
                 {/* Header card */}
                 <div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,borderRadius:16,padding:"20px 18px",border:`1px solid ${t.b1}`,position:"relative",overflow:"hidden"}}>
-                  <div style={{position:"absolute",top:0,right:0,width:120,height:120,background:"radial-gradient(circle,"+t.acc+"10,transparent 70%)",borderRadius:"0 16px 0 0",pointerEvents:"none"}}/>
+                  <div style={{position:"absolute",top:0,right:0,width:120,height:120,background:`radial-gradient(circle,${t.acc}10,transparent 70%)`,borderRadius:"0 16px 0 0",pointerEvents:"none"}}/>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
                     <div>
                       <div style={{fontFamily:"Amiri,serif",fontSize:"1.6rem",color:t.acc,lineHeight:1,marginBottom:4}}>{activeKhatma.name}</div>
                       <div style={{fontSize:".65rem",color:t.tx3}}>Depuis le {new Date(activeKhatma.startDate).toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"})}</div>
                     </div>
-                    <button onClick={()=>setActiveKhatma(null)} style={{background:"transparent",border:"1px solid "+t.rd+"44",color:t.rd,borderRadius:8,padding:"5px 10px",fontSize:".65rem",cursor:"pointer",transition:"all .2s"}} onMouseEnter={e=>{e.currentTarget.style.background=t.rd+"12";}} onMouseLeave={e=>{e.currentTarget.style.background="transparent";}}>Terminer</button>
+                    <button onClick={()=>setActiveKhatma(null)} style={{background:"transparent",border:`1px solid ${t.rd}44`,color:t.rd,borderRadius:8,padding:"5px 10px",fontSize:".65rem",cursor:"pointer",transition:"all .2s"}} onMouseEnter={e=>{e.currentTarget.style.background=`${t.rd}12`;}} onMouseLeave={e=>{e.currentTarget.style.background="transparent";}}>Terminer</button>
                   </div>
                   {/* Big progress */}
                   <div style={{marginBottom:10}}>
@@ -3936,7 +3935,7 @@ return (
                       <span style={{fontSize:".8rem",fontWeight:800,color:t.acc}}>{Math.round(Object.values(activeKhatma.log).filter(Boolean).length/activeKhatma.totalDays*100)}%</span>
                     </div>
                     <div style={{height:14,background:t.b1,borderRadius:99,overflow:"hidden",boxShadow:"inset 0 2px 4px rgba(0,0,0,.1)"}}>
-                      <div style={{height:"100%",width:`${Math.round(Object.values(activeKhatma.log).filter(Boolean).length/activeKhatma.totalDays*100)}%`,background:`linear-gradient(90deg,${t.acc},${t.acc2},${t.acc3})`,borderRadius:99,boxShadow:"0 0 8px "+t.acc+"66",transition:"width .8s ease",position:"relative"}}>
+                      <div style={{height:"100%",width:`${Math.round(Object.values(activeKhatma.log).filter(Boolean).length/activeKhatma.totalDays*100)}%`,background:`linear-gradient(90deg,${t.acc},${t.acc2},${t.acc3})`,borderRadius:99,boxShadow:`0 0 8px ${t.acc}66`,transition:"width .8s ease",position:"relative"}}>
                         <div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent)",borderRadius:99}}/>
                       </div>
                     </div>
@@ -3964,7 +3963,7 @@ return (
                       setKhatmas(p=>p.map(x=>x.id===activeKhatma.id?updated:x));
                       setActiveKhatma(updated);
                       togglePage(mushafPage||1);
-                    }} style={{padding:"10px 14px",background:t.gr+"18",border:"1px solid "+t.gr+"44",borderRadius:10,color:t.gr,fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>
+                    }} style={{padding:"10px 14px",background:`${t.gr}18`,border:`1px solid ${t.gr}44`,borderRadius:10,color:t.gr,fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>
                       👍 Journée lue
                     </button>
                   </div>
@@ -3983,7 +3982,7 @@ return (
                         const isTod=d===today();
                         const isFut=d>today();
                         return (
-                          <div key={i} style={{aspectRatio:"1",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".6rem",fontWeight:700,cursor:isFut?"default":"pointer",border:`1.5px solid ${isTod?t.acc:isDone?t.gr:t.b2}`,background:isDone?t.gr+"25":isTod?t.acc+"18":t.s2,color:isTod?t.acc:isDone?t.gr:isFut?t.tx3+"66":t.tx3,transition:"all .15s",minHeight:28}} onMouseEnter={e=>{if(!isFut){e.currentTarget.style.transform="scale(1.12)";e.currentTarget.style.boxShadow="0 2px 8px "+t.acc+"33";e.currentTarget.style.borderColor=t.acc;}}} onMouseLeave={e=>{if(!isFut){e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";e.currentTarget.style.borderColor=isTod?t.acc:isDone?t.gr:t.b2;}}} onClick={()=>{if(!isFut)markKhatmaDay(activeKhatma,d);}}>
+                          <div key={i} style={{aspectRatio:"1",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".6rem",fontWeight:700,cursor:isFut?"default":"pointer",border:`1.5px solid ${isTod?t.acc:isDone?t.gr:t.b2}`,background:isDone?`${t.gr}25`:isTod?`${t.acc}18`:t.s2,color:isTod?t.acc:isDone?t.gr:isFut?t.tx3+"66":t.tx3,transition:"all .15s",minHeight:28}} onMouseEnter={e=>{if(!isFut){e.currentTarget.style.transform="scale(1.12)";e.currentTarget.style.boxShadow=`0 2px 8px ${t.acc}33`;e.currentTarget.style.borderColor=t.acc;}}} onMouseLeave={e=>{if(!isFut){e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";e.currentTarget.style.borderColor=isTod?t.acc:isDone?t.gr:t.b2;}}} onClick={()=>{if(!isFut)markKhatmaDay(activeKhatma,d);}}>
                             {isDone?"✓":i+1}
                           </div>
                         );
@@ -3999,7 +3998,7 @@ return (
                     {[{l:"Juz terminés",v:SURAHS.reduce((s,su)=>{const j=su.juz;if(!s.includes(j)&&SURAHS.filter(x=>x.juz===j).every(x=>sMem(x)===x.v))return[...s,j];return s;},[]).length,max:30,c:t.acc},{l:"Sourates terminées",v:SURAHS.filter(s=>sMem(s)===s.v).length,max:114,c:t.gr},{l:"Versets mémorisés",v:totalMem,max:TOTAL_VERSES,c:t.bl},{l:"Pages lues",v:Object.keys(pageRead).filter(k=>pageRead[k]).length,max:604,c:t.pu}].map((it,i)=>(
                       <div key={i}>
                         <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span style={{fontSize:".7rem",color:t.tx2}}>{it.l}</span><span style={{fontSize:".7rem",color:it.c,fontWeight:700}}>{it.v}<span style={{color:t.tx3,fontWeight:400}}>/{it.max}</span></span></div>
-                        <div style={{height:7,background:t.b1,borderRadius:99,overflow:"hidden"}}><div style={{height:"100%",width:`${it.v/it.max*100}%`,background:it.c,borderRadius:99,transition:"width .6s",boxShadow:"0 0 6px "+it.c+"55"}}/></div>
+                        <div style={{height:7,background:t.b1,borderRadius:99,overflow:"hidden"}}><div style={{height:"100%",width:`${it.v/it.max*100}%`,background:it.c,borderRadius:99,transition:"width .6s",boxShadow:`0 0 6px ${it.c}55`}}/></div>
                       </div>
                     ))}
                   </div>
@@ -4042,7 +4041,7 @@ return (
                   </div>
                 </div>
                 <div style={{height:8,background:t.b1,borderRadius:99,overflow:"hidden"}}>
-                  <div style={{height:"100%",width:`${colPct}%`,background:colPct===100?t.gr:`linear-gradient(90deg,${t.acc},${t.acc2})`,borderRadius:99,transition:"width .6s",boxShadow:"0 0 8px "+t.acc+"55"}}/>
+                  <div style={{height:"100%",width:`${colPct}%`,background:colPct===100?t.gr:`linear-gradient(90deg,${t.acc},${t.acc2})`,borderRadius:99,transition:"width .6s",boxShadow:`0 0 8px ${t.acc}55`}}/>
                 </div>
                 <div>
                   <div style={{fontSize:".6rem",color:t.tx3,marginBottom:8}}>Coche les juz que TU as lus — les autres membres font de même</div>
@@ -4053,7 +4052,7 @@ return (
                       const isMine=myMember?.juzDone.includes(juz);
                       const isCovered=activeColKhatma.members.some(m=>m.juzDone.includes(juz));
                       return(
-                        <div key={juz} onClick={()=>markColJuz(juz)} style={{aspectRatio:"1",borderRadius:8,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",border:`2px solid ${isMine?t.acc:isCovered?t.gr+"66":t.b2}`,background:isMine?t.acc+"20":isCovered?t.gr+"12":t.s2,transition:"all .15s"}} onMouseEnter={e=>e.currentTarget.style.transform="scale(1.08)"} onMouseLeave={e=>e.currentTarget.style.transform=""}>
+                        <div key={juz} onClick={()=>markColJuz(juz)} style={{aspectRatio:"1",borderRadius:8,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",border:`2px solid ${isMine?t.acc:isCovered?t.gr+"66":t.b2}`,background:isMine?`${t.acc}20`:isCovered?`${t.gr}12`:t.s2,transition:"all .15s"}} onMouseEnter={e=>e.currentTarget.style.transform="scale(1.08)"} onMouseLeave={e=>e.currentTarget.style.transform=""}>
                           <span style={{fontSize:".62rem",fontWeight:700,color:isMine?t.acc:isCovered?t.gr:t.tx3}}>{juz}</span>
                           {isCovered&&!isMine&&<span style={{fontSize:".42rem",color:t.gr,lineHeight:1}}>✓</span>}
                           {isMine&&<span style={{fontSize:".42rem",color:t.acc,lineHeight:1}}>●</span>}
@@ -4083,7 +4082,7 @@ return (
                   </div>
                 </div>
                 {colPct===100&&(
-                  <div style={{padding:"14px",background:t.gr+"15",borderRadius:12,border:"1px solid "+t.gr+"44",textAlign:"center"}}>
+                  <div style={{padding:"14px",background:`${t.gr}15`,borderRadius:12,border:`1px solid ${t.gr}44`,textAlign:"center"}}>
                     <div style={{fontSize:"1.5rem",marginBottom:4}}>🌿</div>
                     <div style={{fontFamily:"Amiri,serif",fontSize:"1rem",color:t.gr}}>Khatma complète !</div>
                     <div style={{fontSize:".7rem",color:t.tx2,marginTop:4}}>بارك الله فيكم جميعاً</div>
@@ -4185,14 +4184,14 @@ return (
                 {/* Mode */}
                 <div style={{display:"flex",gap:6,marginBottom:10}}>
                   {[["surah","Quelle sourate ?"],["complete","Complète le verset"]].map(([m,l])=>(
-                    <button key={m} onClick={()=>{setQuizMode(m);setQuizQ(null);setQuizAnswer(null);}} style={{flex:1,padding:"8px",borderRadius:10,border:`1.5px solid ${quizMode===m?t.acc:t.b2}`,background:quizMode===m?t.acc+"15":t.s2,color:quizMode===m?t.acc:t.tx2,fontSize:".72rem",cursor:"pointer",fontWeight:quizMode===m?700:400}}>{l}</button>
+                    <button key={m} onClick={()=>{setQuizMode(m);setQuizQ(null);setQuizAnswer(null);}} style={{flex:1,padding:"8px",borderRadius:10,border:`1.5px solid ${quizMode===m?t.acc:t.b2}`,background:quizMode===m?`${t.acc}15`:t.s2,color:quizMode===m?t.acc:t.tx2,fontSize:".72rem",cursor:"pointer",fontWeight:quizMode===m?700:400}}>{l}</button>
                   ))}
                 </div>
                 {/* Filtre source */}
                 <div style={{display:"flex",gap:5,marginBottom:12,flexWrap:"wrap"}}>
-                  <button onClick={()=>{setQuizFilter("memorized");setQuizFilterSurah(null);setQuizQ(null);}} style={{padding:"4px 10px",borderRadius:99,border:`1px solid ${quizFilter==="memorized"&&!quizFilterSurah?t.acc:t.b2}`,background:quizFilter==="memorized"&&!quizFilterSurah?t.acc+"15":t.s2,color:quizFilter==="memorized"&&!quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer",fontWeight:600}}>Mes mémorisés</button>
-                  <button onClick={()=>{setQuizFilter("all");setQuizFilterSurah(null);setQuizQ(null);}} style={{padding:"4px 10px",borderRadius:99,border:`1px solid ${quizFilter==="all"&&!quizFilterSurah?t.acc:t.b2}`,background:quizFilter==="all"&&!quizFilterSurah?t.acc+"15":t.s2,color:quizFilter==="all"&&!quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer"}}>Tout</button>
-                  <select value={quizFilterSurah||""} onChange={e=>{const v=+e.target.value||null;setQuizFilterSurah(v);setQuizFilter(v?"surah":"memorized");setQuizQ(null);}} style={{padding:"4px 8px",borderRadius:99,border:`1px solid ${quizFilterSurah?t.acc:t.b2}`,background:quizFilterSurah?t.acc+"15":t.s2,color:quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer",outline:"none"}}>
+                  <button onClick={()=>{setQuizFilter("memorized");setQuizFilterSurah(null);setQuizQ(null);}} style={{padding:"4px 10px",borderRadius:99,border:`1px solid ${quizFilter==="memorized"&&!quizFilterSurah?t.acc:t.b2}`,background:quizFilter==="memorized"&&!quizFilterSurah?`${t.acc}15`:t.s2,color:quizFilter==="memorized"&&!quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer",fontWeight:600}}>Mes mémorisés</button>
+                  <button onClick={()=>{setQuizFilter("all");setQuizFilterSurah(null);setQuizQ(null);}} style={{padding:"4px 10px",borderRadius:99,border:`1px solid ${quizFilter==="all"&&!quizFilterSurah?t.acc:t.b2}`,background:quizFilter==="all"&&!quizFilterSurah?`${t.acc}15`:t.s2,color:quizFilter==="all"&&!quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer"}}>Tout</button>
+                  <select value={quizFilterSurah||""} onChange={e=>{const v=+e.target.value||null;setQuizFilterSurah(v);setQuizFilter(v?"surah":"memorized");setQuizQ(null);}} style={{padding:"4px 8px",borderRadius:99,border:`1px solid ${quizFilterSurah?t.acc:t.b2}`,background:quizFilterSurah?`${t.acc}15`:t.s2,color:quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer",outline:"none"}}>
                     <option value="">Par sourate…</option>
                     {SURAHS.map(s=><option key={s.n} value={s.n}>{s.n}. {s.name}</option>)}
                   </select>
@@ -4220,7 +4219,7 @@ return (
                           {quizChoices.map(s=>{
                             const isCorrect=s.n===quizQ.sn;
                             const isChosen=quizAnswer===s.n;
-                            const bg=quizAnswer?isCorrect?t.gr+"20":isChosen?t.rd+"20":t.s2:t.s2;
+                            const bg=quizAnswer?isCorrect?`${t.gr}20`:isChosen?`${t.rd}20`:t.s2:t.s2;
                             const border=quizAnswer?isCorrect?`2px solid ${t.gr}`:isChosen?`2px solid ${t.rd}`:`1px solid ${t.b1}`:`1px solid ${t.b2}`;
                             return(
                               <button key={s.n} onClick={()=>{
@@ -4237,7 +4236,7 @@ return (
                         </div>
                         {quizAnswer&&(
                           <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                            <div style={{textAlign:"center",padding:"10px",background:quizAnswer===quizQ.sn?t.gr+"15":t.rd+"15",borderRadius:10,border:`1px solid ${quizAnswer===quizQ.sn?t.gr:t.rd}`,color:quizAnswer===quizQ.sn?t.gr:t.rd,fontWeight:700,fontSize:".8rem"}}>
+                            <div style={{textAlign:"center",padding:"10px",background:quizAnswer===quizQ.sn?`${t.gr}15`:`${t.rd}15`,borderRadius:10,border:`1px solid ${quizAnswer===quizQ.sn?t.gr:t.rd}`,color:quizAnswer===quizQ.sn?t.gr:t.rd,fontWeight:700,fontSize:".8rem"}}>
                               {quizAnswer===quizQ.sn?"✓ Bonne réponse ! 🌟":`✗ C'était ${SURAHS.find(s=>s.n===quizQ.sn)?.name} · v.${quizQ.n}`}
                             </div>
                             <button onClick={()=>generateQuiz(quizFilterSurah,quizFilter)} style={{padding:"11px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:10,color:"#000",fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>Question suivante →</button>
@@ -4259,13 +4258,13 @@ return (
                           <button onClick={()=>setQuizAnswer("shown")} style={{padding:"11px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:10,color:t.tx2,fontWeight:600,fontSize:".8rem",cursor:"pointer"}}>👁 Révéler la suite</button>
                         ):(
                           <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                            <div style={{background:t.s2,borderRadius:12,padding:"16px",border:"1px solid "+t.acc+"44"}}>
+                            <div style={{background:t.s2,borderRadius:12,padding:"16px",border:`1px solid ${t.acc}44`}}>
                               <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.4rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.acc}}>{quizQ.ar?}</div>
                               {quizQ.fr&&<div style={{fontSize:".72rem",color:t.tx2,marginTop:8,fontStyle:"italic"}}>{quizQ.fr}</div>}
                             </div>
                             <div style={{display:"flex",gap:8}}>
-                              <button onClick={()=>{setQuizScore(p=>({...p,correct:p.correct+1,total:p.total+1}));generateQuiz(quizFilterSurah,quizFilter);}} style={{flex:1,padding:"11px",background:t.gr+"20",border:`1px solid ${t.gr}`,borderRadius:10,color:t.gr,fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>✓ Je savais</button>
-                              <button onClick={()=>{setQuizScore(p=>({...p,total:p.total+1,wrongs:[...p.wrongs,{q:quizQ,chosen:null,correct:quizQ.sn}]}));generateQuiz(quizFilterSurah,quizFilter);}} style={{flex:1,padding:"11px",background:t.rd+"15",border:`1px solid ${t.rd}`,borderRadius:10,color:t.rd,fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>✗ À revoir</button>
+                              <button onClick={()=>{setQuizScore(p=>({...p,correct:p.correct+1,total:p.total+1}));generateQuiz(quizFilterSurah,quizFilter);}} style={{flex:1,padding:"11px",background:`${t.gr}20`,border:`1px solid ${t.gr}`,borderRadius:10,color:t.gr,fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>✓ Je savais</button>
+                              <button onClick={()=>{setQuizScore(p=>({...p,total:p.total+1,wrongs:[...p.wrongs,{q:quizQ,chosen:null,correct:quizQ.sn}]}));generateQuiz(quizFilterSurah,quizFilter);}} style={{flex:1,padding:"11px",background:`${t.rd}15`,border:`1px solid ${t.rd}`,borderRadius:10,color:t.rd,fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>✗ À revoir</button>
                             </div>
                           </div>
                         )}
@@ -4298,14 +4297,14 @@ return (
                     <div style={{fontSize:".6rem",color:t.tx3,textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Mes erreurs — clique pour voir le verset</div>
                     <div style={{display:"flex",flexDirection:"column",gap:6}}>
                       {quizScore.wrongs.slice(-5).map((w,i)=>(
-                        <div key={i} onClick={()=>setQuizShowWrong(quizShowWrong?.q?.n===w.q.n?null:w)} style={{padding:"8px 12px",background:t.rd+"10",borderRadius:8,border:"1px solid "+t.rd+"30",cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>e.currentTarget.style.background=t.rd+"18"} onMouseLeave={e=>e.currentTarget.style.background=t.rd+"10"}>
+                        <div key={i} onClick={()=>setQuizShowWrong(quizShowWrong?.q?.n===w.q.n?null:w)} style={{padding:"8px 12px",background:`${t.rd}10`,borderRadius:8,border:`1px solid ${t.rd}30`,cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>e.currentTarget.style.background=`${t.rd}18`} onMouseLeave={e=>e.currentTarget.style.background=`${t.rd}10`}>
                           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                             <span style={{fontSize:".68rem",color:t.rd,fontWeight:600}}>{SURAHS.find(s=>s.n===w.correct)?.name} · v.{w.q.n}</span>
                             {w.chosen&&<span style={{fontSize:".6rem",color:t.tx3}}>Tu as dit : {SURAHS.find(s=>s.n===w.chosen)?.name}</span>}
                             <span style={{fontSize:".7rem",color:t.tx3}}>{quizShowWrong?.q?.n===w.q.n?"▲":"▼"}</span>
                           </div>
                           {quizShowWrong?.q?.n===w.q.n&&(
-                            <div style={{marginTop:8,paddingTop:8,borderTop:"1px solid "+t.rd+"20"}}>
+                            <div style={{marginTop:8,paddingTop:8,borderTop:`1px solid ${t.rd}20`}}>
                               <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.1rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx,marginBottom:4}}>{w.q.ar?}</div>
                               {w.q.fr&&<div style={{fontSize:".68rem",color:t.tx2,fontStyle:"italic"}}>{w.q.fr}</div>}
                             </div>
@@ -4337,7 +4336,7 @@ return (
                 cells.push({key,count,intensity,d});
               }
               const maxCount=Math.max(...cells.map(c=>c.count),1);
-              const colors=["#1a2a1a",t.gr+"33",t.gr+"66",t.gr+"99",t.gr];
+              const colors=["#1a2a1a",`${t.gr}33`,`${t.gr}66`,`${t.gr}99`,t.gr];
               // Jours de la semaine
               const dayLabels=["D","L","M","M","J","V","S"];
               return(
@@ -4419,7 +4418,7 @@ return (
                         return(
                           <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
                             <span style={{fontSize:".48rem",color:t.tx3,fontWeight:isLast?700:400}}>{w.total}</span>
-                            <div style={{width:"100%",height:h,borderRadius:"4px 4px 0 0",background:isLast?t.acc:t.acc+"44",transition:"height .6s ease",position:"relative"}}>
+                            <div style={{width:"100%",height:h,borderRadius:"4px 4px 0 0",background:isLast?t.acc:`${t.acc}44`,transition:"height .6s ease",position:"relative"}}>
                               {isLast&&<div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,rgba(255,255,255,.2),transparent)",borderRadius:"4px 4px 0 0"}}/>}
                             </div>
                             <span style={{fontSize:".42rem",color:t.tx3,textAlign:"center",lineHeight:1.2}}>{w.label}</span>
@@ -4474,8 +4473,8 @@ return (
                         {/* Halo pour les sourates complètes */}
                         {isComplete&&(
                           <circle cx={x} cy={y} r={r+3} fill="url(#starGlow)" opacity="0.4">
-                            <animate attributeName="r" values={`${r+2};${r+5};${r+2}`} dur={(2+i%3)+"s"} repeatCount="indefinite"/>
-                            <animate attributeName="opacity" values="0.4;0.15;0.4" dur={(2+i%3)+"s"} repeatCount="indefinite"/>
+                            <animate attributeName="r" values={`${r+2};${r+5};${r+2}`} dur={`${2+i%3}s`} repeatCount="indefinite"/>
+                            <animate attributeName="opacity" values="0.4;0.15;0.4" dur={`${2+i%3}s`} repeatCount="indefinite"/>
                           </circle>
                         )}
                         {/* Point principal */}
@@ -4508,7 +4507,7 @@ return (
               {[
                 {l:"Versets mémorisés",v:totalMem,s:`/ ${TOTAL_VERSES}`,c:"a",icon:"📿"},
                 {l:"Sourates complètes",v:SURAHS.filter(s=>sPct(s)===100).length,s:"/ 114",c:"g",icon:"📚"},
-                {l:"Série actuelle",v:memStreak+"j",s:"consécutifs",c:"b",icon:"🔥"},
+                {l:"Série actuelle",v:`${memStreak}j`,s:"consécutifs",c:"b",icon:"🔥"},
                 {l:"Pages lues",v:Object.keys(pageRead).filter(k=>pageRead[k]).length,s:"/ 604",c:"r",icon:"📖"},
               ].map((k,i)=>(
                 <div key={i} className={`sc ${k.c}`}>
@@ -4524,7 +4523,7 @@ return (
             {(()=>{
               const fmtDur=s=>{const h=Math.floor(s/3600);const m=Math.floor((s%3600)/60);const sec=s%60;return h>0?`${h}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`:`${m}:${String(sec).padStart(2,"0")}`;};
               const hassanat=totalMem*10+versesRecited*3; // estimation : 10/verset mémorisé + 3/récité
-              const hassFmt=hassanat>=1000000?(hassanat/1000000).toFixed(2)+"M":hassanat>=1000?(hassanat/1000).toFixed(1)+"k":String(hassanat);
+              const hassFmt=hassanat>=1000000?`${(hassanat/1000000).toFixed(2)}M`:hassanat>=1000?`${(hassanat/1000).toFixed(1)}k`:String(hassanat);
               const statsItems=[
                 {v:fmtDur(engagementTime),l:"Temps d'engagement",icon:"⏱",c:t.acc},
                 {v:`${Math.round(pct)}%`,l:"Achèvement du Coran",icon:"📿",c:t.gr},
@@ -4546,7 +4545,7 @@ return (
                           <div style={{fontSize:"1.3rem",fontWeight:800,color:s.c,letterSpacing:-.5,fontVariantNumeric:"tabular-nums"}}>{s.v}</div>
                           <div style={{fontSize:".6rem",color:t.tx3,marginTop:2,lineHeight:1.3}}>{s.l}</div>
                         </div>
-                        <div style={{width:36,height:36,borderRadius:10,background:s.c+"18",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.1rem",flexShrink:0}}>{s.icon}</div>
+                        <div style={{width:36,height:36,borderRadius:10,background:`${s.c}18`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.1rem",flexShrink:0}}>{s.icon}</div>
                       </div>
                     ))}
                   </div>
@@ -4571,14 +4570,14 @@ return (
                 {chartView==="daily"&&(
                   <div>
                     <div style={{display:"flex",alignItems:"flex-end",gap:4,height:100,marginBottom:6}}>
-                      {gains.map((g,i)=>{const lbl=new Date(histKeys[i]).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric"});const isToday=histKeys[i]===today();return(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:Math.max(Math.round(g/maxG*100),4)+"px",background:isToday?`linear-gradient(180deg,${t.acc2},${t.acc})`:"linear-gradient(180deg,"+ t.acc +"88,"+ t.acc +"44)"}}/></div><div className="blbl" style={{color:isToday?t.acc:t.tx3}}>{lbl}</div>{g>0&&<div className="bval">+{g}</div>}</div>);})}</div>
+                      {gains.map((g,i)=>{const lbl=new Date(histKeys[i]).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric"});const isToday=histKeys[i]===today();return(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:`${Math.max(Math.round(g/maxG*100),4)}px`,background:isToday?`linear-gradient(180deg,${t.acc2},${t.acc})`:`linear-gradient(180deg,${t.acc}88,${t.acc}44)`}}/></div><div className="blbl" style={{color:isToday?t.acc:t.tx3}}>{lbl}</div>{g>0&&<div className="bval">+{g}</div>}</div>);})}</div>
                     <div style={{textAlign:"center",fontSize:".65rem",color:t.tx3}}>Versets mémorisés par jour (14 derniers jours)</div>
                   </div>
                 )}
                 {chartView==="weekly"&&(
                   <div>
                     <div style={{display:"flex",alignItems:"flex-end",gap:4,height:100,marginBottom:6}}>
-                      {weeklyData.map((w,i)=>(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:Math.max(Math.round(w.v/maxWeek*100),4)+"px",background:`linear-gradient(180deg,${t.acc2},${t.acc})`}}/></div><div className="blbl">{w.label}</div>{w.v>0&&<div className="bval">+{w.v}</div>}</div>))}
+                      {weeklyData.map((w,i)=>(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:`${Math.max(Math.round(w.v/maxWeek*100),4)}px`,background:`linear-gradient(180deg,${t.acc2},${t.acc})`}}/></div><div className="blbl">{w.label}</div>{w.v>0&&<div className="bval">+{w.v}</div>}</div>))}
                     </div>
                     <div style={{textAlign:"center",fontSize:".65rem",color:t.tx3}}>Versets mémorisés par semaine</div>
                   </div>
@@ -4586,7 +4585,7 @@ return (
                 {chartView==="monthly"&&(
                   <div>
                     <div style={{display:"flex",alignItems:"flex-end",gap:4,height:100,marginBottom:6}}>
-                      {monthlyData.map((m,i)=>(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:Math.max(Math.round(m.v/maxMonth*100),4)+"px",background:`linear-gradient(180deg,${t.acc2},${t.acc})`}}/></div><div className="blbl">{m.label}</div>{m.v>0&&<div className="bval">+{m.v}</div>}</div>))}
+                      {monthlyData.map((m,i)=>(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:`${Math.max(Math.round(m.v/maxMonth*100),4)}px`,background:`linear-gradient(180deg,${t.acc2},${t.acc})`}}/></div><div className="blbl">{m.label}</div>{m.v>0&&<div className="bval">+{m.v}</div>}</div>))}
                     </div>
                     <div style={{textAlign:"center",fontSize:".65rem",color:t.tx3}}>Versets mémorisés par mois</div>
                   </div>
@@ -4599,7 +4598,7 @@ return (
               <div className="ch"><span className="ct">Badges</span><span style={{fontSize:".65rem",color:t.acc,fontWeight:700}}>{badges.length}{"/"}{BADGE_DEFS.length}</span></div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(120px,1fr))",gap:8,padding:12}}>
                 {BADGE_DEFS.map(bd=>{const earned=badges.includes(bd.id);return(
-                  <div key={bd.id} className="badge-card" style={{background:earned?"linear-gradient(135deg,"+ t.acc +"22,"+ t.acc2 +"11)":t.s2,border:`1.5px solid ${earned?t.acc:t.b1}`,opacity:earned?1:0.45}}>
+                  <div key={bd.id} className="badge-card" style={{background:earned?`linear-gradient(135deg,${t.acc}22,${t.acc2}11)`:t.s2,border:`1.5px solid ${earned?t.acc:t.b1}`,opacity:earned?1:0.45}}>
                     <div style={{fontSize:"1.6rem",marginBottom:4}}>{bd.icon}</div>
                     <div style={{fontSize:".7rem",fontWeight:700,color:earned?t.acc:t.tx3,marginBottom:3}}>{bd.label}</div>
                     <div style={{fontSize:".58rem",color:t.tx3}}>{bd.desc}</div>
@@ -4628,8 +4627,8 @@ return (
 
             {/* Révision espacée */}
             {spacedDue.length>0&&(
-              <div className="card" style={{border:"1px solid "+t.rd+"44"}}>
-                <div className="ch" style={{background:t.rd+"10"}}><span className="ct" style={{color:t.rd}}>Révision du jour — {spacedDue.length} versets</span></div>
+              <div className="card" style={{border:`1px solid ${t.rd}44`}}>
+                <div className="ch" style={{background:`${t.rd}10`}}><span className="ct" style={{color:t.rd}}>Révision du jour — {spacedDue.length} versets</span></div>
                 <div>
                   {spacedDue.slice(0,10).map((key,i)=>{const[sn,vn]=key.split("_").map(Number);const s=SURAHS.find(x=>x.n===sn);const v=Q[sn]?.[vn-1];return(
                     <div key={i} style={{padding:"10px 14px",borderBottom:`1px solid ${t.b1}`,display:"flex",alignItems:"center",gap:8,transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=t.s2} onMouseLeave={e=>e.currentTarget.style.background=""}>
@@ -4648,7 +4647,7 @@ return (
                 <div className="cd-grid">
                   {cdS.map(s=>(
                     <div key={s.n} className="cdc" onClick={()=>{doSelect(s);setPage("quran");}}>
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}><span style={{fontFamily:"Amiri,serif",fontSize:".95rem",color:t.acc}}>{s.ar}</span>{s.p>0&&<span style={{fontSize:".6rem",color:t.gr,fontWeight:700,background:t.gr+"18",padding:"1px 6px",borderRadius:99}}>{s.p}%</span>}</div>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}><span style={{fontFamily:"Amiri,serif",fontSize:".95rem",color:t.acc}}>{s.ar}</span>{s.p>0&&<span style={{fontSize:".6rem",color:t.gr,fontWeight:700,background:`${t.gr}18`,padding:"1px 6px",borderRadius:99}}>{s.p}%</span>}</div>
                       <div style={{fontSize:".72rem",fontWeight:600,color:t.tx,marginBottom:3}}>{s.name}</div>
                       <div style={{height:4,background:t.b1,borderRadius:99,overflow:"hidden",marginBottom:5}}><div style={{height:"100%",width:`${s.p}%`,background:t.gr,borderRadius:99}}/></div>
                       <div style={{fontSize:".62rem",color:t.tx3}}>{s.rem}v restants{s.days&&<span style={{color:t.bl,marginLeft:4}}>·~{s.days}j</span>}</div>
@@ -4672,8 +4671,8 @@ return (
               </div>
               <div style={{padding:"14px 0 4px"}}>
                 <div style={{fontSize:".68rem",color:t.tx3,marginBottom:8}}>Connecté en tant que</div>
-                <div style={{fontSize:".82rem",color:t.acc,fontWeight:600,marginBottom:14,padding:"10px 14px",background:t.acc+"10",borderRadius:10,border:"1px solid "+t.acc+"25"}}>{user?.email}</div>
-                <button onClick={()=>supabase.auth.signOut()} style={{width:"100%",padding:"13px",background:"transparent",border:"1px solid "+t.rd+"55",borderRadius:12,color:t.rd,fontWeight:700,fontSize:".82rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,transition:"background .2s"}} onMouseEnter={e=>e.currentTarget.style.background=t.rd+"0a"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                <div style={{fontSize:".82rem",color:t.acc,fontWeight:600,marginBottom:14,padding:"10px 14px",background:`${t.acc}10`,borderRadius:10,border:`1px solid ${t.acc}25`}}>{user?.email}</div>
+                <button onClick={()=>supabase.auth.signOut()} style={{width:"100%",padding:"13px",background:"transparent",border:`1px solid ${t.rd}55`,borderRadius:12,color:t.rd,fontWeight:700,fontSize:".82rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,transition:"background .2s"}} onMouseEnter={e=>e.currentTarget.style.background=`${t.rd}0a`} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                   Se déconnecter
                 </button>
@@ -4692,7 +4691,7 @@ return (
                     <div style={{fontSize:".8rem",color:t.tx,fontWeight:600}}>Rappel quotidien</div>
                     <div style={{fontSize:".63rem",color:t.tx3,marginTop:2}}>Recevoir un rappel chaque jour</div>
                   </div>
-                  <button onClick={notifEnabled?()=>{setNotifEnabled(false);sv("qnotif",false);}:requestNotifications} style={{padding:"6px 16px",borderRadius:20,border:`1.5px solid ${notifEnabled?t.gr:t.b2}`,background:notifEnabled?t.gr+"18":t.s2,color:notifEnabled?t.gr:t.tx2,fontSize:".7rem",cursor:"pointer",fontWeight:700,transition:"all .2s"}}>
+                  <button onClick={notifEnabled?()=>{setNotifEnabled(false);sv("qnotif",false);}:requestNotifications} style={{padding:"6px 16px",borderRadius:20,border:`1.5px solid ${notifEnabled?t.gr:t.b2}`,background:notifEnabled?`${t.gr}18`:t.s2,color:notifEnabled?t.gr:t.tx2,fontSize:".7rem",cursor:"pointer",fontWeight:700,transition:"all .2s"}}>
                     {notifEnabled?"Activé":"Activer"}
                   </button>
                 </div>
@@ -4736,7 +4735,7 @@ return (
                 <div style={{fontSize:".62rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginBottom:10}}>Thème visuel</div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
                   {Object.entries(THEME_META).map(([key,meta])=>(
-                    <div key={key} onClick={()=>setTn(key)} style={{border:`2px solid ${tn===key?t.acc:t.b1}`,borderRadius:12,padding:"10px 12px",cursor:"pointer",background:tn===key?t.acc+"10":t.s2,transition:"all .2s",transform:tn===key?"translateY(-1px)":"none",boxShadow:tn===key?"0 4px 14px "+t.acc+"33":"none"}}>
+                    <div key={key} onClick={()=>setTn(key)} style={{border:`2px solid ${tn===key?t.acc:t.b1}`,borderRadius:12,padding:"10px 12px",cursor:"pointer",background:tn===key?`${t.acc}10`:t.s2,transition:"all .2s",transform:tn===key?"translateY(-1px)":"none",boxShadow:tn===key?`0 4px 14px ${t.acc}33`:"none"}}>
                       <div style={{display:"flex",gap:4,marginBottom:6}}>
                         {meta.preview.map((c,i)=>(<div key={i} style={{width:14,height:14,borderRadius:"50%",background:c,border:"1px solid rgba(255,255,255,.1)"}}/>))}
                       </div>
@@ -4782,7 +4781,7 @@ return (
               </div>
               <div style={{padding:"8px 0",display:"flex",flexDirection:"column",gap:6}}>
                 {RECITERS.map(r=>(
-                  <div key={r.id} style={{padding:"10px 14px",borderRadius:10,border:`1.5px solid ${rec.id===r.id?t.acc:t.b1}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",background:rec.id===r.id?t.acc+"10":t.s2,transition:"all .2s"}} onClick={()=>setRec(r)}>
+                  <div key={r.id} style={{padding:"10px 14px",borderRadius:10,border:`1.5px solid ${rec.id===r.id?t.acc:t.b1}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",background:rec.id===r.id?`${t.acc}10`:t.s2,transition:"all .2s"}} onClick={()=>setRec(r)}>
                     <div>
                       <div style={{fontSize:".76rem",fontWeight:600,color:rec.id===r.id?t.acc:t.tx}}>{r.name}</div>
                       <div style={{fontFamily:"Amiri,serif",fontSize:".85rem",color:t.tx3,marginTop:2}}>{r.ar}</div>
@@ -4823,8 +4822,8 @@ return (
                 Aide & Tutoriel
               </div>
               <div style={{padding:"8px 0",display:"flex",flexDirection:"column",gap:8}}>
-                <button onClick={()=>{setShowTutorial(true);setTutorialPage(0);}} style={{width:"100%",padding:"14px 16px",background:"linear-gradient(135deg,"+ t.acc +"18,"+ t.acc2||t.acc +"10)",border:"1.5px solid "+t.acc+"44",borderRadius:12,color:t.acc,fontWeight:700,fontSize:".85rem",cursor:"pointer",display:"flex",alignItems:"center",gap:12,transition:"all .2s"}} onMouseEnter={e=>e.currentTarget.style.background="linear-gradient(135deg,"+ t.acc +"28,"+ t.acc2||t.acc +"18)"} onMouseLeave={e=>e.currentTarget.style.background="linear-gradient(135deg,"+ t.acc +"18,"+ t.acc2||t.acc +"10)"}>
-                  <div style={{width:38,height:38,borderRadius:10,background:t.acc+"20",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                <button onClick={()=>{setShowTutorial(true);setTutorialPage(0);}} style={{width:"100%",padding:"14px 16px",background:`linear-gradient(135deg,${t.acc}18,${t.acc2||t.acc}10)`,border:`1.5px solid ${t.acc}44`,borderRadius:12,color:t.acc,fontWeight:700,fontSize:".85rem",cursor:"pointer",display:"flex",alignItems:"center",gap:12,transition:"all .2s"}} onMouseEnter={e=>e.currentTarget.style.background=`linear-gradient(135deg,${t.acc}28,${t.acc2||t.acc}18)`} onMouseLeave={e=>e.currentTarget.style.background=`linear-gradient(135deg,${t.acc}18,${t.acc2||t.acc}10)`}>
+                  <div style={{width:38,height:38,borderRadius:10,background:`${t.acc}20`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.acc} strokeWidth="1.8" strokeLinecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   </div>
                   <div style={{textAlign:"left"}}>
@@ -4917,12 +4916,12 @@ return (
               const isPl=playing===v.n;
               return (
                 <div key={v.n} className="immersive-verse" id={`iv-${selS.n}-${v.n}`}>
-                  <div className="immersive-ar" style={{fontSize:(arabicSize*1.2)+"rem"}}>
+                  <div className="immersive-ar" style={{fontSize:`${arabicSize*1.2}rem`}}>
                     <TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/>
                     <span style={{color:t.acc,fontFamily:"Amiri,serif",fontSize:".75rem",marginRight:6}}> ﴿{v.n}﴾</span>
                   </div>
                   {showTr&&v.fr&&(<div className="immersive-fr">{v.fr}</div>)}
-                  {showTf&&v.tf&&(<div style={{background:t.pu+"10",borderRadius:10,padding:"10px 14px",marginTop:8,fontSize:".72rem",color:t.tx2,fontStyle:"italic",textAlign:"center",lineHeight:1.7}}>{v.tf}</div>)}
+                  {showTf&&v.tf&&(<div style={{background:`${t.pu}10`,borderRadius:10,padding:"10px 14px",marginTop:8,fontSize:".72rem",color:t.tx2,fontStyle:"italic",textAlign:"center",lineHeight:1.7}}>{v.tf}</div>)}
                   <div className="immersive-num">v.{v.n} {isMem&&"· ✓ mémorisé"}</div>
                   <div style={{display:"flex",gap:6,justifyContent:"center",marginTop:8}}>
                     <button className={`vbtn ${isMem?"mem":""}`} onClick={()=>toggleV(selS.n,v.n)}>{isMem?"✓ Mémorisé":"+ Mémoriser"}</button>
@@ -4976,7 +4975,7 @@ return (
                 const pg=SURAH_PDF_PAGES[origIdx]||1;
                 const isActive=(mushafPage||1)===pg;
                 return(
-                  <div key={s.n} onClick={()=>{setMushafPage(pg);setMushafSurahModal(false);}} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 20px",cursor:"pointer",background:isActive?t.acc+"15":"transparent",borderLeft:isActive?`3px solid ${t.acc}`:"3px solid transparent",transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=t.acc+"10"} onMouseLeave={e=>e.currentTarget.style.background=isActive?t.acc+"15":"transparent"}>
+                  <div key={s.n} onClick={()=>{setMushafPage(pg);setMushafSurahModal(false);}} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 20px",cursor:"pointer",background:isActive?`${t.acc}15`:"transparent",borderLeft:isActive?`3px solid ${t.acc}`:"3px solid transparent",transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=`${t.acc}10`} onMouseLeave={e=>e.currentTarget.style.background=isActive?`${t.acc}15`:"transparent"}>
                     <div style={{width:32,height:32,borderRadius:8,background:isActive?t.acc:t.s2,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".65rem",fontWeight:700,color:isActive?"#000":t.tx3,flexShrink:0}}>{s.n}</div>
                     <div style={{flex:1}}>
                       <div style={{fontSize:".8rem",fontWeight:600,color:isActive?t.acc:t.tx}}>{s.name}</div>
@@ -5031,7 +5030,7 @@ return (
           {!timerRunning&&timerLeft===null&&(
             <div style={{display:"flex",gap:8,flexWrap:"wrap",justifyContent:"center"}} onClick={e=>e.stopPropagation()}>
               {[5,10,15,20,25,30,45,60].map(m=>(
-                <button key={m} onClick={()=>setTimerDuration(m)} style={{padding:"8px 14px",borderRadius:10,border:`1.5px solid ${timerDuration===m?t.acc:"rgba(255,255,255,.12)"}`,background:timerDuration===m?t.acc+"20":"rgba(255,255,255,.04)",color:timerDuration===m?t.acc:"rgba(255,255,255,.5)",fontSize:".78rem",cursor:"pointer",fontWeight:timerDuration===m?700:400}}>
+                <button key={m} onClick={()=>setTimerDuration(m)} style={{padding:"8px 14px",borderRadius:10,border:`1.5px solid ${timerDuration===m?t.acc:"rgba(255,255,255,.12)"}`,background:timerDuration===m?`${t.acc}20`:"rgba(255,255,255,.04)",color:timerDuration===m?t.acc:"rgba(255,255,255,.5)",fontSize:".78rem",cursor:"pointer",fontWeight:timerDuration===m?700:400}}>
                   {m}min{m===25?" 🍅":""}
                 </button>
               ))}
@@ -5041,7 +5040,7 @@ return (
           {/* Contrôles */}
           <div style={{display:"flex",gap:12}} onClick={e=>e.stopPropagation()}>
             {!timerRunning&&timerLeft===null&&(
-              <button onClick={startTimer} style={{padding:"14px 40px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:14,color:"#000",fontWeight:800,fontSize:"1rem",cursor:"pointer",boxShadow:"0 4px 20px "+t.acc+"44"}}>
+              <button onClick={startTimer} style={{padding:"14px 40px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:14,color:"#000",fontWeight:800,fontSize:"1rem",cursor:"pointer",boxShadow:`0 4px 20px ${t.acc}44`}}>
                 ▶ Démarrer
               </button>
             )}
@@ -5076,8 +5075,8 @@ return (
       )}
 
       {playing!==null&&selS&&!focusMode&&!immersive&&(
-        <div style={{position:"fixed",bottom:"calc(70px + env(safe-area-inset-bottom))",left:12,right:12,zIndex:55,background:t.navBg,border:"1px solid "+t.acc+"44",borderRadius:14,padding:"9px 14px",display:"flex",alignItems:"center",gap:10,boxShadow:`0 -2px 20px rgba(0,0,0,.25)`,backdropFilter:"blur(12px)"}}>
-          <div style={{width:32,height:32,borderRadius:8,background:t.acc+"15",border:"1px solid "+t.acc+"33",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+        <div style={{position:"fixed",bottom:"calc(70px + env(safe-area-inset-bottom))",left:12,right:12,zIndex:55,background:t.navBg,border:`1px solid ${t.acc}44`,borderRadius:14,padding:"9px 14px",display:"flex",alignItems:"center",gap:10,boxShadow:`0 -2px 20px rgba(0,0,0,.25)`,backdropFilter:"blur(12px)"}}>
+          <div style={{width:32,height:32,borderRadius:8,background:`${t.acc}15`,border:`1px solid ${t.acc}33`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
             <span style={{fontFamily:"Amiri,serif",fontSize:".7rem",color:t.acc}}>{selS.n}</span>
           </div>
           <div style={{flex:1,minWidth:0}}>
