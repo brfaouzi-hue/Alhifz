@@ -3208,7 +3208,7 @@ return (
                   icon:(
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12 2 L12 22" stroke={t.pu} strokeWidth="1.4"/>
-                      <path d="M4 6 Q12 2 20 6 L20 18 Q12 22 4 18 Z" stroke={t.pu} strokeWidth="1.4" fill=(t.pu)+"10"/>
+                      <path d="M4 6 Q12 2 20 6 L20 18 Q12 22 4 18 Z" stroke={t.pu} strokeWidth="1.4" fill={(t.pu)+"10"}/>
                       <path d="M4 6 L4 18" stroke={t.pu} strokeWidth="1.4"/>
                     </svg>
                   ),
