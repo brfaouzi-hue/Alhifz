@@ -5103,7 +5103,6 @@ return (
             </div>
           </div>
         )}
-      </div>
 
       {focusMode&&selS&&verses.length>0&&(
         <div style={{position:"fixed",inset:0,zIndex:150,background:"#050505",display:"flex",flexDirection:"column",overflow:"hidden"}}>
