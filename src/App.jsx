@@ -686,7 +686,7 @@ function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,au
   const loadWords=()=>{
     if(loaded)return;
     setLoaded(true);
-    fetch(`https://api.quran.com/api/v4/verses/by_key/${sn}:${vn}?words=true&word_fields=text_uthmani,translation&language=fr`)
+    fetch("https://api.quran.com/api/v4/verses/by_key/"+sn+":"+vn+"?words=true&word_fields=text_uthmani,translation&language=fr")
       .then(r=>r.json())
       .then(d=>setWords(d?.verse?.words||null))
       .catch(()=>setWords(null));
@@ -704,7 +704,7 @@ function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,au
         <span key={i} style={{position:"relative",display:"inline-block",margin:"0 2px",cursor:"pointer",padding:"2px 4px",borderRadius:4,transition:"background .15s"}}
           onMouseEnter={e=>{setTooltip(i);e.currentTarget.style.background="rgba(201,168,76,.15)";}}
           onMouseLeave={e=>{setTooltip(null);e.currentTarget.style.background="transparent";}}
-          onClick={()=>{const a=new Audio(`https://audio.qurancdn.com/${w.audio_url}`);a.play();}}>
+          onClick={()=>{const a=new Audio("https://audio.qurancdn.com/"+w.audio_url);a.play();}}>
           {w.text_uthmani}
           {tooltip===i&&(
             <span style={{position:"absolute",bottom:"110%",left:"50%",transform:"translateX(-50%)",background:"#1a1a1a",color:"#c9a84c",padding:"4px 8px",borderRadius:6,fontSize:".65rem",whiteSpace:"nowrap",zIndex:99,border:"1px solid rgba(201,168,76,.3)",pointerEvents:"none"}}>
@@ -720,7 +720,7 @@ function WbwModal({sn,vn,t}){
   const [words,setWords]=useState(null);
   useEffect(()=>{
     let cancelled=false;
-    fetch(`https://api.quran.com/api/v4/verses/by_key/${sn}:${vn}?words=true&word_fields=text_uthmani,translation&language=fr`)
+    fetch("https://api.quran.com/api/v4/verses/by_key/"+sn+":"+vn+"?words=true&word_fields=text_uthmani,translation&language=fr")
       .then(r=>r.json())
       .then(d=>{if(!cancelled)setWords(d?.verse?.words?.filter(w=>w.char_type_name==="word")||null);})
       .catch(()=>{if(!cancelled)setWords([]);});
@@ -730,10 +730,10 @@ function WbwModal({sn,vn,t}){
   return (
     <div style={{display:"flex",flexDirection:"column",gap:8}}>
       {words.map((w,i)=>(
-        <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",background:"rgba(255,255,255,.04)",borderRadius:10,border:`1px solid ${t.b1}`}}>
+        <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",background:"rgba(255,255,255,.04)",borderRadius:10,border:"1px solid "+t.b1}}>
           <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.4rem",color:"#fff",direction:"rtl"}}>{w.text_uthmani}</div>
           <div style={{fontSize:".75rem",color:t.acc,textAlign:"center",flex:1,padding:"0 12px"}}>{w.translation?.text||""}</div>
-          <button onClick={()=>new Audio(`https://audio.qurancdn.com/${w.audio_url}`).play()} style={{background:`${t.acc}22`,border:`1px solid ${t.acc}44`,borderRadius:8,padding:"6px 10px",color:t.acc,cursor:"pointer",fontSize:".7rem"}}>▶</button>
+          <button onClick={()=>new Audio("https://audio.qurancdn.com/"+w.audio_url).play()} style={{background:t.acc+"22",border:"1px solid "+t.acc+"44",borderRadius:8,padding:"6px 10px",color:t.acc,cursor:"pointer",fontSize:".7rem"}}>▶</button>
         </div>
       ))}
     </div>
@@ -753,7 +753,7 @@ function TajwidSpan({text,enabled,tjc}) {
 
   // Parser robuste via DOMParser — gère tous les cas (imbriqués, sans guillemets, auto-fermants)
   try{
-    const wrapped=`<span>${clean}</span>`;
+    const wrapped="<span>"+clean+"</span>";
     const doc=new DOMParser().parseFromString(wrapped,"text/html");
     const root=doc.querySelector("span");
     if(!root) throw new Error("parse fail");
@@ -789,120 +789,40 @@ function TajwidSpan({text,enabled,tjc}) {
 // ONBOARDING — Premier lancement
 // ═══════════════════════════════════════
 const ONBOARD_SLIDES=[
-  {
-    icon:(acc)=>(
-      <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-        <circle cx="32" cy="32" r="30" fill={acc+"22"} stroke={acc} strokeWidth="1.5"/>
-        <path d="M20 44 Q32 12 44 44" stroke={acc} strokeWidth="2" strokeLinecap="round" fill="none"/>
-        <path d="M24 36 Q32 20 40 36" stroke={acc} strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-        <circle cx="32" cy="46" r="3" fill={acc}/>
-      </svg>
-    ),
-    title:"بِسْمِ اللَّهِ",
-    sub:"Bienvenue dans Al-Hifz",
-    desc:"Le mémorisateur de Coran le plus complet. Mémorise, révcite, révise — tout en un.",
-    color:"#16a34a",
-  },
-  {
-    icon:(acc)=>(
-      <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-        <rect x="12" y="8" width="40" height="48" rx="4" fill={acc+"18"} stroke={acc} strokeWidth="1.5"/>
-        <line x1="20" y1="20" x2="44" y2="20" stroke={acc} strokeWidth="1.5" strokeLinecap="round"/>
-        <line x1="20" y1="28" x2="44" y2="28" stroke={acc} strokeWidth="1.5" strokeLinecap="round"/>
-        <line x1="20" y1="36" x2="36" y2="36" stroke={acc} strokeWidth="1.5" strokeLinecap="round"/>
-        <circle cx="48" cy="48" r="10" fill={acc}/>
-        <polyline points="44 48 47 51 53 45" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none"/>
-      </svg>
-    ),
-    title:"Mémorise verset par verset",
-    sub:"Progression intelligente",
-    desc:"Marque les versets mémorisés, suis ta progression par sourate et juz. La révision espacée (SM2) t'aide à ne rien oublier.",
-    color:"#2563eb",
-  },
-  {
-    icon:(acc)=>(
-      <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-        <circle cx="32" cy="32" r="20" fill={acc+"18"} stroke={acc} strokeWidth="1.5"/>
-        <circle cx="32" cy="32" r="10" fill={acc+"30"}/>
-        <path d="M32 12 L32 8M32 56 L32 52M12 32 L8 32M56 32 L52 32" stroke={acc} strokeWidth="2" strokeLinecap="round"/>
-        <circle cx="32" cy="32" r="4" fill={acc}/>
-        <path d="M28 32a3 3 0 0 0-3 3v8" stroke="#e91e63" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-      </svg>
-    ),
-    title:"Récite et sois évalué",
-    sub:"Reconnaissance vocale arabe",
-    desc:"Appuie sur 🎤, récite le verset, et reçois un score mot par mot avec les erreurs surlignées. Mode enchaîné pour toute la sourate.",
-    color:"#e91e63",
-  },
-  {
-    icon:(acc)=>(
-      <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-        <rect x="8" y="16" width="48" height="36" rx="4" fill={acc+"18"} stroke={acc} strokeWidth="1.5"/>
-        <path d="M8 24 L56 24" stroke={acc} strokeWidth="1" opacity=".4"/>
-        <text x="32" y="38" textAnchor="middle" fontFamily="serif" fontSize="16" fill={acc}>القرآن</text>
-        <path d="M16 48 Q32 44 48 48" stroke={acc} strokeWidth="1" strokeLinecap="round" opacity=".4"/>
-      </svg>
-    ),
-    title:"Mushaf & Tajweed",
-    sub:"Lecture page par page",
-    desc:"Lis le Mushaf page par page, active le tajweed coloré, swipe pour naviguer. Lance une khatma pour lire le Coran complet.",
-    color:"#7c3aed",
-  },
+  {visual:(c)=>(<svg width="100" height="100" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="46" fill={c+"18"} stroke={c} strokeWidth="1.2"/><path d="M50 20 C38 20 28 30 28 42 C28 56 40 64 52 62 C44 60 36 52 36 42 C36 32 44 24 54 22Z" fill={c} opacity=".9"/></svg>),
+    title:"بِسْمِ اللَّهِ",badge:"Bienvenue",desc:"Al-Hifz vous accompagne du premier verset jusqu’à la khatma.",color:"#16a34a",emoji:"🌙"},
+  {visual:(c)=>(<svg width="100" height="100" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="36" fill="none" stroke={c+"20"} strokeWidth="8"/><circle cx="50" cy="50" r="36" fill="none" stroke={c} strokeWidth="8" strokeDasharray="150 226" strokeLinecap="round" transform="rotate(-90 50 50)"/></svg>),
+    title:"Suis ta progression",badge:"Mémorisation",desc:"Chaque verset mémorisé fait avancer ton anneau.",color:"#2563eb",emoji:"📿"},
+  {visual:(c)=>(<svg width="100" height="100" viewBox="0 0 100 100" fill="none"><rect x="38" y="18" width="24" height="36" rx="12" fill={c+"25"} stroke={c} strokeWidth="1.5"/></svg>),
+    title:"Récite à voix haute",badge:"Récitation",desc:"Appuie sur le micro et récite. L’app colore les erreurs.",color:"#e91e63",emoji:"🎤"},
+  {visual:(c)=>(<svg width="100" height="100" viewBox="0 0 100 100" fill="none"><rect x="12" y="22" width="36" height="56" rx="3" fill={c+"18"} stroke={c} strokeWidth="1.2"/><rect x="52" y="22" width="36" height="56" rx="3" fill={c+"18"} stroke={c} strokeWidth="1.2"/></svg>),
+    title:"Mushaf et Quiz",badge:"Lecture",desc:"Lis le Mushaf avec les couleurs tajweed.",color:"#7c3aed",emoji:"📜"},
 ];
-
 function OnboardModal({t,acc,tn,onDone,onSkip,onTutorial}){
   const [slide,setSlide]=React.useState(0);
   const s=ONBOARD_SLIDES[slide];
   const isLast=slide===ONBOARD_SLIDES.length-1;
-  const bg=tn==="light"?"#ffffff":"#0a150b";
-  return(
-    <div style={{position:"fixed",inset:0,zIndex:500,background:bg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"space-between",padding:"env(safe-area-inset-top) 24px max(24px,env(safe-area-inset-bottom))",overflowY:"auto"}}>
-      <style>{`@keyframes fadeSlide{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}`}</style>
-      {/* Skip */}
-      <div style={{width:"100%",display:"flex",justifyContent:"flex-end",paddingTop:16}}>
-        {!isLast&&<button onClick={onSkip} style={{background:"none",border:"none",color:t.tx3,fontSize:".75rem",cursor:"pointer",padding:"4px 8px"}}>Passer →</button>}
-      </div>
-      {/* Contenu */}
-      <div key={slide} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:28,animation:"fadeSlide .35s ease",textAlign:"center",maxWidth:360,width:"100%"}}>
-        <div style={{width:120,height:120,borderRadius:28,background:`${s.color}12`,display:"flex",alignItems:"center",justifyContent:"center",border:`2px solid ${s.color}33`}}>
-          {s.icon(s.color)}
-        </div>
-        <div>
-          <div style={{fontFamily:"Amiri,serif",fontSize:"1.5rem",color:s.color,marginBottom:6,fontWeight:700}}>{s.title}</div>
-          <div style={{fontSize:".72rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"2px",marginBottom:14}}>{s.sub}</div>
-          <div style={{fontSize:".88rem",color:t.tx2,lineHeight:1.7}}>{s.desc}</div>
-        </div>
-        {/* Points de progression */}
-        <div style={{display:"flex",gap:8,alignItems:"center"}}>
-          {ONBOARD_SLIDES.map((_,i)=>(
-            <div key={i} onClick={()=>setSlide(i)} style={{width:i===slide?24:8,height:8,borderRadius:99,background:i===slide?s.color:t.b2,transition:"all .3s",cursor:"pointer"}}/>
-          ))}
-        </div>
-      </div>
-      {/* Footer */}
-      <div style={{width:"100%",maxWidth:360,display:"flex",flexDirection:"column",gap:10}}>
-        {isLast?(
-          <>
-            <button onClick={onTutorial} style={{width:"100%",padding:"15px",background:`linear-gradient(135deg,${acc},${acc}cc)`,border:"none",borderRadius:14,color:"#000",fontWeight:800,fontSize:".9rem",cursor:"pointer"}}>
-              Voir le tutoriel complet
-            </button>
-            <button onClick={onDone} style={{width:"100%",padding:"13px",background:"none",border:`1.5px solid ${t.b2}`,borderRadius:14,color:t.tx2,fontWeight:600,fontSize:".85rem",cursor:"pointer"}}>
-              Commencer directement
-            </button>
-          </>
-        ):(
-          <button onClick={()=>setSlide(p=>p+1)} style={{width:"100%",padding:"15px",background:`linear-gradient(135deg,${s.color},${s.color}cc)`,border:"none",borderRadius:14,color:"#fff",fontWeight:800,fontSize:".9rem",cursor:"pointer"}}>
-            Suivant →
-          </button>
-        )}
+  const bg=tn==="light"?"#ffffff":"#060d07";
+  return(<div style={{position:"fixed",inset:0,zIndex:500,background:bg,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+    <style>{"@keyframes ob-in{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}@keyframes ob-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}"}</style>
+    <div style={{display:"flex",justifyContent:"space-between",padding:"max(16px,env(safe-area-inset-top)) 20px 10px",flexShrink:0}}>
+      <div style={{display:"flex",gap:5}}>{ONBOARD_SLIDES.map((_,i)=>(<div key={i} onClick={()=>setSlide(i)} style={{height:4,width:i===slide?22:5,borderRadius:99,background:i===slide?s.color:t.b2,transition:"all .3s",cursor:"pointer"}}/>))}</div>
+      <button onClick={onSkip} style={{background:"none",border:"none",color:t.tx3,fontSize:".75rem",cursor:"pointer"}}>{"Passer"}</button>
+    </div>
+    <div key={slide} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"0 28px 16px",animation:"ob-in .4s ease",gap:28}}>
+      <div style={{padding:"4px 12px",borderRadius:99,background:s.color+"18",border:"1px solid "+s.color+"44",fontSize:".62rem",fontWeight:700,color:s.color,textTransform:"uppercase"}}>{s.emoji+" "+s.badge}</div>
+      <div style={{width:130,height:130,borderRadius:32,background:s.color+"10",border:"1.5px solid "+s.color+"25",display:"flex",alignItems:"center",justifyContent:"center",animation:"ob-pulse 3s ease-in-out infinite",flexShrink:0}}>{s.visual(s.color)}</div>
+      <div style={{textAlign:"center",maxWidth:300}}>
+        <div style={{fontFamily:"Amiri,serif",fontSize:"1.5rem",color:t.tx,fontWeight:700,marginBottom:8}}>{s.title}</div>
+        <div style={{fontSize:".85rem",color:t.tx2,lineHeight:1.65}}>{s.desc}</div>
       </div>
     </div>
-  );
+    <div style={{padding:"14px 22px",paddingBottom:"max(22px,env(safe-area-inset-bottom))",display:"flex",flexDirection:"column",gap:8,flexShrink:0}}>
+      {isLast?(<><button onClick={onTutorial} style={{width:"100%",padding:"14px",background:"linear-gradient(135deg,"+s.color+","+s.color+"bb)",border:"none",borderRadius:12,color:"#fff",fontWeight:800,cursor:"pointer"}}>{"Voir le guide"}</button><button onClick={onDone} style={{width:"100%",padding:"12px",background:"transparent",border:"1px solid "+t.b2,borderRadius:12,color:t.tx2,fontWeight:600,cursor:"pointer"}}>{"Commencer"}</button></>)
+      :(<button onClick={()=>setSlide(p=>p+1)} style={{width:"100%",padding:"14px",background:"linear-gradient(135deg,"+s.color+","+s.color+"bb)",border:"none",borderRadius:12,color:"#fff",fontWeight:800,cursor:"pointer"}}>{"Suivant"}</button>)}
+    </div>
+  </div>);
 }
-
-// ═══════════════════════════════════════
-// TUTORIEL COMPLET — Toutes les fonctionnalités
-// ═══════════════════════════════════════
 const TUTORIAL_SECTIONS=[
   {
     id:"memo",label:"Mémorisation",icon:"📿",color:"#16a34a",
@@ -1177,21 +1097,21 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
       <style>{`@keyframes tutoIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}`}</style>
 
       {/* Header */}
-      <div style={{display:"flex",alignItems:"center",padding:"14px 16px",paddingTop:"max(14px,env(safe-area-inset-top))",borderBottom:`1px solid ${t.b1}`,flexShrink:0,gap:10}}>
+      <div style={{display:"flex",alignItems:"center",padding:"14px 16px",paddingTop:"max(14px,env(safe-area-inset-top))",borderBottom:"1px solid "+t.b1,flexShrink:0,gap:10}}>
         <div style={{flex:1}}>
           <div style={{fontSize:".54rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"2px",marginBottom:2}}>Tutoriel</div>
           <div style={{fontSize:".9rem",fontWeight:700,color:t.tx}}>{section.icon} {section.label}</div>
         </div>
         <span style={{fontSize:".62rem",color:t.tx3}}>{step+1}{"/"}{section.steps.length}</span>
-        <button onClick={onClose} style={{width:30,height:30,borderRadius:"50%",border:`1px solid ${t.b2}`,background:t.s2,color:t.tx3,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
+        <button onClick={onClose} style={{width:30,height:30,borderRadius:"50%",border:"1px solid "+t.b2,background:t.s2,color:t.tx3,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
 
       {/* Navigation sections */}
-      <div style={{display:"flex",gap:6,padding:"10px 14px",overflowX:"auto",borderBottom:`1px solid ${t.b1}`,flexShrink:0,scrollbarWidth:"none"}}>
+      <div style={{display:"flex",gap:6,padding:"10px 14px",overflowX:"auto",borderBottom:"1px solid "+t.b1,flexShrink:0,scrollbarWidth:"none"}}>
         {TUTORIAL_SECTIONS.map((s,i)=>(
-          <button key={s.id} onClick={()=>{setActiveSection(i);setStep(0);}} style={{padding:"5px 12px",borderRadius:99,border:`1.5px solid ${i===activeSection?s.color:t.b2}`,background:i===activeSection?`${s.color}15`:t.s2,color:i===activeSection?s.color:t.tx3,fontSize:".62rem",fontWeight:i===activeSection?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,transition:"all .2s"}}>
+          <button key={s.id} onClick={()=>{setActiveSection(i);setStep(0);}} style={{padding:"5px 12px",borderRadius:99,border:"1.5px solid "+(i===activeSection?s.color:t.b2),background:i===activeSection?s.color+"15":t.s2,color:i===activeSection?s.color:t.tx3,fontSize:".62rem",fontWeight:i===activeSection?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,transition:"all .2s"}}>
             {s.icon} {s.label}
           </button>
         ))}
@@ -1199,14 +1119,14 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
 
       {/* Barre de progression */}
       <div style={{height:3,background:t.b1,flexShrink:0}}>
-        <div style={{height:"100%",width:`${((activeSection*10+step+1)/(TUTORIAL_SECTIONS.reduce((a,s)=>a+s.steps.length,0)))*100}%`,background:section.color,transition:"width .4s ease"}}/>
+        <div style={{height:"100%",width:((activeSection*10+step+1)/(TUTORIAL_SECTIONS.reduce((a,s)=>a+s.steps.length,0)))*100+"%",background:section.color,transition:"width .4s ease"}}/>
       </div>
 
       {/* Contenu du step */}
-      <div key={`${activeSection}-${step}`} style={{flex:1,display:"flex",flexDirection:"column",padding:"24px 20px",gap:20,animation:"tutoIn .3s ease",overflowY:"auto"}}>
+      <div key={activeSection+"-"+step} style={{flex:1,display:"flex",flexDirection:"column",padding:"24px 20px",gap:20,animation:"tutoIn .3s ease",overflowY:"auto"}}>
 
         {/* Illustration mock de l'app */}
-        <div style={{width:"100%",borderRadius:16,background:tn==="light"?"#f0f0f0":"#1a1a1a",border:`1.5px solid ${section.color}30`,overflow:"hidden",minHeight:180,position:"relative"}}>
+        <div style={{width:"100%",borderRadius:16,background:tn==="light"?"#f0f0f0":"#1a1a1a",border:"1.5px solid "+section.color+"30",overflow:"hidden",minHeight:180,position:"relative"}}>
           <div style={{position:"absolute",top:0,left:0,right:0,height:28,background:tn==="light"?"#e0e0e0":"#111",display:"flex",alignItems:"center",padding:"0 10px",gap:5}}>
             <div style={{width:8,height:8,borderRadius:"50%",background:"#ff5f57"}}/>
             <div style={{width:8,height:8,borderRadius:"50%",background:"#febc2e"}}/>
@@ -1216,20 +1136,20 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
           <div style={{padding:"34px 10px 10px",display:"flex",flexDirection:"column",gap:5}}>
             {(currentStep?.mock?.lines||[]).map((line,li)=>{
               if(line.type==="header") return(
-                <div key={li} style={{background:`${section.color}15`,borderRadius:8,padding:"6px 10px",borderLeft:`3px solid ${section.color}`}}>
+                <div key={li} style={{background:section.color+"15",borderRadius:8,padding:"6px 10px",borderLeft:"3px solid "+section.color}}>
                   <div style={{fontSize:".65rem",fontWeight:700,color:section.color}}>{line.text}</div>
                   {line.sub&&<div style={{fontSize:".5rem",color:"#888",marginTop:1}}>{line.sub}</div>}
                 </div>
               );
               if(line.type==="verse") return(
-                <div key={li} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 6px",borderRadius:7,background:line.mem?`${t.gr}15`:tn==="light"?"#fff":"#222",border:`1px solid ${line.mem?t.gr:line.due?"#f59e0b":"#ddd"}`}}>
+                <div key={li} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 6px",borderRadius:7,background:line.mem?t.gr+"15":tn==="light"?"#fff":"#222",border:"1px solid "+(line.mem?t.gr:line.due?"#f59e0b":"#ddd")}}>
                   <div style={{width:18,height:18,borderRadius:"50%",background:line.mem?t.gr:"#ddd",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:".45rem",color:line.mem?"#fff":"#888"}}>{line.mem?"✓":line.n}</div>
                   <div style={{fontFamily:"Amiri,serif",fontSize:".85rem",direction:"rtl",flex:1,color:tn==="light"?"#1a0a00":"#f0e8d0",lineHeight:1.5}}>{line.ar}</div>
                 </div>
               );
               if(line.type==="actions") return(
                 <div key={li} style={{display:"flex",gap:4,flexWrap:"wrap"}}>
-                  {line.btns.map((b,bi)=><span key={bi} style={{padding:"2px 7px",borderRadius:20,border:`1px solid ${section.color}`,color:section.color,fontSize:".5rem",fontWeight:600}}>{b}</span>)}
+                  {line.btns.map((b,bi)=><span key={bi} style={{padding:"2px 7px",borderRadius:20,border:"1px solid "+section.color,color:section.color,fontSize:".5rem",fontWeight:600}}>{b}</span>)}
                 </div>
               );
               if(line.type==="mic") return(
@@ -1243,14 +1163,14 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
                 </div>
               );
               if(line.type==="score") return(
-                <div key={li} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 8px",background:`${t.gr}15`,borderRadius:8}}>
+                <div key={li} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 8px",background:t.gr+"15",borderRadius:8}}>
                   <div style={{width:34,height:34,borderRadius:"50%",background:t.gr,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:".7rem",fontWeight:800}}>{line.pct}%</div>
                   <div style={{fontSize:".55rem",color:"#666"}}>{line.correct} corrects · {line.wrong} erreur{line.wrong>1?"s":""}</div>
                 </div>
               );
               if(line.type==="ring") return(
                 <div key={li} style={{display:"flex",justifyContent:"center",padding:"4px 0"}}>
-                  <div style={{width:50,height:50,borderRadius:"50%",border:`4px solid ${section.color}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".7rem",fontWeight:800,color:section.color}}>{line.pct}%</div>
+                  <div style={{width:50,height:50,borderRadius:"50%",border:"4px solid "+section.color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".7rem",fontWeight:800,color:section.color}}>{line.pct}%</div>
                 </div>
               );
               if(line.type==="kpi") return(
@@ -1262,7 +1182,7 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
                 <div key={li} style={{padding:"0 4px"}}>
                   <div style={{fontSize:".5rem",color:"#888",marginBottom:3}}>{line.label}</div>
                   <div style={{height:5,background:"#eee",borderRadius:99,overflow:"hidden"}}>
-                    <div style={{height:"100%",width:`${line.pct}%`,background:section.color,borderRadius:99}}/>
+                    <div style={{height:"100%",width:line.pct+"%",background:section.color,borderRadius:99}}/>
                   </div>
                 </div>
               );
@@ -1275,7 +1195,7 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
                 <div key={li} style={{padding:"4px 8px",background:tn==="light"?"#f5f5f5":"#2a2a2a",borderRadius:6,fontSize:".55rem",color:"#888",direction:"ltr"}}>Tu as dit : <span style={{fontFamily:"Amiri,serif",direction:"rtl",color:tn==="light"?"#333":"#ccc"}}>{line.text}</span></div>
               );
               if(line.type==="tip") return(
-                <div key={li} style={{display:"flex",alignItems:"center",gap:5,padding:"4px 7px",background:`${section.color}10`,borderRadius:6,marginTop:2}}>
+                <div key={li} style={{display:"flex",alignItems:"center",gap:5,padding:"4px 7px",background:section.color+"10",borderRadius:6,marginTop:2}}>
                   <span style={{fontSize:".65rem"}}>💡</span>
                   <span style={{fontSize:".5rem",color:section.color,fontWeight:600}}>{line.text}</span>
                 </div>
@@ -1297,7 +1217,7 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
               );
               if(line.type==="editions") return(
                 <div key={li} style={{display:"flex",gap:6}}>
-                  {line.items.map((e,ei)=><div key={ei} style={{flex:1,padding:"6px",borderRadius:8,border:`1px solid ${ei===0?section.color:"#ddd"}`,background:ei===0?`${section.color}15`:"transparent",textAlign:"center"}}>
+                  {line.items.map((e,ei)=><div key={ei} style={{flex:1,padding:"6px",borderRadius:8,border:"1px solid "+(ei===0?section.color:"#ddd"),background:ei===0?section.color+"15":"transparent",textAlign:"center"}}>
                     <div style={{fontSize:".55rem",fontWeight:700,color:ei===0?section.color:"#888"}}>{e.name}</div>
                     <div style={{fontSize:".45rem",color:"#aaa"}}>{e.sub}</div>
                   </div>)}
@@ -1314,19 +1234,19 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
               );
               if(line.type==="partial-words") return(
                 <div key={li} style={{display:"flex",gap:4,justifyContent:"center",flexWrap:"wrap"}}>
-                  {line.words.map((w,wi)=><span key={wi} style={{padding:"3px 8px",borderRadius:20,border:`1px solid ${line.selected.includes(wi)?section.color:"#ddd"}`,background:line.selected.includes(wi)?`${section.color}20`:"transparent",fontFamily:"Amiri,serif",fontSize:".75rem",color:line.selected.includes(wi)?section.color:"#888"}}>{w}</span>)}
+                  {line.words.map((w,wi)=><span key={wi} style={{padding:"3px 8px",borderRadius:20,border:"1px solid "+(line.selected.includes(wi)?section.color:"#ddd"),background:line.selected.includes(wi)?section.color+"20":"transparent",fontFamily:"Amiri,serif",fontSize:".75rem",color:line.selected.includes(wi)?section.color:"#888"}}>{w}</span>)}
                 </div>
               );
               if(line.type==="filter") return(
                 <div key={li} style={{display:"flex",gap:4,flexWrap:"wrap"}}>
-                  {line.btns.map((b,bi)=><span key={bi} style={{padding:"3px 8px",borderRadius:20,border:`1px solid ${bi===0?section.color:"#ddd"}`,background:bi===0?`${section.color}15`:"transparent",fontSize:".5rem",color:bi===0?section.color:"#888"}}>{b}</span>)}
+                  {line.btns.map((b,bi)=><span key={bi} style={{padding:"3px 8px",borderRadius:20,border:"1px solid "+(bi===0?section.color:"#ddd"),background:bi===0?section.color+"15":"transparent",fontSize:".5rem",color:bi===0?section.color:"#888"}}>{b}</span>)}
                 </div>
               );
               if(line.type==="quiz-q") return(
                 <div key={li} style={{display:"flex",flexDirection:"column",gap:4}}>
                   <div style={{fontFamily:"Amiri,serif",fontSize:".95rem",direction:"rtl",textAlign:"center",color:tn==="light"?"#1a0a00":"#f0e8d0",padding:"4px"}}>{line.ar}</div>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:3}}>
-                    {line.choices.map((c,ci)=><div key={ci} style={{padding:"4px 6px",borderRadius:6,border:`1px solid ${ci===line.correct?"#4caf50":"#ddd"}`,background:ci===line.correct?"#4caf5015":"transparent",fontSize:".5rem",color:ci===line.correct?"#4caf50":"#888",textAlign:"center"}}>{c}</div>)}
+                    {line.choices.map((c,ci)=><div key={ci} style={{padding:"4px 6px",borderRadius:6,border:"1px solid "+(ci===line.correct?"#4caf50":"#ddd"),background:ci===line.correct?"#4caf5015":"transparent",fontSize:".5rem",color:ci===line.correct?"#4caf50":"#888",textAlign:"center"}}>{c}</div>)}
                   </div>
                 </div>
               );
@@ -1346,15 +1266,15 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
         </div>
 
         {/* Description */}
-        <div style={{padding:"18px 16px",background:t.s2,borderRadius:14,border:`1px solid ${t.b1}`}}>
+        <div style={{padding:"18px 16px",background:t.s2,borderRadius:14,border:"1px solid "+t.b1}}>
           <div style={{fontSize:".88rem",color:t.tx,lineHeight:1.8,fontWeight:500}}>{currentStep?.desc}</div>
         </div>
 
         {/* Liste de steps de la section */}
         <div style={{display:"flex",flexDirection:"column",gap:8}}>
           {section.steps.map((s,i)=>(
-            <div key={i} onClick={()=>setStep(i)} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 14px",borderRadius:10,border:`1.5px solid ${i===step?section.color:t.b1}`,background:i===step?`${section.color}10`:t.s2,cursor:"pointer",transition:"all .15s"}}>
-              <div style={{width:26,height:26,borderRadius:"50%",background:i<step?section.color:i===step?`${section.color}20`:t.b1,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+            <div key={i} onClick={()=>setStep(i)} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 14px",borderRadius:10,border:"1.5px solid "+(i===step?section.color:t.b1),background:i===step?section.color+"10":t.s2,cursor:"pointer",transition:"all .15s"}}>
+              <div style={{width:26,height:26,borderRadius:"50%",background:i<step?section.color:i===step?section.color+"20":t.b1,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                 {i<step
                   ?<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
                   :<span style={{fontSize:".65rem",fontWeight:700,color:i===step?section.color:t.tx3}}>{i+1}</span>
@@ -1367,10 +1287,10 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
       </div>
 
       {/* Footer navigation */}
-      <div style={{display:"flex",gap:8,padding:"12px 16px",paddingBottom:"max(12px,env(safe-area-inset-bottom))",borderTop:`1px solid ${t.b1}`,flexShrink:0,alignItems:"center"}}>
-        <button onClick={goPrev} disabled={activeSection===0&&step===0} style={{padding:"11px 16px",borderRadius:12,border:`1px solid ${t.b2}`,background:t.s2,color:t.tx2,cursor:"pointer",fontSize:".75rem",fontWeight:600,opacity:activeSection===0&&step===0?.35:1}}>←</button>
+      <div style={{display:"flex",gap:8,padding:"12px 16px",paddingBottom:"max(12px,env(safe-area-inset-bottom))",borderTop:"1px solid "+t.b1,flexShrink:0,alignItems:"center"}}>
+        <button onClick={goPrev} disabled={activeSection===0&&step===0} style={{padding:"11px 16px",borderRadius:12,border:"1px solid "+t.b2,background:t.s2,color:t.tx2,cursor:"pointer",fontSize:".75rem",fontWeight:600,opacity:activeSection===0&&step===0?.35:1}}>←</button>
         <div style={{flex:1,textAlign:"center",fontSize:".62rem",color:t.tx3}}>
-          {isLastSection&&isLastStep?"Fin du tutoriel !":isLastStep?"Section suivante : "+TUTORIAL_SECTIONS[activeSection+1]?.label:`${section.steps.length-step-1} étape${section.steps.length-step-1>1?"s":""} restante${section.steps.length-step-1>1?"s":""}`}
+          {isLastSection&&isLastStep?"Fin du tutoriel !":isLastStep?"Section suivante : "+TUTORIAL_SECTIONS[activeSection+1]?.label:(section.steps.length-step-1)+" étape"+(section.steps.length-step-1>1?"s":"")+" restante"+(section.steps.length-step-1>1?"s":"")}
         </div>
         <button onClick={goNext} style={{padding:"11px 20px",borderRadius:12,border:"none",background:section.color,color:"#fff",cursor:"pointer",fontSize:".78rem",fontWeight:700}}>
           {isLastSection&&isLastStep?"Terminer ✓":isLastStep?"Section suivante →":"Suivant →"}
@@ -1472,27 +1392,27 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
       `}</style>
 
       {/* Header */}
-      <div style={{display:"flex",alignItems:"center",padding:"14px 16px",borderBottom:`1px solid ${t.b1}`,flexShrink:0,gap:10,paddingTop:"max(14px,env(safe-area-inset-top))"}}>
+      <div style={{display:"flex",alignItems:"center",padding:"14px 16px",borderBottom:"1px solid "+t.b1,flexShrink:0,gap:10,paddingTop:"max(14px,env(safe-area-inset-top))"}}>
         <div style={{flex:1}}>
           <div style={{fontSize:".52rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"2px",marginBottom:2}}>Récitation</div>
           <div style={{fontFamily:"Amiri,serif",fontSize:".95rem",color:acc,fontWeight:700,lineHeight:1.2}}>{selS.name}<span style={{color:t.tx3,fontWeight:400,fontSize:".8rem"}}> · {selS.ar}</span></div>
         </div>
         {/* Mode enchaîné toggle */}
-        <button onClick={toggleChain} style={{display:"flex",alignItems:"center",gap:5,padding:"5px 10px",borderRadius:20,border:`1px solid ${chain?acc:t.b2}`,background:chain?`${acc}18`:t.s2,color:chain?acc:t.tx3,fontSize:".6rem",fontWeight:700,cursor:"pointer",flexShrink:0,transition:"all .2s"}}>
+        <button onClick={toggleChain} style={{display:"flex",alignItems:"center",gap:5,padding:"5px 10px",borderRadius:20,border:"1px solid "+(chain?acc:t.b2),background:chain?acc+"18":t.s2,color:chain?acc:t.tx3,fontSize:".6rem",fontWeight:700,cursor:"pointer",flexShrink:0,transition:"all .2s"}}>
           {chain
             ?<><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>Enchaîné</>
             :<><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>Verset/verset</>
           }
         </button>
         <span style={{fontSize:".62rem",color:t.tx3,fontWeight:600,flexShrink:0}}>{idx+1}{"/"}{verses.length}</span>
-        <button onClick={onClose} style={{width:30,height:30,borderRadius:"50%",border:`1px solid ${t.b2}`,background:t.s2,color:t.tx3,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+        <button onClick={onClose} style={{width:30,height:30,borderRadius:"50%",border:"1px solid "+t.b2,background:t.s2,color:t.tx3,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
 
       {/* Barre progression */}
       <div style={{height:3,background:t.b1,flexShrink:0}}>
-        <div style={{height:"100%",width:`${progress}%`,background:`linear-gradient(90deg,${acc},${t.acc2||acc})`,transition:"width .5s ease",boxShadow:`0 0 6px ${acc}55`}}/>
+        <div style={{height:"100%",width:progress+"%",background:"linear-gradient(90deg,"+acc+","+t.acc2||acc+")",transition:"width .5s ease",boxShadow:"0 0 6px "+acc+"55"}}/>
       </div>
 
       {/* Corps */}
@@ -1500,7 +1420,7 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
 
         {/* Badge verset */}
         <div style={{display:"flex",alignItems:"center",gap:8}}>
-          <div style={{width:34,height:34,borderRadius:"50%",border:`2px solid ${isMem?t.gr:t.b2}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".7rem",fontWeight:800,color:isMem?t.gr:t.tx3,background:isMem?`${t.gr}12`:"transparent",transition:"all .3s"}}>{curV?.n}</div>
+          <div style={{width:34,height:34,borderRadius:"50%",border:"2px solid "+(isMem?t.gr:t.b2),display:"flex",alignItems:"center",justifyContent:"center",fontSize:".7rem",fontWeight:800,color:isMem?t.gr:t.tx3,background:isMem?t.gr+"12":"transparent",transition:"all .3s"}}>{curV?.n}</div>
           {isMem&&<div style={{fontSize:".6rem",color:t.gr,fontWeight:700,display:"flex",alignItems:"center",gap:3}}>
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>Mémorisé
           </div>}
@@ -1534,7 +1454,7 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
                     opacity:wi>spokenWords.length?0.35:1,
                     transition:"all .15s",
                     fontSize:wi===spokenWords.length?"1.1em":"1em",
-                    textShadow:wi===spokenWords.length?`0 0 16px ${acc}`:"none",
+                    textShadow:wi===spokenWords.length?"0 0 16px "+acc:"none",
                   }}>{word} </span>
                 );
               });
@@ -1552,11 +1472,11 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
         {/* Score */}
         {hasScore&&(
           <div style={{width:"100%",maxWidth:440,animation:"scoreIn .3s ease"}}>
-            <div style={{display:"flex",gap:14,padding:"14px 16px",background:speechScore.pct>=80?`${t.gr}10`:speechScore.pct>=50?`${acc}10`:"rgba(233,30,99,.07)",borderRadius:14,border:`1.5px solid ${speechScore.pct>=80?t.gr:speechScore.pct>=50?acc:"#e91e63"}33`}}>
+            <div style={{display:"flex",gap:14,padding:"14px 16px",background:speechScore.pct>=80?t.gr+"10":speechScore.pct>=50?acc+"10":"rgba(233,30,99,.07)",borderRadius:14,border:"1.5px solid "+(speechScore.pct>=80?t.gr:speechScore.pct>=50?acc:"#e91e63")+"33"}}>
               <div style={{position:"relative",width:56,height:56,flexShrink:0}}>
                 <svg width="56" height="56" viewBox="0 0 56 56">
                   <circle cx="28" cy="28" r="23" fill="none" stroke={t.b1} strokeWidth="5"/>
-                  <circle cx="28" cy="28" r="23" fill="none" stroke={speechScore.pct>=80?t.gr:speechScore.pct>=50?acc:"#e91e63"} strokeWidth="5" strokeDasharray={`${2*Math.PI*23*speechScore.pct/100} ${2*Math.PI*23}`} strokeLinecap="round" transform="rotate(-90 28 28)" style={{transition:"stroke-dasharray .6s"}}/>
+                  <circle cx="28" cy="28" r="23" fill="none" stroke={speechScore.pct>=80?t.gr:speechScore.pct>=50?acc:"#e91e63"} strokeWidth="5" strokeDasharray={2*Math.PI*23*speechScore.pct/100+" "+2*Math.PI*23} strokeLinecap="round" transform="rotate(-90 28 28)" style={{transition:"stroke-dasharray .6s"}}/>
                 </svg>
                 <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
                   <span style={{fontSize:".88rem",fontWeight:800,color:speechScore.pct>=80?t.gr:speechScore.pct>=50?acc:"#e91e63",lineHeight:1}}>{speechScore.pct}</span>
@@ -1579,7 +1499,7 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
 
         {/* Micro */}
         <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:10}}>
-          <button onClick={handleMic} style={{width:72,height:72,borderRadius:"50%",border:"none",cursor:"pointer",background:isListening?"#e91e63":isCountdown?"#f59e0b":hasScore&&speechScore?.pct>=80?t.gr:acc,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,animation:isListening?"micRing 1.4s infinite":"none",transition:"background .25s",boxShadow:`0 4px 18px ${isListening?"rgba(233,30,99,.4)":isCountdown?"rgba(245,158,11,.4)":`${acc}44`}`}}>
+          <button onClick={handleMic} style={{width:72,height:72,borderRadius:"50%",border:"none",cursor:"pointer",background:isListening?"#e91e63":isCountdown?"#f59e0b":hasScore&&speechScore?.pct>=80?t.gr:acc,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,animation:isListening?"micRing 1.4s infinite":"none",transition:"background .25s",boxShadow:"0 4px 18px "+(isListening?"rgba(233,30,99,.4)":isCountdown?"rgba(245,158,11,.4)":acc+"44")}}>
             {isListening
               ?<svg width="24" height="24" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
               :isCountdown
@@ -1592,7 +1512,7 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
           {isListening&&(
             <div style={{display:"flex",gap:3,alignItems:"center",height:22}}>
               {Array.from({length:11},(_,i)=>(
-                <div key={i} style={{width:3,background:"#e91e63",borderRadius:99,height:18,transformOrigin:"center",animation:`wave .65s ease-in-out ${i*.055}s infinite`,opacity:.55+i*.04}}/>
+                <div key={i} style={{width:3,background:"#e91e63",borderRadius:99,height:18,transformOrigin:"center",animation:"wave .65s ease-in-out "+i*.055+"s infinite",opacity:.55+i*.04}}/>
               ))}
             </div>
           )}
@@ -1608,9 +1528,9 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
       </div>
 
       {/* Footer */}
-      <div style={{display:"flex",gap:8,padding:"12px 16px",borderTop:`1px solid ${t.b1}`,flexShrink:0,alignItems:"center",paddingBottom:"max(12px,env(safe-area-inset-bottom))"}}>
-        <button onClick={()=>{if(idx>0)goTo(idx-1);}} disabled={idx===0} style={{padding:"10px 14px",borderRadius:10,border:`1px solid ${t.b2}`,background:t.s2,color:idx===0?t.tx3:t.tx,cursor:idx===0?"default":"pointer",fontSize:".72rem",fontWeight:600,opacity:idx===0?.35:1}}>←</button>
-        <button onClick={()=>doPlay(curV?.n)} style={{flex:1,padding:"10px",borderRadius:10,border:`1px solid ${t.b2}`,background:t.s2,color:t.tx2,cursor:"pointer",fontSize:".7rem",fontWeight:600,display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
+      <div style={{display:"flex",gap:8,padding:"12px 16px",borderTop:"1px solid "+t.b1,flexShrink:0,alignItems:"center",paddingBottom:"max(12px,env(safe-area-inset-bottom))"}}>
+        <button onClick={()=>{if(idx>0)goTo(idx-1);}} disabled={idx===0} style={{padding:"10px 14px",borderRadius:10,border:"1px solid "+t.b2,background:t.s2,color:idx===0?t.tx3:t.tx,cursor:idx===0?"default":"pointer",fontSize:".72rem",fontWeight:600,opacity:idx===0?.35:1}}>←</button>
+        <button onClick={()=>doPlay(curV?.n)} style={{flex:1,padding:"10px",borderRadius:10,border:"1px solid "+t.b2,background:t.s2,color:t.tx2,cursor:"pointer",fontSize:".7rem",fontWeight:600,display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
           <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>Écouter
         </button>
         <button onClick={()=>{if(idx<verses.length-1)goTo(idx+1);else onClose();}} style={{padding:"10px 14px",borderRadius:10,border:"none",background:acc,color:"#000",cursor:"pointer",fontSize:".72rem",fontWeight:700}}>
@@ -1680,7 +1600,7 @@ function colorTajweed(html){
   return h
     .replace(/<tajweed class=["']?([a-z_]+)["']?>/g,(match,cls)=>{
       const c=TJ_COLORS[cls];
-      return c?`<span style="color:${c};font-weight:bold">`:"<span>";
+      return c?'<span style="color:'+c+';font-weight:bold">':"<span>";
     })
     .replace(/<\/tajweed>/g,"</span>");
 }
@@ -1696,7 +1616,7 @@ function MushafTajweedView({page,fullscreen,edition}){
   const [loaded,setLoaded]=React.useState(false);
   const [error,setError]=React.useState(false);
   React.useEffect(()=>{setLoaded(false);setError(false);},[pg,isFr]);
-  const url=`https://dccirpngkozsexrzuzgy.supabase.co/storage/v1/object/public/mushaf/${folder}/${pad}.jpg`;
+  const url="https://dccirpngkozsexrzuzgy.supabase.co/storage/v1/object/public/mushaf/"+folder+"/"+pad+".jpg";
   return(
     <div style={{flex:1,overflowY:"auto",background:"#f5f0e8",display:"flex",flexDirection:"column",alignItems:"center",position:"relative"}}>
       {!loaded&&!error&&(
@@ -1713,9 +1633,9 @@ function MushafTajweedView({page,fullscreen,edition}){
         </div>
       )}
       <img
-        key={`${pg}-${isFr}`}
+        key={pg+"-"+isFr}
         src={url}
-        alt={`Mushaf page ${pg}`}
+        alt={"Mushaf page "+pg}
         onLoad={()=>setLoaded(true)}
         onError={()=>setError(true)}
         style={{
@@ -1739,23 +1659,23 @@ function MushafTajweedView({page,fullscreen,edition}){
 // URLs Mushaf — proxy Vercel en premier (pas de CORS), puis CDN directs en fallback
 const EDITION_IMGS = {
  hafs: pg => [
-    `https://static.qurancdn.com/images/quran/pages/v4/en/hafs/page${String(pg).padStart(3,"0")}.png`,
-    `https://cdn.islamic.network/quran/images/high-resolution/${pg}.jpg`,
+    "https://static.qurancdn.com/images/quran/pages/v4/en/hafs/page"+String(pg).padStart(3,"0")+".png",
+    "https://cdn.islamic.network/quran/images/high-resolution/"+pg+".jpg",
   ],
   tajweed: pg => [],
   warsh: pg => [
-    `https://static.qurancdn.com/images/quran/pages/v4/en/warsh/page${String(pg).padStart(3,"0")}.png`,
-    `https://cdn.islamic.network/quran/images/high-resolution/${pg}.jpg`,
+    "https://static.qurancdn.com/images/quran/pages/v4/en/warsh/page"+String(pg).padStart(3,"0")+".png",
+    "https://cdn.islamic.network/quran/images/high-resolution/"+pg+".jpg",
   ],
   indopak: pg => [
-    `https://static.qurancdn.com/images/quran/pages/v4/en/indopak/page${String(pg).padStart(3,"0")}.png`,
-    `https://cdn.islamic.network/quran/images/high-resolution/${pg}.jpg`,
+    "https://static.qurancdn.com/images/quran/pages/v4/en/indopak/page"+String(pg).padStart(3,"0")+".png",
+    "https://cdn.islamic.network/quran/images/high-resolution/"+pg+".jpg",
   ],
 };
 // Charge l'URL réelle depuis l'API qurancdn (contourne les problèmes CORS des CDN directs)
 const fetchMushafPageUrl=async(pg, editionId)=>{
   try{
-    const r=await fetch(`https://api.qurancdn.com/api/qdc/pages/${pg}?book_name=${editionId==="warsh"?"warsh":"hafs"}`);
+    const r=await fetch("https://api.qurancdn.com/api/qdc/pages/"+pg+"?book_name="+(editionId==="warsh"?"warsh":"hafs"));
     const d=await r.json();
     return d?.page?.image_url||null;
   }catch{return null;}
@@ -1835,7 +1755,7 @@ ${t.arabesque ? (
 ::-webkit-scrollbar-track{background:${t.s1};}
 ::-webkit-scrollbar-thumb{background:${t.b2};border-radius:99px;}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:${tn==="dark"?".018":".035"};background-image:repeating-linear-gradient(0deg,transparent,transparent 40px,${acc} 40px,${acc} 41px),repeating-linear-gradient(90deg,transparent,transparent 40px,${acc} 40px,${acc} 41px),repeating-linear-gradient(45deg,transparent,transparent 28px,${acc} 28px,${acc} 29px),repeating-linear-gradient(-45deg,transparent,transparent 28px,${acc} 28px,${acc} 29px);}
-${ramadan?`body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle,${acc}33 1px,transparent 1px);background-size:30px 30px;opacity:.4;}`:""}
+${ramadan?"body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle,"+acc+"33 1px,transparent 1px);background-size:30px 30px;opacity:.4;}":""}
 body>*{position:relative;z-index:1;}
 .wrap{animation:pageIn .25s ease;}
 .wrap.transitioning{animation:pageOut .12s ease forwards;}
@@ -2108,7 +2028,7 @@ const [authReady, setAuthReady] = useState(false);
       {name:'theme-color',content:'#050f08'},
     ];
     appleItems.forEach(({name,content})=>{
-      if(!document.querySelector(`meta[name="${name}"]`)){
+      if(!document.querySelector('meta[name="'+name+'"]' )){
         const m=document.createElement('meta');
         m.name=name;m.content=content;
         document.head.appendChild(m);
@@ -2440,7 +2360,7 @@ const handleReset=async()=>{
     setVerseSearchLoading(true);
     const ql=q.toLowerCase().trim();const results=[];
     Object.entries(Q).forEach(([sn,vs])=>{vs.forEach(v=>{const arClean=v.ar.replace(/\[[mgqrt]\](.*?)\[\/[mgqrt]\]/g,"$1");if(arClean.includes(q)||v.fr?.toLowerCase().includes(ql)){results.push({sn:parseInt(sn),vn:v.n,ar:arClean,fr:v.fr,surah:SURAHS.find(s=>s.n===parseInt(sn))?.name||""});}});});
-    for(const s of SURAHS){if(Q[s.n])continue;try{const cached=localStorage.getItem(`qv3_${s.n}`);if(cached){const vs=JSON.parse(cached);vs.forEach(v=>{const arClean=(v.ar||"");if(arClean.includes(q)||v.fr?.toLowerCase().includes(ql)){results.push({sn:s.n,vn:v.n,ar:arClean,fr:v.fr,surah:s.name});}});}}catch{}}
+    for(const s of SURAHS){if(Q[s.n])continue;try{const cached=localStorage.getItem("qv3_"+s.n);if(cached){const vs=JSON.parse(cached);vs.forEach(v=>{const arClean=(v.ar||"");if(arClean.includes(q)||v.fr?.toLowerCase().includes(ql)){results.push({sn:s.n,vn:v.n,ar:arClean,fr:v.fr,surah:s.name});}});}}catch{}}
     setVerseSearchResults(results.slice(0,30));setVerseSearchLoading(false);
   },[]);
 
@@ -2473,7 +2393,7 @@ const handleReset=async()=>{
       return;
     }
     // Auto-scroll
-    const el=document.getElementById(`v-${selS?.n}-${playing}`);
+    const el=document.getElementById("v-"+(selS?.n)+"-"+playing);
     if(el){
       const scroller=el.closest(".vscroll");
       if(scroller){
@@ -2569,7 +2489,7 @@ const handleReset=async()=>{
       604:"🎉 Khatma complète ! بارك الله فيك — ختمت القرآن الكريم",
     };
     if(milestones.includes(pagesRead)&&msgs[pagesRead]){
-      const key=`enc_${pagesRead}`;
+      const key="enc_"+pagesRead;
       if(!ld(key,false)){
         setEncouragementMsg({pages:pagesRead,msg:msgs[pagesRead]});
         sv(key,true);
@@ -2591,7 +2511,7 @@ const handleReset=async()=>{
   // SM-2 update function
   const sm2Update=(sn,vn,quality)=>{
     // quality: 0=blackout, 1=wrong, 2=hard, 3=ok, 4=good, 5=perfect
-    const key=`${sn}_${vn}`;
+    const key=sn+"_"+vn;
     setSpaced(prev=>{
       const card=prev[key]||{interval:1,repetitions:0,ef:2.5};
       let {interval,repetitions,ef}=card;
@@ -2690,7 +2610,7 @@ const handleReset=async()=>{
     audio.load();
     audio.play().catch(()=>{
       // fallback cdn
-      audio.src=`https://cdn.islamic.network/quran/audio/128/${rec.id}/${String(selS.n).padStart(3,"0")}${String(vn).padStart(3,"0")}.mp3`;
+      audio.src="https://cdn.islamic.network/quran/audio/128/"+rec.id+"/"+String(selS.n).padStart(3,"0")+String(vn).padStart(3,"0")+".mp3";
       audio.load();
       audio.play().catch(()=>setPlaying(null));
     });
@@ -2700,7 +2620,7 @@ const handleReset=async()=>{
   // Charge le tafsir Ibn Kathir (FR) — 3 sources en cascade
   const tafsirLoadingRef=useRef({});
   const loadTafsir=useCallback(async(sn,vn)=>{
-    const key=`${sn}_${vn}`;
+    const key=sn+"_"+vn;
     if(tafsirLoadingRef.current[key]||tafsirData[key]) return;
     tafsirLoadingRef.current[key]=true;
     setTafsirLoading(p=>({...p,[key]:true}));
@@ -2714,7 +2634,7 @@ const handleReset=async()=>{
     // Source 1 : quran.com API — essayer plusieurs IDs tafsir FR
     for(const tid of [31,169,817]){
       try{
-        const r=await fetch(`https://api.quran.com/api/v4/tafsirs/${tid}/by_ayah/${sn}:${vn}`,{headers:{"Accept":"application/json"}});
+        const r=await fetch("https://api.quran.com/api/v4/tafsirs/"+tid+"/by_ayah/"+sn+":"+vn,{headers:{"Accept":"application/json"}});
         if(r.ok){
           const d=await r.json();
           const raw=d?.tafsir?.text||d?.data?.text||"";
@@ -2725,7 +2645,7 @@ const handleReset=async()=>{
     }
     // Source 2 : raw GitHub spa5k (pas de cache CDN)
     try{
-      const r=await fetch(`https://raw.githubusercontent.com/spa5k/tafsir_api/main/tafsir/fr-tafsir-ibn-kathir/${sn}/${vn}.json`);
+      const r=await fetch("https://raw.githubusercontent.com/spa5k/tafsir_api/main/tafsir/fr-tafsir-ibn-kathir/"+sn+"/"+vn+".json");
       if(r.ok){
         const d=await r.json();
         const text=clean(d?.text||d?.tafsir||"");
@@ -2734,7 +2654,7 @@ const handleReset=async()=>{
     }catch{}
     // Source 3 : API alquran.cloud — tafsir jalalayn FR (bon fallback)
     try{
-      const r=await fetch(`https://api.alquran.cloud/v1/ayah/${sn}:${vn}/fr.jalalayn`);
+      const r=await fetch("https://api.alquran.cloud/v1/ayah/"+sn+":"+vn+"/fr.jalalayn");
       if(r.ok){
         const d=await r.json();
         const text=clean(d?.data?.text||"");
@@ -2746,15 +2666,15 @@ const handleReset=async()=>{
 
   const buildUrl=(sn,vn)=>{
     const s=String(sn).padStart(3,"0");const v=String(vn).padStart(3,"0");
-    return `https://everyayah.com/data/${rec.everyayah||"Alafasy_128kbps"}/${s}${v}.mp3`;
+    return "https://everyayah.com/data/"+rec.everyayah||"Alafasy_128kbps"+"/"+s+v+".mp3";
   };
 
   // Charge les timestamps par mot pour la Tilawa
   const loadWordTimings=useCallback(async(sn,vn)=>{
-    const key=`${sn}_${vn}`;
+    const key=sn+"_"+vn;
     if(wordTimings[key])return wordTimings[key];
     try{
-      const r=await fetch(`https://api.qurancdn.com/api/qdc/verses/by_chapter/${sn}?verse_number=${vn}&words=true&word_fields=audio_url,location,text_uthmani&per_page=1`);
+      const r=await fetch("https://api.qurancdn.com/api/qdc/verses/by_chapter/"+sn+"?verse_number="+vn+"&words=true&word_fields=audio_url,location,text_uthmani&per_page=1");
       const d=await r.json();
       const words=(d.verses?.[0]?.words||[])
         .filter(w=>w.char_type_name==="word")
@@ -2846,7 +2766,7 @@ const handleReset=async()=>{
   // Q[s.n] utilisé uniquement comme fallback traduction hors ligne
   useEffect(()=>{
     if(!selS){setVerses([]);setLoadState("idle");return;}
-    const cacheKey=`qv5_${selS.n}`; // v4 = tajweed HTML + traduction fusionnée
+    const cacheKey="qv5_"+selS.n; // v4 = tajweed HTML + traduction fusionnée
     // Check cache first
     try{
       const cached=localStorage.getItem(cacheKey);
@@ -2854,9 +2774,9 @@ const handleReset=async()=>{
     }catch{}
     setVerses([]);setLoadState("loading");
     // Fetch tajweed Arabic + French translation in parallel
-    const arFetch=fetch(`https://api.qurancdn.com/api/qdc/verses/by_chapter/${selS.n}?language=fr&words=false&per_page=300&fields=text_uthmani_tajweed,text_uthmani,translations&translations=31`)
+    const arFetch=fetch("https://api.qurancdn.com/api/qdc/verses/by_chapter/"+selS.n+"?language=fr&words=false&per_page=300&fields=text_uthmani_tajweed,text_uthmani,translations&translations=31")
       .then(r=>r.json());
-    const frFetch=fetch(`https://api.alquran.cloud/v1/surah/${selS.n}/fr.hamidullah`)
+    const frFetch=fetch("https://api.alquran.cloud/v1/surah/"+selS.n+"/fr.hamidullah")
       .then(r=>r.json()).catch(()=>({data:{ayahs:[]}}));
     Promise.all([arFetch,frFetch]).then(([arData,frData])=>{
       const arAyahs=arData?.verses||[];
@@ -2894,7 +2814,7 @@ const handleReset=async()=>{
     const x=swipeState[sn]?.x||0;
     if(x<-130){
       setFavorites(prev=>{
-        const key=`surah_${sn}`;
+        const key="surah_"+sn;
         if(prev.find(f=>f.key===key)) return prev.filter(f=>f.key!==key);
         return [...prev,{key,sn,vn:0,ar:s.ar||"",fr:"",surah:s.name,isSurah:true}];
       });
@@ -2962,9 +2882,9 @@ const handleReset=async()=>{
       setActiveKhatma(updated);
     }
   };
-  const toggleFav=(sn,vn,ar,fr,surah)=>{const key=`${sn}_${vn}`;setFavorites(p=>p.find(f=>f.key===key)?p.filter(f=>f.key!==key):[...p,{key,sn,vn,ar,fr,surah}]);};
-  const isFav=(sn,vn)=>favorites.some(f=>f.key===`${sn}_${vn}`);
-  const saveNote=(sn,vn,text)=>{const k=`${sn}_${vn}`;if(text.trim())setNotes(p=>({...p,[k]:text.trim()}));else setNotes(p=>{const n={...p};delete n[k];return n;});setEditingNote(null);};
+  const toggleFav=(sn,vn,ar,fr,surah)=>{const key=sn+"_"+vn;setFavorites(p=>p.find(f=>f.key===key)?p.filter(f=>f.key!==key):[...p,{key,sn,vn,ar,fr,surah}]);};
+  const isFav=(sn,vn)=>favorites.some(f=>f.key===sn+"_"+vn);
+  const saveNote=(sn,vn,text)=>{const k=sn+"_"+vn;if(text.trim())setNotes(p=>({...p,[k]:text.trim()}));else setNotes(p=>{const n={...p};delete n[k];return n;});setEditingNote(null);};
   // Génération plan mémorisation via Anthropic API
   const generateAIPlan=async()=>{
     setAiPlanLoading(true);setAiPlanResult("");
@@ -2992,9 +2912,9 @@ const handleReset=async()=>{
       ?"• Mémorise par groupes de 3-5 versets\n• Technique de la chaîne (rattacher chaque verset au suivant)\n• Récite à voix haute en marchant\n• Vise mémorisation + compréhension du sens"
       :"• Mémorisation par pages entières\n• Récitation en prière pour ancrer la mémoire\n• Enseigne à un proche pour solidifier\n• Vise Tajwid parfait sur chaque verset";
     const feasibleText=feasible
-      ?`Avec ${vPerDay} versets/jour (${timeNeeded} min), tu atteindras ton objectif en ${aiPlanParams.months} mois.`
-      :`Avec ${timeAvail} min/jour tu peux memoriser ~${adjustedVpd} versets/jour.\nDuree estimee realiste : ${adjustedMonths} mois.\nPour respecter ${aiPlanParams.months} mois, vise ${timeNeeded} min/jour.`;
-    const surahList=nextSurahs.map((s,i)=>`${i+1}. ${s}`).join("\n");
+      ?"Avec "+vPerDay+" versets/jour ("+timeNeeded+" min), tu atteindras ton objectif en "+aiPlanParams.months+" mois."
+      :"Avec "+timeAvail+" min/jour tu peux memoriser ~"+adjustedVpd+" versets/jour.\nDuree estimee realiste : "+adjustedMonths+" mois.\nPour respecter "+aiPlanParams.months+" mois, vise "+timeNeeded+" min/jour.";
+    const surahList=nextSurahs.map((s,i)=>i+1+". "+s).join("\n");
     const plan="\u2756 PLAN DE MEMORISATION PERSONNALISE\n"
       +"\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\n"
       +"\ud83d\udcca TON PROFIL\n"
@@ -3051,7 +2971,7 @@ const handleReset=async()=>{
       let vs=Q[filterSurah]||[];
       if(vs.length===0){
         try{
-          const r=await fetch(`https://api.qurancdn.com/api/qdc/verses/by_chapter/${filterSurah}?language=fr&words=false&per_page=286&fields=text_uthmani,verse_number,translations`);
+          const r=await fetch("https://api.qurancdn.com/api/qdc/verses/by_chapter/"+filterSurah+"?language=fr&words=false&per_page=286&fields=text_uthmani,verse_number,translations");
           const d=await r.json();
           vs=(d.verses||[]).map(v=>({n:v.verse_number,ar:v.text_uthmani||"",fr:v.translations?.[0]?.text||""}));
           if(!Q[filterSurah]) Q[filterSurah]=vs;
@@ -3094,7 +3014,7 @@ const handleReset=async()=>{
   };
   const sendTestNotif=()=>{
     if(Notification.permission==="granted"){
-      new Notification("Al-Hifz 📖",{body:`🔥 Al-Hifz — Continue ta mémorisation aujourd'hui !`,icon:"/icon-192.png"});
+      new Notification("Al-Hifz 📖",{body:"🔥 Al-Hifz — Continue ta mémorisation !",icon:"/icon-192.png"});
     }
   };
 
@@ -3125,7 +3045,7 @@ const handleReset=async()=>{
     setTimerRunning(false);
     setTimerLeft(null);
   };
-  const fmtTime=s=>s==null?`${timerDuration}:00`:`${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+  const fmtTime=s=>s==null?timerDuration+":00":String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
   const removeFromList=(listId,sn,vn)=>setLists(p=>p.map(l=>l.id===listId?{...l,items:l.items.filter(i=>!(i.sn===sn&&i.vn===vn))}:l));
 
   // Fonctions reconnaissance vocale
@@ -3270,7 +3190,7 @@ const handleReset=async()=>{
   const topS=[...SURAHS].map(s=>({...s,p:sPct(s)})).filter(s=>s.p>0).sort((a,b)=>b.p-a.p).slice(0,10);
   const cdS=SURAHS.map(s=>{const done=sMem(s),rem=s.v-done,days=vpd>0?Math.ceil(rem/vpd):null;return{...s,done,rem,days,p:sPct(s)};}).filter(s=>s.rem>0).slice(0,30);
 
-  const weeklyData=useMemo(()=>{const weeks=[];for(let w=6;w>=0;w--){const start=new Date();start.setDate(start.getDate()-w*7-6);const end=new Date();end.setDate(end.getDate()-w*7);const days=Object.keys(hist).filter(d=>{const dd=new Date(d);return dd>=start&&dd<=end;});const gained=days.reduce((s,d,i)=>{const prev=days[i-1]?hist[days[i-1]]:0;return s+Math.max(0,(hist[d]||0)-prev);},0);weeks.push({label:`S${7-w}`,v:gained});}return weeks;},[hist]);
+  const weeklyData=useMemo(()=>{const weeks=[];for(let w=6;w>=0;w--){const start=new Date();start.setDate(start.getDate()-w*7-6);const end=new Date();end.setDate(end.getDate()-w*7);const days=Object.keys(hist).filter(d=>{const dd=new Date(d);return dd>=start&&dd<=end;});const gained=days.reduce((s,d,i)=>{const prev=days[i-1]?hist[days[i-1]]:0;return s+Math.max(0,(hist[d]||0)-prev);},0);weeks.push({label:"S"+7-w,v:gained});}return weeks;},[hist]);
   const maxWeek=Math.max(...weeklyData.map(w=>w.v),1);
   const monthlyData=useMemo(()=>{const months=[];for(let m=5;m>=0;m--){const d=new Date();d.setMonth(d.getMonth()-m);const y=d.getFullYear(),mo=d.getMonth();const days=Object.keys(hist).filter(k=>{const dd=new Date(k);return dd.getFullYear()===y&&dd.getMonth()===mo;}).sort();const gained=days.reduce((s,d,i)=>{const prev=days[i-1]?hist[days[i-1]]:0;return s+Math.max(0,(hist[d]||0)-prev);},0);months.push({label:d.toLocaleDateString("fr-FR",{month:"short"}),v:gained});}return months;},[hist]);
   const maxMonth=Math.max(...monthlyData.map(m=>m.v),1);
@@ -3321,7 +3241,7 @@ return (
       {/* Modal Plan IA */}
       {showAIPlan&&(
         <div className="overlay" onClick={()=>setShowAIPlan(false)}>
-          <div style={{background:t.s1,border:`1px solid ${t.acc}`,borderRadius:18,padding:24,maxWidth:520,width:"92%",maxHeight:"85vh",display:"flex",flexDirection:"column",gap:14}} onClick={e=>e.stopPropagation()}>
+          <div style={{background:t.s1,border:"1px solid "+t.acc,borderRadius:18,padding:24,maxWidth:520,width:"92%",maxHeight:"85vh",display:"flex",flexDirection:"column",gap:14}} onClick={e=>e.stopPropagation()}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
               <div>
                 <h2 style={{fontFamily:"Amiri,serif",fontSize:"1.5rem",color:t.acc,marginBottom:2}}>Mon Parcours de mémorisation</h2>
@@ -3335,7 +3255,7 @@ return (
                   <label style={{fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",display:"block",marginBottom:5}}>Objectif global</label>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
                     {[["juz30","Juz 30"],["juz29","Juz 29-30"],["halfquran","Demi-Coran"],["fullquran","Coran complet"]].map(([v,l])=>(
-                      <button key={v} onClick={()=>setAiPlanParams(p=>({...p,goal:v,customGoal:null}))} style={{padding:"8px 10px",borderRadius:8,border:`1.5px solid ${aiPlanParams.goal===v&&!aiPlanParams.customGoal?t.acc:t.b2}`,background:aiPlanParams.goal===v&&!aiPlanParams.customGoal?`${t.acc}15`:t.s2,color:aiPlanParams.goal===v&&!aiPlanParams.customGoal?t.acc:t.tx,fontSize:".72rem",cursor:"pointer",fontWeight:aiPlanParams.goal===v&&!aiPlanParams.customGoal?700:400,transition:"all .15s"}}>{l}</button>
+                      <button key={v} onClick={()=>setAiPlanParams(p=>({...p,goal:v,customGoal:null}))} style={{padding:"8px 10px",borderRadius:8,border:"1.5px solid "+(aiPlanParams.goal===v&&!aiPlanParams.customGoal?t.acc:t.b2),background:aiPlanParams.goal===v&&!aiPlanParams.customGoal?t.acc+"15":t.s2,color:aiPlanParams.goal===v&&!aiPlanParams.customGoal?t.acc:t.tx,fontSize:".72rem",cursor:"pointer",fontWeight:aiPlanParams.goal===v&&!aiPlanParams.customGoal?700:400,transition:"all .15s"}}>{l}</button>
                     ))}
                   </div>
                 </div>
@@ -3343,20 +3263,20 @@ return (
                 <div>
                   <label style={{fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",display:"block",marginBottom:5}}>Ou choisir précisément</label>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
-                    <select onChange={e=>{const v=+e.target.value;if(v)setAiPlanParams(p=>({...p,customGoal:`juz_${v}`,goal:null}));}} style={{padding:"7px 6px",borderRadius:8,border:`1px solid ${aiPlanParams.customGoal?.startsWith("juz_")?t.acc:t.b2}`,background:aiPlanParams.customGoal?.startsWith("juz_")?`${t.acc}15`:t.s2,color:aiPlanParams.customGoal?.startsWith("juz_")?t.acc:t.tx,fontSize:".65rem",cursor:"pointer",outline:"none"}}>
+                    <select onChange={e=>{const v=+e.target.value;if(v)setAiPlanParams(p=>({...p,customGoal:"juz_"+v,goal:null}));}} style={{padding:"7px 6px",borderRadius:8,border:"1px solid "+(aiPlanParams.customGoal?.startsWith("juz_")?t.acc:t.b2),background:aiPlanParams.customGoal?.startsWith("juz_")?t.acc+"15":t.s2,color:aiPlanParams.customGoal?.startsWith("juz_")?t.acc:t.tx,fontSize:".65rem",cursor:"pointer",outline:"none"}}>
                       <option value="">Juz…</option>
                       {Array.from({length:30},(_,i)=>i+1).map(j=><option key={j} value={j}>Juz {j}</option>)}
                     </select>
-                    <select onChange={e=>{const v=+e.target.value;if(v)setAiPlanParams(p=>({...p,customGoal:`surah_${v}`,goal:null}));}} style={{padding:"7px 6px",borderRadius:8,border:`1px solid ${aiPlanParams.customGoal?.startsWith("surah_")?t.acc:t.b2}`,background:aiPlanParams.customGoal?.startsWith("surah_")?`${t.acc}15`:t.s2,color:aiPlanParams.customGoal?.startsWith("surah_")?t.acc:t.tx,fontSize:".65rem",cursor:"pointer",outline:"none"}}>
+                    <select onChange={e=>{const v=+e.target.value;if(v)setAiPlanParams(p=>({...p,customGoal:"surah_"+v,goal:null}));}} style={{padding:"7px 6px",borderRadius:8,border:"1px solid "+(aiPlanParams.customGoal?.startsWith("surah_")?t.acc:t.b2),background:aiPlanParams.customGoal?.startsWith("surah_")?t.acc+"15":t.s2,color:aiPlanParams.customGoal?.startsWith("surah_")?t.acc:t.tx,fontSize:".65rem",cursor:"pointer",outline:"none"}}>
                       <option value="">Sourate…</option>
                       {SURAHS.map(s=><option key={s.n} value={s.n}>{s.name}</option>)}
                     </select>
-                    <select onChange={e=>{const v=+e.target.value;if(v)setAiPlanParams(p=>({...p,customGoal:`hizb_${v}`,goal:null}));}} style={{padding:"7px 6px",borderRadius:8,border:`1px solid ${aiPlanParams.customGoal?.startsWith("hizb_")?t.acc:t.b2}`,background:aiPlanParams.customGoal?.startsWith("hizb_")?`${t.acc}15`:t.s2,color:aiPlanParams.customGoal?.startsWith("hizb_")?t.acc:t.tx,fontSize:".65rem",cursor:"pointer",outline:"none"}}>
+                    <select onChange={e=>{const v=+e.target.value;if(v)setAiPlanParams(p=>({...p,customGoal:"hizb_"+v,goal:null}));}} style={{padding:"7px 6px",borderRadius:8,border:"1px solid "+(aiPlanParams.customGoal?.startsWith("hizb_")?t.acc:t.b2),background:aiPlanParams.customGoal?.startsWith("hizb_")?t.acc+"15":t.s2,color:aiPlanParams.customGoal?.startsWith("hizb_")?t.acc:t.tx,fontSize:".65rem",cursor:"pointer",outline:"none"}}>
                       <option value="">Hizb…</option>
                       {Array.from({length:60},(_,i)=>i+1).map(h=><option key={h} value={h}>Hizb {h}</option>)}
                     </select>
                   </div>
-                  {aiPlanParams.customGoal&&<div style={{fontSize:".6rem",color:t.acc,marginTop:4}}>✦ Objectif : {aiPlanParams.customGoal.replace("juz_","Juz ").replace("surah_",s=>` Sourate ${SURAHS.find(x=>x.n===+aiPlanParams.customGoal.split("_")[1])?.name||""}`).replace("hizb_","Hizb ")}</div>}
+                  {aiPlanParams.customGoal&&<div style={{fontSize:".6rem",color:t.acc,marginTop:4}}>✦ Objectif : {aiPlanParams.customGoal.replace("juz_","Juz ").replace("surah_",s=>" Sourate "+(SURAHS.find(x=>x.n===+aiPlanParams.customGoal.split("_")[1])?.name||"")).replace("hizb_","Hizb ")}</div>}
                 </div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
                   <div>
@@ -3372,16 +3292,16 @@ return (
                   <label style={{fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",display:"block",marginBottom:5}}>Niveau</label>
                   <div style={{display:"flex",gap:6}}>
                     {[["debutant","Débutant"],["intermediaire","Intermédiaire"],["avance","Avancé"]].map(([v,l])=>(
-                      <button key={v} onClick={()=>setAiPlanParams(p=>({...p,level:v}))} style={{flex:1,padding:"7px",borderRadius:8,border:`1.5px solid ${aiPlanParams.level===v?t.acc:t.b2}`,background:aiPlanParams.level===v?`${t.acc}15`:t.s2,color:aiPlanParams.level===v?t.acc:t.tx,fontSize:".7rem",cursor:"pointer",fontWeight:aiPlanParams.level===v?700:400,transition:"all .15s"}}>{l}</button>
+                      <button key={v} onClick={()=>setAiPlanParams(p=>({...p,level:v}))} style={{flex:1,padding:"7px",borderRadius:8,border:"1.5px solid "+(aiPlanParams.level===v?t.acc:t.b2),background:aiPlanParams.level===v?t.acc+"15":t.s2,color:aiPlanParams.level===v?t.acc:t.tx,fontSize:".7rem",cursor:"pointer",fontWeight:aiPlanParams.level===v?700:400,transition:"all .15s"}}>{l}</button>
                     ))}
                   </div>
                 </div>
-                <button onClick={generateAIPlan} disabled={aiPlanLoading} style={{width:"100%",padding:"12px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:10,color:"#fff",fontSize:".85rem",fontWeight:700,cursor:"pointer",opacity:aiPlanLoading?.6:1,transition:"opacity .2s"}}>
+                <button onClick={generateAIPlan} disabled={aiPlanLoading} style={{width:"100%",padding:"12px",background:"linear-gradient(135deg,"+t.acc+","+t.acc2+")",border:"none",borderRadius:10,color:"#fff",fontSize:".85rem",fontWeight:700,cursor:"pointer",opacity:aiPlanLoading?.6:1,transition:"opacity .2s"}}>
                   {aiPlanLoading?"Calcul en cours…":"✦ Générer mon parcours"}
                 </button>
                 {aiPlanLoading&&(
                   <div style={{textAlign:"center",color:t.tx3,fontSize:".7rem"}}>
-                    <div style={{width:24,height:24,border:`2px solid ${t.acc}`,borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite",margin:"0 auto 8px"}}/>
+                    <div style={{width:24,height:24,border:"2px solid "+t.acc,borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite",margin:"0 auto 8px"}}/>
                     Analyse de ton profil en cours…
                   </div>
                 )}
@@ -3389,12 +3309,12 @@ return (
             )}
             {aiPlanResult&&(
               <div style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column",gap:10}}>
-                <div style={{padding:"12px 14px",background:t.s2,borderRadius:10,border:`1px solid ${t.b1}`,fontSize:".75rem",color:t.tx,lineHeight:1.8,whiteSpace:"pre-wrap",fontFamily:"DM Sans,sans-serif"}}>
+                <div style={{padding:"12px 14px",background:t.s2,borderRadius:10,border:"1px solid "+t.b1,fontSize:".75rem",color:t.tx,lineHeight:1.8,whiteSpace:"pre-wrap",fontFamily:"DM Sans,sans-serif"}}>
                   {aiPlanResult}
                 </div>
                 <div style={{display:"flex",gap:8}}>
-                  <button onClick={()=>{navigator.clipboard?.writeText(aiPlanResult);}} style={{flex:1,padding:"9px",background:`${t.acc}18`,border:`1px solid ${t.acc}`,borderRadius:8,color:t.acc,fontSize:".75rem",cursor:"pointer",fontWeight:600}}>Copier le plan</button>
-                  <button onClick={()=>setAiPlanResult("")} style={{flex:1,padding:"9px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:8,color:t.tx2,fontSize:".75rem",cursor:"pointer"}}>Nouveau plan</button>
+                  <button onClick={()=>{navigator.clipboard?.writeText(aiPlanResult);}} style={{flex:1,padding:"9px",background:t.acc+"18",border:"1px solid "+t.acc,borderRadius:8,color:t.acc,fontSize:".75rem",cursor:"pointer",fontWeight:600}}>Copier le plan</button>
+                  <button onClick={()=>setAiPlanResult("")} style={{flex:1,padding:"9px",background:t.s2,border:"1px solid "+t.b2,borderRadius:8,color:t.tx2,fontSize:".75rem",cursor:"pointer"}}>Nouveau plan</button>
                 </div>
               </div>
             )}
@@ -3409,20 +3329,20 @@ return (
           <svg width="120" height="120" viewBox="0 0 120 120" style={{marginBottom:20}}>
             <defs><linearGradient id="sg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor={acc}/><stop offset="1" stopColor={acc3}/></linearGradient></defs>
             <circle cx="60" cy="60" r="55" fill="none" stroke={acc} strokeWidth=".8" opacity=".3" strokeDasharray="4,3"/>
-            {[0,45,90,135,180,225,270,315].map(a=>(<g key={a} transform={`rotate(${a} 60 60)`}><line x1="60" y1="12" x2="60" y2="35" stroke="url(#sg)" strokeWidth="2" strokeLinecap="round"/><polygon points="60,12 56,22 60,35 64,22" fill={acc} opacity=".6"/></g>))}
+            {[0,45,90,135,180,225,270,315].map(a=>(<g key={a} transform={"rotate("+a+" 60 60)"}><line x1="60" y1="12" x2="60" y2="35" stroke="url(#sg)" strokeWidth="2" strokeLinecap="round"/><polygon points="60,12 56,22 60,35 64,22" fill={acc} opacity=".6"/></g>))}
             <circle cx="60" cy="60" r="18" fill="none" stroke="url(#sg)" strokeWidth="2"/>
             <circle cx="60" cy="60" r="10" fill={acc} opacity=".15"/>
           </svg>
-          <div style={{fontFamily:"Amiri,serif",fontSize:"2.2rem",color:acc,textShadow:`0 0 30px ${acc}66`,letterSpacing:"2px",marginBottom:6}}>Al-Hifz</div>
+          <div style={{fontFamily:"Amiri,serif",fontSize:"2.2rem",color:acc,textShadow:"0 0 30px "+acc+"66",letterSpacing:"2px",marginBottom:6}}>Al-Hifz</div>
           <div style={{fontFamily:"Amiri Quran,serif",fontSize:".9rem",color:acc2,letterSpacing:"3px",opacity:.7}}>حفظ القرآن الكريم</div>
-          <div style={{marginTop:20,display:"flex",gap:5}}>{[0,1,2].map(i=>(<div key={i} style={{width:5,height:5,borderRadius:"50%",background:acc,animation:`pulse 1s ${i*0.2}s infinite`,opacity:.6}}/>))}</div>
+          <div style={{marginTop:20,display:"flex",gap:5}}>{[0,1,2].map(i=>(<div key={i} style={{width:5,height:5,borderRadius:"50%",background:acc,animation:"pulse 1s "+i*0.2+"s infinite",opacity:.6}}/>))}</div>
         </div>
       )}
 
       {/* Test */}
       {testMode&&(
         <div style={{position:"fixed",inset:0,zIndex:100,background:tn==="dark"?"#04060a":"#faf6ef",display:"flex",flexDirection:"column",overflow:"hidden"}}>
-          <div style={{padding:"14px 16px",borderBottom:`1px solid ${t.b1}`,display:"flex",alignItems:"center",gap:10,background:t.navBg}}>
+          <div style={{padding:"14px 16px",borderBottom:"1px solid "+t.b1,display:"flex",alignItems:"center",gap:10,background:t.navBg}}>
             <div style={{flex:1}}><div style={{fontFamily:"Amiri,serif",fontSize:"1.2rem",color:acc}}>{testSurah?.name}</div><div style={{fontSize:".62rem",color:t.tx3}}>Test {testIdx+1}{"/"}{testVerses.length} · {testScore.correct} ✓ {testScore.wrong} ✗</div></div>
             <button className="tbtn" style={{borderColor:t.rd,color:t.rd}} onClick={()=>setTestMode(false)}>✕ Quitter</button>
           </div>
@@ -3435,13 +3355,13 @@ return (
               <button className="tbtn" onClick={()=>setTestMode(false)}>Retour</button>
             </div>
           ):(testVerses[testIdx]&&<div style={{flex:1,display:"flex",flexDirection:"column",padding:20,gap:16,overflowY:"auto"}}>
-                <div style={{height:4,background:t.b1,borderRadius:99,overflow:"hidden"}}><div style={{height:"100%",background:t.acc,borderRadius:99,width:`${(testIdx/testVerses.length)*100}%`,transition:"width .3s"}}/></div>
-                <div style={{background:t.s2,borderRadius:14,padding:16,border:`1px solid ${t.b1}`}}>
+                <div style={{height:4,background:t.b1,borderRadius:99,overflow:"hidden"}}><div style={{height:"100%",background:t.acc,borderRadius:99,width:(testIdx/testVerses.length)*100+"%",transition:"width .3s"}}/></div>
+                <div style={{background:t.s2,borderRadius:14,padding:16,border:"1px solid "+t.b1}}>
                   <div style={{fontSize:".62rem",color:t.tx3,marginBottom:8,textTransform:"uppercase",letterSpacing:"1px"}}>Complète — {testSurah?.name} v.{testVerses[testIdx]?.n}</div>
                   <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.6rem",direction:"rtl",textAlign:"right",lineHeight:2.2,color:t.acc}}>{(testVerses[testIdx]?.ar||"").split(" ").slice(0,3).join(" ")}…</div>
                   <div style={{fontSize:".68rem",color:t.tx3,marginTop:6,fontStyle:"italic"}}>{testVerses[testIdx]?.fr?.split(" ").slice(0,6).join(" ")}…</div>
                 </div>
-                {testRevealed&&(<div style={{background:t.s3,borderRadius:14,padding:16,border:`2px solid ${t.acc}44`}}>
+                {testRevealed&&(<div style={{background:t.s3,borderRadius:14,padding:16,border:"2px solid "+t.acc+"44"}}>
                   <div style={{fontSize:".6rem",color:t.acc,marginBottom:8,textTransform:"uppercase"}}>Verset complet</div>
                   <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.6rem",direction:"rtl",textAlign:"right",lineHeight:2.2,color:t.tx}}>{(testVerses[testIdx]?.ar||"")} ﴿{testVerses[testIdx]?.n}﴾</div>
                   <div style={{fontSize:".75rem",color:t.tx2,marginTop:8,fontStyle:"italic"}}>{testVerses[testIdx]?.fr}</div>
@@ -3449,8 +3369,8 @@ return (
                 {!testRevealed
                   ?(<button className="mbtn" onClick={()=>setTestRevealed(true)}>Révéler le verset</button>)
                   :(<div style={{display:"flex",gap:10}}>
-                      <button style={{flex:1,padding:"14px",borderRadius:12,border:"none",background:`${t.rd}22`,color:t.rd,fontSize:".85rem",fontWeight:700,cursor:"pointer"}} onClick={()=>{setTestScore(p=>({...p,wrong:p.wrong+1,total:p.total+1}));if(testIdx+1>=testVerses.length)setTestDone(true);else{setTestIdx(i=>i+1);setTestRevealed(false);}}}>✗ Difficile</button>
-                      <button style={{flex:1,padding:"14px",borderRadius:12,border:"none",background:`${t.gr}22`,color:t.gr,fontSize:".85rem",fontWeight:700,cursor:"pointer"}} onClick={()=>{markSpaced(testSurah.n,testVerses[testIdx]?.n,4);setTestScore(p=>({...p,correct:p.correct+1,total:p.total+1}));if(testIdx+1>=testVerses.length)setTestDone(true);else{setTestIdx(i=>i+1);setTestRevealed(false);}}}>✓ Maîtrisé</button>
+                      <button style={{flex:1,padding:"14px",borderRadius:12,border:"none",background:t.rd+"22",color:t.rd,fontSize:".85rem",fontWeight:700,cursor:"pointer"}} onClick={()=>{setTestScore(p=>({...p,wrong:p.wrong+1,total:p.total+1}));if(testIdx+1>=testVerses.length)setTestDone(true);else{setTestIdx(i=>i+1);setTestRevealed(false);}}}>✗ Difficile</button>
+                      <button style={{flex:1,padding:"14px",borderRadius:12,border:"none",background:t.gr+"22",color:t.gr,fontSize:".85rem",fontWeight:700,cursor:"pointer"}} onClick={()=>{markSpaced(testSurah.n,testVerses[testIdx]?.n,4);setTestScore(p=>({...p,correct:p.correct+1,total:p.total+1}));if(testIdx+1>=testVerses.length)setTestDone(true);else{setTestIdx(i=>i+1);setTestRevealed(false);}}}>✓ Maîtrisé</button>
                     </div>)
                 }
               </div>)}
@@ -3507,7 +3427,7 @@ return (
             <h2 style={{fontFamily:"Amiri,serif",color:acc,marginBottom:4}}>✂ Lecture partielle</h2>
             <p style={{fontSize:".68rem",color:t.tx3,marginBottom:16}}>Sélectionne les mots à lire — idéal pour mémoriser bout à bout</p>
             {/* Aperçu du segment sélectionné */}
-            <div style={{background:t.s2,borderRadius:12,padding:"14px 16px",border:`1px solid ${t.b1}`,marginBottom:14,direction:"rtl",textAlign:"right"}}>
+            <div style={{background:t.s2,borderRadius:12,padding:"14px 16px",border:"1px solid "+t.b1,marginBottom:14,direction:"rtl",textAlign:"right"}}>
               <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.3rem",lineHeight:2.2,color:t.tx}}>
                 {partialVerse.words.map((w,i)=>(
                   <span key={i} style={{
@@ -3579,23 +3499,23 @@ return (
       )}
 
       {/* Note modal */}
-      {editingNote&&(<div className="overlay" onClick={()=>setEditingNote(null)}><div className="modal" onClick={e=>e.stopPropagation()}><h2>Note personnelle</h2><p style={{fontSize:".72rem",color:t.tx3,marginBottom:12}}>{editingNote.replace("_"," · verset ")}</p><textarea value={noteText} onChange={e=>setNoteText(e.target.value)} placeholder="Écris ta note…" style={{width:"100%",minHeight:100,background:t.inputBg,border:`1px solid ${t.b2}`,borderRadius:8,padding:"10px 12px",color:t.tx,fontSize:".85rem",resize:"vertical",outline:"none",marginBottom:12}}/><div style={{display:"flex",gap:8}}><button className="mbtn" style={{flex:1}} onClick={()=>{const[sn,vn]=editingNote.split("_");saveNote(sn,vn,noteText);}}>Sauvegarder</button>{notes[editingNote]&&(<button className="tbtn" style={{borderColor:t.rd,color:t.rd}} onClick={()=>{const[sn,vn]=editingNote.split("_");saveNote(sn,vn,"");}}>Supprimer</button>)}</div></div></div>)}
+      {editingNote&&(<div className="overlay" onClick={()=>setEditingNote(null)}><div className="modal" onClick={e=>e.stopPropagation()}><h2>Note personnelle</h2><p style={{fontSize:".72rem",color:t.tx3,marginBottom:12}}>{editingNote.replace("_"," · verset ")}</p><textarea value={noteText} onChange={e=>setNoteText(e.target.value)} placeholder="Écris ta note…" style={{width:"100%",minHeight:100,background:t.inputBg,border:"1px solid "+t.b2,borderRadius:8,padding:"10px 12px",color:t.tx,fontSize:".85rem",resize:"vertical",outline:"none",marginBottom:12}}/><div style={{display:"flex",gap:8}}><button className="mbtn" style={{flex:1}} onClick={()=>{const[sn,vn]=editingNote.split("_");saveNote(sn,vn,noteText);}}>Sauvegarder</button>{notes[editingNote]&&(<button className="tbtn" style={{borderColor:t.rd,color:t.rd}} onClick={()=>{const[sn,vn]=editingNote.split("_");saveNote(sn,vn,"");}}>Supprimer</button>)}</div></div></div>)}
 
       {/* Share modal */}
-      {shareVerse&&(<div className="overlay" onClick={()=>setShareVerse(null)}><div className="modal" onClick={e=>e.stopPropagation()}><h2 style={{fontFamily:"Amiri,serif",color:acc,marginBottom:4}}>{shareVerse.surahAr}</h2><p style={{fontSize:".68rem",color:t.tx3,marginBottom:14}}>{shareVerse.surah} · verset {shareVerse.vn}</p><div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,border:`2px solid ${acc}`,borderRadius:14,padding:"20px 18px",marginBottom:14,textAlign:"center"}}><div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.5rem",direction:"rtl",lineHeight:2.2,color:t.tx,marginBottom:10}}>{shareVerse.ar}</div><div style={{fontSize:".75rem",color:t.tx2,fontStyle:"italic",lineHeight:1.6}}>{shareVerse.fr}</div><div style={{marginTop:10,fontSize:".6rem",color:t.tx3}}>— {shareVerse.surah} ({shareVerse.sn}:{shareVerse.vn}) · Al-Hifz</div></div><button className="mbtn" onClick={()=>{const txt=`${shareVerse.ar}\n\n${shareVerse.fr}\n\n— ${shareVerse.surah} (${shareVerse.sn}:${shareVerse.vn})`;navigator.clipboard?.writeText(txt).catch(()=>{});setShareVerse(null);}}>Copier le verset</button></div></div>)}
+      {shareVerse&&(<div className="overlay" onClick={()=>setShareVerse(null)}><div className="modal" onClick={e=>e.stopPropagation()}><h2 style={{fontFamily:"Amiri,serif",color:acc,marginBottom:4}}>{shareVerse.surahAr}</h2><p style={{fontSize:".68rem",color:t.tx3,marginBottom:14}}>{shareVerse.surah} · verset {shareVerse.vn}</p><div style={{background:"linear-gradient(135deg,"+t.s2+","+t.s3+")",border:"2px solid "+acc,borderRadius:14,padding:"20px 18px",marginBottom:14,textAlign:"center"}}><div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.5rem",direction:"rtl",lineHeight:2.2,color:t.tx,marginBottom:10}}>{shareVerse.ar}</div><div style={{fontSize:".75rem",color:t.tx2,fontStyle:"italic",lineHeight:1.6}}>{shareVerse.fr}</div><div style={{marginTop:10,fontSize:".6rem",color:t.tx3}}>— {shareVerse.surah} ({shareVerse.sn}:{shareVerse.vn}) · Al-Hifz</div></div><button className="mbtn" onClick={()=>{const txt=shareVerse.ar+"\n\n"+shareVerse.fr+"\n\n— "+shareVerse.surah+" ("+shareVerse.sn+":"+shareVerse.vn+")";navigator.clipboard?.writeText(txt).catch(()=>{});setShareVerse(null);}}>Copier le verset</button></div></div>)}
 
       {/* Weekly report */}
-      {showWeeklyReport&&(<div className="overlay" onClick={()=>setShowWeeklyReport(false)}><div className="modal" onClick={e=>e.stopPropagation()}><h2 style={{marginBottom:4}}>Rapport hebdomadaire</h2><p style={{marginBottom:16}}>{weeklyReport.totalWeek} versets · {weeklyReport.activeDays}/7 jours actifs</p><div style={{display:"flex",alignItems:"flex-end",gap:6,height:80,marginBottom:12}}>{weeklyReport.days.map((d,i)=>{const maxG=Math.max(...weeklyReport.days.map(x=>x.gained),1);const isToday=d.date===today();return(<div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}><div style={{fontSize:".52rem",color:acc}}>{d.gained||""}</div><div style={{width:"100%",height:60,display:"flex",alignItems:"flex-end"}}><div style={{width:"100%",height:`${Math.max(Math.round(d.gained/maxG*100),4)}%`,background:isToday?acc:`${acc}66`,borderRadius:"3px 3px 0 0",minHeight:3}}/></div><div style={{fontSize:".52rem",color:isToday?acc:t.tx3,fontWeight:isToday?700:400}}>{d.label}</div></div>);})}</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>{[{v:weeklyReport.totalWeek,l:"Versets",c:acc},{v:weeklyReport.activeDays,l:"Jours actifs",c:t.gr},{v:weeklyReport.best?.gained||0,l:"Meilleur jour",c:t.bl}].map((k,i)=>(<div key={i} style={{background:t.s2,borderRadius:10,padding:"10px",textAlign:"center"}}><div style={{fontSize:"1.4rem",fontWeight:700,color:k.c}}>{k.v}</div><div style={{fontSize:".58rem",color:t.tx3}}>{k.l}</div></div>))}</div><div style={{textAlign:"center",color:weeklyReport.totalWeek>0?t.gr:t.tx3,fontSize:".75rem",marginBottom:14,fontWeight:600}}>{weeklyReport.activeDays>=5?"Excellente semaine ! 🌟":weeklyReport.activeDays>=3?"Bonne progression, continue !":"Essaie de mémoriser chaque jour."}</div><button className="mbtn" onClick={()=>setShowWeeklyReport(false)}>Fermer</button></div></div>)}
+      {showWeeklyReport&&(<div className="overlay" onClick={()=>setShowWeeklyReport(false)}><div className="modal" onClick={e=>e.stopPropagation()}><h2 style={{marginBottom:4}}>Rapport hebdomadaire</h2><p style={{marginBottom:16}}>{weeklyReport.totalWeek} versets · {weeklyReport.activeDays}/7 jours actifs</p><div style={{display:"flex",alignItems:"flex-end",gap:6,height:80,marginBottom:12}}>{weeklyReport.days.map((d,i)=>{const maxG=Math.max(...weeklyReport.days.map(x=>x.gained),1);const isToday=d.date===today();return(<div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}><div style={{fontSize:".52rem",color:acc}}>{d.gained||""}</div><div style={{width:"100%",height:60,display:"flex",alignItems:"flex-end"}}><div style={{width:"100%",height:Math.max(Math.round(d.gained/maxG*100),4)+"%",background:isToday?acc:acc+"66",borderRadius:"3px 3px 0 0",minHeight:3}}/></div><div style={{fontSize:".52rem",color:isToday?acc:t.tx3,fontWeight:isToday?700:400}}>{d.label}</div></div>);})}</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>{[{v:weeklyReport.totalWeek,l:"Versets",c:acc},{v:weeklyReport.activeDays,l:"Jours actifs",c:t.gr},{v:weeklyReport.best?.gained||0,l:"Meilleur jour",c:t.bl}].map((k,i)=>(<div key={i} style={{background:t.s2,borderRadius:10,padding:"10px",textAlign:"center"}}><div style={{fontSize:"1.4rem",fontWeight:700,color:k.c}}>{k.v}</div><div style={{fontSize:".58rem",color:t.tx3}}>{k.l}</div></div>))}</div><div style={{textAlign:"center",color:weeklyReport.totalWeek>0?t.gr:t.tx3,fontSize:".75rem",marginBottom:14,fontWeight:600}}>{weeklyReport.activeDays>=5?"Excellente semaine ! 🌟":weeklyReport.activeDays>=3?"Bonne progression, continue !":"Essaie de mémoriser chaque jour."}</div><button className="mbtn" onClick={()=>setShowWeeklyReport(false)}>Fermer</button></div></div>)}
 
       {/* Offline banner */}
       {isOffline&&(
-        <div style={{background:`${t.rd}CC`,color:"#fff",padding:"6px 16px",textAlign:"center",fontSize:".7rem",fontWeight:600,backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",gap:8,position:"sticky",top:0,zIndex:61}}>
+        <div style={{background:t.rd+"CC",color:"#fff",padding:"6px 16px",textAlign:"center",fontSize:".7rem",fontWeight:600,backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",gap:8,position:"sticky",top:0,zIndex:61}}>
           <span>●</span> Mode hors ligne — Coran embarqué et mémorisations disponibles
         </div>
       )}
       {/* Install banner */}
       {showInstallBanner&&(
-        <div style={{background:`linear-gradient(135deg,${t.acc}ee,${t.acc2}ee)`,padding:"8px 16px",display:"flex",alignItems:"center",gap:10,position:"sticky",top:0,zIndex:61,backdropFilter:"blur(8px)"}}>
+        <div style={{background:"linear-gradient(135deg,"+t.acc+"ee,"+t.acc2+"ee)",padding:"8px 16px",display:"flex",alignItems:"center",gap:10,position:"sticky",top:0,zIndex:61,backdropFilter:"blur(8px)"}}>
           <span style={{fontSize:".75rem",fontWeight:700,color:"#fff",flex:1}}>Installer Al-Hifz sur ton écran d'accueil</span>
           <button onClick={()=>{installPromptRef.current?.prompt();setShowInstallBanner(false);}} style={{background:"rgba(255,255,255,.25)",border:"1px solid rgba(255,255,255,.4)",color:"#fff",borderRadius:8,padding:"4px 12px",fontSize:".7rem",fontWeight:700,cursor:"pointer"}}>Installer</button>
           <button onClick={()=>setShowInstallBanner(false)} style={{background:"none",border:"none",color:"rgba(255,255,255,.7)",cursor:"pointer",fontSize:"1rem"}}>✕</button>
@@ -3616,7 +3536,7 @@ return (
       {badgePopup&&(
         <div style={{position:"fixed",bottom:100,left:"50%",transform:"translateX(-50%)",zIndex:300,animation:"slideUp .4s ease"}} onClick={()=>setBadgePopup(null)}>
           <style>{`@keyframes slideUp{from{transform:translateX(-50%) translateY(30px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}`}</style>
-          <div style={{background:`linear-gradient(135deg,${t.s1},${t.s2})`,border:`2px solid ${t.acc}`,borderRadius:18,padding:"16px 24px",textAlign:"center",boxShadow:`0 8px 32px ${t.acc}44`,backdropFilter:"blur(16px)",minWidth:220,cursor:"pointer"}}>
+          <div style={{background:"linear-gradient(135deg,"+t.s1+","+t.s2+")",border:"2px solid "+t.acc,borderRadius:18,padding:"16px 24px",textAlign:"center",boxShadow:"0 8px 32px "+t.acc+"44",backdropFilter:"blur(16px)",minWidth:220,cursor:"pointer"}}>
             <div style={{fontSize:"2.5rem",marginBottom:6}}>{badgePopup.icon}</div>
             <div style={{fontSize:".6rem",color:t.acc,textTransform:"uppercase",letterSpacing:2,fontWeight:700,marginBottom:4}}>Badge débloqué !</div>
             <div style={{fontSize:".9rem",fontWeight:800,color:t.tx,marginBottom:2}}>{badgePopup.label}</div>
@@ -3628,7 +3548,7 @@ return (
       {/* Popup encouragement pages */}
       {encouragementMsg&&(
         <div style={{position:"fixed",bottom:100,left:"50%",transform:"translateX(-50%)",zIndex:300,animation:"slideUp .4s ease"}} onClick={()=>setEncouragementMsg(null)}>
-          <div style={{background:`linear-gradient(135deg,${t.s1},${t.s2})`,border:`2px solid ${t.gr}`,borderRadius:18,padding:"14px 22px",textAlign:"center",boxShadow:`0 8px 32px ${t.gr}44`,backdropFilter:"blur(16px)",minWidth:240,cursor:"pointer"}}>
+          <div style={{background:"linear-gradient(135deg,"+t.s1+","+t.s2+")",border:"2px solid "+t.gr,borderRadius:18,padding:"14px 22px",textAlign:"center",boxShadow:"0 8px 32px "+t.gr+"44",backdropFilter:"blur(16px)",minWidth:240,cursor:"pointer"}}>
             <div style={{fontSize:"2rem",marginBottom:6}}>📖</div>
             <div style={{fontSize:".6rem",color:t.gr,textTransform:"uppercase",letterSpacing:2,fontWeight:700,marginBottom:4}}>{encouragementMsg.pages} pages lues</div>
             <div style={{fontSize:".8rem",fontWeight:700,color:t.tx,lineHeight:1.5}}>{encouragementMsg.msg}</div>
@@ -3639,10 +3559,10 @@ return (
 
       {/* Timer flottant en haut quand actif */}
       {timerRunning&&timerLeft!==null&&timerLeft>0&&(
-        <div style={{position:"fixed",top:0,left:0,right:0,zIndex:250,backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",background:tn==="light"?"rgba(255,255,255,.92)":"rgba(13,26,14,.92)",borderBottom:`1px solid ${t.b1}`,boxShadow:`0 2px 20px rgba(0,0,0,.15)`}}>
+        <div style={{position:"fixed",top:0,left:0,right:0,zIndex:250,backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",background:tn==="light"?"rgba(255,255,255,.92)":"rgba(13,26,14,.92)",borderBottom:"1px solid "+t.b1,boxShadow:"0 2px 20px rgba(0,0,0,.15)"}}>
           <div style={{display:"flex",alignItems:"center",gap:10,padding:"7px 16px"}}>
             {/* Icône séance */}
-            <div style={{width:28,height:28,borderRadius:"50%",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:`0 2px 8px ${t.acc}44`}}>
+            <div style={{width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,"+t.acc+","+t.acc2+")",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:"0 2px 8px "+t.acc+"44"}}>
               <span style={{fontSize:".7rem"}}>⏱</span>
             </div>
             <div style={{flex:1,display:"flex",flexDirection:"column",gap:3,minWidth:0}}>
@@ -3654,30 +3574,30 @@ return (
               <div style={{height:4,background:t.b1,borderRadius:99,overflow:"hidden"}}>
                 <div style={{
                   height:"100%",
-                  width:`${100-(timerLeft/(timerDuration*60)*100)}%`,
-                  background:`linear-gradient(90deg,${t.acc},${t.acc2})`,
+                  width:100-(timerLeft/(timerDuration*60)*100)+"%",
+                  background:"linear-gradient(90deg,"+t.acc+","+t.acc2+")",
                   borderRadius:99,
                   transition:"width 1s linear",
-                  boxShadow:`0 0 6px ${t.acc}66`,
+                  boxShadow:"0 0 6px "+t.acc+"66",
                 }}/>
               </div>
             </div>
-            <button onClick={pauseTimer} style={{background:t.s2,border:`1px solid ${t.b2}`,borderRadius:8,padding:"5px 10px",color:t.tx2,cursor:"pointer",fontSize:".65rem",fontWeight:700,flexShrink:0}}>⏸</button>
-            <button onClick={()=>setTimerOpen(true)} style={{background:`${t.acc}15`,border:`1px solid ${t.acc}44`,borderRadius:8,padding:"5px 10px",color:t.acc,cursor:"pointer",fontSize:".65rem",fontWeight:700,flexShrink:0}}>↗</button>
+            <button onClick={pauseTimer} style={{background:t.s2,border:"1px solid "+t.b2,borderRadius:8,padding:"5px 10px",color:t.tx2,cursor:"pointer",fontSize:".65rem",fontWeight:700,flexShrink:0}}>⏸</button>
+            <button onClick={()=>setTimerOpen(true)} style={{background:t.acc+"15",border:"1px solid "+t.acc+"44",borderRadius:8,padding:"5px 10px",color:t.acc,cursor:"pointer",fontSize:".65rem",fontWeight:700,flexShrink:0}}>↗</button>
           </div>
         </div>
       )}
       {timerLeft===0&&(
-        <div style={{position:"fixed",top:0,left:0,right:0,zIndex:250,backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",background:tn==="light"?"rgba(232,255,235,.95)":"rgba(13,40,18,.95)",borderBottom:`1px solid ${t.gr}44`}}>
+        <div style={{position:"fixed",top:0,left:0,right:0,zIndex:250,backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",background:tn==="light"?"rgba(232,255,235,.95)":"rgba(13,40,18,.95)",borderBottom:"1px solid "+t.gr+"44"}}>
           <div style={{display:"flex",alignItems:"center",gap:10,padding:"7px 16px"}}>
-            <div style={{width:28,height:28,borderRadius:"50%",background:`linear-gradient(135deg,${t.gr},#43a047)`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+            <div style={{width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,"+t.gr+",#43a047)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
               <span style={{fontSize:".75rem"}}>✓</span>
             </div>
             <div style={{flex:1}}>
               <div style={{fontSize:".72rem",fontWeight:700,color:t.gr}}>Séance terminée</div>
               <div style={{fontSize:".58rem",color:t.tx3,marginTop:1}}>بارك الله فيك — que Allah bénisse ton effort</div>
             </div>
-            <button onClick={resetTimer} style={{background:"none",border:`1px solid ${t.gr}44`,borderRadius:8,padding:"5px 10px",color:t.gr,cursor:"pointer",fontSize:".65rem",fontWeight:700}}>✕</button>
+            <button onClick={resetTimer} style={{background:"none",border:"1px solid "+t.gr+"44",borderRadius:8,padding:"5px 10px",color:t.gr,cursor:"pointer",fontSize:".65rem",fontWeight:700}}>✕</button>
           </div>
         </div>
       )}
@@ -3702,7 +3622,7 @@ return (
               <span style={{fontSize:".85rem",lineHeight:1}}>🔥</span>
               <span style={{fontSize:".65rem",fontWeight:800,color:"#f97316"}}>{memStreak}</span>
             </div>}
-            {user&&<button onClick={()=>setPage("settings")} title={user.email} style={{width:30,height:30,borderRadius:"50%",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".8rem",fontWeight:800,color:"#000",flexShrink:0,boxShadow:`0 0 8px ${t.acc}66`}}>{(user.email||"?")[0].toUpperCase()}</button>}
+            {user&&<button onClick={()=>setPage("settings")} title={user.email} style={{width:30,height:30,borderRadius:"50%",background:"linear-gradient(135deg,"+t.acc+","+t.acc2+")",border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".8rem",fontWeight:800,color:"#000",flexShrink:0,boxShadow:"0 0 8px "+t.acc+"66"}}>{(user.email||"?")[0].toUpperCase()}</button>}
           </div>
         </div>
       </div>
@@ -3711,7 +3631,7 @@ return (
       {page==="quran"&&<div className="hero" style={{padding:"12px 16px"}}>
         {/* Verset du jour */}
         {versetDuJour&&!versetDuJourDismissed&&(
-          <div style={{padding:"10px 14px",background:`linear-gradient(135deg,${acc}12,${acc}06)`,borderRadius:10,border:`1px solid ${acc}30`,marginBottom:8}}>
+          <div style={{padding:"10px 14px",background:"linear-gradient(135deg,"+acc+"12,"+acc+"06)",borderRadius:10,border:"1px solid "+acc+"30",marginBottom:8}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
               <span style={{fontSize:".58rem",color:acc,textTransform:"uppercase",letterSpacing:"1.5px",fontWeight:700}}>Verset du jour</span>
               <div style={{display:"flex",gap:6,alignItems:"center"}}>
@@ -3743,7 +3663,7 @@ return (
         <div style={{position:"fixed",inset:0,zIndex:10,display:"flex",flexDirection:"column",background:"#0d1000",paddingTop:"env(safe-area-inset-top)",paddingBottom:"calc(62px + env(safe-area-inset-bottom))"}}>
           <div style={{display:"flex",gap:6,padding:"6px 10px",background:"rgba(0,0,0,.8)",flexShrink:0,overflowX:"auto",borderBottom:"1px solid rgba(201,168,76,.15)"}}>
             {MUSHAF_EDITIONS.map(ed=>(
-              <button key={ed.id} onClick={()=>setMushafEdition(ed.id)} style={{padding:"5px 12px",borderRadius:20,border:`1.5px solid ${mushafEdition===ed.id?"#c9a84c":"rgba(201,168,76,.2)"}`,background:mushafEdition===ed.id?"rgba(201,168,76,.15)":"transparent",color:mushafEdition===ed.id?"#c9a84c":"rgba(201,168,76,.5)",fontSize:".6rem",fontWeight:mushafEdition===ed.id?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
+              <button key={ed.id} onClick={()=>setMushafEdition(ed.id)} style={{padding:"5px 12px",borderRadius:20,border:"1.5px solid "+(mushafEdition===ed.id?"#c9a84c":"rgba(201,168,76,.2)"),background:mushafEdition===ed.id?"rgba(201,168,76,.15)":"transparent",color:mushafEdition===ed.id?"#c9a84c":"rgba(201,168,76,.5)",fontSize:".6rem",fontWeight:mushafEdition===ed.id?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
                 {ed.name}
               </button>
             ))}
@@ -3754,27 +3674,27 @@ return (
         </div>
       )}
 
-      <div className={`wrap${pageTransition?" transitioning":""}`}>
+      <div className={"wrap"+(pageTransition?" transitioning":"")}>
 
         {/* ACCUEIL */}
         {page==="home"&&(
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
 
             {/* ── Bloc Al-Hifz exact ── */}
-            <div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,borderRadius:16,border:`1px solid ${t.b1}`,position:"relative",overflow:"hidden"}}>
+            <div style={{background:"linear-gradient(135deg,"+t.s2+","+t.s3+")",borderRadius:16,border:"1px solid "+t.b1,position:"relative",overflow:"hidden"}}>
               {/* Décoration bordure haut */}
               <svg style={{position:"absolute",top:0,left:0,width:"100%",height:12,display:"block"}} preserveAspectRatio="none" viewBox="0 0 800 12">
                 <defs><linearGradient id="bord2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="transparent"/><stop offset=".15" stopColor={acc}/><stop offset=".5" stopColor={acc3}/><stop offset=".85" stopColor={acc}/><stop offset="1" stopColor="transparent"/></linearGradient></defs>
                 <rect y="0" width="800" height="1.5" fill="url(#bord2)"/>
               </svg>
-              <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse at 50% 100%,${acc}0e 0%,transparent 70%)`,pointerEvents:"none"}}/>
+              <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%,"+acc+"0e 0%,transparent 70%)",pointerEvents:"none"}}/>
 
               <div style={{padding:"18px 16px 14px"}}>
                 {/* Title */}
                 <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,marginBottom:14}}>
                   <svg width="60" height="8" viewBox="0 0 80 10"><line x1="0" y1="5" x2="55" y2="5" stroke={acc} strokeWidth=".8" opacity=".4"/><circle cx="62" cy="5" r="2.5" fill="none" stroke={acc} strokeWidth=".8" opacity=".6"/><circle cx="72" cy="5" r="1.5" fill={acc} opacity=".5"/></svg>
                   <div style={{textAlign:"center"}}>
-                    <div style={{fontFamily:"Amiri,serif",fontSize:"1.6rem",fontWeight:700,color:acc,lineHeight:1,letterSpacing:"1px",textShadow:`0 0 30px ${acc}55`}}>Al-Hifz</div>
+                    <div style={{fontFamily:"Amiri,serif",fontSize:"1.6rem",fontWeight:700,color:acc,lineHeight:1,letterSpacing:"1px",textShadow:"0 0 30px "+acc+"55"}}>Al-Hifz</div>
                     <div style={{fontSize:".46rem",textTransform:"uppercase",letterSpacing:"4px",color:t.tx3,marginTop:2}}>حفظ القرآن الكريم</div>
                   </div>
                   <svg width="60" height="8" viewBox="0 0 80 10" style={{transform:"scaleX(-1)"}}><line x1="0" y1="5" x2="55" y2="5" stroke={acc} strokeWidth=".8" opacity=".4"/><circle cx="62" cy="5" r="2.5" fill="none" stroke={acc} strokeWidth=".8" opacity=".6"/><circle cx="72" cy="5" r="1.5" fill={acc} opacity=".5"/></svg>
@@ -3789,8 +3709,8 @@ return (
                         <defs><linearGradient id="cg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor={acc}/><stop offset="1" stopColor={acc3}/></linearGradient><filter id="glow2h"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
                         <circle cx="44" cy="44" r="42" fill="none" stroke={acc} strokeWidth=".4" opacity=".2" strokeDasharray="3,4"/>
                         <circle cx="44" cy="44" r="35" fill="none" stroke={t.b1} strokeWidth="7"/>
-                        <circle cx="44" cy="44" r="35" fill="none" stroke="url(#cg2)" strokeWidth="7" strokeDasharray={`${2*Math.PI*35*pct/100} ${2*Math.PI*35*(1-pct/100)}`} strokeLinecap="round" transform="rotate(-90 44 44)" filter="url(#glow2h)" style={{transition:"stroke-dasharray 1.2s cubic-bezier(.4,0,.2,1)"}}/>
-                        <g transform="translate(44,44)" opacity=".15">{[0,60,120,180,240,300].map(a=>(<line key={a} x1="0" y1="-12" x2="0" y2="-7" stroke={acc} strokeWidth=".8" transform={`rotate(${a})`}/>))}</g>
+                        <circle cx="44" cy="44" r="35" fill="none" stroke="url(#cg2)" strokeWidth="7" strokeDasharray={2*Math.PI*35*pct/100+" "+2*Math.PI*35*(1-pct/100)} strokeLinecap="round" transform="rotate(-90 44 44)" filter="url(#glow2h)" style={{transition:"stroke-dasharray 1.2s cubic-bezier(.4,0,.2,1)"}}/>
+                        <g transform="translate(44,44)" opacity=".15">{[0,60,120,180,240,300].map(a=>(<line key={a} x1="0" y1="-12" x2="0" y2="-7" stroke={acc} strokeWidth=".8" transform={"rotate("+a+")"}/>))}</g>
                       </svg>
                       <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
                         <div style={{fontSize:"1.55rem",fontWeight:800,color:acc,lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{pct}<span style={{fontSize:".65rem",fontWeight:600}}>%</span></div>
@@ -3811,10 +3731,10 @@ return (
                         </div>
                       </div>
                       <div style={{position:"relative",height:11,background:t.b1,borderRadius:99,overflow:"hidden",boxShadow:"inset 0 2px 6px rgba(0,0,0,.15)"}}>
-                        <div style={{height:"100%",width:`${pct}%`,borderRadius:99,background:`linear-gradient(90deg,${acc},${acc2},${acc3})`,boxShadow:`0 0 10px ${acc}99`,transition:"width 1.2s cubic-bezier(.4,0,.2,1)",position:"relative",minWidth:pct>0?"12px":"0"}}>
+                        <div style={{height:"100%",width:pct+"%",borderRadius:99,background:"linear-gradient(90deg,"+acc+","+acc2+","+acc3+")",boxShadow:"0 0 10px "+acc+"99",transition:"width 1.2s cubic-bezier(.4,0,.2,1)",position:"relative",minWidth:pct>0?"12px":"0"}}>
                           <div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent)",backgroundSize:"200% 100%",animation:"shimmer 2.5s infinite",borderRadius:99}}/>
                         </div>
-                        {pct>2&&<div style={{position:"absolute",top:"50%",transform:"translateY(-50%)",left:`calc(${pct}% - 6px)`,width:11,height:11,borderRadius:"50%",background:"#fff",boxShadow:`0 0 6px ${acc}`,opacity:.9}}/>}
+                        {pct>2&&<div style={{position:"absolute",top:"50%",transform:"translateY(-50%)",left:"calc("+pct+"% - 6px)",width:11,height:11,borderRadius:"50%",background:"#fff",boxShadow:"0 0 6px "+acc,opacity:.9}}/>}
                       </div>
                       <div style={{display:"flex",justifyContent:"space-between",marginTop:3}}>
                         <span style={{fontSize:".5rem",color:t.tx3}}>0</span>
@@ -3830,7 +3750,7 @@ return (
                       </div>
                       <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:t.s3,borderRadius:7}}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round" opacity=".8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-                        <div><div style={{fontSize:".8rem",fontWeight:700,color:daysLeft<=0?t.gr:"#f97316",lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{daysLeft>0?(daysLeft>365?`~${(daysLeft/365).toFixed(1)}a`:`${daysLeft}j`):"Fini!"}</div><div style={{fontSize:".44rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Avant fin</div></div>
+                        <div><div style={{fontSize:".8rem",fontWeight:700,color:daysLeft<=0?t.gr:"#f97316",lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{daysLeft>0?(daysLeft>365?"~"+(daysLeft/365).toFixed(1)+"a":daysLeft+"j"):"Fini!"}</div><div style={{fontSize:".44rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Avant fin</div></div>
                       </div>
                       <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:t.s3,borderRadius:7}}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.gr} strokeWidth="1.5" strokeLinecap="round" opacity=".8"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
@@ -3845,15 +3765,15 @@ return (
                 </div>
 
                 {/* ETA */}
-                <div style={{marginTop:8,padding:"5px 10px",borderTop:`1px solid ${acc}15`,display:"flex",alignItems:"center",justifyContent:"center",gap:5,background:`${acc}04`,borderRadius:"0 0 8px 8px",marginLeft:-16,marginRight:-16,paddingLeft:16,paddingRight:16}}>
+                <div style={{marginTop:8,padding:"5px 10px",borderTop:"1px solid "+acc+"15",display:"flex",alignItems:"center",justifyContent:"center",gap:5,background:acc+"04",borderRadius:"0 0 8px 8px",marginLeft:-16,marginRight:-16,paddingLeft:16,paddingRight:16}}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={acc} strokeWidth="1.5" strokeLinecap="round" opacity=".5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-                  <span style={{fontSize:".6rem",color:t.tx3,fontStyle:"italic"}}>{remaining>0?`Fin estimée · ${eta}`:"🎉 Coran complet !"}</span>
+                  <span style={{fontSize:".6rem",color:t.tx3,fontStyle:"italic"}}>{remaining>0?"Fin estimée · "+eta:"🎉 Coran complet !"}</span>
                 </div>
 
                 {/* Rappels */}
-                {!(hist[today()]||0)&&(<div style={{marginTop:7,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${t.bl}15`,borderRadius:8,border:`1px solid ${t.bl}30`,cursor:"pointer"}} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>sPct(x)<100);if(s)doSelect(s);}}><div style={{width:6,height:6,borderRadius:"50%",background:t.bl,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".63rem",color:t.bl,fontWeight:600,flex:1}}>Aucune mémorisation aujourd'hui — on commence ?</span><span style={{fontSize:".58rem",color:t.bl,opacity:.7}}>→</span></div>)}
-                {spacedDue.length>0&&(<div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${t.rd}15`,borderRadius:8,border:`1px solid ${t.rd}30`,cursor:"pointer"}} onClick={()=>setPage("pages")}><div style={{width:6,height:6,borderRadius:"50%",background:t.rd,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".63rem",color:t.rd,fontWeight:600,flex:1}}>{spacedDue.length} verset{spacedDue.length>1?"s":""} à réviser aujourd'hui</span><span style={{fontSize:".58rem",color:t.rd,opacity:.7}}>Voir →</span></div>)}
-                {bookmark&&(<div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${acc}10`,borderRadius:8,border:`1px solid ${acc}25`,cursor:"pointer"}} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>x.n===bookmark.sn);if(s)doSelect(s);}}><span style={{fontSize:".7rem",color:acc}}>◈</span><span style={{fontSize:".63rem",color:t.tx,fontWeight:600,flex:1}}>Reprendre : {bookmark.name}</span><span style={{fontSize:".58rem",color:t.tx3}}>→</span></div>)}
+                {!(hist[today()]||0)&&(<div style={{marginTop:7,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:t.bl+"15",borderRadius:8,border:"1px solid "+t.bl+"30",cursor:"pointer"}} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>sPct(x)<100);if(s)doSelect(s);}}><div style={{width:6,height:6,borderRadius:"50%",background:t.bl,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".63rem",color:t.bl,fontWeight:600,flex:1}}>Aucune mémorisation aujourd'hui — on commence ?</span><span style={{fontSize:".58rem",color:t.bl,opacity:.7}}>→</span></div>)}
+                {spacedDue.length>0&&(<div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:t.rd+"15",borderRadius:8,border:"1px solid "+t.rd+"30",cursor:"pointer"}} onClick={()=>setPage("pages")}><div style={{width:6,height:6,borderRadius:"50%",background:t.rd,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".63rem",color:t.rd,fontWeight:600,flex:1}}>{spacedDue.length} verset{spacedDue.length>1?"s":""} à réviser aujourd'hui</span><span style={{fontSize:".58rem",color:t.rd,opacity:.7}}>Voir →</span></div>)}
+                {bookmark&&(<div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:acc+"10",borderRadius:8,border:"1px solid "+acc+"25",cursor:"pointer"}} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>x.n===bookmark.sn);if(s)doSelect(s);}}><span style={{fontSize:".7rem",color:acc}}>◈</span><span style={{fontSize:".63rem",color:t.tx,fontWeight:600,flex:1}}>Reprendre : {bookmark.name}</span><span style={{fontSize:".58rem",color:t.tx3}}>→</span></div>)}
                 {/* Streak */}
                 {memStreak>0&&(<div onClick={()=>setPage("stats")} style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"6px 10px",background:"rgba(249,115,22,.08)",borderRadius:9,border:"1px solid rgba(249,115,22,.2)",cursor:"pointer"}}><span style={{fontSize:"1.1rem"}}>🔥</span><span style={{fontSize:".7rem",fontWeight:700,color:"#f97316",flex:1}}>{memStreak} jour{memStreak>1?"s":""} de suite</span><span style={{fontSize:".58rem",color:"#f97316",opacity:.7}}>Stats →</span></div>)}
               </div>
@@ -3861,7 +3781,7 @@ return (
 
             {/* Verset du jour condensé */}
             {versetDuJour&&!versetDuJourDismissed&&(
-              <div style={{background:`linear-gradient(135deg,${t.acc}12,${t.acc}06)`,borderRadius:12,padding:"14px 16px",border:`1px solid ${t.acc}30`}}>
+              <div style={{background:"linear-gradient(135deg,"+t.acc+"12,"+t.acc+"06)",borderRadius:12,padding:"14px 16px",border:"1px solid "+t.acc+"30"}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
                   <span style={{fontSize:".6rem",color:t.acc,textTransform:"uppercase",letterSpacing:2,fontWeight:700}}>Verset du jour</span>
                   <div style={{display:"flex",gap:6}}>
@@ -3897,7 +3817,7 @@ return (
                       <polyline points="9 12 11 14 15 10" stroke={spacedDue.length>0?t.rd:t.gr} strokeWidth="1.6"/>
                     </svg>
                   ),
-                  label:"Réviser",sub:spacedDue.length>0?`${spacedDue.length} verset${spacedDue.length>1?"s":""} dus`:"Tout à jour",action:()=>setPage("pages"),c:spacedDue.length>0?t.rd:t.gr,badge:spacedDue.length
+                  label:"Réviser",sub:spacedDue.length>0?spacedDue.length+" verset"+(spacedDue.length>1?"s":"")+" dus":"Tout à jour",action:()=>setPage("pages"),c:spacedDue.length>0?t.rd:t.gr,badge:spacedDue.length
                 },
                 {
                   icon:(
@@ -3912,16 +3832,16 @@ return (
                   icon:(
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12 2 L12 22" stroke={t.pu} strokeWidth="1.4"/>
-                      <path d="M4 6 Q12 2 20 6 L20 18 Q12 22 4 18 Z" stroke={t.pu} strokeWidth="1.4" fill={`${t.pu}10`}/>
+                      <path d="M4 6 Q12 2 20 6 L20 18 Q12 22 4 18 Z" stroke={t.pu} strokeWidth="1.4" fill={t.pu+"10"}/>
                       <path d="M4 6 L4 18" stroke={t.pu} strokeWidth="1.4"/>
                     </svg>
                   ),
                   label:"Mushaf",sub:"Lire page par page",action:()=>setPage("mushaf"),c:t.pu
                 },
               ].map((a,i)=>(
-                <div key={i} onClick={a.action} style={{background:t.cardBg,border:`1px solid ${t.b1}`,borderRadius:16,padding:"18px 14px",cursor:"pointer",transition:"all .2s",position:"relative",overflow:"hidden",display:"flex",flexDirection:"column",gap:6}} onMouseEnter={e=>{e.currentTarget.style.borderColor=a.c;e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow=`0 6px 20px ${a.c}22`;}} onMouseLeave={e=>{e.currentTarget.style.borderColor=t.b1;e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";}}>
+                <div key={i} onClick={a.action} style={{background:t.cardBg,border:"1px solid "+t.b1,borderRadius:16,padding:"18px 14px",cursor:"pointer",transition:"all .2s",position:"relative",overflow:"hidden",display:"flex",flexDirection:"column",gap:6}} onMouseEnter={e=>{e.currentTarget.style.borderColor=a.c;e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 6px 20px "+a.c+"22";}} onMouseLeave={e=>{e.currentTarget.style.borderColor=t.b1;e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";}}>
                   {a.badge>0&&<div style={{position:"absolute",top:10,right:10,background:t.rd,color:"#fff",borderRadius:99,fontSize:".5rem",fontWeight:800,minWidth:16,height:16,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4px"}}>{a.badge}</div>}
-                  <div style={{width:44,height:44,borderRadius:12,background:`${a.c}10`,display:"flex",alignItems:"center",justifyContent:"center"}}>{a.icon}</div>
+                  <div style={{width:44,height:44,borderRadius:12,background:a.c+"10",display:"flex",alignItems:"center",justifyContent:"center"}}>{a.icon}</div>
                   <div style={{fontSize:".8rem",fontWeight:700,color:t.tx}}>{a.label}</div>
                   <div style={{fontSize:".62rem",color:t.tx3}}>{a.sub}</div>
                 </div>
@@ -3935,7 +3855,7 @@ return (
               return s?(
                 <div className="card" onClick={()=>{doSelect(s);setPage("quran");}} style={{cursor:"pointer"}} onMouseEnter={e=>{e.currentTarget.style.borderColor=t.acc;e.currentTarget.style.transform="translateY(-1px)";}} onMouseLeave={e=>{e.currentTarget.style.borderColor=t.b1;e.currentTarget.style.transform="";}}>
                   <div style={{padding:"12px 14px",display:"flex",alignItems:"center",gap:12}}>
-                    <div style={{width:40,height:40,borderRadius:10,background:`${t.acc}12`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                    <div style={{width:40,height:40,borderRadius:10,background:t.acc+"12",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.acc} strokeWidth="1.6" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
                     </div>
                     <div style={{flex:1,minWidth:0}}>
@@ -3961,7 +3881,7 @@ return (
               ];
               const h=hadiths[new Date().getDate()%hadiths.length];
               return(
-                <div style={{padding:"14px 16px",background:`linear-gradient(135deg,${t.acc}08,${t.acc}04)`,borderRadius:14,border:`1px solid ${t.acc}20`,position:"relative"}}>
+                <div style={{padding:"14px 16px",background:"linear-gradient(135deg,"+t.acc+"08,"+t.acc+"04)",borderRadius:14,border:"1px solid "+t.acc+"20",position:"relative"}}>
                   <button onClick={()=>{setHadithDismissed(true);sv("qhadith_dis_"+today(),true);}} style={{position:"absolute",top:10,right:10,background:"none",border:"none",cursor:"pointer",color:t.tx3,fontSize:".8rem",lineHeight:1,padding:4}}>✕</button>
                   <div style={{fontSize:".54rem",color:t.acc,textTransform:"uppercase",letterSpacing:"2px",fontWeight:700,marginBottom:8}}>Hadith du jour</div>
                   <div style={{fontFamily:"Amiri,serif",fontSize:"1.05rem",direction:"rtl",textAlign:"right",lineHeight:1.8,color:t.tx,marginBottom:8}}>{h.ar}</div>
@@ -3985,14 +3905,14 @@ return (
                       {nextS?"En cours de mémorisation":"Prochaine sourate"}
                     </div>
                     <div style={{display:"flex",alignItems:"center",gap:12}}>
-                      <div style={{width:40,height:40,borderRadius:10,background:`${t.gr}12`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".75rem",fontWeight:800,color:t.gr,border:`1px solid ${t.gr}30`,flexShrink:0}}>{target.n}</div>
+                      <div style={{width:40,height:40,borderRadius:10,background:t.gr+"12",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".75rem",fontWeight:800,color:t.gr,border:"1px solid "+t.gr+"30",flexShrink:0}}>{target.n}</div>
                       <div style={{flex:1,minWidth:0}}>
                         <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
                           <span style={{fontSize:".8rem",fontWeight:700,color:t.tx}}>{target.name}</span>
                           <span style={{fontFamily:"Amiri,serif",fontSize:".85rem",color:t.tx3}}>{target.ar}</span>
                         </div>
                         <div style={{height:5,background:t.b1,borderRadius:99,overflow:"hidden"}}>
-                          <div style={{height:"100%",width:`${pctV}%`,background:`linear-gradient(90deg,${t.gr},${t.acc})`,borderRadius:99,transition:"width .6s"}}/>
+                          <div style={{height:"100%",width:pctV+"%",background:"linear-gradient(90deg,"+t.gr+","+t.acc+")",borderRadius:99,transition:"width .6s"}}/>
                         </div>
                         <div style={{fontSize:".58rem",color:t.tx3,marginTop:3}}>{sMem(target)}{"/"}{target.v} versets · {target.v-sMem(target)} restants</div>
                       </div>
@@ -4010,13 +3930,13 @@ return (
             <div className="lp card">
               <div className="ltabs">
                 {[["list","Sourates"],["juz","Juz"],["pages-nav","Pages"],["vsearch","Versets"],["themes","Thèmes"]].map(([id,l])=>(
-                  <button key={id} className={`lt ${ltab===id?"on":""}`} onClick={()=>setLtab(id)}>{l}</button>
+                  <button key={id} className={"lt "+(ltab===id?"on":"")} onClick={()=>setLtab(id)}>{l}</button>
                 ))}
               </div>
               {ltab==="list"&&(<div className="sbox"><input className="sinp" placeholder="Chercher sourate…" value={search} onChange={e=>setSearch(e.target.value)} onInput={e=>setSearch(e.target.value)} inputMode="search" type="search" autoComplete="off" autoCorrect="off" spellCheck={false}/></div>)}
               {ltab==="pages-nav"&&(
                 <div className="slist">
-                  <div style={{padding:"6px 10px",borderBottom:`1px solid ${t.b1}`,fontSize:".58rem",color:t.tx3,display:"flex",justifyContent:"space-between"}}>
+                  <div style={{padding:"6px 10px",borderBottom:"1px solid "+t.b1,fontSize:".58rem",color:t.tx3,display:"flex",justifyContent:"space-between"}}>
                     <span>604 pages · cliquer pour ouvrir</span>
                     <span style={{color:t.gr}}>{Object.keys(pageRead).filter(k=>pageRead[k]).length} lues</span>
                   </div>
@@ -4028,13 +3948,13 @@ return (
                       const surahEntry=Object.entries(SURAH_PAGE).find(([_,p])=>p===pg);
                       return (
                         <div key={pg}
-                          title={surahEntry?`Sourate ${surahEntry[0]} — page ${pg}`:`Page ${pg}`}
+                          title={surahEntry?"Sourate "+surahEntry[0]+" — page "+pg:"Page "+pg}
                           style={{height:28,borderRadius:5,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:".55rem",fontWeight:700,
-                            border:`1px solid ${isCur?t.acc:surahEntry?`${t.acc}55`:isRead?t.gr:t.b1}`,
-                            background:isRead?`${t.gr}18`:isCur?`${t.acc}20`:surahEntry?`${t.acc}08`:t.s2,
+                            border:`1px solid ${isCur?t.acc:surahEntry?t.acc+"55":isRead?t.gr:t.b1}`,
+                            background:isRead?t.gr+"18":isCur?t.acc+"20":surahEntry?t.acc+"08":t.s2,
                             color:isCur?t.acc:isRead?t.gr:t.tx3,transition:"all .12s"}}
                           onMouseEnter={e=>{e.currentTarget.style.borderColor=t.acc;e.currentTarget.style.transform="scale(1.1)";}}
-                          onMouseLeave={e=>{e.currentTarget.style.borderColor=isCur?t.acc:surahEntry?`${t.acc}55`:isRead?t.gr:t.b1;e.currentTarget.style.transform="";}}
+                          onMouseLeave={e=>{e.currentTarget.style.borderColor=isCur?t.acc:surahEntry?t.acc+"55":isRead?t.gr:t.b1;e.currentTarget.style.transform="";}}
                           onClick={()=>{setMushafPage(pg);setPage("mushaf");}}>
                           {pg}
                         </div>
@@ -4045,14 +3965,14 @@ return (
               )}
               {ltab==="vsearch"&&(
                 <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
-                  <div className="sbox" style={{borderBottom:`1px solid ${t.b1}`}}>
+                  <div className="sbox" style={{borderBottom:"1px solid "+t.b1}}>
                     <input className="sinp" placeholder="Chercher en arabe ou français…" value={verseSearch} onChange={e=>{setVerseSearch(e.target.value);searchVerses(e.target.value);}} autoFocus/>
                   </div>
                   <div className="slist">
                     {verseSearchLoading&&<div style={{textAlign:"center",padding:20,color:t.tx3,fontSize:".75rem"}}>Recherche…</div>}
                     {!verseSearchLoading&&verseSearch&&verseSearchResults.length===0&&(<div style={{textAlign:"center",padding:20,color:t.tx3,fontSize:".75rem"}}>Aucun résultat dans les sourates téléchargées</div>)}
                     {verseSearchResults.map((r,i)=>(
-                      <div key={i} style={{padding:"10px 12px",borderBottom:`1px solid ${t.b1}`,cursor:"pointer",transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=t.s2} onMouseLeave={e=>e.currentTarget.style.background=""} onClick={()=>{const s=SURAHS.find(x=>x.n===r.sn);if(s)doSelect(s);addToHistory(r.sn,r.vn);}}>
+                      <div key={i} style={{padding:"10px 12px",borderBottom:"1px solid "+t.b1,cursor:"pointer",transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=t.s2} onMouseLeave={e=>e.currentTarget.style.background=""} onClick={()=>{const s=SURAHS.find(x=>x.n===r.sn);if(s)doSelect(s);addToHistory(r.sn,r.vn);}}>
                         <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span style={{fontSize:".68rem",fontWeight:600,color:t.acc}}>{r.surah}</span><span style={{fontSize:".6rem",color:t.tx3}}>v.{r.vn}</span></div>
                         <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1rem",direction:"rtl",textAlign:"right",color:t.tx,lineHeight:1.8,marginBottom:4}}>{r.ar}</div>
                         {r.fr&&<div style={{fontSize:".65rem",color:t.tx2,fontStyle:"italic",overflow:"hidden",textOverflow:"ellipsis",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{r.fr}</div>}
@@ -4065,7 +3985,7 @@ return (
               {ltab==="themes"&&(
                 <div className="slist">
                   {QURAN_THEMES.map(th=>(
-                    <div key={th.id} style={{padding:"10px 12px",borderBottom:`1px solid ${t.b1}`,cursor:"pointer",background:selTheme===th.id?t.s3:"transparent",transition:"background .15s"}} onClick={()=>setSelTheme(selTheme===th.id?null:th.id)}>
+                    <div key={th.id} style={{padding:"10px 12px",borderBottom:"1px solid "+t.b1,cursor:"pointer",background:selTheme===th.id?t.s3:"transparent",transition:"background .15s"}} onClick={()=>setSelTheme(selTheme===th.id?null:th.id)}>
                       <div style={{display:"flex",alignItems:"center",gap:10}}>
                         <span style={{fontSize:"1.4rem",width:28,textAlign:"center",flexShrink:0}}>{th.icon}</span>
                         <div style={{flex:1,minWidth:0}}><div style={{fontSize:".76rem",fontWeight:700,color:th.color,whiteSpace:"nowrap"}}>{th.label}</div><div style={{fontSize:".58rem",color:t.tx3,marginTop:1}}>{th.desc}</div></div>
@@ -4074,7 +3994,7 @@ return (
                       {selTheme===th.id&&(
                         <div style={{marginTop:8,display:"flex",flexDirection:"column",gap:4}}>
                           {th.verses.map((ref,i)=>{const s=SURAHS.find(x=>x.n===ref.s);return(
-                            <div key={i} style={{padding:"6px 10px",background:t.s2,borderRadius:8,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",transition:"transform .15s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateX(3px)"} onMouseLeave={e=>e.currentTarget.style.transform=""} onClick={e=>{e.stopPropagation();const su=SURAHS.find(x=>x.n===ref.s);if(su){doSelect(su);setTimeout(()=>{const el=document.getElementById(`v-${ref.s}-${ref.v}`);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},600);}}}>
+                            <div key={i} style={{padding:"6px 10px",background:t.s2,borderRadius:8,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",transition:"transform .15s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateX(3px)"} onMouseLeave={e=>e.currentTarget.style.transform=""} onClick={e=>{e.stopPropagation();const su=SURAHS.find(x=>x.n===ref.s);if(su){doSelect(su);setTimeout(()=>{const el=document.getElementById("v-"+ref.s+"-"+ref.v);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},600);}}}>
                               <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:".62rem",color:th.color,fontWeight:600}}>{s?.name}</span><span style={{fontSize:".6rem",color:t.tx2,fontFamily:"Amiri,serif"}}>{s?.ar}</span></div>
                               <span style={{fontSize:".6rem",color:t.tx3,background:t.s3,padding:"2px 6px",borderRadius:4}}>v.{ref.v}</span>
                             </div>
@@ -4094,8 +4014,8 @@ return (
                     const likeAction=sw.x<-130;
                     return (
                       <div key={s.n}
-                        className={`srow ${selS?.n===s.n?"sel":""} ${p===100?"done":""}`}
-                        style={{transform:`translateX(${Math.min(0,sw.x)}px)`,transition:sw.swiping?"none":"transform .25s ease"}}
+                        className={"srow"+(selS?.n===s.n?" sel":"")+(p===100?" done":"")}
+                        style={{transform:"translateX("+Math.min(0,sw.x)+"px)",transition:sw.swiping?"none":"transform .25s ease"}}
                         onClick={()=>{ if(Math.abs(sw.x||0)<8) doSelect(s); }}
                         onTouchStart={e=>{
                           swipeTouchStart.current[s.n]=e.touches[0].clientX;
@@ -4108,26 +4028,26 @@ return (
                         onTouchEnd={()=>handleSwipeEnd(s.n,s)}
                         onMouseDown={e=>{
                           if(e.button!==0)return;
-                          swipeTouchStart.current[`m_${s.n}`]=e.clientX;
-                          swipeTouchStart.current[`md_${s.n}`]=true;
+                          swipeTouchStart.current["m_"+s.n]=e.clientX;
+                          swipeTouchStart.current["md_"+s.n]=true;
                         }}
                         onMouseMove={e=>{
-                          if(!swipeTouchStart.current[`md_${s.n}`])return;
-                          const dx=e.clientX-(swipeTouchStart.current[`m_${s.n}`]||0);
+                          if(!swipeTouchStart.current["md_"+s.n])return;
+                          const dx=e.clientX-(swipeTouchStart.current["m_"+s.n]||0);
                           if(dx<-8) setSwipeState(prev=>({...prev,[s.n]:{...prev[s.n],x:Math.max(-160,dx),swiping:true}}));
                         }}
                         onMouseUp={()=>{
-                          swipeTouchStart.current[`md_${s.n}`]=false;
+                          swipeTouchStart.current["md_"+s.n]=false;
                           handleSwipeEnd(s.n,s);
                         }}
                         onMouseLeave={()=>{
-                          if(swipeTouchStart.current[`md_${s.n}`]){
-                            swipeTouchStart.current[`md_${s.n}`]=false;
+                          if(swipeTouchStart.current["md_"+s.n]){
+                            swipeTouchStart.current["md_"+s.n]=false;
                             handleSwipeEnd(s.n,s);
                           }
                         }}>
                         {revealed&&(
-                          <div className="srow-reveal" style={{right:0,left:`calc(100% + ${Math.min(0,sw.x)}px)`}}>
+                          <div className="srow-reveal" style={{right:0,left:"calc(100% + "+Math.min(0,sw.x)+"px)"}}>
                             {likeAction
                               ?(<div className="srow-reveal-btn" style={{background:"#e91e63",color:"#fff",width:70}}>
                                   <span style={{fontSize:"1rem"}}>♥</span>
@@ -4142,21 +4062,21 @@ return (
                         )}
                         {/* Hint glissière visible au hover desktop */}
                         <div className="srow-hint">← glisser</div>
-                        <div className={`snum ${p===100?"done":""}`} onClick={e=>{e.stopPropagation();toggleAll(s);}}>
+                        <div className={"snum "+(p===100?"done":"")} onClick={e=>{e.stopPropagation();toggleAll(s);}}>
                           {p===100?<Icons.Check size={10} color={t.gr}/>:s.n}
                         </div>
                         <div style={{flex:1}}>
                           <div className="sname" style={{display:"flex",alignItems:"center",gap:4}}>
                             {s.name}
                             {emb&&<span style={{fontSize:".45rem",color:t.gr}}>⬤</span>}
-                            {revFlags[String(s.n)]==="active"&&<span style={{fontSize:".5rem",background:`${t.acc}20`,color:t.acc,padding:"1px 4px",borderRadius:3}}>révision</span>}
-                            {revFlags[String(s.n)]==="mastered"&&<span style={{fontSize:".5rem",background:`${t.gr}20`,color:t.gr,padding:"1px 4px",borderRadius:3}}>✓</span>}
+                            {revFlags[String(s.n)]==="active"&&<span style={{fontSize:".5rem",background:t.acc+"20",color:t.acc,padding:"1px 4px",borderRadius:3}}>révision</span>}
+                            {revFlags[String(s.n)]==="mastered"&&<span style={{fontSize:".5rem",background:t.gr+"20",color:t.gr,padding:"1px 4px",borderRadius:3}}>✓</span>}
                           </div>
                           <div className="smeta">Juz {s.juz} · {s.v}v · {s.type}</div>
                         </div>
                         <div style={{textAlign:"right",flexShrink:0}}>
                           <div className="sar">{s.ar}</div>
-                          <div className="mbar"><div className="mfill" style={{width:`${p}%`}}/></div>
+                          <div className="mbar"><div className="mfill" style={{width:p+"%"}}/></div>
                           <div style={{fontSize:".52rem",color:t.tx3,marginTop:2}}>{sMem(s)}{"/"}{s.v}</div>
                         </div>
                       </div>
@@ -4168,17 +4088,17 @@ return (
                 <>
                   <div className="jg">
                     {juzList.map(j=>{const p=juzPct(j);return(
-                      <div key={j} className={`jc ${selJuz===j?"sel":""}`} onClick={()=>{setSelJuz(j===selJuz?null:j);const firstS=SURAHS.find(s=>s.juz===j);if(firstS&&j!==selJuz)doSelect(firstS);}}>
+                      <div key={j} className={"jc "+(selJuz===j?"sel":"")} onClick={()=>{setSelJuz(j===selJuz?null:j);const firstS=SURAHS.find(s=>s.juz===j);if(firstS&&j!==selJuz)doSelect(firstS);}}>
                         <div className="jl">Juz</div><div className="jn">{j}</div>
-                        <div className="jb"><div className="jf" style={{width:`${p}%`}}/></div>
+                        <div className="jb"><div className="jf" style={{width:p+"%"}}/></div>
                         <div style={{fontSize:".56rem",color:p===100?t.gr:p>0?t.acc:t.tx3,marginTop:2}}>{p}%</div>
                       </div>
                     );})}
                   </div>
-                  {selJuz&&(<div className="slist" style={{borderTop:`1px solid ${t.b1}`}}>
+                  {selJuz&&(<div className="slist" style={{borderTop:"1px solid "+t.b1}}>
                     {SURAHS.filter(s=>s.juz===selJuz).map(s=>(
-                      <div key={s.n} className={`srow ${selS?.n===s.n?"sel":""}`} onClick={()=>doSelect(s)}>
-                        <div className={`snum ${sPct(s)===100?"done":""}`} onClick={e=>{e.stopPropagation();toggleAll(s);}}>{sPct(s)===100?<Icons.Check size={10} color={t.gr}/>:s.n}</div>
+                      <div key={s.n} className={"srow "+(selS?.n===s.n?"sel":"")} onClick={()=>doSelect(s)}>
+                        <div className={"snum "+(sPct(s)===100?"done":"")} onClick={e=>{e.stopPropagation();toggleAll(s);}}>{sPct(s)===100?<Icons.Check size={10} color={t.gr}/>:s.n}</div>
                         <div style={{flex:1}}><div className="sname">{s.name}</div><div className="smeta">{s.v}v{!!Q[s.n]&&<span style={{color:t.gr,marginLeft:4}}>⬤</span>}</div></div>
                         <div className="sar">{s.ar}</div>
                       </div>
@@ -4215,45 +4135,45 @@ return (
                         {sMem(selS)>=2&&(<button className="tbtn" style={{borderColor:t.pu,color:t.pu}} onClick={()=>startTest(selS,verses)}>Test</button>)}
                       </div>
                     </div>
-                    <div className="vbar"><div className="vfill" style={{width:`${sPct(selS)}%`}}/></div>
+                    <div className="vbar"><div className="vfill" style={{width:sPct(selS)+"%"}}/></div>
                   </div>
 
                   <div className="vtoolbar">
-                    <button className={`tbtn ${showTj?"on":""}`} onClick={()=>setShowTj(v=>!v)}>Tajwid</button>
-                    <button className={`tbtn ${showTr?"on":""}`} onClick={()=>setShowTr(v=>!v)}>Traduction</button>
-                    <button className={`tbtn ${showTf?"on":""}`} onClick={()=>setShowTf(v=>!v)}>Tafsir</button>
+                    <button className={"tbtn "+(showTj?"on":"")} onClick={()=>setShowTj(v=>!v)}>Tajwid</button>
+                    <button className={"tbtn "+(showTr?"on":"")} onClick={()=>setShowTr(v=>!v)}>Traduction</button>
+                    <button className={"tbtn "+(showTf?"on":"")} onClick={()=>setShowTf(v=>!v)}>Tafsir</button>
 
-                    <button className={`tbtn ${reviewMode?"on":""}`} style={reviewMode?{background:t.rd,borderColor:t.rd,color:"#fff"}:{}} onClick={()=>{setReviewMode(v=>!v);setRevealedVerses({});}}>{reviewMode?"Quitter révision":"Révision"}</button>
-                    <button className={`tbtn ${karaokeMode?"on":""}`} style={karaokeMode?{background:"#e91e63",borderColor:"#e91e63",color:"#fff"}:{borderColor:t.b2}} onClick={()=>{setKaraokeMode(v=>!v);setActiveWordIdx(-1);}}>Tilawa</button>
-                    <button className={`tbtn ${hifzMode?"on":""}`} style={hifzMode?{background:t.pu,borderColor:t.pu,color:"#fff"}:{}} onClick={()=>{setHifzMode(v=>!v);setHifzLevel({});setRevealedVerses({});}}>Hifz</button>
+                    <button className={"tbtn "+(reviewMode?"on":"")} style={reviewMode?{background:t.rd,borderColor:t.rd,color:"#fff"}:{}} onClick={()=>{setReviewMode(v=>!v);setRevealedVerses({});}}>{reviewMode?"Quitter révision":"Révision"}</button>
+                    <button className={"tbtn "+(karaokeMode?"on":"")} style={karaokeMode?{background:"#e91e63",borderColor:"#e91e63",color:"#fff"}:{borderColor:t.b2}} onClick={()=>{setKaraokeMode(v=>!v);setActiveWordIdx(-1);}}>Tilawa</button>
+                    <button className={"tbtn "+(hifzMode?"on":"")} style={hifzMode?{background:t.pu,borderColor:t.pu,color:"#fff"}:{}} onClick={()=>{setHifzMode(v=>!v);setHifzLevel({});setRevealedVerses({});}}>Hifz</button>
                     <button className="tbtn" onClick={()=>setImmersive(true)}>Immersif</button>
-                    <button className={`tbtn ${focusMode?"on":""}`} style={focusMode?{background:"#1a1a1a",borderColor:"#444",color:"#fff"}:{}} onClick={()=>{setFocusMode(v=>!v);setFocusIdx(0);}}>Concentration</button>
+                    <button className={"tbtn "+(focusMode?"on":"")} style={focusMode?{background:"#1a1a1a",borderColor:"#444",color:"#fff"}:{}} onClick={()=>{setFocusMode(v=>!v);setFocusIdx(0);}}>Concentration</button>
                     <div style={{display:"flex",alignItems:"center",gap:4,marginLeft:"auto"}}>
                       <button className="tbtn" onClick={()=>setArabicSize(s=>Math.max(1,s-0.15))}>A-</button>
                       <button className="tbtn" onClick={()=>setArabicSize(s=>Math.min(3,s+0.15))}>A+</button>
                     </div>
                   </div>
 
-                  {SURAH_INFO[selS.n]&&(<div style={{padding:"10px 14px",background:t.s3,borderBottom:`1px solid ${t.b1}`,fontSize:".7rem",color:t.tx2,lineHeight:1.6}}><div style={{fontWeight:700,color:t.acc,marginBottom:3,fontSize:".65rem",textTransform:"uppercase",letterSpacing:"1px"}}>Vertus & occasions</div><div style={{marginBottom:4}}>{SURAH_INFO[selS.n].virtue}</div><div style={{color:t.gr,fontWeight:600}}>Quand réciter : {SURAH_INFO[selS.n].occasion}</div></div>)}
+                  {SURAH_INFO[selS.n]&&(<div style={{padding:"10px 14px",background:t.s3,borderBottom:"1px solid "+t.b1,fontSize:".7rem",color:t.tx2,lineHeight:1.6}}><div style={{fontWeight:700,color:t.acc,marginBottom:3,fontSize:".65rem",textTransform:"uppercase",letterSpacing:"1px"}}>Vertus & occasions</div><div style={{marginBottom:4}}>{SURAH_INFO[selS.n].virtue}</div><div style={{color:t.gr,fontWeight:600}}>Quand réciter : {SURAH_INFO[selS.n].occasion}</div></div>)}
 
-                  {reviewMode&&(<div style={{padding:"8px 14px",background:`${t.rd}22`,borderBottom:`1px solid ${t.rd}44`,display:"flex",alignItems:"center",gap:8}}><div style={{fontSize:".72rem",color:t.rd,fontWeight:600,flex:1}}>Mode révision — appuie pour révéler</div><button className="tbtn" style={{borderColor:t.rd,color:t.rd}} onClick={()=>setRevealedVerses({})}>Tout masquer</button></div>)}
-                  {hifzMode&&(<div style={{padding:"8px 14px",background:`${t.pu}18`,borderBottom:`1px solid ${t.pu}44`,display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                  {reviewMode&&(<div style={{padding:"8px 14px",background:t.rd+"22",borderBottom:"1px solid "+t.rd+"44",display:"flex",alignItems:"center",gap:8}}><div style={{fontSize:".72rem",color:t.rd,fontWeight:600,flex:1}}>Mode révision — appuie pour révéler</div><button className="tbtn" style={{borderColor:t.rd,color:t.rd}} onClick={()=>setRevealedVerses({})}>Tout masquer</button></div>)}
+                  {hifzMode&&(<div style={{padding:"8px 14px",background:t.pu+"18",borderBottom:"1px solid "+t.pu+"44",display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
                     <div style={{fontSize:".72rem",color:t.pu,fontWeight:600,flex:1}}>Mode Hifz — les derniers mots sont masqués. Clique pour révéler.</div>
                     <div style={{display:"flex",gap:4,alignItems:"center"}}>
                       <span style={{fontSize:".6rem",color:t.tx3}}>Difficulté :</span>
                       {[1,2,3,4,5].map(l=>(
-                        <button key={l} className={`tbtn`} style={{minWidth:24,padding:"2px 6px",borderColor:l<=Object.values(hifzLevel).filter(v=>v===l).length?t.pu:t.b2}} onClick={()=>setHifzLevel(()=>{const nv={};verses.forEach(v=>{nv[v.n]=l;});return nv;})}>{l}</button>
+                        <button key={l} className={"tbtn"} style={{minWidth:24,padding:"2px 6px",borderColor:l<=Object.values(hifzLevel).filter(v=>v===l).length?t.pu:t.b2}} onClick={()=>setHifzLevel(()=>{const nv={};verses.forEach(v=>{nv[v.n]=l;});return nv;})}>{l}</button>
                       ))}
                       <button className="tbtn" onClick={()=>setHifzLevel({})}>Reset</button>
                     </div>
                   </div>)}
 
                   {/* Audio */}
-                  <div style={{padding:"10px 14px",background:t.s1,borderBottom:`1px solid ${t.b1}`,display:"flex",flexDirection:"column",gap:8}}>
+                  <div style={{padding:"10px 14px",background:t.s1,borderBottom:"1px solid "+t.b1,display:"flex",flexDirection:"column",gap:8}}>
                     <div style={{display:"flex",alignItems:"center",gap:8}}>
                       <span style={{fontSize:"1rem",flexShrink:0}}>🎙️</span>
                       <div style={{flex:1,position:"relative"}}>
-                        <select value={rec.id} onChange={e=>setRec(RECITERS.find(r=>r.id===e.target.value)||RECITERS[0])} style={{width:"100%",appearance:"none",WebkitAppearance:"none",background:t.s2,border:`1.5px solid ${t.b1}`,borderRadius:10,padding:"8px 30px 8px 12px",fontSize:".72rem",color:t.tx,fontWeight:500,cursor:"pointer",outline:"none"}}>
+                        <select value={rec.id} onChange={e=>setRec(RECITERS.find(r=>r.id===e.target.value)||RECITERS[0])} style={{width:"100%",appearance:"none",WebkitAppearance:"none",background:t.s2,border:"1.5px solid "+t.b1,borderRadius:10,padding:"8px 30px 8px 12px",fontSize:".72rem",color:t.tx,fontWeight:500,cursor:"pointer",outline:"none"}}>
                           {RECITERS.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}
                         </select>
                         <span style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",color:t.tx3,fontSize:".75rem",pointerEvents:"none"}}>▾</span>
@@ -4265,19 +4185,19 @@ return (
                         setContinuousMode(false);
                         setContinuousIdx(0);
                         setRecitModal(true);
-                      }} style={{flexShrink:0,display:"flex",alignItems:"center",gap:5,background:`${t.acc}18`,border:`1px solid ${t.acc}`,borderRadius:10,padding:"7px 14px",color:t.acc,fontSize:".7rem",fontWeight:700,cursor:"pointer",transition:"all .2s"}} onMouseEnter={e=>{e.currentTarget.style.background=`${t.acc}30`;}} onMouseLeave={e=>{e.currentTarget.style.background=`${t.acc}18`;}}>
+                      }} style={{flexShrink:0,display:"flex",alignItems:"center",gap:5,background:t.acc+"18",border:"1px solid "+t.acc,borderRadius:10,padding:"7px 14px",color:t.acc,fontSize:".7rem",fontWeight:700,cursor:"pointer",transition:"all .2s"}} onMouseEnter={e=>{e.currentTarget.style.background=t.acc+"30";}} onMouseLeave={e=>{e.currentTarget.style.background=t.acc+"18";}}>
                         🎤 Récitation
                       </button>
-                    <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,1);}} style={{flexShrink:0,display:"flex",alignItems:"center",gap:5,background:playlistActive&&playlist[0]?.sn===selS.n?"#e53935":t.acc,border:"none",borderRadius:10,padding:"8px 14px",color:"#fff",fontSize:".72rem",fontWeight:700,cursor:"pointer",boxShadow:`0 2px 8px ${t.acc}44`,transition:"transform .15s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-1px)"} onMouseLeave={e=>e.currentTarget.style.transform=""}>{playlistActive&&playlist[0]?.sn===selS.n?"■ Stop":"▶ Sourate"}</button>
+                    <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,1);}} style={{flexShrink:0,display:"flex",alignItems:"center",gap:5,background:playlistActive&&playlist[0]?.sn===selS.n?"#e53935":t.acc,border:"none",borderRadius:10,padding:"8px 14px",color:"#fff",fontSize:".72rem",fontWeight:700,cursor:"pointer",boxShadow:"0 2px 8px "+t.acc+"44",transition:"transform .15s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-1px)"} onMouseLeave={e=>e.currentTarget.style.transform=""}>{playlistActive&&playlist[0]?.sn===selS.n?"■ Stop":"▶ Sourate"}</button>
                     </div>
                     <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
                       <span style={{fontSize:".6rem",color:t.tx3}}>Répét.</span>
-                      {[1,3,5,10].map(n=>(<button key={n} className={`tbtn ${loopCount===n&&!loopInfinite?"on":""}`} onClick={()=>{setLoopCount(n);setLoopInfinite(false);}} style={{minWidth:26,padding:"3px 6px"}}>{n}×</button>))}
-                      <button className={`tbtn ${loopInfinite?"on":""}`} onClick={()=>setLoopInfinite(p=>!p)} style={{minWidth:26,padding:"3px 8px",fontWeight:700,fontSize:".8rem",borderColor:loopInfinite?t.acc:t.b2,color:loopInfinite?t.acc:t.tx3}}>∞</button>
+                      {[1,3,5,10].map(n=>(<button key={n} className={"tbtn "+(loopCount===n&&!loopInfinite?"on":"")} onClick={()=>{setLoopCount(n);setLoopInfinite(false);}} style={{minWidth:26,padding:"3px 6px"}}>{n}×</button>))}
+                      <button className={"tbtn "+(loopInfinite?"on":"")} onClick={()=>setLoopInfinite(p=>!p)} style={{minWidth:26,padding:"3px 8px",fontWeight:700,fontSize:".8rem",borderColor:loopInfinite?t.acc:t.b2,color:loopInfinite?t.acc:t.tx3}}>∞</button>
                       {!loopInfinite&&loopCurrent>1&&<span style={{fontSize:".6rem",color:t.acc,fontWeight:700}}>{loopCurrent}{"/"}{loopCount}</span>}
                       {loopInfinite&&playing!==null&&<span style={{fontSize:".6rem",color:t.acc,fontWeight:700,animation:"pulse 1s infinite"}}>∞ en boucle</span>}
                       <span style={{fontSize:".6rem",color:t.tx3,marginLeft:4}}>Vitesse</span>
-                      {[0.75,1,1.25,1.5].map(s=>(<button key={s} className={`tbtn ${playbackRate===s?"on":""}`} onClick={()=>setPlaybackRate(s)} style={{minWidth:32,padding:"3px 5px"}}>{s}×</button>))}
+                      {[0.75,1,1.25,1.5].map(s=>(<button key={s} className={"tbtn "+(playbackRate===s?"on":"")} onClick={()=>setPlaybackRate(s)} style={{minWidth:32,padding:"3px 5px"}}>{s}×</button>))}
                       <button className="tbtn" style={{marginLeft:"auto",borderColor:bookmark?.sn===selS.n?t.acc:t.b2,color:bookmark?.sn===selS.n?t.acc:t.tx3,fontWeight:bookmark?.sn===selS.n?700:400}} onClick={()=>setBookmark(bookmark?.sn===selS.n?null:{sn:selS.n,name:selS.name})}>{bookmark?.sn===selS.n?"● Signet":"○ Signet"}</button>
                     </div>
                   </div>
@@ -4388,7 +4308,7 @@ return (
                 {l:"Maîtrisées",v:Object.values(revFlags).filter(f=>f==="mastered").length,c:t.gr,icon:"✦"},
                 {l:"En pause",v:Object.values(revFlags).filter(f=>f==="paused").length,c:t.tx3,icon:"◆"},
               ].map((k,i)=>(
-                <div key={i} style={{background:t.cardBg,border:`1px solid ${t.b1}`,borderRadius:12,padding:"10px 6px",textAlign:"center",minWidth:0,overflow:"hidden"}}>
+                <div key={i} style={{background:t.cardBg,border:"1px solid "+t.b1,borderRadius:12,padding:"10px 6px",textAlign:"center",minWidth:0,overflow:"hidden"}}>
                   <div style={{fontSize:"1rem",color:k.c,marginBottom:2}}>{k.icon}</div>
                   <div style={{fontSize:"1.2rem",fontWeight:800,color:k.c}}>{k.v}</div>
                   <div style={{fontSize:".5rem",color:t.tx3,textTransform:"uppercase",letterSpacing:".5px",marginTop:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{k.l}</div>
@@ -4405,18 +4325,18 @@ return (
                 </div>
                 {SURAHS.filter(s=>revFlags[String(s.n)]==="active").map(s=>{
                   const memPct=sPct(s);
-                  const spacedKeys=spacedDue.filter(k=>k.startsWith(`${s.n}_`));
+                  const spacedKeys=spacedDue.filter(k=>k.startsWith(s.n+"_"));
                   const lastSession=revSessions.filter(x=>x.sn===s.n).slice(-1)[0];
                   return (
-                    <div key={s.n} style={{padding:"13px 16px",borderBottom:`1px solid ${t.b1}`,transition:"background .15s,transform .15s"}} onMouseEnter={e=>{e.currentTarget.style.background=t.s2;e.currentTarget.style.transform="translateX(3px)";}} onMouseLeave={e=>{e.currentTarget.style.background="";e.currentTarget.style.transform="";}}>
+                    <div key={s.n} style={{padding:"13px 16px",borderBottom:"1px solid "+t.b1,transition:"background .15s,transform .15s"}} onMouseEnter={e=>{e.currentTarget.style.background=t.s2;e.currentTarget.style.transform="translateX(3px)";}} onMouseLeave={e=>{e.currentTarget.style.background="";e.currentTarget.style.transform="";}}>
                       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
-                        <div style={{width:34,height:34,borderRadius:"50%",border:`2px solid ${t.acc}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Amiri,serif",fontSize:".75rem",color:t.acc,flexShrink:0}}>{s.n}</div>
+                        <div style={{width:34,height:34,borderRadius:"50%",border:"2px solid "+t.acc,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Amiri,serif",fontSize:".75rem",color:t.acc,flexShrink:0}}>{s.n}</div>
                         <div style={{flex:1,minWidth:0}}>
                           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                             <div style={{fontWeight:700,color:t.tx,fontSize:".82rem"}}>{s.name}</div>
                             <div style={{display:"flex",gap:4}}>
-                              {spacedKeys.length>0&&(<span style={{fontSize:".6rem",background:`${t.rd}18`,color:t.rd,padding:"1px 7px",borderRadius:99,fontWeight:700}}>{spacedKeys.length} dus</span>)}
-                              <span style={{fontSize:".6rem",background:`${t.acc}15`,color:t.acc,padding:"1px 7px",borderRadius:99}}>{memPct}%</span>
+                              {spacedKeys.length>0&&(<span style={{fontSize:".6rem",background:t.rd+"18",color:t.rd,padding:"1px 7px",borderRadius:99,fontWeight:700}}>{spacedKeys.length} dus</span>)}
+                              <span style={{fontSize:".6rem",background:t.acc+"15",color:t.acc,padding:"1px 7px",borderRadius:99}}>{memPct}%</span>
                             </div>
                           </div>
                           <div style={{fontSize:".6rem",color:t.tx3,marginTop:2,fontFamily:"Amiri,serif"}}>{s.ar} · Juz {s.juz} · {s.v}v</div>
@@ -4424,7 +4344,7 @@ return (
                       </div>
                       {/* Progress bar */}
                       <div style={{height:5,background:t.b1,borderRadius:99,overflow:"hidden",marginBottom:8}}>
-                        <div style={{height:"100%",width:`${memPct}%`,background:memPct===100?t.gr:`linear-gradient(90deg,${t.acc},${t.acc2})`,borderRadius:99,boxShadow:memPct===100?`0 0 6px ${t.gr}66`:`0 0 4px ${t.acc}44`}}/>
+                        <div style={{height:"100%",width:memPct+"%",background:memPct===100?t.gr:"linear-gradient(90deg,"+t.acc+","+t.acc2+")",borderRadius:99,boxShadow:memPct===100?"0 0 6px "+t.gr+"66":"0 0 4px "+t.acc+"44"}}/>
                       </div>
                       {/* Actions */}
                       <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
@@ -4449,9 +4369,9 @@ return (
               </div>
 
               <div>
-                    <div style={{display:"flex",gap:4,padding:"8px 12px",borderBottom:`1px solid ${t.b1}`,overflowX:"auto"}}>
+                    <div style={{display:"flex",gap:4,padding:"8px 12px",borderBottom:"1px solid "+t.b1,overflowX:"auto"}}>
                       {[["all","Toutes",SURAHS.length],["memorized","Mémorisées",SURAHS.filter(s=>sPct(s)===100).length],["active","En révision",Object.values(revFlags).filter(f=>f==="active").length],["none","Sans progrès",SURAHS.filter(s=>sMem(s)===0).length]].map(([f,l,cnt])=>(
-                        <button key={f} onClick={()=>setRevFilter(f)} style={{padding:"3px 10px",borderRadius:99,border:`1px solid ${revFilter===f?t.acc:t.b2}`,background:revFilter===f?`${t.acc}18`:"transparent",color:revFilter===f?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer",whiteSpace:"nowrap",fontWeight:revFilter===f?700:400,transition:"all .15s"}}>{l} <span style={{opacity:.7}}>({cnt})</span></button>
+                        <button key={f} onClick={()=>setRevFilter(f)} style={{padding:"3px 10px",borderRadius:99,border:"1px solid "+(revFilter===f?t.acc:t.b2),background:revFilter===f?t.acc+"18":"transparent",color:revFilter===f?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer",whiteSpace:"nowrap",fontWeight:revFilter===f?700:400,transition:"all .15s"}}>{l} <span style={{opacity:.7}}>({cnt})</span></button>
                       ))}
                     </div>
                     <div style={{maxHeight:400,overflowY:"auto"}}>
@@ -4461,20 +4381,20 @@ return (
                         const flagColors={active:t.acc,mastered:t.gr,paused:t.tx3};
                         const flagLabels={active:"En révision",mastered:"Maîtrisée",paused:"En pause"};
                         return (
-                          <div key={s.n} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 14px",borderBottom:`1px solid ${t.b1}`,transition:"background .12s"}} onMouseEnter={e=>e.currentTarget.style.background=t.s2} onMouseLeave={e=>e.currentTarget.style.background=""}>
-                            <div style={{width:26,height:26,borderRadius:"50%",border:`1.5px solid ${flag?flagColors[flag]:t.b2}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".58rem",color:flag?flagColors[flag]:t.tx3,flexShrink:0}}>{s.n}</div>
+                          <div key={s.n} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 14px",borderBottom:"1px solid "+t.b1,transition:"background .12s"}} onMouseEnter={e=>e.currentTarget.style.background=t.s2} onMouseLeave={e=>e.currentTarget.style.background=""}>
+                            <div style={{width:26,height:26,borderRadius:"50%",border:"1.5px solid "+(flag?flagColors[flag]:t.b2),display:"flex",alignItems:"center",justifyContent:"center",fontSize:".58rem",color:flag?flagColors[flag]:t.tx3,flexShrink:0}}>{s.n}</div>
                             <div style={{flex:1,minWidth:0}}>
                               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                                 <span style={{fontSize:".75rem",fontWeight:600,color:t.tx}}>{s.name}</span>
                                 <span style={{fontFamily:"Amiri,serif",fontSize:".85rem",color:t.acc,flexShrink:0}}>{s.ar}</span>
                               </div>
                               <div style={{height:3,background:t.b1,borderRadius:99,overflow:"hidden",marginTop:4}}>
-                                <div style={{height:"100%",width:`${pct2}%`,background:pct2===100?t.gr:t.acc,borderRadius:99}}/>
+                                <div style={{height:"100%",width:pct2+"%",background:pct2===100?t.gr:t.acc,borderRadius:99}}/>
                               </div>
                               <div style={{fontSize:".55rem",color:t.tx3,marginTop:2}}>{sMem(s)}{"/"}{s.v}v · Juz {s.juz}</div>
                             </div>
                             <button onClick={()=>setRevFlags(p=>{const n={...p};const cur=n[String(s.n)];if(cur==="active")n[String(s.n)]="mastered";else if(cur==="mastered")n[String(s.n)]="paused";else if(cur==="paused")delete n[String(s.n)];else n[String(s.n)]="active";return n;})}
-                              style={{padding:"4px 10px",borderRadius:8,border:`1px solid ${flag?flagColors[flag]:t.b2}`,background:flag?`${flagColors[flag]}15`:"transparent",color:flag?flagColors[flag]:t.tx3,fontSize:".6rem",cursor:"pointer",flexShrink:0,fontWeight:flag?700:400,transition:"all .15s",whiteSpace:"nowrap"}}>
+                              style={{padding:"4px 10px",borderRadius:8,border:"1px solid "+(flag?flagColors[flag]:t.b2),background:flag?flagColors[flag]+"15":"transparent",color:flag?flagColors[flag]:t.tx3,fontSize:".6rem",cursor:"pointer",flexShrink:0,fontWeight:flag?700:400,transition:"all .15s",whiteSpace:"nowrap"}}>
                               {flag?flagLabels[flag]:"+ Ajouter"}
                             </button>
                           </div>
@@ -4490,10 +4410,10 @@ return (
                 <div className="ch"><span className="ct">Maîtrisées</span><span style={{fontSize:".65rem",color:t.gr,fontWeight:700}}>{Object.entries(revFlags).filter(([,f])=>f==="mastered").length} sourates</span></div>
                 <div style={{display:"flex",flexWrap:"wrap",gap:6,padding:12}}>
                   {SURAHS.filter(s=>revFlags[String(s.n)]==="mastered").map(s=>(
-                    <div key={s.n} style={{padding:"5px 12px",borderRadius:99,background:`${t.gr}15`,border:`1px solid ${t.gr}44`,display:"flex",alignItems:"center",gap:6,cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";}} onMouseLeave={e=>{e.currentTarget.style.transform="";}} onClick={()=>{doSelect(s);setPage("quran");}}>
+                    <div key={s.n} style={{padding:"5px 12px",borderRadius:99,background:t.gr+"15",border:"1px solid "+t.gr+"44",display:"flex",alignItems:"center",gap:6,cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";}} onMouseLeave={e=>{e.currentTarget.style.transform="";}} onClick={()=>{doSelect(s);setPage("quran");}}>
                       <span style={{fontSize:".68rem",fontWeight:700,color:t.gr}}>{s.name}</span>
                       <span style={{fontFamily:"Amiri,serif",fontSize:".78rem",color:t.acc}}>{s.ar}</span>
-                      <button onClick={e=>{e.stopPropagation();setRevFlags(p=>{const n={...p};delete n[String(s.n)];return n;});}} style={{background:"none",border:"none",color:`${t.gr}77`,cursor:"pointer",fontSize:".65rem",padding:"0 0 0 2px",lineHeight:1}}>✕</button>
+                      <button onClick={e=>{e.stopPropagation();setRevFlags(p=>{const n={...p};delete n[String(s.n)];return n;});}} style={{background:"none",border:"none",color:t.gr+"77",cursor:"pointer",fontSize:".65rem",padding:"0 0 0 2px",lineHeight:1}}>✕</button>
                     </div>
                   ))}
                 </div>
@@ -4514,7 +4434,7 @@ return (
                     return (
                       <div key={d} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
                         {gain>0&&<span style={{fontSize:".48rem",color:t.acc,fontWeight:700}}>+{gain}</span>}
-                        <div style={{width:"100%",height:`${Math.max(Math.round(gain/maxG2*50),3)}px`,background:isToday?t.acc:`${t.acc}66`,borderRadius:"3px 3px 0 0",transition:"height .3s"}}/>
+                        <div style={{width:"100%",height:Math.max(Math.round(gain/maxG2*50),3)+"px",background:isToday?t.acc:t.acc+"66",borderRadius:"3px 3px 0 0",transition:"height .3s"}}/>
                         <span style={{fontSize:".48rem",color:isToday?t.acc:t.tx3,fontWeight:isToday?700:400}}>{lbl}</span>
                       </div>
                     );
@@ -4532,13 +4452,13 @@ return (
             {!activeKhatma?(
               <>
                 {/* Hero d'intro */}
-                <div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,borderRadius:16,padding:"24px 20px",border:`1px solid ${t.b1}`,textAlign:"center",position:"relative",overflow:"hidden"}}>
-                  <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse at 50% 0%,${t.acc}12,transparent 60%)`,pointerEvents:"none"}}/>
-                  <div style={{fontFamily:"Amiri,serif",fontSize:"2.5rem",color:t.acc,marginBottom:4,textShadow:`0 0 20px ${t.acc}44`}}>ختمة القرآن</div>
+                <div style={{background:"linear-gradient(135deg,"+t.s2+","+t.s3+")",borderRadius:16,padding:"24px 20px",border:"1px solid "+t.b1,textAlign:"center",position:"relative",overflow:"hidden"}}>
+                  <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 0%,"+t.acc+"12,transparent 60%)",pointerEvents:"none"}}/>
+                  <div style={{fontFamily:"Amiri,serif",fontSize:"2.5rem",color:t.acc,marginBottom:4,textShadow:"0 0 20px "+t.acc+"44"}}>ختمة القرآن</div>
                   <div style={{fontSize:".75rem",color:t.tx2,marginBottom:16,lineHeight:1.7}}>Commence une Khatma pour suivre ta lecture complète du Coran.<br/>Chaque jour compté, chaque page une victoire.</div>
                   <div style={{display:"flex",justifyContent:"center",gap:16,flexWrap:"wrap"}}>
                     {[{v:SURAHS.filter(s=>sMem(s)===s.v).length,l:"Sourates mémorisées",c:t.gr},{v:totalMem,l:"Versets mémorisés",c:t.acc},{v:Object.keys(pageRead).filter(k=>pageRead[k]).length,l:"Pages lues",c:t.bl}].map((k,i)=>(
-                      <div key={i} style={{textAlign:"center",padding:"10px 16px",background:`${k.c}12`,borderRadius:12,border:`1px solid ${k.c}30`}}>
+                      <div key={i} style={{textAlign:"center",padding:"10px 16px",background:k.c+"12",borderRadius:12,border:"1px solid "+k.c+"30"}}>
                         <div style={{fontSize:"1.4rem",fontWeight:800,color:k.c}}>{k.v}</div>
                         <div style={{fontSize:".58rem",color:t.tx3,marginTop:2}}>{k.l}</div>
                       </div>
@@ -4563,15 +4483,15 @@ return (
                         return (
                           <div key={kp.id} onClick={()=>setKPreset(kp)}
                             style={{display:"flex",alignItems:"center",gap:14,padding:"13px 16px",borderRadius:12,
-                              border:`2px solid ${sel?t.acc:t.b1}`,
-                              background:sel?`linear-gradient(135deg,${t.acc}12,${t.acc2}06)`:t.s2,
+                              border:"2px solid "+(sel?t.acc:t.b1),
+                              background:sel?"linear-gradient(135deg,"+t.acc+"12,"+t.acc2+"06)":t.s2,
                               cursor:"pointer",transition:"all .18s",
-                              boxShadow:sel?`0 4px 16px ${t.acc}22`:"none",
+                              boxShadow:sel?"0 4px 16px "+t.acc+"22":"none",
                             }}
                             onMouseEnter={e=>{if(!sel){e.currentTarget.style.borderColor=t.acc+"66";e.currentTarget.style.transform="translateX(3px)";}}}
                             onMouseLeave={e=>{if(!sel){e.currentTarget.style.borderColor=t.b1;e.currentTarget.style.transform="";}}}>
                             {/* Bullet élégant */}
-                            <div style={{width:36,height:36,borderRadius:"50%",border:`1.5px solid ${sel?t.acc:t.b2}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,background:sel?`${t.acc}15`:"transparent",transition:"all .18s"}}>
+                            <div style={{width:36,height:36,borderRadius:"50%",border:"1.5px solid "+(sel?t.acc:t.b2),display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,background:sel?t.acc+"15":"transparent",transition:"all .18s"}}>
                               {sel
                                 ?<svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,10.5 12,3.5" stroke={t.acc} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
                                 :<div style={{width:6,height:6,borderRadius:"50%",background:t.b2}}/>
@@ -4587,13 +4507,13 @@ return (
                       })}
                     </div>
                                         {kPreset?.id==="custom"&&(
-                      <div style={{marginBottom:14,padding:"12px 14px",background:t.s2,borderRadius:10,border:`1px solid ${t.b1}`}}>
+                      <div style={{marginBottom:14,padding:"12px 14px",background:t.s2,borderRadius:10,border:"1px solid "+t.b1}}>
                         <label style={{display:"block",fontSize:".65rem",color:t.tx3,marginBottom:6}}>Nombre de jours</label>
                         <input className="sinp" type="number" min="1" value={kCustomDays} onChange={e=>setKCustomDays(e.target.value)} style={{width:100}}/>
                       </div>
                     )}
                     {kPreset&&(
-                      <button onClick={createKhatma} style={{width:"100%",padding:"13px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:12,color:"#fff",fontSize:".88rem",fontWeight:700,cursor:"pointer",boxShadow:`0 4px 16px ${t.acc}44`,transition:"transform .15s,box-shadow .15s"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow=`0 6px 20px ${t.acc}55`;}} onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow=`0 4px 16px ${t.acc}44`;}}>
+                      <button onClick={createKhatma} style={{width:"100%",padding:"13px",background:"linear-gradient(135deg,"+t.acc+","+t.acc2+")",border:"none",borderRadius:12,color:"#fff",fontSize:".88rem",fontWeight:700,cursor:"pointer",boxShadow:"0 4px 16px "+t.acc+"44",transition:"transform .15s,box-shadow .15s"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow="0 6px 20px "+t.acc+"55";}} onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="0 4px 16px "+t.acc+"44";}}>
                         Commencer la Khatma ✦
                       </button>
                     )}
@@ -4608,12 +4528,12 @@ return (
                       const done=Object.values(k.log).filter(Boolean).length;
                       const p2=Math.round(done/k.totalDays*100);
                       return (
-                        <div key={k.id} style={{padding:"14px 16px",borderBottom:`1px solid ${t.b1}`,cursor:"pointer",transition:"background .15s,transform .15s"}} onMouseEnter={e=>{e.currentTarget.style.background=t.s2;e.currentTarget.style.transform="translateX(4px)";}} onMouseLeave={e=>{e.currentTarget.style.background="";e.currentTarget.style.transform="";}} onClick={()=>setActiveKhatma(k)}>
+                        <div key={k.id} style={{padding:"14px 16px",borderBottom:"1px solid "+t.b1,cursor:"pointer",transition:"background .15s,transform .15s"}} onMouseEnter={e=>{e.currentTarget.style.background=t.s2;e.currentTarget.style.transform="translateX(4px)";}} onMouseLeave={e=>{e.currentTarget.style.background="";e.currentTarget.style.transform="";}} onClick={()=>setActiveKhatma(k)}>
                           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
                             <div><div style={{fontWeight:700,color:t.tx,fontSize:".85rem"}}>{k.name}</div><div style={{fontSize:".62rem",color:t.tx3,marginTop:2}}>Démarré le {new Date(k.startDate).toLocaleDateString("fr-FR",{day:"numeric",month:"long"})}</div></div>
                             <div style={{textAlign:"right"}}><div style={{fontSize:"1.1rem",fontWeight:800,color:p2===100?t.gr:t.acc}}>{p2}%</div><div style={{fontSize:".58rem",color:t.tx3}}>{done}{"/"}{k.totalDays}j</div></div>
                           </div>
-                          <div style={{height:5,background:t.b1,borderRadius:99,overflow:"hidden"}}><div style={{height:"100%",width:`${p2}%`,background:p2===100?t.gr:`linear-gradient(90deg,${t.acc},${t.acc2})`,borderRadius:99,transition:"width .5s"}}/></div>
+                          <div style={{height:5,background:t.b1,borderRadius:99,overflow:"hidden"}}><div style={{height:"100%",width:p2+"%",background:p2===100?t.gr:"linear-gradient(90deg,"+t.acc+","+t.acc2+")",borderRadius:99,transition:"width .5s"}}/></div>
                         </div>
                       );
                     })}
@@ -4624,14 +4544,14 @@ return (
               /* Active Khatma view */
               <div style={{display:"flex",flexDirection:"column",gap:14}}>
                 {/* Header card */}
-                <div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,borderRadius:16,padding:"20px 18px",border:`1px solid ${t.b1}`,position:"relative",overflow:"hidden"}}>
-                  <div style={{position:"absolute",top:0,right:0,width:120,height:120,background:`radial-gradient(circle,${t.acc}10,transparent 70%)`,borderRadius:"0 16px 0 0",pointerEvents:"none"}}/>
+                <div style={{background:"linear-gradient(135deg,"+t.s2+","+t.s3+")",borderRadius:16,padding:"20px 18px",border:"1px solid "+t.b1,position:"relative",overflow:"hidden"}}>
+                  <div style={{position:"absolute",top:0,right:0,width:120,height:120,background:"radial-gradient(circle,"+t.acc+"10,transparent 70%)",borderRadius:"0 16px 0 0",pointerEvents:"none"}}/>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
                     <div>
                       <div style={{fontFamily:"Amiri,serif",fontSize:"1.6rem",color:t.acc,lineHeight:1,marginBottom:4}}>{activeKhatma.name}</div>
                       <div style={{fontSize:".65rem",color:t.tx3}}>Depuis le {new Date(activeKhatma.startDate).toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"})}</div>
                     </div>
-                    <button onClick={()=>setActiveKhatma(null)} style={{background:"transparent",border:`1px solid ${t.rd}44`,color:t.rd,borderRadius:8,padding:"5px 10px",fontSize:".65rem",cursor:"pointer",transition:"all .2s"}} onMouseEnter={e=>{e.currentTarget.style.background=`${t.rd}12`;}} onMouseLeave={e=>{e.currentTarget.style.background="transparent";}}>Terminer</button>
+                    <button onClick={()=>setActiveKhatma(null)} style={{background:"transparent",border:"1px solid "+t.rd+"44",color:t.rd,borderRadius:8,padding:"5px 10px",fontSize:".65rem",cursor:"pointer",transition:"all .2s"}} onMouseEnter={e=>{e.currentTarget.style.background=t.rd+"12";}} onMouseLeave={e=>{e.currentTarget.style.background="transparent";}}>Terminer</button>
                   </div>
                   {/* Big progress */}
                   <div style={{marginBottom:10}}>
@@ -4640,7 +4560,7 @@ return (
                       <span style={{fontSize:".8rem",fontWeight:800,color:t.acc}}>{Math.round(Object.values(activeKhatma.log).filter(Boolean).length/activeKhatma.totalDays*100)}%</span>
                     </div>
                     <div style={{height:14,background:t.b1,borderRadius:99,overflow:"hidden",boxShadow:"inset 0 2px 4px rgba(0,0,0,.1)"}}>
-                      <div style={{height:"100%",width:`${Math.round(Object.values(activeKhatma.log).filter(Boolean).length/activeKhatma.totalDays*100)}%`,background:`linear-gradient(90deg,${t.acc},${t.acc2},${t.acc3})`,borderRadius:99,boxShadow:`0 0 8px ${t.acc}66`,transition:"width .8s ease",position:"relative"}}>
+                      <div style={{height:"100%",width:Math.round(Object.values(activeKhatma.log).filter(Boolean).length/activeKhatma.totalDays*100)+"%",background:"linear-gradient(90deg,"+t.acc+","+t.acc2+","+t.acc3+")",borderRadius:99,boxShadow:"0 0 8px "+t.acc+"66",transition:"width .8s ease",position:"relative"}}>
                         <div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent)",borderRadius:99}}/>
                       </div>
                     </div>
@@ -4660,15 +4580,15 @@ return (
                       const lastPage=activeKhatma.lastPage||Math.min(604,doneCount*pagesPerDay+1);
                       setMushafPage(lastPage);
                       setPage("mushaf");
-                    }} style={{flex:1,padding:"10px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:10,color:"#000",fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>
-                      📖 Lire maintenant {activeKhatma.lastPage?`(p.${activeKhatma.lastPage})`:""}
+                    }} style={{flex:1,padding:"10px",background:"linear-gradient(135deg,"+t.acc+","+t.acc2+")",border:"none",borderRadius:10,color:"#000",fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>
+                      📖 Lire maintenant {activeKhatma.lastPage?"(p."+activeKhatma.lastPage+")":""}
                     </button>
                     <button onClick={()=>{
                       const updated={...activeKhatma,log:{...activeKhatma.log,[today()]:true},lastPage:(mushafPage||1)};
                       setKhatmas(p=>p.map(x=>x.id===activeKhatma.id?updated:x));
                       setActiveKhatma(updated);
                       togglePage(mushafPage||1);
-                    }} style={{padding:"10px 14px",background:`${t.gr}18`,border:`1px solid ${t.gr}44`,borderRadius:10,color:t.gr,fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>
+                    }} style={{padding:"10px 14px",background:t.gr+"18",border:"1px solid "+t.gr+"44",borderRadius:10,color:t.gr,fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>
                       👍 Journée lue
                     </button>
                   </div>
@@ -4687,7 +4607,7 @@ return (
                         const isTod=d===today();
                         const isFut=d>today();
                         return (
-                          <div key={i} style={{aspectRatio:"1",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".6rem",fontWeight:700,cursor:isFut?"default":"pointer",border:`1.5px solid ${isTod?t.acc:isDone?t.gr:t.b2}`,background:isDone?`${t.gr}25`:isTod?`${t.acc}18`:t.s2,color:isTod?t.acc:isDone?t.gr:isFut?t.tx3+"66":t.tx3,transition:"all .15s",minHeight:28}} onMouseEnter={e=>{if(!isFut){e.currentTarget.style.transform="scale(1.12)";e.currentTarget.style.boxShadow=`0 2px 8px ${t.acc}33`;e.currentTarget.style.borderColor=t.acc;}}} onMouseLeave={e=>{if(!isFut){e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";e.currentTarget.style.borderColor=isTod?t.acc:isDone?t.gr:t.b2;}}} onClick={()=>{if(!isFut)markKhatmaDay(activeKhatma,d);}}>
+                          <div key={i} style={{aspectRatio:"1",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".6rem",fontWeight:700,cursor:isFut?"default":"pointer",border:"1.5px solid "+(isTod?t.acc:isDone?t.gr:t.b2),background:isDone?t.gr+"25":isTod?t.acc+"18":t.s2,color:isTod?t.acc:isDone?t.gr:isFut?t.tx3+"66":t.tx3,transition:"all .15s",minHeight:28}} onMouseEnter={e=>{if(!isFut){e.currentTarget.style.transform="scale(1.12)";e.currentTarget.style.boxShadow="0 2px 8px "+t.acc+"33";e.currentTarget.style.borderColor=t.acc;}}} onMouseLeave={e=>{if(!isFut){e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";e.currentTarget.style.borderColor=isTod?t.acc:isDone?t.gr:t.b2;}}} onClick={()=>{if(!isFut)markKhatmaDay(activeKhatma,d);}}>
                             {isDone?"✓":i+1}
                           </div>
                         );
@@ -4703,7 +4623,7 @@ return (
                     {[{l:"Juz terminés",v:SURAHS.reduce((s,su)=>{const j=su.juz;if(!s.includes(j)&&SURAHS.filter(x=>x.juz===j).every(x=>sMem(x)===x.v))return[...s,j];return s;},[]).length,max:30,c:t.acc},{l:"Sourates terminées",v:SURAHS.filter(s=>sMem(s)===s.v).length,max:114,c:t.gr},{l:"Versets mémorisés",v:totalMem,max:TOTAL_VERSES,c:t.bl},{l:"Pages lues",v:Object.keys(pageRead).filter(k=>pageRead[k]).length,max:604,c:t.pu}].map((it,i)=>(
                       <div key={i}>
                         <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span style={{fontSize:".7rem",color:t.tx2}}>{it.l}</span><span style={{fontSize:".7rem",color:it.c,fontWeight:700}}>{it.v}<span style={{color:t.tx3,fontWeight:400}}>/{it.max}</span></span></div>
-                        <div style={{height:7,background:t.b1,borderRadius:99,overflow:"hidden"}}><div style={{height:"100%",width:`${it.v/it.max*100}%`,background:it.c,borderRadius:99,transition:"width .6s",boxShadow:`0 0 6px ${it.c}55`}}/></div>
+                        <div style={{height:7,background:t.b1,borderRadius:99,overflow:"hidden"}}><div style={{height:"100%",width:it.v/it.max*100+"%",background:it.c,borderRadius:99,transition:"width .6s",boxShadow:"0 0 6px "+it.c+"55"}}/></div>
                       </div>
                     ))}
                   </div>
@@ -4718,7 +4638,7 @@ return (
               <button className="tbtn" style={{borderColor:t.acc,color:t.acc,fontSize:".6rem"}} onClick={()=>setShowCollective(p=>!p)}>{showCollective?"Fermer":"+ Nouvelle"}</button>
             </div>
             {showCollective&&(
-              <div style={{padding:"14px 16px",borderBottom:`1px solid ${t.b1}`,display:"flex",flexDirection:"column",gap:12}}>
+              <div style={{padding:"14px 16px",borderBottom:"1px solid "+t.b1,display:"flex",flexDirection:"column",gap:12}}>
                 <div>
                   <div style={{fontSize:".65rem",color:t.tx3,marginBottom:6,textTransform:"uppercase",letterSpacing:"1px"}}>Créer une khatma de groupe</div>
                   <div style={{display:"flex",gap:8}}>
@@ -4746,7 +4666,7 @@ return (
                   </div>
                 </div>
                 <div style={{height:8,background:t.b1,borderRadius:99,overflow:"hidden"}}>
-                  <div style={{height:"100%",width:`${colPct}%`,background:colPct===100?t.gr:`linear-gradient(90deg,${t.acc},${t.acc2})`,borderRadius:99,transition:"width .6s",boxShadow:`0 0 8px ${t.acc}55`}}/>
+                  <div style={{height:"100%",width:colPct+"%",background:colPct===100?t.gr:"linear-gradient(90deg,"+t.acc+","+t.acc2+")",borderRadius:99,transition:"width .6s",boxShadow:"0 0 8px "+t.acc+"55"}}/>
                 </div>
                 <div>
                   <div style={{fontSize:".6rem",color:t.tx3,marginBottom:8}}>Coche les juz que TU as lus — les autres membres font de même</div>
@@ -4757,7 +4677,7 @@ return (
                       const isMine=myMember?.juzDone.includes(juz);
                       const isCovered=activeColKhatma.members.some(m=>m.juzDone.includes(juz));
                       return(
-                        <div key={juz} onClick={()=>markColJuz(juz)} style={{aspectRatio:"1",borderRadius:8,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",border:`2px solid ${isMine?t.acc:isCovered?t.gr+"66":t.b2}`,background:isMine?`${t.acc}20`:isCovered?`${t.gr}12`:t.s2,transition:"all .15s"}} onMouseEnter={e=>e.currentTarget.style.transform="scale(1.08)"} onMouseLeave={e=>e.currentTarget.style.transform=""}>
+                        <div key={juz} onClick={()=>markColJuz(juz)} style={{aspectRatio:"1",borderRadius:8,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",border:"2px solid "+(isMine?t.acc:isCovered?t.gr+"66":t.b2),background:isMine?t.acc+"20":isCovered?t.gr+"12":t.s2,transition:"all .15s"}} onMouseEnter={e=>e.currentTarget.style.transform="scale(1.08)"} onMouseLeave={e=>e.currentTarget.style.transform=""}>
                           <span style={{fontSize:".62rem",fontWeight:700,color:isMine?t.acc:isCovered?t.gr:t.tx3}}>{juz}</span>
                           {isCovered&&!isMine&&<span style={{fontSize:".42rem",color:t.gr,lineHeight:1}}>✓</span>}
                           {isMine&&<span style={{fontSize:".42rem",color:t.acc,lineHeight:1}}>●</span>}
@@ -4767,7 +4687,7 @@ return (
                   </div>
                   <div style={{display:"flex",gap:12,marginTop:8,flexWrap:"wrap"}}>
                     {[[t.acc,"Tes juz"],[t.gr,"Autre membre"],["transparent","Non couvert"]].map(([c,l])=>(
-                      <div key={l} style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:8,height:8,borderRadius:3,background:c,border:`1.5px solid ${c==="transparent"?t.b2:c}`}}/><span style={{fontSize:".58rem",color:t.tx3}}>{l}</span></div>
+                      <div key={l} style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:8,height:8,borderRadius:3,background:c,border:"1.5px solid "+(c==="transparent"?t.b2:c)}}/><span style={{fontSize:".58rem",color:t.tx3}}>{l}</span></div>
                     ))}
                   </div>
                 </div>
@@ -4775,8 +4695,8 @@ return (
                   <div style={{fontSize:".65rem",color:t.tx3,marginBottom:8,textTransform:"uppercase",letterSpacing:"1px"}}>Membres</div>
                   <div style={{display:"flex",flexDirection:"column",gap:6}}>
                     {activeColKhatma.members.map((m,i)=>(
-                      <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 12px",background:t.s2,borderRadius:10,border:`1px solid ${t.b1}`}}>
-                        <div style={{width:28,height:28,borderRadius:"50%",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".7rem",fontWeight:700,color:"#000",flexShrink:0}}>{m.name[0].toUpperCase()}</div>
+                      <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 12px",background:t.s2,borderRadius:10,border:"1px solid "+t.b1}}>
+                        <div style={{width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,"+t.acc+","+t.acc2+")",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".7rem",fontWeight:700,color:"#000",flexShrink:0}}>{m.name[0].toUpperCase()}</div>
                         <div style={{flex:1,minWidth:0}}>
                           <div style={{fontSize:".75rem",fontWeight:600,color:t.tx,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.name}{m.uid===(user?.id||"local")&&" (moi)"}</div>
                           <div style={{fontSize:".58rem",color:t.tx3}}>{m.juzDone.length} juz lus · vu {m.lastSeen===today()?"aujourd'hui":m.lastSeen}</div>
@@ -4787,13 +4707,13 @@ return (
                   </div>
                 </div>
                 {colPct===100&&(
-                  <div style={{padding:"14px",background:`${t.gr}15`,borderRadius:12,border:`1px solid ${t.gr}44`,textAlign:"center"}}>
+                  <div style={{padding:"14px",background:t.gr+"15",borderRadius:12,border:"1px solid "+t.gr+"44",textAlign:"center"}}>
                     <div style={{fontSize:"1.5rem",marginBottom:4}}>🌿</div>
                     <div style={{fontFamily:"Amiri,serif",fontSize:"1rem",color:t.gr}}>Khatma complète !</div>
                     <div style={{fontSize:".7rem",color:t.tx2,marginTop:4}}>بارك الله فيكم جميعاً</div>
                   </div>
                 )}
-                <button onClick={()=>{const other=collectiveKhatmas.filter(k=>k.id!==activeColKhatma.id);setActiveColKhatma(other[0]||null);}} style={{background:"none",border:`1px solid ${t.b2}`,borderRadius:8,padding:"7px",color:t.tx3,fontSize:".65rem",cursor:"pointer"}}>Voir d'autres khatmas</button>
+                <button onClick={()=>{const other=collectiveKhatmas.filter(k=>k.id!==activeColKhatma.id);setActiveColKhatma(other[0]||null);}} style={{background:"none",border:"1px solid "+t.b2,borderRadius:8,padding:"7px",color:t.tx3,fontSize:".65rem",cursor:"pointer"}}>Voir d'autres khatmas</button>
               </div>
             ):(
               <div style={{padding:"20px 16px",textAlign:"center",color:t.tx3,fontSize:".75rem"}}>
@@ -4813,7 +4733,7 @@ return (
               <div className="ch"><span className="ct">Versets favoris</span><span style={{fontSize:".65rem",color:t.tx3}}>{favorites.length} versets</span></div>
               {favorites.length===0?(<div className="empty"><div style={{fontSize:"1.8rem",marginBottom:8}}>💚</div>Marque des versets avec ♥ pour les retrouver ici</div>):(
                 <div>{favorites.map((fav,i)=>(
-                  <div key={i} style={{padding:"12px 14px",borderBottom:`1px solid ${t.b1}`,transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=t.s2} onMouseLeave={e=>e.currentTarget.style.background=""}>
+                  <div key={i} style={{padding:"12px 14px",borderBottom:"1px solid "+t.b1,transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=t.s2} onMouseLeave={e=>e.currentTarget.style.background=""}>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
                       <span style={{fontSize:".72rem",fontWeight:600,color:t.acc}}>{fav.surah} · v.{fav.vn}</span>
                       <button className="vbtn" style={{borderColor:t.rd,color:t.rd}} onClick={()=>toggleFav(fav.sn,fav.vn,fav.ar,fav.fr,fav.surah)}>✕</button>
@@ -4839,13 +4759,13 @@ return (
                 {lists.length===0?<div style={{textAlign:"center",color:t.tx3,fontSize:".75rem",padding:"12px 0"}}>Crée des listes thématiques de versets</div>:(
                   <div style={{display:"flex",flexDirection:"column",gap:8}}>
                     {lists.map(l=>(
-                      <div key={l.id} style={{background:t.s2,border:`1px solid ${selList===l.id?t.acc:t.b1}`,borderRadius:10,overflow:"hidden",transition:"border-color .2s"}}>
+                      <div key={l.id} style={{background:t.s2,border:"1px solid "+(selList===l.id?t.acc:t.b1),borderRadius:10,overflow:"hidden",transition:"border-color .2s"}}>
                         <div style={{padding:"10px 12px",cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center"}} onClick={()=>setSelList(selList===l.id?null:l.id)}>
                           <span style={{fontWeight:600,color:t.tx}}>{l.name}</span>
                           <span style={{fontSize:".65rem",color:t.tx3,background:t.s3,padding:"2px 8px",borderRadius:99}}>{l.items.length} versets</span>
                         </div>
                         {selList===l.id&&l.items.map((it,i)=>(
-                          <div key={i} style={{padding:"8px 12px",borderTop:`1px solid ${t.b1}`,display:"flex",alignItems:"center",gap:8,transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=t.s3} onMouseLeave={e=>e.currentTarget.style.background=""}>
+                          <div key={i} style={{padding:"8px 12px",borderTop:"1px solid "+t.b1,display:"flex",alignItems:"center",gap:8,transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=t.s3} onMouseLeave={e=>e.currentTarget.style.background=""}>
                             <div style={{flex:1}}><span style={{fontSize:".68rem",color:t.acc,fontWeight:600}}>{it.surah} v.{it.vn}</span></div>
                             <button className="vbtn" style={{borderColor:t.rd,color:t.rd,fontSize:".58rem"}} onClick={()=>removeFromList(l.id,it.sn,it.vn)}>✕</button>
                           </div>
@@ -4862,7 +4782,7 @@ return (
                 <div className="ch"><span className="ct">Historique de lecture</span><button className="tbtn" style={{borderColor:t.rd,color:t.rd,fontSize:".6rem"}} onClick={()=>setReadHistory([])}>Effacer</button></div>
                 <div style={{maxHeight:260,overflowY:"auto"}}>
                   {readHistory.slice(0,20).map((h,i)=>(
-                    <div key={i} style={{padding:"8px 14px",borderBottom:`1px solid ${t.b1}`,display:"flex",alignItems:"center",gap:10,cursor:"pointer",transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=t.s2} onMouseLeave={e=>e.currentTarget.style.background=""} onClick={()=>{const s=SURAHS.find(x=>x.n===h.sn);if(s){doSelect(s);setPage("quran");}}}>
+                    <div key={i} style={{padding:"8px 14px",borderBottom:"1px solid "+t.b1,display:"flex",alignItems:"center",gap:10,cursor:"pointer",transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=t.s2} onMouseLeave={e=>e.currentTarget.style.background=""} onClick={()=>{const s=SURAHS.find(x=>x.n===h.sn);if(s){doSelect(s);setPage("quran");}}}>
                       <span style={{fontSize:".72rem",color:t.acc,fontWeight:600}}>{h.surah}</span>
                       <span style={{fontSize:".65rem",color:t.tx3}}>v.{h.vn}</span>
                       <span style={{fontSize:".6rem",color:t.tx3,marginLeft:"auto"}}>{new Date(h.ts).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}</span>
@@ -4889,14 +4809,14 @@ return (
                 {/* Mode */}
                 <div style={{display:"flex",gap:6,marginBottom:10}}>
                   {[["surah","Quelle sourate ?"],["complete","Complète le verset"]].map(([m,l])=>(
-                    <button key={m} onClick={()=>{setQuizMode(m);setQuizQ(null);setQuizAnswer(null);}} style={{flex:1,padding:"8px",borderRadius:10,border:`1.5px solid ${quizMode===m?t.acc:t.b2}`,background:quizMode===m?`${t.acc}15`:t.s2,color:quizMode===m?t.acc:t.tx2,fontSize:".72rem",cursor:"pointer",fontWeight:quizMode===m?700:400}}>{l}</button>
+                    <button key={m} onClick={()=>{setQuizMode(m);setQuizQ(null);setQuizAnswer(null);}} style={{flex:1,padding:"8px",borderRadius:10,border:"1.5px solid "+(quizMode===m?t.acc:t.b2),background:quizMode===m?t.acc+"15":t.s2,color:quizMode===m?t.acc:t.tx2,fontSize:".72rem",cursor:"pointer",fontWeight:quizMode===m?700:400}}>{l}</button>
                   ))}
                 </div>
                 {/* Filtre source */}
                 <div style={{display:"flex",gap:5,marginBottom:12,flexWrap:"wrap"}}>
-                  <button onClick={()=>{setQuizFilter("memorized");setQuizFilterSurah(null);setQuizQ(null);}} style={{padding:"4px 10px",borderRadius:99,border:`1px solid ${quizFilter==="memorized"&&!quizFilterSurah?t.acc:t.b2}`,background:quizFilter==="memorized"&&!quizFilterSurah?`${t.acc}15`:t.s2,color:quizFilter==="memorized"&&!quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer",fontWeight:600}}>Mes mémorisés</button>
-                  <button onClick={()=>{setQuizFilter("all");setQuizFilterSurah(null);setQuizQ(null);}} style={{padding:"4px 10px",borderRadius:99,border:`1px solid ${quizFilter==="all"&&!quizFilterSurah?t.acc:t.b2}`,background:quizFilter==="all"&&!quizFilterSurah?`${t.acc}15`:t.s2,color:quizFilter==="all"&&!quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer"}}>Tout</button>
-                  <select value={quizFilterSurah||""} onChange={e=>{const v=+e.target.value||null;setQuizFilterSurah(v);setQuizFilter(v?"surah":"memorized");setQuizQ(null);}} style={{padding:"4px 8px",borderRadius:99,border:`1px solid ${quizFilterSurah?t.acc:t.b2}`,background:quizFilterSurah?`${t.acc}15`:t.s2,color:quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer",outline:"none"}}>
+                  <button onClick={()=>{setQuizFilter("memorized");setQuizFilterSurah(null);setQuizQ(null);}} style={{padding:"4px 10px",borderRadius:99,border:"1px solid "+(quizFilter==="memorized"&&!quizFilterSurah?t.acc:t.b2),background:quizFilter==="memorized"&&!quizFilterSurah?t.acc+"15":t.s2,color:quizFilter==="memorized"&&!quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer",fontWeight:600}}>Mes mémorisés</button>
+                  <button onClick={()=>{setQuizFilter("all");setQuizFilterSurah(null);setQuizQ(null);}} style={{padding:"4px 10px",borderRadius:99,border:"1px solid "+(quizFilter==="all"&&!quizFilterSurah?t.acc:t.b2),background:quizFilter==="all"&&!quizFilterSurah?t.acc+"15":t.s2,color:quizFilter==="all"&&!quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer"}}>Tout</button>
+                  <select value={quizFilterSurah||""} onChange={e=>{const v=+e.target.value||null;setQuizFilterSurah(v);setQuizFilter(v?"surah":"memorized");setQuizQ(null);}} style={{padding:"4px 8px",borderRadius:99,border:"1px solid "+(quizFilterSurah?t.acc:t.b2),background:quizFilterSurah?t.acc+"15":t.s2,color:quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer",outline:"none"}}>
                     <option value="">Par sourate…</option>
                     {SURAHS.map(s=><option key={s.n} value={s.n}>{s.n}. {s.name}</option>)}
                   </select>
@@ -4906,8 +4826,8 @@ return (
                   <div style={{textAlign:"center",padding:"24px 20px"}}>
                     <div style={{fontSize:"3rem",marginBottom:12}}>🎯</div>
                     <div style={{fontSize:".85rem",color:t.tx,fontWeight:600,marginBottom:6}}>Teste ta mémorisation</div>
-                    <div style={{fontSize:".7rem",color:t.tx3,marginBottom:20}}>{quizFilter==="memorized"&&!quizFilterSurah?"Quiz sur tes versets mémorisés":quizFilterSurah?`Quiz sur ${SURAHS.find(s=>s.n===quizFilterSurah)?.name}`:"Quiz sur tout le Coran embarqué"}</div>
-                    <button onClick={()=>generateQuiz(quizFilterSurah,quizFilter)} style={{padding:"12px 28px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:12,color:"#000",fontWeight:800,fontSize:".85rem",cursor:"pointer"}}>▶ Commencer</button>
+                    <div style={{fontSize:".7rem",color:t.tx3,marginBottom:20}}>{quizFilter==="memorized"&&!quizFilterSurah?"Quiz sur tes versets mémorisés":quizFilterSurah?"Quiz sur "+(SURAHS.find(s=>s.n===quizFilterSurah)?.name):"Quiz sur tout le Coran embarqué"}</div>
+                    <button onClick={()=>generateQuiz(quizFilterSurah,quizFilter)} style={{padding:"12px 28px",background:"linear-gradient(135deg,"+t.acc+","+t.acc2+")",border:"none",borderRadius:12,color:"#000",fontWeight:800,fontSize:".85rem",cursor:"pointer"}}>▶ Commencer</button>
                   </div>
                 )}
 
@@ -4915,7 +4835,7 @@ return (
                   <div style={{display:"flex",flexDirection:"column",gap:12}}>
                     {quizMode==="surah"&&(
                       <>
-                        <div style={{background:t.s2,borderRadius:12,padding:"16px",border:`1px solid ${t.b1}`}}>
+                        <div style={{background:t.s2,borderRadius:12,padding:"16px",border:"1px solid "+t.b1}}>
                           <div style={{fontSize:".6rem",color:t.tx3,marginBottom:8,textTransform:"uppercase",letterSpacing:1}}>Verset {quizQ.n}</div>
                           <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.6rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx}}>{quizQ.ar?}</div>
                           {quizAnswer&&quizQ.fr&&<div style={{fontSize:".72rem",color:t.tx2,marginTop:8,fontStyle:"italic"}}>{quizQ.fr}</div>}
@@ -4924,8 +4844,8 @@ return (
                           {quizChoices.map(s=>{
                             const isCorrect=s.n===quizQ.sn;
                             const isChosen=quizAnswer===s.n;
-                            const bg=quizAnswer?isCorrect?`${t.gr}20`:isChosen?`${t.rd}20`:t.s2:t.s2;
-                            const border=quizAnswer?isCorrect?`2px solid ${t.gr}`:isChosen?`2px solid ${t.rd}`:`1px solid ${t.b1}`:`1px solid ${t.b2}`;
+                            const bg=quizAnswer?isCorrect?t.gr+"20":isChosen?t.rd+"20":t.s2:t.s2;
+                            const border=quizAnswer?isCorrect?"2px solid "+t.gr:isChosen?"2px solid "+t.rd:"1px solid "+t.b1:"1px solid "+t.b2;
                             return(
                               <button key={s.n} onClick={()=>{
                                 if(quizAnswer)return;
@@ -4941,17 +4861,17 @@ return (
                         </div>
                         {quizAnswer&&(
                           <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                            <div style={{textAlign:"center",padding:"10px",background:quizAnswer===quizQ.sn?`${t.gr}15`:`${t.rd}15`,borderRadius:10,border:`1px solid ${quizAnswer===quizQ.sn?t.gr:t.rd}`,color:quizAnswer===quizQ.sn?t.gr:t.rd,fontWeight:700,fontSize:".8rem"}}>
-                              {quizAnswer===quizQ.sn?"✓ Bonne réponse ! 🌟":`✗ C'était ${SURAHS.find(s=>s.n===quizQ.sn)?.name} · v.${quizQ.n}`}
+                            <div style={{textAlign:"center",padding:"10px",background:quizAnswer===quizQ.sn?t.gr+"15":t.rd+"15",borderRadius:10,border:"1px solid "+(quizAnswer===quizQ.sn?t.gr:t.rd),color:quizAnswer===quizQ.sn?t.gr:t.rd,fontWeight:700,fontSize:".8rem"}}>
+                              {quizAnswer===quizQ.sn?"✓ Bonne réponse ! 🌟":"✗ C'était "+(SURAHS.find(s=>s.n===quizQ.sn)?.name)+" · v."+quizQ.n}
                             </div>
-                            <button onClick={()=>generateQuiz(quizFilterSurah,quizFilter)} style={{padding:"11px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:10,color:"#000",fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>Question suivante →</button>
+                            <button onClick={()=>generateQuiz(quizFilterSurah,quizFilter)} style={{padding:"11px",background:"linear-gradient(135deg,"+t.acc+","+t.acc2+")",border:"none",borderRadius:10,color:"#000",fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>Question suivante →</button>
                           </div>
                         )}
                       </>
                     )}
                     {quizMode==="complete"&&(
                       <>
-                        <div style={{background:t.s2,borderRadius:12,padding:"16px",border:`1px solid ${t.b1}`}}>
+                        <div style={{background:t.s2,borderRadius:12,padding:"16px",border:"1px solid "+t.b1}}>
                           <div style={{fontSize:".6rem",color:t.tx3,marginBottom:8,textTransform:"uppercase",letterSpacing:1}}>{SURAHS.find(s=>s.n===quizQ.sn)?.name} · v.{quizQ.n}</div>
                           <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.4rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx}}>
                             {(stripTags(quizQ.ar||"")).split(" ").slice(0,3).join(" ")}
@@ -4960,16 +4880,16 @@ return (
                           {quizQ.fr&&<div style={{fontSize:".7rem",color:t.tx3,marginTop:6,fontStyle:"italic"}}>{quizQ.fr?.split(" ").slice(0,6).join(" ")}…</div>}
                         </div>
                         {!quizAnswer?(
-                          <button onClick={()=>setQuizAnswer("shown")} style={{padding:"11px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:10,color:t.tx2,fontWeight:600,fontSize:".8rem",cursor:"pointer"}}>👁 Révéler la suite</button>
+                          <button onClick={()=>setQuizAnswer("shown")} style={{padding:"11px",background:t.s2,border:"1px solid "+t.b2,borderRadius:10,color:t.tx2,fontWeight:600,fontSize:".8rem",cursor:"pointer"}}>👁 Révéler la suite</button>
                         ):(
                           <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                            <div style={{background:t.s2,borderRadius:12,padding:"16px",border:`1px solid ${t.acc}44`}}>
+                            <div style={{background:t.s2,borderRadius:12,padding:"16px",border:"1px solid "+t.acc+"44"}}>
                               <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.4rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.acc}}>{quizQ.ar?}</div>
                               {quizQ.fr&&<div style={{fontSize:".72rem",color:t.tx2,marginTop:8,fontStyle:"italic"}}>{quizQ.fr}</div>}
                             </div>
                             <div style={{display:"flex",gap:8}}>
-                              <button onClick={()=>{setQuizScore(p=>({...p,correct:p.correct+1,total:p.total+1}));generateQuiz(quizFilterSurah,quizFilter);}} style={{flex:1,padding:"11px",background:`${t.gr}20`,border:`1px solid ${t.gr}`,borderRadius:10,color:t.gr,fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>✓ Je savais</button>
-                              <button onClick={()=>{setQuizScore(p=>({...p,total:p.total+1,wrongs:[...p.wrongs,{q:quizQ,chosen:null,correct:quizQ.sn}]}));generateQuiz(quizFilterSurah,quizFilter);}} style={{flex:1,padding:"11px",background:`${t.rd}15`,border:`1px solid ${t.rd}`,borderRadius:10,color:t.rd,fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>✗ À revoir</button>
+                              <button onClick={()=>{setQuizScore(p=>({...p,correct:p.correct+1,total:p.total+1}));generateQuiz(quizFilterSurah,quizFilter);}} style={{flex:1,padding:"11px",background:t.gr+"20",border:"1px solid "+t.gr,borderRadius:10,color:t.gr,fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>✓ Je savais</button>
+                              <button onClick={()=>{setQuizScore(p=>({...p,total:p.total+1,wrongs:[...p.wrongs,{q:quizQ,chosen:null,correct:quizQ.sn}]}));generateQuiz(quizFilterSurah,quizFilter);}} style={{flex:1,padding:"11px",background:t.rd+"15",border:"1px solid "+t.rd,borderRadius:10,color:t.rd,fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>✗ À revoir</button>
                             </div>
                           </div>
                         )}
@@ -4990,7 +4910,7 @@ return (
                     {v:quizScore.total-quizScore.correct,l:"À revoir",c:t.rd},
                     {v:quizScore.total>0?Math.round(quizScore.correct/quizScore.total*100)+"%":"—",l:"Score",c:t.acc},
                   ].map((k,i)=>(
-                    <div key={i} style={{textAlign:"center",padding:"10px 4px",background:t.s2,borderRadius:10,border:`1px solid ${t.b1}`,minWidth:0}}>
+                    <div key={i} style={{textAlign:"center",padding:"10px 4px",background:t.s2,borderRadius:10,border:"1px solid "+t.b1,minWidth:0}}>
                       <div style={{fontSize:"1.3rem",fontWeight:800,color:k.c}}>{k.v}</div>
                       <div style={{fontSize:".52rem",color:t.tx3,marginTop:2}}>{k.l}</div>
                     </div>
@@ -5002,14 +4922,14 @@ return (
                     <div style={{fontSize:".6rem",color:t.tx3,textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Mes erreurs — clique pour voir le verset</div>
                     <div style={{display:"flex",flexDirection:"column",gap:6}}>
                       {quizScore.wrongs.slice(-5).map((w,i)=>(
-                        <div key={i} onClick={()=>setQuizShowWrong(quizShowWrong?.q?.n===w.q.n?null:w)} style={{padding:"8px 12px",background:`${t.rd}10`,borderRadius:8,border:`1px solid ${t.rd}30`,cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>e.currentTarget.style.background=`${t.rd}18`} onMouseLeave={e=>e.currentTarget.style.background=`${t.rd}10`}>
+                        <div key={i} onClick={()=>setQuizShowWrong(quizShowWrong?.q?.n===w.q.n?null:w)} style={{padding:"8px 12px",background:t.rd+"10",borderRadius:8,border:"1px solid "+t.rd+"30",cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>e.currentTarget.style.background=t.rd+"18"} onMouseLeave={e=>e.currentTarget.style.background=t.rd+"10"}>
                           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                             <span style={{fontSize:".68rem",color:t.rd,fontWeight:600}}>{SURAHS.find(s=>s.n===w.correct)?.name} · v.{w.q.n}</span>
                             {w.chosen&&<span style={{fontSize:".6rem",color:t.tx3}}>Tu as dit : {SURAHS.find(s=>s.n===w.chosen)?.name}</span>}
                             <span style={{fontSize:".7rem",color:t.tx3}}>{quizShowWrong?.q?.n===w.q.n?"▲":"▼"}</span>
                           </div>
                           {quizShowWrong?.q?.n===w.q.n&&(
-                            <div style={{marginTop:8,paddingTop:8,borderTop:`1px solid ${t.rd}20`}}>
+                            <div style={{marginTop:8,paddingTop:8,borderTop:"1px solid "+t.rd+"20"}}>
                               <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.1rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx,marginBottom:4}}>{w.q.ar?}</div>
                               {w.q.fr&&<div style={{fontSize:".68rem",color:t.tx2,fontStyle:"italic"}}>{w.q.fr}</div>}
                             </div>
@@ -5041,7 +4961,7 @@ return (
                 cells.push({key,count,intensity,d});
               }
               const maxCount=Math.max(...cells.map(c=>c.count),1);
-              const colors=["#1a2a1a",`${t.gr}33`,`${t.gr}66`,`${t.gr}99`,t.gr];
+              const colors=["#1a2a1a",t.gr+"33",t.gr+"66",t.gr+"99",t.gr];
               // Jours de la semaine
               const dayLabels=["D","L","M","M","J","V","S"];
               return(
@@ -5069,7 +4989,7 @@ return (
                             <div style={{fontSize:".45rem",color:t.tx3,height:14,textAlign:"center",whiteSpace:"nowrap"}}>{showMonth?monthLabel:""}</div>
                             {weekCells.map((c,di)=>(
                               <div key={di}
-                                title={`${c.key} — ${c.count} versets`}
+                                title={c.key+" — "+c.count+" versets"}
                                 style={{width:11,height:11,borderRadius:2,background:colors[c.intensity],transition:"background .2s",cursor:c.count>0?"pointer":"default"}}
                                 onClick={()=>c.count>0&&console.log(c.key,c.count)}
                               />
@@ -5123,7 +5043,7 @@ return (
                         return(
                           <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
                             <span style={{fontSize:".48rem",color:t.tx3,fontWeight:isLast?700:400}}>{w.total}</span>
-                            <div style={{width:"100%",height:h,borderRadius:"4px 4px 0 0",background:isLast?t.acc:`${t.acc}44`,transition:"height .6s ease",position:"relative"}}>
+                            <div style={{width:"100%",height:h,borderRadius:"4px 4px 0 0",background:isLast?t.acc:t.acc+"44",transition:"height .6s ease",position:"relative"}}>
                               {isLast&&<div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,rgba(255,255,255,.2),transparent)",borderRadius:"4px 4px 0 0"}}/>}
                             </div>
                             <span style={{fontSize:".42rem",color:t.tx3,textAlign:"center",lineHeight:1.2}}>{w.label}</span>
@@ -5153,7 +5073,7 @@ return (
                   </defs>
                   {/* Fond étoilé */}
                   {Array.from({length:40},(_,i)=>(
-                    <circle key={`star-${i}`} cx={(i*97+13)%380} cy={(i*61+7)%260} r={0.3+((i*37)%10)*0.05} fill="white" opacity={0.15+((i*23)%30)*0.01}/>
+                    <circle key={"star-"+i} cx={(i*97+13)%380} cy={(i*61+7)%260} r={0.3+((i*37)%10)*0.05} fill="white" opacity={0.15+((i*23)%30)*0.01}/>
                   ))}
                   {/* Croissant de lune — guide de disposition */}
                   <path d="M 40 200 Q 120 20 200 15 Q 280 10 340 80 Q 370 130 340 190" fill="none" stroke={t.acc} strokeWidth="0.3" strokeDasharray="3,6" opacity="0.2"/>
@@ -5178,14 +5098,14 @@ return (
                         {/* Halo pour les sourates complètes */}
                         {isComplete&&(
                           <circle cx={x} cy={y} r={r+3} fill="url(#starGlow)" opacity="0.4">
-                            <animate attributeName="r" values={`${r+2};${r+5};${r+2}`} dur={`${2+i%3}s`} repeatCount="indefinite"/>
-                            <animate attributeName="opacity" values="0.4;0.15;0.4" dur={`${2+i%3}s`} repeatCount="indefinite"/>
+                            <animate attributeName="r" values={r+2+";"+r+5+";"+r+2} dur={2+i%3+"s"} repeatCount="indefinite"/>
+                            <animate attributeName="opacity" values="0.4;0.15;0.4" dur={2+i%3+"s"} repeatCount="indefinite"/>
                           </circle>
                         )}
                         {/* Point principal */}
                         <circle cx={x} cy={y} r={r}
-                          fill={isComplete?"#c9a84c":hasProgress?`rgba(201,168,76,${pct2/100*0.6+0.1})`:"rgba(255,255,255,0.08)"}
-                          stroke={isRevision?"#e91e63":isComplete?"#f5dc8c":hasProgress?`rgba(201,168,76,0.5)`:"rgba(255,255,255,0.15)"}
+                          fill={isComplete?"#c9a84c":hasProgress?"rgba(201,168,76,"+pct2/100*0.6+0.1+")":"rgba(255,255,255,0.08)"}
+                          stroke={isRevision?"#e91e63":isComplete?"#f5dc8c":hasProgress?"rgba(201,168,76,0.5)":"rgba(255,255,255,0.15)"}
                           strokeWidth={isComplete?0.8:0.4}
                           filter={isComplete?"url(#glow2)":undefined}
                         />
@@ -5201,7 +5121,7 @@ return (
                 <div style={{display:"flex",gap:12,padding:"4px 12px 8px",justifyContent:"center",flexWrap:"wrap"}}>
                   {[[t.acc,"Mémorisée"],["rgba(201,168,76,0.4)","En cours"],["rgba(255,255,255,0.15)","À commencer"],["#e91e63","En révision"]].map(([c,l])=>(
                     <div key={l} style={{display:"flex",alignItems:"center",gap:4}}>
-                      <div style={{width:8,height:8,borderRadius:"50%",background:c,border:`1px solid ${c}`}}/>
+                      <div style={{width:8,height:8,borderRadius:"50%",background:c,border:"1px solid "+c}}/>
                       <span style={{fontSize:".58rem",color:t.tx3}}>{l}</span>
                     </div>
                   ))}
@@ -5210,12 +5130,12 @@ return (
             </div>
             <div className="sg">
               {[
-                {l:"Versets mémorisés",v:totalMem,s:`/ ${TOTAL_VERSES}`,c:"a",icon:"📿"},
+                {l:"Versets mémorisés",v:totalMem,s:"/ "+TOTAL_VERSES,c:"a",icon:"📿"},
                 {l:"Sourates complètes",v:SURAHS.filter(s=>sPct(s)===100).length,s:"/ 114",c:"g",icon:"📚"},
-                {l:"Série actuelle",v:`${memStreak}j`,s:"consécutifs",c:"b",icon:"🔥"},
+                {l:"Série actuelle",v:memStreak+"j",s:"consécutifs",c:"b",icon:"🔥"},
                 {l:"Pages lues",v:Object.keys(pageRead).filter(k=>pageRead[k]).length,s:"/ 604",c:"r",icon:"📖"},
               ].map((k,i)=>(
-                <div key={i} className={`sc ${k.c}`}>
+                <div key={i} className={"sc "+k.c}>
                   <div style={{fontSize:"1.2rem",marginBottom:3}}>{k.icon}</div>
                   <div className="slbl">{k.l}</div>
                   <div className="sval">{k.v}</div>
@@ -5226,12 +5146,12 @@ return (
 
             {/* ── Stats Tarteel-style ── */}
             {(()=>{
-              const fmtDur=s=>{const h=Math.floor(s/3600);const m=Math.floor((s%3600)/60);const sec=s%60;return h>0?`${h}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`:`${m}:${String(sec).padStart(2,"0")}`;};
+              const fmtDur=s=>{const h=Math.floor(s/3600);const m=Math.floor((s%3600)/60);const sec=s%60;return h>0?h+":"+String(m).padStart(2,"0")+":"+String(sec).padStart(2,"0"):m+":"+String(sec).padStart(2,"0");};
               const hassanat=totalMem*10+versesRecited*3; // estimation : 10/verset mémorisé + 3/récité
-              const hassFmt=hassanat>=1000000?`${(hassanat/1000000).toFixed(2)}M`:hassanat>=1000?`${(hassanat/1000).toFixed(1)}k`:String(hassanat);
+              const hassFmt=hassanat>=1000000?(hassanat/1000000).toFixed(2)+"M":hassanat>=1000?(hassanat/1000).toFixed(1)+"k":String(hassanat);
               const statsItems=[
                 {v:fmtDur(engagementTime),l:"Temps d'engagement",icon:"⏱",c:t.acc},
-                {v:`${Math.round(pct)}%`,l:"Achèvement du Coran",icon:"📿",c:t.gr},
+                {v:Math.round(pct)+"%",l:"Achèvement du Coran",icon:"📿",c:t.gr},
                 {v:versesRecited.toLocaleString(),l:"Versets récités",icon:"🎙️",c:t.bl},
                 {v:fmtDur(recitTime),l:"Temps de récitation",icon:"📖",c:t.pu},
                 {v:badges.length,l:"Badges reçus",icon:"🏅",c:"#f59e0b"},
@@ -5243,18 +5163,18 @@ return (
                     <span className="ct">Statistiques détaillées</span>
                     <span style={{fontSize:".6rem",color:t.tx3}}>Pour la vie</span>
                   </div>
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:1,borderTop:`1px solid ${t.b1}`}}>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:1,borderTop:"1px solid "+t.b1}}>
                     {statsItems.map((s,i)=>(
-                      <div key={i} style={{padding:"16px 14px",borderBottom:`1px solid ${t.b1}`,borderRight:i%2===0?`1px solid ${t.b1}`:"none",display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
+                      <div key={i} style={{padding:"16px 14px",borderBottom:"1px solid "+t.b1,borderRight:i%2===0?"1px solid "+t.b1:"none",display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
                         <div style={{flex:1,minWidth:0}}>
                           <div style={{fontSize:"1.3rem",fontWeight:800,color:s.c,letterSpacing:-.5,fontVariantNumeric:"tabular-nums"}}>{s.v}</div>
                           <div style={{fontSize:".6rem",color:t.tx3,marginTop:2,lineHeight:1.3}}>{s.l}</div>
                         </div>
-                        <div style={{width:36,height:36,borderRadius:10,background:`${s.c}18`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.1rem",flexShrink:0}}>{s.icon}</div>
+                        <div style={{width:36,height:36,borderRadius:10,background:s.c+"18",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.1rem",flexShrink:0}}>{s.icon}</div>
                       </div>
                     ))}
                   </div>
-                  <div style={{padding:"10px 14px",fontSize:".6rem",color:t.tx3,textAlign:"center",borderTop:`1px solid ${t.b1}`}}>
+                  <div style={{padding:"10px 14px",fontSize:".6rem",color:t.tx3,textAlign:"center",borderTop:"1px solid "+t.b1}}>
                     ⭐ Les hassanates sont une estimation indicative · Allah seul en connaît la récompense réelle
                   </div>
                 </div>
@@ -5267,7 +5187,7 @@ return (
                 <span className="ct">Progression</span>
                 <div style={{display:"flex",gap:4}}>
                   {[["daily","Jours"],["weekly","Semaines"],["monthly","Mois"]].map(([v,l])=>(
-                    <button key={v} className={`tbtn ${chartView===v?"on":""}`} onClick={()=>setChartView(v)}>{l}</button>
+                    <button key={v} className={"tbtn "+(chartView===v?"on":"")} onClick={()=>setChartView(v)}>{l}</button>
                   ))}
                 </div>
               </div>
@@ -5275,14 +5195,14 @@ return (
                 {chartView==="daily"&&(
                   <div>
                     <div style={{display:"flex",alignItems:"flex-end",gap:4,height:100,marginBottom:6}}>
-                      {gains.map((g,i)=>{const lbl=new Date(histKeys[i]).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric"});const isToday=histKeys[i]===today();return(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:`${Math.max(Math.round(g/maxG*100),4)}px`,background:isToday?`linear-gradient(180deg,${t.acc2},${t.acc})`:`linear-gradient(180deg,${t.acc}88,${t.acc}44)`}}/></div><div className="blbl" style={{color:isToday?t.acc:t.tx3}}>{lbl}</div>{g>0&&<div className="bval">+{g}</div>}</div>);})}</div>
+                      {gains.map((g,i)=>{const lbl=new Date(histKeys[i]).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric"});const isToday=histKeys[i]===today();return(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:Math.max(Math.round(g/maxG*100),4)+"px",background:isToday?"linear-gradient(180deg,"+t.acc2+","+t.acc+")":"linear-gradient(180deg,"+t.acc+"88,"+t.acc+"44)"}}/></div><div className="blbl" style={{color:isToday?t.acc:t.tx3}}>{lbl}</div>{g>0&&<div className="bval">+{g}</div>}</div>);})}</div>
                     <div style={{textAlign:"center",fontSize:".65rem",color:t.tx3}}>Versets mémorisés par jour (14 derniers jours)</div>
                   </div>
                 )}
                 {chartView==="weekly"&&(
                   <div>
                     <div style={{display:"flex",alignItems:"flex-end",gap:4,height:100,marginBottom:6}}>
-                      {weeklyData.map((w,i)=>(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:`${Math.max(Math.round(w.v/maxWeek*100),4)}px`,background:`linear-gradient(180deg,${t.acc2},${t.acc})`}}/></div><div className="blbl">{w.label}</div>{w.v>0&&<div className="bval">+{w.v}</div>}</div>))}
+                      {weeklyData.map((w,i)=>(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:Math.max(Math.round(w.v/maxWeek*100),4)+"px",background:"linear-gradient(180deg,"+t.acc2+","+t.acc+")"}}/></div><div className="blbl">{w.label}</div>{w.v>0&&<div className="bval">+{w.v}</div>}</div>))}
                     </div>
                     <div style={{textAlign:"center",fontSize:".65rem",color:t.tx3}}>Versets mémorisés par semaine</div>
                   </div>
@@ -5290,7 +5210,7 @@ return (
                 {chartView==="monthly"&&(
                   <div>
                     <div style={{display:"flex",alignItems:"flex-end",gap:4,height:100,marginBottom:6}}>
-                      {monthlyData.map((m,i)=>(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:`${Math.max(Math.round(m.v/maxMonth*100),4)}px`,background:`linear-gradient(180deg,${t.acc2},${t.acc})`}}/></div><div className="blbl">{m.label}</div>{m.v>0&&<div className="bval">+{m.v}</div>}</div>))}
+                      {monthlyData.map((m,i)=>(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:Math.max(Math.round(m.v/maxMonth*100),4)+"px",background:"linear-gradient(180deg,"+t.acc2+","+t.acc+")"}}/></div><div className="blbl">{m.label}</div>{m.v>0&&<div className="bval">+{m.v}</div>}</div>))}
                     </div>
                     <div style={{textAlign:"center",fontSize:".65rem",color:t.tx3}}>Versets mémorisés par mois</div>
                   </div>
@@ -5303,7 +5223,7 @@ return (
               <div className="ch"><span className="ct">Badges</span><span style={{fontSize:".65rem",color:t.acc,fontWeight:700}}>{badges.length}{"/"}{BADGE_DEFS.length}</span></div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(120px,1fr))",gap:8,padding:12}}>
                 {BADGE_DEFS.map(bd=>{const earned=badges.includes(bd.id);return(
-                  <div key={bd.id} className="badge-card" style={{background:earned?`linear-gradient(135deg,${t.acc}22,${t.acc2}11)`:t.s2,border:`1.5px solid ${earned?t.acc:t.b1}`,opacity:earned?1:0.45}}>
+                  <div key={bd.id} className="badge-card" style={{background:earned?"linear-gradient(135deg,"+t.acc+"22,"+t.acc2+"11)":t.s2,border:"1.5px solid "+(earned?t.acc:t.b1),opacity:earned?1:0.45}}>
                     <div style={{fontSize:"1.6rem",marginBottom:4}}>{bd.icon}</div>
                     <div style={{fontSize:".7rem",fontWeight:700,color:earned?t.acc:t.tx3,marginBottom:3}}>{bd.label}</div>
                     <div style={{fontSize:".58rem",color:t.tx3}}>{bd.desc}</div>
@@ -5322,7 +5242,7 @@ return (
                     <div key={s.n} className="trow" style={{padding:"5px 8px",cursor:"pointer"}} onClick={()=>{doSelect(s);setPage("quran");}}>
                       <span style={{width:20,textAlign:"right",fontSize:".65rem",color:t.tx3,flexShrink:0}}>{i+1}</span>
                       <span style={{minWidth:80,fontSize:".72rem",fontWeight:600,color:s.p===100?t.gr:t.tx}}>{s.name}</span>
-                      <div className="tbar"><div className="tfill" style={{width:`${s.p}%`,background:s.p===100?t.gr:t.acc}}/></div>
+                      <div className="tbar"><div className="tfill" style={{width:s.p+"%",background:s.p===100?t.gr:t.acc}}/></div>
                       <span style={{fontSize:".65rem",color:s.p===100?t.gr:t.acc,fontWeight:700,width:32,textAlign:"right",flexShrink:0}}>{s.p}%</span>
                     </div>
                   ))}
@@ -5332,11 +5252,11 @@ return (
 
             {/* Révision espacée */}
             {spacedDue.length>0&&(
-              <div className="card" style={{border:`1px solid ${t.rd}44`}}>
-                <div className="ch" style={{background:`${t.rd}10`}}><span className="ct" style={{color:t.rd}}>Révision du jour — {spacedDue.length} versets</span></div>
+              <div className="card" style={{border:"1px solid "+t.rd+"44"}}>
+                <div className="ch" style={{background:t.rd+"10"}}><span className="ct" style={{color:t.rd}}>Révision du jour — {spacedDue.length} versets</span></div>
                 <div>
                   {spacedDue.slice(0,10).map((key,i)=>{const[sn,vn]=key.split("_").map(Number);const s=SURAHS.find(x=>x.n===sn);const v=Q[sn]?.[vn-1];return(
-                    <div key={i} style={{padding:"10px 14px",borderBottom:`1px solid ${t.b1}`,display:"flex",alignItems:"center",gap:8,transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=t.s2} onMouseLeave={e=>e.currentTarget.style.background=""}>
+                    <div key={i} style={{padding:"10px 14px",borderBottom:"1px solid "+t.b1,display:"flex",alignItems:"center",gap:8,transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=t.s2} onMouseLeave={e=>e.currentTarget.style.background=""}>
                       <div style={{flex:1}}><span style={{fontSize:".72rem",fontWeight:600,color:t.acc}}>{s?.name}</span><span style={{fontSize:".65rem",color:t.tx3,marginLeft:6}}>v.{vn}</span>{v&&<div style={{fontFamily:"Amiri Quran,serif",fontSize:".9rem",direction:"rtl",textAlign:"right",color:t.tx,marginTop:4}}>{v.ar}</div>}</div>
                       <button className="vbtn" style={{borderColor:t.gr,color:t.gr,flexShrink:0}} onClick={()=>{markSpaced(sn,vn);}}>✓ Révisé</button>
                     </div>
@@ -5352,9 +5272,9 @@ return (
                 <div className="cd-grid">
                   {cdS.map(s=>(
                     <div key={s.n} className="cdc" onClick={()=>{doSelect(s);setPage("quran");}}>
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}><span style={{fontFamily:"Amiri,serif",fontSize:".95rem",color:t.acc}}>{s.ar}</span>{s.p>0&&<span style={{fontSize:".6rem",color:t.gr,fontWeight:700,background:`${t.gr}18`,padding:"1px 6px",borderRadius:99}}>{s.p}%</span>}</div>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}><span style={{fontFamily:"Amiri,serif",fontSize:".95rem",color:t.acc}}>{s.ar}</span>{s.p>0&&<span style={{fontSize:".6rem",color:t.gr,fontWeight:700,background:t.gr+"18",padding:"1px 6px",borderRadius:99}}>{s.p}%</span>}</div>
                       <div style={{fontSize:".72rem",fontWeight:600,color:t.tx,marginBottom:3}}>{s.name}</div>
-                      <div style={{height:4,background:t.b1,borderRadius:99,overflow:"hidden",marginBottom:5}}><div style={{height:"100%",width:`${s.p}%`,background:t.gr,borderRadius:99}}/></div>
+                      <div style={{height:4,background:t.b1,borderRadius:99,overflow:"hidden",marginBottom:5}}><div style={{height:"100%",width:s.p+"%",background:t.gr,borderRadius:99}}/></div>
                       <div style={{fontSize:".62rem",color:t.tx3}}>{s.rem}v restants{s.days&&<span style={{color:t.bl,marginLeft:4}}>·~{s.days}j</span>}</div>
                     </div>
                   ))}
@@ -5376,8 +5296,8 @@ return (
               </div>
               <div style={{padding:"14px 0 4px"}}>
                 <div style={{fontSize:".68rem",color:t.tx3,marginBottom:8}}>Connecté en tant que</div>
-                <div style={{fontSize:".82rem",color:t.acc,fontWeight:600,marginBottom:14,padding:"10px 14px",background:`${t.acc}10`,borderRadius:10,border:`1px solid ${t.acc}25`}}>{user?.email}</div>
-                <button onClick={()=>supabase.auth.signOut()} style={{width:"100%",padding:"13px",background:"transparent",border:`1px solid ${t.rd}55`,borderRadius:12,color:t.rd,fontWeight:700,fontSize:".82rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,transition:"background .2s"}} onMouseEnter={e=>e.currentTarget.style.background=`${t.rd}0a`} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                <div style={{fontSize:".82rem",color:t.acc,fontWeight:600,marginBottom:14,padding:"10px 14px",background:t.acc+"10",borderRadius:10,border:"1px solid "+t.acc+"25"}}>{user?.email}</div>
+                <button onClick={()=>supabase.auth.signOut()} style={{width:"100%",padding:"13px",background:"transparent",border:"1px solid "+t.rd+"55",borderRadius:12,color:t.rd,fontWeight:700,fontSize:".82rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,transition:"background .2s"}} onMouseEnter={e=>e.currentTarget.style.background=t.rd+"0a"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                   Se déconnecter
                 </button>
@@ -5391,12 +5311,12 @@ return (
                 Notifications
               </div>
               <div style={{padding:"8px 0",display:"flex",flexDirection:"column",gap:10}}>
-                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 0",borderBottom:`1px solid ${t.b1}`}}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 0",borderBottom:"1px solid "+t.b1}}>
                   <div>
                     <div style={{fontSize:".8rem",color:t.tx,fontWeight:600}}>Rappel quotidien</div>
                     <div style={{fontSize:".63rem",color:t.tx3,marginTop:2}}>Recevoir un rappel chaque jour</div>
                   </div>
-                  <button onClick={notifEnabled?()=>{setNotifEnabled(false);sv("qnotif",false);}:requestNotifications} style={{padding:"6px 16px",borderRadius:20,border:`1.5px solid ${notifEnabled?t.gr:t.b2}`,background:notifEnabled?`${t.gr}18`:t.s2,color:notifEnabled?t.gr:t.tx2,fontSize:".7rem",cursor:"pointer",fontWeight:700,transition:"all .2s"}}>
+                  <button onClick={notifEnabled?()=>{setNotifEnabled(false);sv("qnotif",false);}:requestNotifications} style={{padding:"6px 16px",borderRadius:20,border:"1.5px solid "+(notifEnabled?t.gr:t.b2),background:notifEnabled?t.gr+"18":t.s2,color:notifEnabled?t.gr:t.tx2,fontSize:".7rem",cursor:"pointer",fontWeight:700,transition:"all .2s"}}>
                     {notifEnabled?"Activé":"Activer"}
                   </button>
                 </div>
@@ -5440,7 +5360,7 @@ return (
                 <div style={{fontSize:".62rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginBottom:10}}>Thème visuel</div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
                   {Object.entries(THEME_META).map(([key,meta])=>(
-                    <div key={key} onClick={()=>setTn(key)} style={{border:`2px solid ${tn===key?t.acc:t.b1}`,borderRadius:12,padding:"10px 12px",cursor:"pointer",background:tn===key?`${t.acc}10`:t.s2,transition:"all .2s",transform:tn===key?"translateY(-1px)":"none",boxShadow:tn===key?`0 4px 14px ${t.acc}33`:"none"}}>
+                    <div key={key} onClick={()=>setTn(key)} style={{border:"2px solid "+(tn===key?t.acc:t.b1),borderRadius:12,padding:"10px 12px",cursor:"pointer",background:tn===key?t.acc+"10":t.s2,transition:"all .2s",transform:tn===key?"translateY(-1px)":"none",boxShadow:tn===key?"0 4px 14px "+t.acc+"33":"none"}}>
                       <div style={{display:"flex",gap:4,marginBottom:6}}>
                         {meta.preview.map((c,i)=>(<div key={i} style={{width:14,height:14,borderRadius:"50%",background:c,border:"1px solid rgba(255,255,255,.1)"}}/>))}
                       </div>
@@ -5453,11 +5373,11 @@ return (
               </div>
               <div className="set-row">
                 <div><div className="set-lbl">Mode nuit automatique</div><div className="set-sub">Bascule en émeraude après 20h</div></div>
-                <button className={`toggle ${autoNight?"on":""}`} onClick={()=>setAutoNight(v=>!v)}/>
+                <button className={"toggle "+(autoNight?"on":"")} onClick={()=>setAutoNight(v=>!v)}/>
               </div>
               <div className="set-row">
                 <div><div className="set-lbl">Thème Ramadan</div><div className="set-sub">Décorations de la nuit bénie</div></div>
-                <button className={`toggle ${ramadanTheme?"on":""}`} onClick={()=>setRamadanTheme(v=>!v)}/>
+                <button className={"toggle "+(ramadanTheme?"on":"")} onClick={()=>setRamadanTheme(v=>!v)}/>
               </div>
             </div>
 
@@ -5469,7 +5389,7 @@ return (
               </div>
               <div className="font-grid">
                 {FONTS.map(f=>(
-                  <div key={f.id} className={`font-card ${fontId===f.id?"sel":""}`} onClick={()=>setFontId(f.id)}>
+                  <div key={f.id} className={"font-card "+(fontId===f.id?"sel":"")} onClick={()=>setFontId(f.id)}>
                     <div className="font-preview" style={{fontFamily:f.css}}>بِسْمِ اللَّهِ</div>
                     <div className="font-name">{f.name}</div>
                     <div className="font-desc">{f.desc}</div>
@@ -5486,7 +5406,7 @@ return (
               </div>
               <div style={{padding:"8px 0",display:"flex",flexDirection:"column",gap:6}}>
                 {RECITERS.map(r=>(
-                  <div key={r.id} style={{padding:"10px 14px",borderRadius:10,border:`1.5px solid ${rec.id===r.id?t.acc:t.b1}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",background:rec.id===r.id?`${t.acc}10`:t.s2,transition:"all .2s"}} onClick={()=>setRec(r)}>
+                  <div key={r.id} style={{padding:"10px 14px",borderRadius:10,border:"1.5px solid "+(rec.id===r.id?t.acc:t.b1),cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",background:rec.id===r.id?t.acc+"10":t.s2,transition:"all .2s"}} onClick={()=>setRec(r)}>
                     <div>
                       <div style={{fontSize:".76rem",fontWeight:600,color:rec.id===r.id?t.acc:t.tx}}>{r.name}</div>
                       <div style={{fontFamily:"Amiri,serif",fontSize:".85rem",color:t.tx3,marginTop:2}}>{r.ar}</div>
@@ -5505,7 +5425,7 @@ return (
               </div>
               <div className="set-row">
                 <div><div className="set-lbl">Exporter les mémorisations</div><div className="set-sub">Fichier JSON de sauvegarde</div></div>
-                <button className="tbtn" style={{borderColor:t.gr,color:t.gr}} onClick={()=>{const data=JSON.stringify({mem,settings,hist,badges,spaced,favorites,notes,khatmas,activeKhatma,readHistory,pageRead},null,2);const blob=new Blob([data],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=`alhifz_backup_${today()}.json`;a.click();}}>Exporter</button>
+                <button className="tbtn" style={{borderColor:t.gr,color:t.gr}} onClick={()=>{const data=JSON.stringify({mem,settings,hist,badges,spaced,favorites,notes,khatmas,activeKhatma,readHistory,pageRead},null,2);const blob=new Blob([data],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="alhifz_backup_"+today()+".json";a.click();}}>Exporter</button>
               </div>
               <div className="set-row">
                 <div><div className="set-lbl">Importer une sauvegarde</div><div className="set-sub">Restaurer depuis un fichier</div></div>
@@ -5527,8 +5447,8 @@ return (
                 Aide & Tutoriel
               </div>
               <div style={{padding:"8px 0",display:"flex",flexDirection:"column",gap:8}}>
-                <button onClick={()=>{setShowTutorial(true);setTutorialPage(0);}} style={{width:"100%",padding:"14px 16px",background:`linear-gradient(135deg,${t.acc}18,${t.acc2||t.acc}10)`,border:`1.5px solid ${t.acc}44`,borderRadius:12,color:t.acc,fontWeight:700,fontSize:".85rem",cursor:"pointer",display:"flex",alignItems:"center",gap:12,transition:"all .2s"}} onMouseEnter={e=>e.currentTarget.style.background=`linear-gradient(135deg,${t.acc}28,${t.acc2||t.acc}18)`} onMouseLeave={e=>e.currentTarget.style.background=`linear-gradient(135deg,${t.acc}18,${t.acc2||t.acc}10)`}>
-                  <div style={{width:38,height:38,borderRadius:10,background:`${t.acc}20`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                <button onClick={()=>{setShowTutorial(true);setTutorialPage(0);}} style={{width:"100%",padding:"14px 16px",background:"linear-gradient(135deg,"+t.acc+"18,"+t.acc2||t.acc+"10)",border:"1.5px solid "+t.acc+"44",borderRadius:12,color:t.acc,fontWeight:700,fontSize:".85rem",cursor:"pointer",display:"flex",alignItems:"center",gap:12,transition:"all .2s"}} onMouseEnter={e=>e.currentTarget.style.background="linear-gradient(135deg,"+t.acc+"28,"+t.acc2||t.acc+"18)"} onMouseLeave={e=>e.currentTarget.style.background="linear-gradient(135deg,"+t.acc+"18,"+t.acc2||t.acc+"10)"}>
+                  <div style={{width:38,height:38,borderRadius:10,background:t.acc+"20",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.acc} strokeWidth="1.8" strokeLinecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   </div>
                   <div style={{textAlign:"left"}}>
@@ -5537,7 +5457,7 @@ return (
                   </div>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.acc} strokeWidth="2" strokeLinecap="round" style={{marginLeft:"auto"}}><path d="M9 18l6-6-6-6"/></svg>
                 </button>
-                <button onClick={()=>{setShowOnboard(true);setOnboardDone(false);}} style={{width:"100%",padding:"12px 16px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:12,color:t.tx2,fontWeight:600,fontSize:".78rem",cursor:"pointer",display:"flex",alignItems:"center",gap:10,transition:"all .2s"}}>
+                <button onClick={()=>{setShowOnboard(true);setOnboardDone(false);}} style={{width:"100%",padding:"12px 16px",background:t.s2,border:"1px solid "+t.b2,borderRadius:12,color:t.tx2,fontWeight:600,fontSize:".78rem",cursor:"pointer",display:"flex",alignItems:"center",gap:10,transition:"all .2s"}}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                   Revoir l'écran d'accueil
                 </button>
@@ -5595,7 +5515,7 @@ return (
             <button onClick={()=>setFocusIdx(i=>Math.max(0,i-1))} disabled={focusIdx===0} style={{flex:1,padding:"12px",background:"#111",border:"1px solid #222",color:focusIdx===0?"#333":"#888",borderRadius:10,cursor:focusIdx===0?"default":"pointer",fontSize:"1rem",transition:"all .2s"}}>◄</button>
             {/* Barre de progression */}
             <div style={{flex:3,height:4,background:"#1a1a1a",borderRadius:99,overflow:"hidden"}}>
-              <div style={{height:"100%",width:`${(focusIdx+1)/verses.length*100}%`,background:"#c9a84c",borderRadius:99,transition:"width .3s"}}/>
+              <div style={{height:"100%",width:(focusIdx+1)/verses.length*100+"%",background:"#c9a84c",borderRadius:99,transition:"width .3s"}}/>
             </div>
             <button onClick={()=>setFocusIdx(i=>Math.min(verses.length-1,i+1))} disabled={focusIdx===verses.length-1} style={{flex:1,padding:"12px",background:"#111",border:"1px solid #222",color:focusIdx===verses.length-1?"#333":"#c9a84c",borderRadius:10,cursor:focusIdx===verses.length-1?"default":"pointer",fontSize:"1rem",transition:"all .2s"}}>►</button>
           </div>
@@ -5620,18 +5540,18 @@ return (
               const isMem=!!(mem[String(selS.n)]||{})[String(v.n)];
               const isPl=playing===v.n;
               return (
-                <div key={v.n} className="immersive-verse" id={`iv-${selS.n}-${v.n}`}>
-                  <div className="immersive-ar" style={{fontSize:`${arabicSize*1.2}rem`}}>
+                <div key={v.n} className="immersive-verse" id={"iv-"+selS.n+"-"+v.n}>
+                  <div className="immersive-ar" style={{fontSize:arabicSize*1.2+"rem"}}>
                     <TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/>
                     <span style={{color:t.acc,fontFamily:"Amiri,serif",fontSize:".75rem",marginRight:6}}> ﴿{v.n}﴾</span>
                   </div>
                   {showTr&&v.fr&&(<div className="immersive-fr">{v.fr}</div>)}
-                  {showTf&&v.tf&&(<div style={{background:`${t.pu}10`,borderRadius:10,padding:"10px 14px",marginTop:8,fontSize:".72rem",color:t.tx2,fontStyle:"italic",textAlign:"center",lineHeight:1.7}}>{v.tf}</div>)}
+                  {showTf&&v.tf&&(<div style={{background:t.pu+"10",borderRadius:10,padding:"10px 14px",marginTop:8,fontSize:".72rem",color:t.tx2,fontStyle:"italic",textAlign:"center",lineHeight:1.7}}>{v.tf}</div>)}
                   <div className="immersive-num">v.{v.n} {isMem&&"· ✓ mémorisé"}</div>
                   <div style={{display:"flex",gap:6,justifyContent:"center",marginTop:8}}>
-                    <button className={`vbtn ${isMem?"mem":""}`} onClick={()=>toggleV(selS.n,v.n)}>{isMem?"✓ Mémorisé":"+ Mémoriser"}</button>
-                    <button className={`vbtn ${isPl?"snd":""}`} onClick={()=>doPlay(v.n)}><Icons.Play size={10}/>{isPl?"Stop":"Écouter"}</button>
-                    <button className={`vbtn ${isFav(selS.n,v.n)?"mem":""}`} onClick={()=>toggleFav(selS.n,v.n,v.ar,v.fr,selS.name)}><Icons.Heart size={10} filled={isFav(selS.n,v.n)}/></button>
+                    <button className={"vbtn "+(isMem?"mem":"")} onClick={()=>toggleV(selS.n,v.n)}>{isMem?"✓ Mémorisé":"+ Mémoriser"}</button>
+                    <button className={"vbtn "+(isPl?"snd":"")} onClick={()=>doPlay(v.n)}><Icons.Play size={10}/>{isPl?"Stop":"Écouter"}</button>
+                    <button className={"vbtn "+(isFav(selS.n,v.n)?"mem":"")} onClick={()=>toggleFav(selS.n,v.n,v.ar,v.fr,selS.name)}><Icons.Heart size={10} filled={isFav(selS.n,v.n)}/></button>
                   </div>
                 </div>
               );
@@ -5655,8 +5575,8 @@ return (
 )}
       {mushafSurahModal&&(
         <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.8)",display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>setMushafSurahModal(false)}>
-          <div style={{width:"100%",maxWidth:600,background:t.s1,borderRadius:"20px 20px 0 0",maxHeight:"80vh",display:"flex",flexDirection:"column",overflow:"hidden",border:`1px solid ${t.b2}`}} onClick={e=>e.stopPropagation()}>
-            <div style={{padding:"16px 20px 12px",borderBottom:`1px solid ${t.b1}`}}>
+          <div style={{width:"100%",maxWidth:600,background:t.s1,borderRadius:"20px 20px 0 0",maxHeight:"80vh",display:"flex",flexDirection:"column",overflow:"hidden",border:"1px solid "+t.b2}} onClick={e=>e.stopPropagation()}>
+            <div style={{padding:"16px 20px 12px",borderBottom:"1px solid "+t.b1}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
                 <span style={{fontSize:".9rem",fontWeight:700,color:t.tx}}>📖 Choisir une sourate</span>
                 <button onClick={()=>setMushafSurahModal(false)} style={{background:"none",border:"none",color:t.tx3,fontSize:"1.2rem",cursor:"pointer"}}>✕</button>
@@ -5666,7 +5586,7 @@ return (
                 value={mushafSurahSearch}
                 onChange={e=>setMushafSurahSearch(e.target.value)}
                 placeholder="Rechercher une sourate…"
-                style={{width:"100%",padding:"10px 14px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:10,color:t.tx,fontSize:".8rem",outline:"none",boxSizing:"border-box"}}
+                style={{width:"100%",padding:"10px 14px",background:t.s2,border:"1px solid "+t.b2,borderRadius:10,color:t.tx,fontSize:".8rem",outline:"none",boxSizing:"border-box"}}
               />
             </div>
             <div style={{overflowY:"auto",flex:1,padding:"8px 0"}}>
@@ -5680,7 +5600,7 @@ return (
                 const pg=SURAH_PDF_PAGES[origIdx]||1;
                 const isActive=(mushafPage||1)===pg;
                 return(
-                  <div key={s.n} onClick={()=>{setMushafPage(pg);setMushafSurahModal(false);}} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 20px",cursor:"pointer",background:isActive?`${t.acc}15`:"transparent",borderLeft:isActive?`3px solid ${t.acc}`:"3px solid transparent",transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=`${t.acc}10`} onMouseLeave={e=>e.currentTarget.style.background=isActive?`${t.acc}15`:"transparent"}>
+                  <div key={s.n} onClick={()=>{setMushafPage(pg);setMushafSurahModal(false);}} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 20px",cursor:"pointer",background:isActive?t.acc+"15":"transparent",borderLeft:isActive?"3px solid "+t.acc:"3px solid transparent",transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=t.acc+"10"} onMouseLeave={e=>e.currentTarget.style.background=isActive?t.acc+"15":"transparent"}>
                     <div style={{width:32,height:32,borderRadius:8,background:isActive?t.acc:t.s2,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".65rem",fontWeight:700,color:isActive?"#000":t.tx3,flexShrink:0}}>{s.n}</div>
                     <div style={{flex:1}}>
                       <div style={{fontSize:".8rem",fontWeight:600,color:isActive?t.acc:t.tx}}>{s.name}</div>
@@ -5714,7 +5634,7 @@ return (
               <circle cx="100" cy="100" r="90" fill="none"
                 stroke={timerLeft===0?"#4caf50":t.acc}
                 strokeWidth="8"
-                strokeDasharray={`${2*Math.PI*90*(timerLeft!=null?1-(timerLeft/(timerDuration*60)):0)} ${2*Math.PI*90}`}
+                strokeDasharray={(2*Math.PI*90*(timerLeft!=null?1-(timerLeft/(timerDuration*60)):0))+" "+2*Math.PI*90}
                 strokeLinecap="round"
                 transform="rotate(-90 100 100)"
                 style={{transition:"stroke-dasharray 1s linear,stroke .5s"}}
@@ -5735,7 +5655,7 @@ return (
           {!timerRunning&&timerLeft===null&&(
             <div style={{display:"flex",gap:8,flexWrap:"wrap",justifyContent:"center"}} onClick={e=>e.stopPropagation()}>
               {[5,10,15,20,25,30,45,60].map(m=>(
-                <button key={m} onClick={()=>setTimerDuration(m)} style={{padding:"8px 14px",borderRadius:10,border:`1.5px solid ${timerDuration===m?t.acc:"rgba(255,255,255,.12)"}`,background:timerDuration===m?`${t.acc}20`:"rgba(255,255,255,.04)",color:timerDuration===m?t.acc:"rgba(255,255,255,.5)",fontSize:".78rem",cursor:"pointer",fontWeight:timerDuration===m?700:400}}>
+                <button key={m} onClick={()=>setTimerDuration(m)} style={{padding:"8px 14px",borderRadius:10,border:"1.5px solid "+(timerDuration===m?t.acc:"rgba(255,255,255,.12)"),background:timerDuration===m?t.acc+"20":"rgba(255,255,255,.04)",color:timerDuration===m?t.acc:"rgba(255,255,255,.5)",fontSize:".78rem",cursor:"pointer",fontWeight:timerDuration===m?700:400}}>
                   {m}min{m===25?" 🍅":""}
                 </button>
               ))}
@@ -5745,7 +5665,7 @@ return (
           {/* Contrôles */}
           <div style={{display:"flex",gap:12}} onClick={e=>e.stopPropagation()}>
             {!timerRunning&&timerLeft===null&&(
-              <button onClick={startTimer} style={{padding:"14px 40px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:14,color:"#000",fontWeight:800,fontSize:"1rem",cursor:"pointer",boxShadow:`0 4px 20px ${t.acc}44`}}>
+              <button onClick={startTimer} style={{padding:"14px 40px",background:"linear-gradient(135deg,"+t.acc+","+t.acc2+")",border:"none",borderRadius:14,color:"#000",fontWeight:800,fontSize:"1rem",cursor:"pointer",boxShadow:"0 4px 20px "+t.acc+"44"}}>
                 ▶ Démarrer
               </button>
             )}
@@ -5755,7 +5675,7 @@ return (
               </button>
             )}
             {!timerRunning&&timerLeft!==null&&timerLeft>0&&(
-              <button onClick={startTimer} style={{padding:"14px 32px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:14,color:"#000",fontWeight:800,fontSize:"1rem",cursor:"pointer"}}>
+              <button onClick={startTimer} style={{padding:"14px 32px",background:"linear-gradient(135deg,"+t.acc+","+t.acc2+")",border:"none",borderRadius:14,color:"#000",fontWeight:800,fontSize:"1rem",cursor:"pointer"}}>
                 ▶ Reprendre
               </button>
             )}
@@ -5780,32 +5700,32 @@ return (
       )}
 
       {playing!==null&&selS&&!focusMode&&!immersive&&(
-        <div style={{position:"fixed",bottom:"calc(70px + env(safe-area-inset-bottom))",left:12,right:12,zIndex:55,background:t.navBg,border:`1px solid ${t.acc}44`,borderRadius:14,padding:"9px 14px",display:"flex",alignItems:"center",gap:10,boxShadow:`0 -2px 20px rgba(0,0,0,.25)`,backdropFilter:"blur(12px)"}}>
-          <div style={{width:32,height:32,borderRadius:8,background:`${t.acc}15`,border:`1px solid ${t.acc}33`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+        <div style={{position:"fixed",bottom:"calc(70px + env(safe-area-inset-bottom))",left:12,right:12,zIndex:55,background:t.navBg,border:"1px solid "+t.acc+"44",borderRadius:14,padding:"9px 14px",display:"flex",alignItems:"center",gap:10,boxShadow:"0 -2px 20px rgba(0,0,0,.25)",backdropFilter:"blur(12px)"}}>
+          <div style={{width:32,height:32,borderRadius:8,background:t.acc+"15",border:"1px solid "+t.acc+"33",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
             <span style={{fontFamily:"Amiri,serif",fontSize:".7rem",color:t.acc}}>{selS.n}</span>
           </div>
           <div style={{flex:1,minWidth:0}}>
             <div style={{fontSize:".72rem",fontWeight:700,color:t.tx,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{selS.name} · v.{playing}</div>
             <div style={{display:"flex",alignItems:"center",gap:6,marginTop:3}}>
               <div style={{flex:1,height:3,background:t.b1,borderRadius:99,overflow:"hidden"}}>
-                <div style={{height:"100%",width:`${audioPct}%`,background:t.acc,borderRadius:99,transition:"width .3s linear"}}/>
+                <div style={{height:"100%",width:audioPct+"%",background:t.acc,borderRadius:99,transition:"width .3s linear"}}/>
               </div>
               <span style={{fontSize:".55rem",color:t.tx3,flexShrink:0}}>{rec.name?.split(" ")[0]}</span>
             </div>
           </div>
           <div style={{display:"flex",gap:6,alignItems:"center",flexShrink:0}}>
-            <button onClick={()=>doPlay(Math.max(1,playing-1))} style={{background:"none",border:`1px solid ${t.b2}`,borderRadius:7,padding:"4px 9px",color:t.tx2,cursor:"pointer",fontSize:".7rem",transition:"border-color .15s"}} onMouseEnter={e=>e.currentTarget.style.borderColor=t.acc} onMouseLeave={e=>e.currentTarget.style.borderColor=t.b2}>◄◄</button>
+            <button onClick={()=>doPlay(Math.max(1,playing-1))} style={{background:"none",border:"1px solid "+t.b2,borderRadius:7,padding:"4px 9px",color:t.tx2,cursor:"pointer",fontSize:".7rem",transition:"border-color .15s"}} onMouseEnter={e=>e.currentTarget.style.borderColor=t.acc} onMouseLeave={e=>e.currentTarget.style.borderColor=t.b2}>◄◄</button>
             <button onClick={()=>doPlay(playing)} style={{background:t.acc,border:"none",borderRadius:7,padding:"5px 12px",color:"#fff",cursor:"pointer",fontSize:".75rem",fontWeight:700,minWidth:36}}>
               {audioPlaying?"⏸":"▶"}
             </button>
-            <button onClick={()=>doPlay(Math.min(selS.v,playing+1))} style={{background:"none",border:`1px solid ${t.b2}`,borderRadius:7,padding:"4px 9px",color:t.tx2,cursor:"pointer",fontSize:".7rem",transition:"border-color .15s"}} onMouseEnter={e=>e.currentTarget.style.borderColor=t.acc} onMouseLeave={e=>e.currentTarget.style.borderColor=t.b2}>►►</button>
+            <button onClick={()=>doPlay(Math.min(selS.v,playing+1))} style={{background:"none",border:"1px solid "+t.b2,borderRadius:7,padding:"4px 9px",color:t.tx2,cursor:"pointer",fontSize:".7rem",transition:"border-color .15s"}} onMouseEnter={e=>e.currentTarget.style.borderColor=t.acc} onMouseLeave={e=>e.currentTarget.style.borderColor=t.b2}>►►</button>
             <button onClick={()=>{setPlaying(null);if(audioRef.current){audioRef.current.pause();audioRef.current.src="";setPlaylistActive(false);}}} style={{background:"none",border:"none",color:t.tx3,cursor:"pointer",fontSize:".9rem",padding:"4px",marginLeft:2}}>✕</button>
           </div>
         </div>
       )}
 
       {/* Scroll to top */}
-      <button onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{position:"fixed",bottom:"calc(76px + env(safe-area-inset-bottom))",right:14,zIndex:50,width:38,height:38,borderRadius:"50%",background:t.s2,border:`1px solid ${t.b2}`,color:t.tx2,fontSize:"1rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 8px rgba(0,0,0,.15)",transition:"all .2s",opacity:0.7}} onMouseEnter={e=>{e.currentTarget.style.opacity="1";e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.borderColor=t.acc;e.currentTarget.style.color=t.acc;}} onMouseLeave={e=>{e.currentTarget.style.opacity="0.7";e.currentTarget.style.transform="";e.currentTarget.style.borderColor=t.b2;e.currentTarget.style.color=t.tx2;}}>↑</button>
+      <button onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{position:"fixed",bottom:"calc(76px + env(safe-area-inset-bottom))",right:14,zIndex:50,width:38,height:38,borderRadius:"50%",background:t.s2,border:"1px solid "+t.b2,color:t.tx2,fontSize:"1rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 8px rgba(0,0,0,.15)",transition:"all .2s",opacity:0.7}} onMouseEnter={e=>{e.currentTarget.style.opacity="1";e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.borderColor=t.acc;e.currentTarget.style.color=t.acc;}} onMouseLeave={e=>{e.currentTarget.style.opacity="0.7";e.currentTarget.style.transform="";e.currentTarget.style.borderColor=t.b2;e.currentTarget.style.color=t.tx2;}}>↑</button>
 
       {/* Bottom nav */}
       <div className="bnav">
@@ -5819,7 +5739,7 @@ return (
           {id:"stats",icon:<Icons.Chart size={19}/>,label:"Stats"},
           {id:"settings",icon:<Icons.Settings size={19}/>,label:"Réglages"},
         ].map(tab=>(
-          <button key={tab.id} className={`bn ${page===tab.id?"on":""}`} onClick={()=>{if(tab.id===page)return;setPageTransition(true);setTimeout(()=>{setPage(tab.id);setPageTransition(false);},120);}}>
+          <button key={tab.id} className={"bn "+(page===tab.id?"on":"")} onClick={()=>{if(tab.id===page)return;setPageTransition(true);setTimeout(()=>{setPage(tab.id);setPageTransition(false);},120);}}>
             <div style={{position:"relative",display:"inline-flex"}}>
               {tab.icon}
               {tab.badge>0&&<span style={{position:"absolute",top:-4,right:-6,background:t.rd,color:"#fff",borderRadius:99,fontSize:".42rem",fontWeight:800,minWidth:14,height:14,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 3px",lineHeight:1}}>{tab.badge>99?"99+":tab.badge}</span>}
