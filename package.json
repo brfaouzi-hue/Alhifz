@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "postinstall": "node scripts/patch-esbuild.js"
+    "postinstall": "node scripts/patch-esbuild.cjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.104.0",

@@ -22,7 +22,6 @@ if (fs.existsSync(viteEsbuildPath) && fs.existsSync(topEsbuildPath)) {
     if (viteVer !== topVer) {
       console.log('Patching vite esbuild ' + viteVer + ' -> ' + topVer);
       copyDir(topEsbuildPath, viteEsbuildPath);
-      // Also patch @esbuild platform binaries
       const topAt = path.join(root, 'node_modules', '@esbuild');
       const viteAt = path.join(root, 'node_modules', 'vite', 'node_modules', '@esbuild');
       if (fs.existsSync(topAt) && fs.existsSync(viteAt)) {
@@ -36,5 +35,5 @@ if (fs.existsSync(viteEsbuildPath) && fs.existsSync(topEsbuildPath)) {
     console.log('Patch skipped:', e.message);
   }
 } else {
-  console.log('No nested vite esbuild found, skip patch');
+  console.log('No nested vite esbuild, skip patch');
 }
