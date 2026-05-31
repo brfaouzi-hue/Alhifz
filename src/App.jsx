@@ -2697,7 +2697,7 @@ const handleReset=async()=>{
 
   // FIX 1: doSelect — scroll uniquement sur mobile (<860px) — corrige le "saut" de page
   const doSelect=s=>{
-    setSelS(s);setPlaying(null);
+    setSelS(s);setPlaying(null);setPage("reader");
     setMushafPage(SURAH_PAGE[s.n]||1);
     if(audioRef.current){audioRef.current.pause();audioRef.current.src="";}
     if(window.innerWidth<860){
@@ -4496,6 +4496,48 @@ return (
                     )}
                   </div>
                 </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {page==="reader"&&selS&&(
+          <div style={{position:"fixed",inset:0,zIndex:50,background:t.bg,display:"flex",flexDirection:"column"}}>
+            {/* Header minimal */}
+            <div style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",borderBottom:"1px solid "+t.b1,background:t.navBg,backdropFilter:"blur(16px)",flexShrink:0}}>
+              <button onClick={()=>{setPage("quran");setPlaying(null);if(audioRef.current){audioRef.current.pause();}}}
+                style={{padding:"5px 10px",borderRadius:20,border:"1px solid "+t.b1,background:"transparent",color:t.tx,cursor:"pointer",fontSize:".8rem",fontWeight:700,flexShrink:0}}>
+                ←
+              </button>
+              <div style={{flex:1,textAlign:"center"}}>
+                <div style={{fontFamily:"Amiri,serif",fontSize:"1.1rem",color:t.acc,fontWeight:700}}>{selS.ar}</div>
+                <div style={{fontSize:".6rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px"}}>{selS.name} · {selS.v} versets</div>
+              </div>
+              <button onClick={()=>doPlay(playing===null?1:playing)}
+                style={{padding:"5px 10px",borderRadius:20,border:"1px solid "+(playing!==null?t.acc:t.b1),background:playing!==null?t.acc+"15":"transparent",color:playing!==null?t.acc:t.tx,cursor:"pointer",fontSize:".9rem",flexShrink:0}}>
+                {playing!==null?"⏸":"▶"}
+              </button>
+            </div>
+            {/* Contenu page par page */}
+            <div style={{flex:1,overflowY:"auto",padding:"0 0 80px 0"}}>
+              {loadState==="loading"&&(
+                <div style={{textAlign:"center",padding:"60px 20px",color:t.tx3}}>
+                  <div style={{fontSize:"1.5rem",marginBottom:10}}>⏳</div>
+                  <div>Chargement...</div>
+                </div>
+              )}
+              {loadState==="error"&&(
+                <div style={{textAlign:"center",padding:"60px 20px"}}>
+                  <div style={{color:t.rd,marginBottom:10}}>Connexion requise</div>
+                  <button onClick={()=>setLoadState("idle")} style={{padding:"8px 20px",background:t.acc,border:"none",borderRadius:10,color:"#fff",cursor:"pointer"}}>Réessayer</button>
+                </div>
+              )}
+              {loadState==="done"&&verses.length>0&&(
+                <QuranPageView verses={verses} selS={selS} t={t} tjc={tjc}
+                  showTj={showTj} showTr={showTr} arabicSize={arabicSize}
+                  mem={mem} hifzMode={hifzMode} hifzLevel={hifzLevel}
+                  playing={playing} toggleV={toggleV} toggleFav={toggleFav}
+                  isFav={isFav} doPlay={doPlay} sv={sv}/>
               )}
             </div>
           </div>
