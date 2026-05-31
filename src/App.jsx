@@ -2085,6 +2085,7 @@ export default function App() {
   const [setup,setSetup]=useState(()=>!ld("qset6",null));
 const [user, setUser] = useState(null);
 const [authReady, setAuthReady] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // iOS viewport-fit=cover + PWA setup
   useEffect(()=>{
@@ -3329,7 +3330,7 @@ const handleReset=async()=>{
        .reduce((s,d,i,arr)=>{const prev=arr[i-1]?hist[arr[i-1]]:0;return s+Math.max(0,(hist[d]||0)-prev);},0)
     :0;
 if(!authReady)return null;
-if(!user)return <AuthScreen authPage={authPage} setAuthPage={setAuthPage} email={email} setEmail={setEmail} password={password} setPassword={setPassword} authLoading={authLoading} authError={authError} onLogin={handleLogin} onSignup={handleSignup} onReset={handleReset}/>;
+  // Auth optionnelle
 return (
     <>
       <style>{buildCSS(t,tjc,arFont,tn,ramadanTheme)}</style>
@@ -3740,7 +3741,7 @@ return (
               <span style={{fontSize:".85rem",lineHeight:1}}>🔥</span>
               <span style={{fontSize:".65rem",fontWeight:800,color:"#f97316"}}>{memStreak}</span>
             </div>}
-            {user&&<button onClick={()=>setPage("settings")} title={user.email} style={{width:30,height:30,borderRadius:"50%",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".8rem",fontWeight:800,color:"#000",flexShrink:0,boxShadow:`0 0 8px ${t.acc}66`}}>{(user.email||"?")[0].toUpperCase()}</button>}
+            {user?<button onClick={()=>setPage("settings")} title={user.email} style={{width:30,height:30,borderRadius:"50%",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".8rem",fontWeight:800,color:"#000",flexShrink:0,boxShadow:`0 0 8px ${t.acc}66`}}>{(user.email||"?")[0].toUpperCase()}</button>:<button onClick={()=>setShowAuthModal(true)} style={{padding:"4px 10px",borderRadius:20,border:"1px solid "+t.acc,background:"transparent",color:t.acc,fontSize:".6rem",fontWeight:700,cursor:"pointer"}}>Se connecter</button>}
           </div>
         </div>
       </div>
@@ -5947,6 +5948,13 @@ return (
           }
         }}
       />
+      {showAuthModal&&(
+        <div style={{position:"fixed",inset:0,zIndex:999,background:"rgba(0,0,0,.75)",backdropFilter:"blur(8px)",display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>setShowAuthModal(false)}>
+          <div onClick={e=>e.stopPropagation()} style={{width:"100%",maxWidth:440}}>
+            <AuthScreen authPage={authPage} setAuthPage={setAuthPage} email={email} setEmail={setEmail} password={password} setPassword={setPassword} authLoading={authLoading} authError={authError} onLogin={async()=>{await onLogin();setShowAuthModal(false);}} onSignup={async()=>{await onSignup();setShowAuthModal(false);}} onReset={onReset} t={t} acc={t.acc} tn={tn}/>
+          </div>
+        </div>
+      )}
     </>
   );
 }
