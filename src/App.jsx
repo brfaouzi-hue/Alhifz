@@ -2046,117 +2046,73 @@ body>*{position:relative;z-index:1;}
 // Main App
 
 // ── Composant page par page (style Tarteel) ──
+
 function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
-                        mem, hifzMode, hifzLevel, reviewMode, playing,
-                        toggleV, toggleFav, isFav, setShareVerse, setWbwVerse,
-                        setWbwOpen, speechSupported, startListening, setSpeechScore,
-                        setRecitModal, doPlay, playing2, pageMode, setPageMode, sv}) {
-  const [curPage, setCurPage] = React.useState(null);
-  
-  // Grouper les versets par page
-  const pageGroups = React.useMemo(() => {
-    if(!verses.length) return {};
-    const groups = {};
-    verses.forEach(v => {
-      // Utiliser pg si disponible, sinon estimer depuis SURAH_PAGE
-      const pg = v.pg || (SURAH_PAGE[selS?.n] || 1);
-      if(!groups[pg]) groups[pg] = [];
-      groups[pg].push(v);
-    });
-    return groups;
-  }, [verses, selS]);
-  
-  const pages = React.useMemo(() => Object.keys(pageGroups).map(Number).sort((a,b)=>a-b), [pageGroups]);
-  
-  // Page courante = première page de la sourate par défaut
-  React.useEffect(() => {
-    if(pages.length > 0 && curPage === null) setCurPage(pages[0]);
-  }, [pages]);
-  
-  const pageIdx = pages.indexOf(curPage);
-  const prevPage = pageIdx > 0 ? pages[pageIdx-1] : null;
-  const nextPage = pageIdx < pages.length-1 ? pages[pageIdx+1] : null;
-  const currentVerses = pageGroups[curPage] || [];
-
-  if(!verses.length || curPage === null) return null;
-
+                        mem, hifzMode, hifzLevel, playing,
+                        toggleV, toggleFav, isFav, doPlay, sv}) {
+  const [curPage, setCurPage] = React.useState(0);
+  const pages = React.useMemo(() => {
+    if(!verses.length) return [];
+    const hasPg = verses.some(v => v.pg > 0);
+    if(hasPg) {
+      const groups = {};
+      verses.forEach(v => { const pg=v.pg||1; if(!groups[pg]) groups[pg]=[]; groups[pg].push(v); });
+      return Object.keys(groups).map(Number).sort((a,b)=>a-b).map(pg=>groups[pg]);
+    }
+    const chunks=[];
+    for(let i=0;i<verses.length;i+=15) chunks.push(verses.slice(i,i+15));
+    return chunks;
+  }, [verses]);
+  React.useEffect(()=>{setCurPage(0);},[selS?.n]);
+  if(!verses.length||!pages.length) return null;
+  const cur=pages[Math.min(curPage,pages.length-1)]||[];
+  const total=pages.length;
+  const pgNum=cur[0]?.pg||null;
   return (
-    <div style={{display:"flex",flexDirection:"column",height:"100%",overflow:"hidden"}}>
-      {/* Navigation pages */}
+    <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"6px 12px",background:t.s2,borderBottom:"1px solid "+t.b1,flexShrink:0}}>
-        <button onClick={()=>prevPage&&setCurPage(prevPage)} disabled={!prevPage}
-          style={{padding:"5px 14px",borderRadius:20,border:"1px solid "+t.b1,background:prevPage?t.acc+"18":"transparent",color:prevPage?t.acc:t.tx3,cursor:prevPage?"pointer":"default",fontSize:".7rem",fontWeight:700,transition:"all .15s"}}>
+        <button onClick={()=>setCurPage(p=>Math.max(0,p-1))} disabled={curPage===0}
+          style={{padding:"5px 14px",borderRadius:20,border:"1px solid "+(curPage>0?t.acc:t.b1),background:curPage>0?t.acc+"15":"transparent",color:curPage>0?t.acc:t.tx3,cursor:curPage>0?"pointer":"default",fontSize:".72rem",fontWeight:700}}>
           ← Préc.
         </button>
-        <div style={{textAlign:"center"}}>
-          <div style={{fontSize:".7rem",fontWeight:800,color:t.tx}}>Page {curPage}</div>
-          <div style={{fontSize:".55rem",color:t.tx3}}>{pageIdx+1} / {pages.length} pages · {currentVerses.length} versets</div>
+        <div style={{textAlign:"center",lineHeight:1.3}}>
+          <div style={{fontSize:".72rem",fontWeight:800,color:t.tx}}>{pgNum?"Page "+pgNum:curPage+1+" / "+total}</div>
+          <div style={{fontSize:".55rem",color:t.tx3}}>{cur.length} versets · {curPage+1}/{total}</div>
         </div>
-        <button onClick={()=>nextPage&&setCurPage(nextPage)} disabled={!nextPage}
-          style={{padding:"5px 14px",borderRadius:20,border:"1px solid "+t.b1,background:nextPage?t.acc+"18":"transparent",color:nextPage?t.acc:t.tx3,cursor:nextPage?"pointer":"default",fontSize:".7rem",fontWeight:700,transition:"all .15s"}}>
+        <button onClick={()=>setCurPage(p=>Math.min(total-1,p+1))} disabled={curPage>=total-1}
+          style={{padding:"5px 14px",borderRadius:20,border:"1px solid "+(curPage<total-1?t.acc:t.b1),background:curPage<total-1?t.acc+"15":"transparent",color:curPage<total-1?t.acc:t.tx3,cursor:curPage<total-1?"pointer":"default",fontSize:".72rem",fontWeight:700}}>
           Suiv. →
         </button>
       </div>
-      
-      {/* Versets de la page courante */}
-      <div style={{flex:1,overflow:"auto",padding:"12px 8px"}}>
-        <div style={{display:"flex",flexDirection:"column",gap:0,direction:"rtl"}}>
-          {currentVerses.map(v => {
-            const isMem = !!(mem[selS?.n]?.[v.n]);
-            const isPlaying = playing===v.n;
-            return (
-              <div key={v.n} style={{
-                padding:"8px 10px",
-                borderBottom:"1px solid "+t.b1+"44",
-                background:isPlaying?t.acc+"12":isMem?t.gr+"08":"transparent",
-                borderRadius:isPlaying?8:0,
-                transition:"background .2s",
-                cursor:"pointer"
-              }} onClick={()=>doPlay(selS.n, v.n, v.ar)}>
-                <div style={{display:"flex",alignItems:"flex-start",gap:8,direction:"rtl"}}>
-                  {/* Numéro verset */}
-                  <div style={{
-                    width:26,height:26,borderRadius:"50%",flexShrink:0,
-                    background:isMem?t.gr:t.acc,
-                    display:"flex",alignItems:"center",justifyContent:"center",
-                    fontSize:".55rem",fontWeight:800,color:"#fff",marginTop:2
-                  }}>{v.n}</div>
-                  {/* Texte arabe */}
-                  <div style={{flex:1,textAlign:"right"}}>
-                    <div style={{
-                      fontFamily:arabicSize>1.4?"Amiri Quran,serif":"Amiri,serif",
-                      fontSize:(arabicSize||1.4)+"rem",
-                      lineHeight:1.9,
-                      color:isPlaying?t.acc:t.tx,
-                      fontWeight:isPlaying?700:400,
-                    }}>
-                      {hifzMode
-                        ? <HifzVerseText ar={v.ar} level={hifzLevel[v.n]||0} tjc={tjc} showTj={showTj} vmark={v.n}/>
-                        : <TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/>
-                      }
-                    </div>
-                    {showTr && v.fr && (
-                      <div style={{fontSize:".72rem",color:t.tx3,textAlign:"right",direction:"ltr",marginTop:4,fontStyle:"italic",lineHeight:1.5}}>
-                        {v.fr.replace(/<[^>]*>/g,"")}
-                      </div>
-                    )}
+      <div style={{flex:1,overflowY:"auto",padding:"10px 6px"}}>
+        {cur.map(v=>{
+          const isMem=!!(mem[String(selS?.n)]?.[String(v.n)]);
+          const isPlay=playing===v.n;
+          return(
+            <div key={v.n} style={{padding:"10px 8px",borderBottom:"1px solid "+t.b1+"33",background:isPlay?t.acc+"10":isMem?t.gr+"06":"transparent",borderRadius:isPlay?8:0,cursor:"pointer"}}
+              onClick={()=>doPlay(selS.n,v.n,v.ar)}>
+              <div style={{display:"flex",alignItems:"flex-start",gap:8,direction:"rtl"}}>
+                <div style={{width:24,height:24,borderRadius:"50%",flexShrink:0,background:isMem?t.gr:isPlay?t.acc:t.b1,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".55rem",fontWeight:800,color:isMem||isPlay?"#fff":t.tx3,marginTop:4}}>{v.n}</div>
+                <div style={{flex:1}}>
+                  <div style={{fontFamily:"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.5)+"rem",lineHeight:2,color:isPlay?t.acc:t.tx,textAlign:"right",direction:"rtl"}}>
+                    <TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/>
                   </div>
-                </div>
-                {/* Actions mini (mémoriser, favori) */}
-                <div style={{display:"flex",gap:6,justifyContent:"flex-start",marginTop:6,paddingRight:34,direction:"ltr"}}>
-                  <button onClick={e=>{e.stopPropagation();toggleV(selS.n,v.n,v.ar);sv("qmem2",{...mem,[selS.n]:{...(mem[selS.n]||{}),[v.n]:!isMem?{d:Date.now()}:undefined}});}}
-                    style={{padding:"2px 8px",borderRadius:10,border:"1px solid "+(isMem?t.gr:t.b1),background:isMem?t.gr+"18":"transparent",color:isMem?t.gr:t.tx3,fontSize:".6rem",cursor:"pointer"}}>
-                    {isMem?"✦ Mémorisé":"+ Mémoriser"}
-                  </button>
-                  <button onClick={e=>{e.stopPropagation();toggleFav(selS.n,v.n);}}
-                    style={{padding:"2px 8px",borderRadius:10,border:"1px solid "+(isFav(selS.n,v.n)?t.rd:t.b1),background:"transparent",color:isFav(selS.n,v.n)?t.rd:t.tx3,fontSize:".6rem",cursor:"pointer"}}>
-                    {isFav(selS.n,v.n)?"❤":"♡"}
-                  </button>
+                  {showTr&&v.fr&&<div style={{fontSize:".7rem",color:t.tx3,direction:"ltr",marginTop:3,fontStyle:"italic",lineHeight:1.5}}>{v.fr.replace(/<[^>]*>/g,"")}</div>}
                 </div>
               </div>
-            );
-          })}
-        </div>
+              <div style={{display:"flex",gap:5,marginTop:5,direction:"ltr"}}>
+                <button onClick={e=>{e.stopPropagation();toggleV(String(selS.n),String(v.n),v.ar);}}
+                  style={{padding:"2px 8px",borderRadius:10,border:"1px solid "+(isMem?t.gr:t.b1),background:isMem?t.gr+"15":"transparent",color:isMem?t.gr:t.tx3,fontSize:".6rem",cursor:"pointer"}}>
+                  {isMem?"✦ Mémorisé":"+ Mémoriser"}
+                </button>
+                <button onClick={e=>{e.stopPropagation();toggleFav(String(selS.n),String(v.n));}}
+                  style={{padding:"2px 8px",borderRadius:10,border:"1px solid "+(isFav(String(selS.n),String(v.n))?t.rd:t.b1),background:"transparent",color:isFav(String(selS.n),String(v.n))?t.rd:t.tx3,fontSize:".6rem",cursor:"pointer"}}>
+                  {isFav(String(selS.n),String(v.n))?"❤":"♡"}
+                </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -3511,18 +3467,10 @@ return (
 
       {/* Splash */}
       {splash&&(
-        <div style={{position:"fixed",inset:0,zIndex:300,background:tn==="dark"?"#07090d":"#f0f7f0",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",animation:"fadeOut 0.5s ease 1.8s forwards"}}>
-          <style>{`@keyframes fadeOut{to{opacity:0;pointer-events:none;}}`}</style>
-          <svg width="120" height="120" viewBox="0 0 120 120" style={{marginBottom:20}}>
-            <defs><linearGradient id="sg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor={acc}/><stop offset="1" stopColor={acc3}/></linearGradient></defs>
-            <circle cx="60" cy="60" r="55" fill="none" stroke={acc} strokeWidth=".8" opacity=".3" strokeDasharray="4,3"/>
-            {[0,45,90,135,180,225,270,315].map(a=>(<g key={a} transform={`rotate(${a} 60 60)`}><line x1="60" y1="12" x2="60" y2="35" stroke="url(#sg)" strokeWidth="2" strokeLinecap="round"/><polygon points="60,12 56,22 60,35 64,22" fill={acc} opacity=".6"/></g>))}
-            <circle cx="60" cy="60" r="18" fill="none" stroke="url(#sg)" strokeWidth="2"/>
-            <circle cx="60" cy="60" r="10" fill={acc} opacity=".15"/>
-          </svg>
-          <div style={{fontFamily:"Amiri,serif",fontSize:"2.2rem",color:acc,textShadow:`0 0 30px ${acc}66`,letterSpacing:"2px",marginBottom:6}}>Al-Hifz</div>
-          <div style={{fontFamily:"Amiri Quran,serif",fontSize:".9rem",color:acc2,letterSpacing:"3px",opacity:.7}}>حفظ القرآن الكريم</div>
-          <div style={{marginTop:20,display:"flex",gap:5}}>{[0,1,2].map(i=>(<div key={i} style={{width:5,height:5,borderRadius:"50%",background:acc,animation:`pulse 1s ${i*0.2}s infinite`,opacity:.6}}/>))}</div>
+        <div style={{position:"fixed",inset:0,zIndex:300,background:tn==="dark"?"#07090d":"#f0f7f0",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:8}}>
+          <div style={{fontFamily:"Amiri,serif",fontSize:"2.5rem",color:acc,letterSpacing:2}}>Al-Hifz</div>
+          <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1rem",color:acc2,opacity:.7}}>حفظ القرآن الكريم</div>
+          <div style={{marginTop:16,display:"flex",gap:5}}>{[0,1,2].map(i=>(<div key={i} style={{width:5,height:5,borderRadius:"50%",background:acc,opacity:.3+i*.3}}/>))}</div>
         </div>
       )}
 
@@ -3728,9 +3676,6 @@ return (
       )}
 
       {/* ══ ONBOARDING ══ */}
-      {showOnboard&&(
-        <OnboardModal t={t} acc={acc} tn={tn} onDone={()=>{setShowOnboard(false);setOnboardDone(true);sv("qonboard",true);}} onSkip={()=>{setShowOnboard(false);setOnboardDone(true);sv("qonboard",true);}} onTutorial={()=>{setShowOnboard(false);setOnboardDone(true);sv("qonboard",true);setShowTutorial(true);setTutorialPage(0);}}/>
-      )}
 
       {/* ══ TUTORIEL COMPLET ══ */}
       {showTutorial&&(
