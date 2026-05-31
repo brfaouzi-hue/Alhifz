@@ -1657,7 +1657,7 @@ function colorTajweed(html){
 
 // MushafTajweedView — rendu React direct depuis l'API qurancdn JSON
 // Tajweed view — images depuis Supabase Storage
-function MushafTajweedView({page,fullscreen,edition}){
+function MushafTajweedView({page,fullscreen,edition,nightMode=false}){
   const pg=page||1;
   const isFr=edition?.id==="tajwid_fr";
   const imgNum=pg+7;
@@ -1731,7 +1731,7 @@ const fetchMushafPageUrl=async(pg, editionId)=>{
     return d?.page?.image_url||null;
   }catch{return null;}
 };
-function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onNext,onPrev,onGoTo,onRecite}) {
+function MushafPage({page,t,tjc,arFont,edition,nightMode=false,fullscreen,onToggleFullscreen,onNext,onPrev,onGoTo,onRecite}) {
   const ed=edition||MUSHAF_EDITIONS[0];
   const touchStart=useRef(null);
   const touchStartY=useRef(null);
@@ -1776,7 +1776,7 @@ function MushafPage({page,t,tjc,arFont,edition,fullscreen,onToggleFullscreen,onN
       </div>
 
       {/* Image Mushaf */}
-      <MushafTajweedView page={page||1} fullscreen={fullscreen} edition={ed}/>
+      <MushafTajweedView page={page||1} fullscreen={fullscreen} nightMode={nightMode} edition={ed}/>
     </div>
   );
 }
@@ -3779,7 +3779,7 @@ return (
             ))}
           </div>
           <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
-            <MushafPage page={mushafPage||1} t={t} tjc={tjc} arFont={arFont} edition={MUSHAF_EDITIONS.find(e=>e.id===mushafEdition)||MUSHAF_EDITIONS[0]} fullscreen={false} onToggleFullscreen={()=>setMushafFullscreen(f=>!f)} onNext={()=>goToPage(Math.min(604,(mushafPage||1)+1))} onPrev={()=>goToPage(Math.max(1,(mushafPage||1)-1))} onGoTo={(pg)=>goToPage(pg)}/>
+            <MushafPage nightMode={tn==="dark"} page={mushafPage||1} t={t} tjc={tjc} arFont={arFont} edition={MUSHAF_EDITIONS.find(e=>e.id===mushafEdition)||MUSHAF_EDITIONS[0]} fullscreen={false} onToggleFullscreen={()=>setMushafFullscreen(f=>!f)} onNext={()=>goToPage(Math.min(604,(mushafPage||1)+1))} onPrev={()=>goToPage(Math.max(1,(mushafPage||1)-1))} onGoTo={(pg)=>goToPage(pg)}/>
           </div>
         </div>
       )}
