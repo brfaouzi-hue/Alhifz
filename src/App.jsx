@@ -2090,7 +2090,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
           const isPlay=playing===v.n;
           return(
             <div key={v.n} style={{padding:"10px 8px",borderBottom:"1px solid "+t.b1+"33",background:isPlay?t.acc+"10":isMem?t.gr+"06":"transparent",borderRadius:isPlay?8:0,cursor:"pointer"}}
-              onClick={()=>doPlay(selS.n,v.n,v.ar)}>
+              onClick={()=>doPlay(v.n)}>
               <div style={{display:"flex",alignItems:"flex-start",gap:8,direction:"rtl"}}>
                 <div style={{width:24,height:24,borderRadius:"50%",flexShrink:0,background:isMem?t.gr:isPlay?t.acc:t.b1,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".55rem",fontWeight:800,color:isMem||isPlay?"#fff":t.tx3,marginTop:4}}>{v.n}</div>
                 <div style={{flex:1}}>
@@ -3467,10 +3467,9 @@ return (
 
       {/* Splash */}
       {splash&&(
-        <div style={{position:"fixed",inset:0,zIndex:300,background:tn==="dark"?"#07090d":"#f0f7f0",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:8}}>
-          <div style={{fontFamily:"Amiri,serif",fontSize:"2.5rem",color:acc,letterSpacing:2}}>Al-Hifz</div>
-          <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1rem",color:acc2,opacity:.7}}>حفظ القرآن الكريم</div>
-          <div style={{marginTop:16,display:"flex",gap:5}}>{[0,1,2].map(i=>(<div key={i} style={{width:5,height:5,borderRadius:"50%",background:acc,opacity:.3+i*.3}}/>))}</div>
+        <div style={{position:"fixed",inset:0,zIndex:300,background:tn==="dark"?"#07090d":"#f5f7f0",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:6}}>
+          <div style={{fontFamily:"Amiri,serif",fontSize:"2.8rem",color:acc,letterSpacing:1}}>Al-Hifz</div>
+          <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1rem",color:acc,opacity:.6}}>حفظ القرآن الكريم</div>
         </div>
       )}
 
