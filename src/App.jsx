@@ -741,7 +741,7 @@ function WbwModal({sn,vn,t}){
 }
 function TajwidSpan({text,enabled,tjc}) {
   const raw=text||"";
-  const clean=raw.replace(/\[[a-z]+\](.*?)\[\/[a-z]+\]/g,"$1");
+  const clean=raw.replace(/\[[a-z]+\](.*?)\[\/[a-z]+\]/g,"$1").replace(/[﴿﴾]/g,"").replace(/\s+[١٢٣٤٥٦٧٨٩٠]+\s*$/,"");
   if(!enabled) return <bdi style={{direction:"rtl"}}>{clean.replace(/<[^>]*>/g,"")}</bdi>;
   if(!clean.includes("<tajweed")) return <bdi style={{direction:"rtl",letterSpacing:0}}>{clean.replace(/<[^>]*>/g,"")}</bdi>;
   // Remplacer les balises tajweed par des spans colorés
@@ -1893,7 +1893,7 @@ body>*{position:relative;z-index:1;}
 .v-info{font-size:.65rem;color:${t.tx3};}
 .vbar{height:4px;background:${t.b2};border-radius:99px;overflow:hidden;margin-top:7px;}
 .vfill{height:100%;background:${t.gr};border-radius:99px;transition:width .5s;}
-.vtoolbar{padding:7px 12px;border-bottom:1px solid ${t.b1};display:flex;align-items:center;gap:5px;flex-wrap:wrap;background:${t.s2};}
+.vtoolbar{overflow-x:auto;padding:7px 12px;border-bottom:1px solid ${t.b1};display:flex;align-items:center;gap:5px;flex-wrap:wrap;background:${t.s2};}
 .tbtn{padding:4px 9px;border-radius:99px;border:1px solid ${t.b2};background:transparent;color:${t.tx2};font-size:.65rem;cursor:pointer;transition:all .2s;white-space:nowrap;}
 .tbtn:hover{border-color:${acc};color:${acc};transform:translateY(-1px);}
 .tbtn.on{background:${acc};border-color:${acc};color:#fff;font-weight:600;}
@@ -4397,6 +4397,7 @@ return (
                   </div>
 
                   <div className="vtoolbar">
+                  <button className={"tbtn"+(pageMode?" on":"")} onClick={()=>{const v=!pageMode;setPageMode(v);sv("qpagemode",v);}} style={{borderColor:pageMode?t.acc:t.b1,color:pageMode?t.acc:t.tx3}} title="Mode page">📄</button>
                     <button className={`tbtn ${showTj?"on":""}`} onClick={()=>setShowTj(v=>!v)}>Tajwid</button>
                     <button className={`tbtn ${showTr?"on":""}`} onClick={()=>setShowTr(v=>!v)}>Traduction</button>
                     <button className={`tbtn ${showTf?"on":""}`} onClick={()=>setShowTf(v=>!v)}>Tafsir</button>
@@ -4410,7 +4411,6 @@ return (
                       <button className="tbtn" onClick={()=>setArabicSize(s=>Math.max(1,s-0.15))}>A-</button>
                       <button className="tbtn" onClick={()=>setArabicSize(s=>Math.min(3,s+0.15))}>A+</button>
                     </div>
-                  <button className={"tbtn"+(pageMode?" on":"")} onClick={()=>{const v=!pageMode;setPageMode(v);sv("qpagemode",v);}} style={{borderColor:pageMode?t.acc:t.b1,color:pageMode?t.acc:t.tx3}} title="Mode page">📄</button>
                   </div>
 
                   {SURAH_INFO[selS.n]&&(<div style={{padding:"10px 14px",background:t.s3,borderBottom:`1px solid ${t.b1}`,fontSize:".7rem",color:t.tx2,lineHeight:1.6}}><div style={{fontWeight:700,color:t.acc,marginBottom:3,fontSize:".65rem",textTransform:"uppercase",letterSpacing:"1px"}}>Vertus & occasions</div><div style={{marginBottom:4}}>{SURAH_INFO[selS.n].virtue}</div><div style={{color:t.gr,fontWeight:600}}>Quand réciter : {SURAH_INFO[selS.n].occasion}</div></div>)}
