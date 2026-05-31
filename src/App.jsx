@@ -781,7 +781,7 @@ function TajwidSpan({text,enabled,tjc}) {
     return <bdi style={{direction:"rtl",letterSpacing:0,lineHeight:"inherit"}}>{parts}</bdi>;
   }catch{
     // Fallback sécurisé : texte brut sans couleurs
-    return <bdi style={{direction:"rtl",letterSpacing:0}}>{clean}</bdi>;
+    return <bdi style={{direction:"rtl",letterSpacing:0}} dangerouslySetInnerHTML={{__html:clean}}/>;
   }
 }
 
@@ -1708,8 +1708,9 @@ function MushafTajweedView({page,fullscreen,edition}){
       {error&&(
         <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,padding:20}}>
           <div style={{fontSize:"2rem"}}>⚠️</div>
-          <div style={{fontSize:".8rem",color:"#c62828",textAlign:"center"}}>Page non disponible</div>
+          <div style={{fontSize:".8rem",color:"#c62828",textAlign:"center",lineHeight:1.6}}>Image non disponible<br/><span style={{fontSize:".65rem",color:"#888"}}>Vérifie ta connexion internet</span></div>
           <button onClick={()=>{setError(false);setLoaded(false);}} style={{padding:"7px 16px",border:"1px solid #c9a84c",background:"transparent",color:"#c9a84c",borderRadius:8,cursor:"pointer"}}>↺ Réessayer</button>
+          <a href={"https://quran.com/page/"+pg} target="_blank" rel="noreferrer" style={{fontSize:".65rem",color:"#c9a84c",textDecoration:"none",marginTop:4}}>Voir sur quran.com →</a>
         </div>
       )}
       <img
@@ -3800,6 +3801,7 @@ return (
       {page==="mushaf"&&(
         <div style={{position:"fixed",inset:0,zIndex:10,display:"flex",flexDirection:"column",background:"#0d1000",paddingTop:"env(safe-area-inset-top)",paddingBottom:"calc(62px + env(safe-area-inset-bottom))"}}>
           <div style={{display:"flex",gap:6,padding:"6px 10px",background:"rgba(0,0,0,.8)",flexShrink:0,overflowX:"auto",borderBottom:"1px solid rgba(201,168,76,.15)"}}>
+            <button onClick={()=>setPage("home")} style={{flexShrink:0,padding:"5px 12px",borderRadius:20,border:"1px solid rgba(201,168,76,.4)",background:"rgba(201,168,76,.1)",color:"#c9a84c",cursor:"pointer",fontSize:".75rem",fontWeight:700,whiteSpace:"nowrap"}}>← Retour</button>
             {MUSHAF_EDITIONS.map(ed=>(
               <button key={ed.id} onClick={()=>setMushafEdition(ed.id)} style={{padding:"5px 12px",borderRadius:20,border:`1.5px solid ${mushafEdition===ed.id?"#c9a84c":"rgba(201,168,76,.2)"}`,background:mushafEdition===ed.id?"rgba(201,168,76,.15)":"transparent",color:mushafEdition===ed.id?"#c9a84c":"rgba(201,168,76,.5)",fontSize:".6rem",fontWeight:mushafEdition===ed.id?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
                 {ed.name}
