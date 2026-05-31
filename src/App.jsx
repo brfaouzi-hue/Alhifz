@@ -741,48 +741,18 @@ function WbwModal({sn,vn,t}){
 }
 function TajwidSpan({text,enabled,tjc}) {
   const raw=text||"";
-  // Strip anciens tags de marquage [m]...[/m]
   const clean=raw.replace(/\[[a-z]+\](.*?)\[\/[a-z]+\]/g,"$1");
-
-  if(!enabled){
-    return <bdi style={{direction:"rtl"}}>{clean}</bdi>;
-  }
-  if(!clean.includes("<tajweed")){
-    return <bdi style={{direction:"rtl",letterSpacing:0}}>{clean}</bdi>;
-  }
-
-  // Parser robuste via DOMParser — gère tous les cas (imbriqués, sans guillemets, auto-fermants)
-  try{
-    const wrapped=`<span>${clean}</span>`;
-    const doc=new DOMParser().parseFromString(wrapped,"text/html");
-    const root=doc.querySelector("span");
-    if(!root) throw new Error("parse fail");
-    let key=0;
-    const renderNode=(node)=>{
-      if(node.nodeType===3){ // texte
-        return node.textContent?<React.Fragment key={key++}>{node.textContent}</React.Fragment>:null;
-      }
-      if(node.nodeType===1){
-        const tag=node.tagName.toLowerCase();
-        const children=Array.from(node.childNodes).map(renderNode).filter(Boolean);
-        if(tag==="tajweed"){
-          const cls=node.getAttribute("class")||"";
-          const colorFn=TAJWID_CLASS_COLORS[cls];
-          const color=colorFn?colorFn(tjc):null;
-          if(color) return <bdi key={key++} style={{color,fontWeight:"bold",letterSpacing:0}} title={cls.replace(/_/g," ")}>{children}</bdi>;
-          return <React.Fragment key={key++}>{children}</React.Fragment>;
-        }
-        // Tout autre tag HTML — on prend juste le texte
-        return <React.Fragment key={key++}>{children}</React.Fragment>;
-      }
-      return null;
-    };
-    const parts=Array.from(root.childNodes).map(renderNode).filter(Boolean);
-    return <bdi style={{direction:"rtl",letterSpacing:0,lineHeight:"inherit"}}>{parts}</bdi>;
-  }catch{
-    // Fallback sécurisé : texte brut sans couleurs
-    return <bdi style={{direction:"rtl",letterSpacing:0}} dangerouslySetInnerHTML={{__html:clean}}/>;
-  }
+  if(!enabled) return <bdi style={{direction:"rtl"}}>{clean.replace(/<[^>]*>/g,"")}</bdi>;
+  if(!clean.includes("<tajweed")) return <bdi style={{direction:"rtl",letterSpacing:0}}>{clean.replace(/<[^>]*>/g,"")}</bdi>;
+  // Remplacer les balises tajweed par des spans colorés
+  const colored=clean
+    .replace(/<tajweed[^>]*class=["']?([^"'> ]+)["']?[^>]*>/g,(m,cls)=>{
+      const colorFn=TAJWID_CLASS_COLORS[cls];
+      const color=colorFn?colorFn(tjc):null;
+      return color?`<span style="color:${color};font-weight:bold" title="${cls.replace(/_/g,' ')}">`:'<span>';
+    })
+    .replace(/<\/tajweed>/g,"</span>");
+  return <bdi style={{direction:"rtl",letterSpacing:0,lineHeight:"inherit"}} dangerouslySetInnerHTML={{__html:colored}}/>;
 }
 
 // ═══════════════════════════════════════
