@@ -1837,10 +1837,10 @@ ${t.arabesque ? (
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:${tn==="dark"?".018":".035"};background-image:repeating-linear-gradient(0deg,transparent,transparent 40px,${acc} 40px,${acc} 41px),repeating-linear-gradient(90deg,transparent,transparent 40px,${acc} 40px,${acc} 41px),repeating-linear-gradient(45deg,transparent,transparent 28px,${acc} 28px,${acc} 29px),repeating-linear-gradient(-45deg,transparent,transparent 28px,${acc} 28px,${acc} 29px);}
 ${ramadan?`body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle,${acc}33 1px,transparent 1px);background-size:30px 30px;opacity:.4;}`:""}
 body>*{position:relative;z-index:1;}
-.wrap{animation:pageIn .22s cubic-bezier(.4,0,.2,1);}
+.wrap{animation:pageIn .25s ease;}
 .wrap.transitioning{animation:pageOut .12s ease forwards;}
 @keyframes pageOut{to{opacity:0;transform:translateY(4px)}}
-@keyframes pageIn{from{opacity:0;transform:translateY(8px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes pageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes memGlow{0%{box-shadow:0 0 0 0 ${t.gr}66}70%{box-shadow:0 0 0 10px ${t.gr}00}100%{box-shadow:0 0 0 0 ${t.gr}00}}
@@ -2372,22 +2372,6 @@ const handleReset=async()=>{
       Object.keys(localStorage).filter(k=>k.startsWith("qv3_")||k.startsWith("qv4_")).forEach(k=>localStorage.removeItem(k));
     }catch{}
     return()=>clearTimeout(t);
-    // Pre-cache Juz 30 sourates en arrière-plan
-    setTimeout(()=>{
-      const juz30=[78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114];
-      juz30.forEach(n=>{
-        const cacheKey="qv5_"+n;
-        try{if(localStorage.getItem(cacheKey))return;}catch{return;}
-        fetch("https://api.qurancdn.com/api/qdc/verses/by_chapter/"+n+"?language=fr&words=false&per_page=300&fields=text_uthmani_tajweed,text_uthmani&translations=31")
-          .then(r=>r.json()).then(data=>{
-            const ayahs=data?.verses||[];
-            if(!ayahs.length)return;
-            const localQ=Q[n]||[];
-            const result=ayahs.map((a,i)=>({n:a.verse_number,ar:a.text_uthmani_tajweed||a.text_uthmani||"",fr:a.translations?.[0]?.text||localQ[i]?.fr||"",tf:localQ[i]?.tf||""}));
-            try{localStorage.setItem(cacheKey,JSON.stringify(result));}catch{}
-          }).catch(()=>{});
-      });
-    }, 3000); // Délai de 3s pour ne pas impacter le chargement initial
   },[]);
 
   useEffect(()=>{
@@ -3475,44 +3459,26 @@ return (
 
       {/* Setup */}
       {setup&&(
-        <div style={{position:"fixed",inset:0,zIndex:500,background:"rgba(0,0,0,.75)",backdropFilter:"blur(8px)",display:"flex",alignItems:"flex-end",justifyContent:"center",padding:"0 0 max(24px,env(safe-area-inset-bottom)) 0"}}>
-          <div style={{background:t.s1,borderRadius:"24px 24px 0 0",padding:"28px 24px",width:"100%",maxWidth:480,border:"1px solid "+t.b1}}>
-            <div style={{textAlign:"center",marginBottom:24}}>
-              <div style={{fontFamily:"Amiri,serif",fontSize:"2rem",color:t.acc,marginBottom:4}}>بِسْمِ ٱللَّهِ</div>
-              <div style={{fontSize:".62rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"2px"}}>Al-Hifz — Le mémorisateur</div>
-              <div style={{width:40,height:2,background:t.acc,margin:"12px auto 16px",borderRadius:99}}/>
-              <div style={{fontSize:".85rem",color:t.tx,lineHeight:1.6}}>Bienvenue ! Configure ton parcours de mémorisation.</div>
-            </div>
-            <div style={{display:"flex",flexDirection:"column",gap:16}}>
-              <div>
-                <label style={{display:"block",fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginBottom:6}}>Versets mémorisés avant Al-Hifz</label>
-                <p style={{fontSize:".6rem",color:t.tx3,marginBottom:8,lineHeight:1.5}}>Si tu connais déjà des sourates, entre le nombre de versets mémorisés. Laisse 0 si tu débutes.</p>
-                <input className="sinp" type="number" min="0" max="6236" placeholder="0 si tu débutes" value={baselineInput} onChange={e=>setBaselineInput(e.target.value)} style={{width:"100%"}}/>
-              </div>
-              <div>
-                <label style={{display:"block",fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginBottom:6}}>Objectif quotidien</label>
-                <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-                  {[3,5,7,10,15,20].map(n=>(
-                    <button key={n} onClick={()=>setGoal(String(n))} style={{padding:"8px 14px",borderRadius:10,border:"1px solid "+(goal==String(n)?t.acc:t.b1),background:goal==String(n)?t.acc+"18":"transparent",color:goal==String(n)?t.acc:t.tx3,fontWeight:goal==String(n)?700:400,cursor:"pointer",fontSize:".75rem",transition:"all .15s"}}>
-                      {n}v/j
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
+        <div className="overlay">
+          <div className="modal">
+            <h2>بِسْمِ ٱللَّهِ</h2>
+            <p>Bienvenue dans Al-Hifz. Configure ton suivi de mémorisation.</p>
+            <label>Sourates déjà mémorisées</label>
+            <p style={{fontSize:".63rem",color:t.tx3,marginBottom:6,lineHeight:1.5}}>Si tu connais déjà des sourates, entre le nombre de versets. Ils seront exclus du calcul de rythme — seules tes nouvelles mémorisations compteront.</p>
+            <input type="number" min="0" max="6236" placeholder="0 si tu débutes" value={baselineInput} onChange={e=>setBaselineInput(e.target.value)}/>
+            <label>Nouveaux versets à mémoriser par jour</label>
+            <input type="number" min="1" max="100" placeholder="5" value={goal} onChange={e=>setGoal(e.target.value)}/>
+            <label>Date de début</label>
+            <input type="date" value={startDate} onChange={e=>setStartDate(e.target.value)}/>
             <button className="mbtn" onClick={()=>{
               setSettings({
                 dailyGoal:parseInt(goal)||5,
                 startDate,
-                goal:parseInt(goal)||5,
                 baselineVerses:parseInt(baselineInput)||0,
                 baselineDate:today(),
               });
               setSetup(false);
-              sv("qset6",{dailyGoal:parseInt(goal)||5,startDate,goal:parseInt(goal)||5,baselineVerses:parseInt(baselineInput)||0,baselineDate:today()});
-            }} style={{width:"100%",marginTop:24,padding:"14px",background:t.acc,border:"none",borderRadius:12,color:"#fff",fontWeight:800,fontSize:".9rem",cursor:"pointer",letterSpacing:".5px"}}>
-              Commencer ma mémorisation ✦
-            </button>
+            }}>Commencer →</button>
           </div>
         </div>
       )}
@@ -3722,20 +3688,16 @@ return (
           <div className="logo">
             <div style={{display:"flex",flexDirection:"column",lineHeight:1.1}}>
               <div style={{display:"flex",alignItems:"baseline",gap:5}}>
-                <span className="logo-h">{page==="quran"&&selS?selS.name:page==="pages"?"Révision":page==="khatma"?"Khatma":page==="quiz"?"Quiz":page==="stats"?"Statistiques":page==="settings"?"Réglages":page==="mushaf"?"Mushaf":"Al-Hifz"}</span>
-                {(page==="home"||page==="quran"&&!selS)&&<span className="logo-ar">القرآن</span>}
-                {page==="quran"&&selS&&<span style={{fontFamily:"Amiri,serif",fontSize:".85rem",color:t.acc,marginLeft:2}}>{selS.ar}</span>}
+                <span className="logo-h">Al-Hifz</span>
+                <span className="logo-ar">القرآن</span>
               </div>
-              <span style={{fontSize:".42rem",color:t.tx3,letterSpacing:"1.5px",textTransform:"uppercase",whiteSpace:"nowrap"}}>
-                {page==="quran"&&selS?`Sourate ${selS.n} · Juz ${selS.juz} · ${selS.type}`:"LE MÉMORISATEUR"}
-              </span>
+              <span style={{fontSize:".42rem",color:t.tx3,letterSpacing:"1.5px",textTransform:"uppercase",whiteSpace:"nowrap",fontStyle:"italic"}}>Le mémorisateur</span>
             </div>
           </div>
           <div className="tb-r">
             <button className="tbtn" style={{borderColor:t.pu,color:t.pu,fontSize:".6rem"}} onClick={()=>setShowAIPlan(true)}>✦ Mon Parcours</button>
             <button className="tbtn" style={{borderColor:timerRunning?t.acc:t.gr,color:timerRunning?t.acc:t.gr,fontSize:".6rem",fontWeight:timerRunning?800:400}} onClick={()=>setTimerOpen(true)}>{timerRunning&&timerLeft?fmtTime(timerLeft):"⏱"}</button>
             <button className="ib" title={tn==="light"?"Passer en mode nuit":"Passer en mode jour"} onClick={()=>setTn(tn==="light"?"emerald":"light")}>{tn==="light"?<Icons.Moon size={14}/>:<Icons.Sun size={14}/>}</button>
-            {(()=>{const todayKey=today();const todayV=hist[todayKey]||0;const vpd_=settings?.dailyGoal||settings?.goal||5;return(<div style={{display:"flex",alignItems:"center",gap:3,padding:"3px 8px",background:todayV>=vpd_?t.gr+"18":t.acc+"12",borderRadius:20,border:"1px solid "+(todayV>=vpd_?t.gr:t.acc)+"30"}}><span style={{fontSize:".62rem",fontWeight:800,color:todayV>=vpd_?t.gr:t.acc}}>{todayV}/{vpd_}</span><span style={{fontSize:".48rem",color:t.tx3,marginLeft:1}}>v.</span></div>);})()}
             {memStreak>0&&<div style={{display:"flex",alignItems:"center",gap:2,padding:"3px 7px",background:"rgba(249,115,22,.15)",borderRadius:8,border:"1px solid rgba(249,115,22,.3)",flexShrink:0}}>
               <span style={{fontSize:".85rem",lineHeight:1}}>🔥</span>
               <span style={{fontSize:".65rem",fontWeight:800,color:"#f97316"}}>{memStreak}</span>
@@ -3774,25 +3736,6 @@ return (
             <span style={{fontSize:".6rem",color:"#f97316",opacity:.7}}>Voir stats →</span>
           </div>
         )}
-        {/* Progression quotidienne */}
-        {settings&&(()=>{
-          const todayKey=today();
-          const todayV=hist[todayKey]||0;
-          const goal_=(settings?.dailyGoal||settings?.goal||5);
-          const pct_=Math.min(100,Math.round(todayV/goal_*100));
-          if(todayV===0) return null;
-          return(
-            <div style={{marginTop:6,padding:"8px 12px",background:t.s2,borderRadius:10,border:"1px solid "+t.b1}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}>
-                <span style={{fontSize:".6rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px"}}>Aujourd'hui</span>
-                <span style={{fontSize:".7rem",fontWeight:800,color:pct_>=100?t.gr:t.acc}}>{todayV}/{goal_} versets {pct_>=100?"✦":""}</span>
-              </div>
-              <div style={{height:5,background:t.b1,borderRadius:99,overflow:"hidden"}}>
-                <div style={{height:"100%",width:pct_+"%",background:pct_>=100?"linear-gradient(90deg,"+t.gr+","+t.gr+"cc)":"linear-gradient(90deg,"+t.acc+","+t.acc+"cc)",borderRadius:99,transition:"width .4s ease"}}/>
-              </div>
-            </div>
-          );
-        })()}
       </div>}
 
       {/* MUSHAF — hors du wrap pour éviter les conflits de scroll iOS */}
@@ -3818,31 +3761,6 @@ return (
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
 
             {/* ── Bloc Al-Hifz exact ── */}
-
-            {/* Widget objectif quotidien */}
-            {settings&&(()=>{
-              const todayKey=today();
-              const todayV=hist[todayKey]||0;
-              const goal_=(settings?.dailyGoal||settings?.goal||5);
-              const pct_=Math.min(100,Math.round(todayV/goal_*100));
-              const done=pct_>=100;
-              return(
-                <div style={{background:done?"linear-gradient(135deg,"+t.gr+"18,"+t.gr+"08)":"linear-gradient(135deg,"+t.s2+","+t.s3+")",borderRadius:14,padding:"12px 16px",border:"1px solid "+(done?t.gr+"40":t.b1),display:"flex",alignItems:"center",gap:12}}>
-                  <div style={{width:44,height:44,borderRadius:"50%",background:done?t.gr+"20":t.acc+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.4rem",flexShrink:0}}>
-                    {done?"✦":"📖"}
-                  </div>
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:5}}>
-                      <span style={{fontSize:".72rem",fontWeight:700,color:done?t.gr:t.tx}}>{done?"Objectif atteint ! بارك الله فيك":"Objectif du jour"}</span>
-                      <span style={{fontSize:".7rem",fontWeight:800,color:done?t.gr:t.acc}}>{todayV}/{goal_}</span>
-                    </div>
-                    <div style={{height:5,background:t.b1,borderRadius:99,overflow:"hidden"}}>
-                      <div style={{height:"100%",width:pct_+"%",background:done?"linear-gradient(90deg,"+t.gr+","+t.gr+"aa)":"linear-gradient(90deg,"+t.acc+","+t.acc+"aa)",borderRadius:99,transition:"width .5s ease"}}/>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
             <div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,borderRadius:16,border:`1px solid ${t.b1}`,position:"relative",overflow:"hidden"}}>
               {/* Décoration bordure haut */}
               <svg style={{position:"absolute",top:0,left:0,width:"100%",height:12,display:"block"}} preserveAspectRatio="none" viewBox="0 0 800 12">
@@ -4274,13 +4192,9 @@ return (
             <div ref={vpRef} id="verse-panel" className="rp">
               {!selS?(
                 <div className="card empty">
-                  <div style={{fontSize:"2.5rem",marginBottom:8}}>📖</div>
-                  <div style={{fontFamily:"Amiri,serif",fontSize:"1.4rem",color:t.acc,marginBottom:8}}>اختر سورة</div>
-                  <div style={{fontSize:".75rem",color:t.tx,marginBottom:4,lineHeight:1.6}}>Sélectionne une sourate dans la liste à gauche</div>
-                  <div style={{fontSize:".62rem",color:t.tx3,lineHeight:1.5}}>Tu peux lire, mémoriser, écouter et tester ta mémorisation</div>
-                  <div style={{marginTop:14,padding:"6px 12px",background:t.acc+"15",borderRadius:8,display:"inline-block"}}>
-                    <span style={{fontSize:".6rem",color:t.acc}}>⬤ = versets embarqués · sans internet possible</span>
-                  </div>
+                  <div className="big-ar">اختر سورة</div>
+                  Sélectionne une sourate pour lire, mémoriser et écouter
+                  <div style={{marginTop:8,fontSize:".65rem",color:t.acc}}>⬤ = embarqué · autres = chargés depuis internet</div>
                 </div>
               ):(
                 <div className="card">
@@ -4383,7 +4297,7 @@ return (
                   {/* Banner mode récitation continue */}
                    <div className="vscroll" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
                     {loadState==="loading"&&(<div style={{textAlign:"center",padding:"30px 14px",color:t.tx3}}><div style={{width:22,height:22,border:"2px solid #ccc",borderTopColor:"#c9a84c",borderRadius:"50%",animation:"spin .7s linear infinite",margin:"0 auto 10px"}}/><div style={{fontSize:".8rem"}}>Chargement…</div></div>)}
-                    {loadState==="error"&&(<div style={{textAlign:"center",padding:"24px",fontSize:".78rem"}}><div style={{fontSize:"1.5rem",marginBottom:10}}>🔌</div><div style={{color:t.rd,fontWeight:700,marginBottom:6}}>Connexion requise</div><div style={{color:t.tx3,marginBottom:14,lineHeight:1.5}}>Les versets de cette sourate sont chargés depuis internet.<br/>Vérifie ta connexion et réessaie.</div><button onClick={()=>{setLoadState("idle");setTimeout(()=>setSelS(s=>({...s})),100);}} style={{padding:"8px 20px",background:t.acc,border:"none",borderRadius:10,color:"#fff",fontWeight:700,cursor:"pointer",fontSize:".75rem"}}>🔄 Réessayer</button>{Q[selS?.n]?.length>0&&<div style={{marginTop:12,fontSize:".65rem",color:t.tx3}}>ou <button onClick={()=>{setVerses(Q[selS.n]);setLoadState("done");}} style={{background:"none",border:"none",color:t.acc,cursor:"pointer",fontWeight:700}}>utiliser les données embarquées</button></div>}</div>)}
+                    {loadState==="error"&&(<div style={{textAlign:"center",padding:"24px",color:"#c62828",fontSize:".78rem"}}>Erreur de chargement.<br/><button className="tbtn" onClick={()=>{const s=selS;setSelS(null);setTimeout(()=>setSelS(s),50);}}>↻ Réessayer</button></div>)}
                     {loadState==="done"&&(
                       <div className="vscroll-inner">
                         {selS.n!==1&&selS.n!==9&&(
@@ -4454,12 +4368,13 @@ return (
                           );
                         })}
                       </div>
-                    )}
                   </div>
                 </div>
-              )}
+              </div>
             </div>
+          )}
           </div>
+        </div>
         )}
 
         {/* PAGES */}
@@ -4480,15 +4395,6 @@ return (
                 </div>
               ))}
             </div>
-            {Object.keys(revFlags).length===0&&(
-              <div style={{background:t.s2,borderRadius:16,padding:"20px 16px",textAlign:"center",border:"1px solid "+t.b1}}>
-                <div style={{fontSize:"2rem",marginBottom:8}}>📚</div>
-                <div style={{fontFamily:"Amiri,serif",fontSize:"1rem",color:t.acc,marginBottom:6}}>وَمَا أُوتِيتُم مِّنَ الْعِلْمِ إِلَّا قَلِيلًا</div>
-                <div style={{fontSize:".62rem",color:t.tx3,marginBottom:14,fontStyle:"italic"}}>Et vous n'avez été dotés que de peu de connaissance</div>
-                <div style={{fontSize:".75rem",color:t.tx,marginBottom:16,lineHeight:1.6}}>Ajoute des sourates ci-dessous pour démarrer ta révision espacée.</div>
-                <button onClick={()=>setRevFlags(p=>({...p,"1":"active"}))} style={{padding:"10px 24px",background:t.acc,border:"none",borderRadius:10,color:"#fff",fontWeight:700,fontSize:".75rem",cursor:"pointer"}}>Commencer avec Al-Fatiha ✦</button>
-              </div>
-            )}
 
             {/* Sourates en révision active — affichage prioritaire */}
             {Object.entries(revFlags).filter(([,f])=>f==="active").length>0&&(
@@ -5011,7 +4917,7 @@ return (
                       <>
                         <div style={{background:t.s2,borderRadius:12,padding:"16px",border:`1px solid ${t.b1}`}}>
                           <div style={{fontSize:".6rem",color:t.tx3,marginBottom:8,textTransform:"uppercase",letterSpacing:1}}>Verset {quizQ.n}</div>
-                          <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.6rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx}}>{quizQ.ar}</div>
+                          <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.6rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx}}>{quizQ.ar?}</div>
                           {quizAnswer&&quizQ.fr&&<div style={{fontSize:".72rem",color:t.tx2,marginTop:8,fontStyle:"italic"}}>{quizQ.fr}</div>}
                         </div>
                         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
@@ -5054,11 +4960,11 @@ return (
                           {quizQ.fr&&<div style={{fontSize:".7rem",color:t.tx3,marginTop:6,fontStyle:"italic"}}>{quizQ.fr?.split(" ").slice(0,6).join(" ")}…</div>}
                         </div>
                         {!quizAnswer?(
-                          <button onClick={()=>setQuizAnswer("shown")} style={{padding:"11px",background:t.s2,border:"1px solid "+t.b2,borderRadius:10,color:t.tx2,fontWeight:600,fontSize:".8rem",cursor:"pointer"}}>👁 Révéler la suite</button>
+                          <button onClick={()=>setQuizAnswer("shown")} style={{padding:"11px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:10,color:t.tx2,fontWeight:600,fontSize:".8rem",cursor:"pointer"}}>👁 Révéler la suite</button>
                         ):(
                           <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                            <div style={{background:t.s2,borderRadius:12,padding:"16px",border:"1px solid "+t.acc+"44"}}>
-                              <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.4rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.acc}}>{quizQ.ar}</div>
+                            <div style={{background:t.s2,borderRadius:12,padding:"16px",border:`1px solid ${t.acc}44`}}>
+                              <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.4rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.acc}}>{quizQ.ar?}</div>
                               {quizQ.fr&&<div style={{fontSize:".72rem",color:t.tx2,marginTop:8,fontStyle:"italic"}}>{quizQ.fr}</div>}
                             </div>
                             <div style={{display:"flex",gap:8}}>
@@ -5103,8 +5009,8 @@ return (
                             <span style={{fontSize:".7rem",color:t.tx3}}>{quizShowWrong?.q?.n===w.q.n?"▲":"▼"}</span>
                           </div>
                           {quizShowWrong?.q?.n===w.q.n&&(
-                            <div style={{marginTop:8,paddingTop:8,borderTop:"1px solid "+t.rd+"20"}}>
-                              <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.1rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx,marginBottom:4}}>{w.q.ar}</div>
+                            <div style={{marginTop:8,paddingTop:8,borderTop:`1px solid ${t.rd}20`}}>
+                              <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.1rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx,marginBottom:4}}>{w.q.ar?}</div>
                               {w.q.fr&&<div style={{fontSize:".68rem",color:t.tx2,fontStyle:"italic"}}>{w.q.fr}</div>}
                             </div>
                           )}
@@ -5668,7 +5574,7 @@ return (
             </div>
             {/* Texte arabe — grand, centré */}
             <div style={{fontFamily:"Amiri Quran,serif",fontSize:"clamp(1.6rem,5vw,2.6rem)",direction:"rtl",textAlign:"center",lineHeight:2.5,color:"#f0e8d0",maxWidth:600,transition:"opacity .3s"}}>
-              {stripTags(verses[focusIdx]?.ar||"")}
+              {{stripTags(verses[focusIdx]?.ar||"")}
             </div>
             {/* Traduction */}
             {showTr&&verses[focusIdx]?.fr&&(
