@@ -2044,6 +2044,124 @@ body>*{position:relative;z-index:1;}
 `;}
 
 // Main App
+
+// ── Composant page par page (style Tarteel) ──
+function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
+                        mem, hifzMode, hifzLevel, reviewMode, playing,
+                        toggleV, toggleFav, isFav, setShareVerse, setWbwVerse,
+                        setWbwOpen, speechSupported, startListening, setSpeechScore,
+                        setRecitModal, doPlay, playing2, pageMode, setPageMode, sv}) {
+  const [curPage, setCurPage] = React.useState(null);
+  
+  // Grouper les versets par page
+  const pageGroups = React.useMemo(() => {
+    if(!verses.length) return {};
+    const groups = {};
+    verses.forEach(v => {
+      // Utiliser pg si disponible, sinon estimer depuis SURAH_PAGE
+      const pg = v.pg || (SURAH_PAGE[selS?.n] || 1);
+      if(!groups[pg]) groups[pg] = [];
+      groups[pg].push(v);
+    });
+    return groups;
+  }, [verses, selS]);
+  
+  const pages = React.useMemo(() => Object.keys(pageGroups).map(Number).sort((a,b)=>a-b), [pageGroups]);
+  
+  // Page courante = première page de la sourate par défaut
+  React.useEffect(() => {
+    if(pages.length > 0 && curPage === null) setCurPage(pages[0]);
+  }, [pages]);
+  
+  const pageIdx = pages.indexOf(curPage);
+  const prevPage = pageIdx > 0 ? pages[pageIdx-1] : null;
+  const nextPage = pageIdx < pages.length-1 ? pages[pageIdx+1] : null;
+  const currentVerses = pageGroups[curPage] || [];
+
+  if(!verses.length || curPage === null) return null;
+
+  return (
+    <div style={{display:"flex",flexDirection:"column",height:"100%",overflow:"hidden"}}>
+      {/* Navigation pages */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"6px 12px",background:t.s2,borderBottom:"1px solid "+t.b1,flexShrink:0}}>
+        <button onClick={()=>prevPage&&setCurPage(prevPage)} disabled={!prevPage}
+          style={{padding:"5px 14px",borderRadius:20,border:"1px solid "+t.b1,background:prevPage?t.acc+"18":"transparent",color:prevPage?t.acc:t.tx3,cursor:prevPage?"pointer":"default",fontSize:".7rem",fontWeight:700,transition:"all .15s"}}>
+          ← Préc.
+        </button>
+        <div style={{textAlign:"center"}}>
+          <div style={{fontSize:".7rem",fontWeight:800,color:t.tx}}>Page {curPage}</div>
+          <div style={{fontSize:".55rem",color:t.tx3}}>{pageIdx+1} / {pages.length} pages · {currentVerses.length} versets</div>
+        </div>
+        <button onClick={()=>nextPage&&setCurPage(nextPage)} disabled={!nextPage}
+          style={{padding:"5px 14px",borderRadius:20,border:"1px solid "+t.b1,background:nextPage?t.acc+"18":"transparent",color:nextPage?t.acc:t.tx3,cursor:nextPage?"pointer":"default",fontSize:".7rem",fontWeight:700,transition:"all .15s"}}>
+          Suiv. →
+        </button>
+      </div>
+      
+      {/* Versets de la page courante */}
+      <div style={{flex:1,overflow:"auto",padding:"12px 8px"}}>
+        <div style={{display:"flex",flexDirection:"column",gap:0,direction:"rtl"}}>
+          {currentVerses.map(v => {
+            const isMem = !!(mem[selS?.n]?.[v.n]);
+            const isPlaying = playing===v.n;
+            return (
+              <div key={v.n} style={{
+                padding:"8px 10px",
+                borderBottom:"1px solid "+t.b1+"44",
+                background:isPlaying?t.acc+"12":isMem?t.gr+"08":"transparent",
+                borderRadius:isPlaying?8:0,
+                transition:"background .2s",
+                cursor:"pointer"
+              }} onClick={()=>doPlay(selS.n, v.n, v.ar)}>
+                <div style={{display:"flex",alignItems:"flex-start",gap:8,direction:"rtl"}}>
+                  {/* Numéro verset */}
+                  <div style={{
+                    width:26,height:26,borderRadius:"50%",flexShrink:0,
+                    background:isMem?t.gr:t.acc,
+                    display:"flex",alignItems:"center",justifyContent:"center",
+                    fontSize:".55rem",fontWeight:800,color:"#fff",marginTop:2
+                  }}>{v.n}</div>
+                  {/* Texte arabe */}
+                  <div style={{flex:1,textAlign:"right"}}>
+                    <div style={{
+                      fontFamily:arabicSize>1.4?"Amiri Quran,serif":"Amiri,serif",
+                      fontSize:(arabicSize||1.4)+"rem",
+                      lineHeight:1.9,
+                      color:isPlaying?t.acc:t.tx,
+                      fontWeight:isPlaying?700:400,
+                    }}>
+                      {hifzMode
+                        ? <HifzVerseText ar={v.ar} level={hifzLevel[v.n]||0} tjc={tjc} showTj={showTj} vmark={v.n}/>
+                        : <TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/>
+                      }
+                    </div>
+                    {showTr && v.fr && (
+                      <div style={{fontSize:".72rem",color:t.tx3,textAlign:"right",direction:"ltr",marginTop:4,fontStyle:"italic",lineHeight:1.5}}>
+                        {v.fr.replace(/<[^>]*>/g,"")}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {/* Actions mini (mémoriser, favori) */}
+                <div style={{display:"flex",gap:6,justifyContent:"flex-start",marginTop:6,paddingRight:34,direction:"ltr"}}>
+                  <button onClick={e=>{e.stopPropagation();toggleV(selS.n,v.n,v.ar);sv("qmem2",{...mem,[selS.n]:{...(mem[selS.n]||{}),[v.n]:!isMem?{d:Date.now()}:undefined}});}}
+                    style={{padding:"2px 8px",borderRadius:10,border:"1px solid "+(isMem?t.gr:t.b1),background:isMem?t.gr+"18":"transparent",color:isMem?t.gr:t.tx3,fontSize:".6rem",cursor:"pointer"}}>
+                    {isMem?"✦ Mémorisé":"+ Mémoriser"}
+                  </button>
+                  <button onClick={e=>{e.stopPropagation();toggleFav(selS.n,v.n);}}
+                    style={{padding:"2px 8px",borderRadius:10,border:"1px solid "+(isFav(selS.n,v.n)?t.rd:t.b1),background:"transparent",color:isFav(selS.n,v.n)?t.rd:t.tx3,fontSize:".6rem",cursor:"pointer"}}>
+                    {isFav(selS.n,v.n)?"❤":"♡"}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [tn,setTn]=useState(()=>ld("qtheme2","light")); // qtheme2 = new key with new themes
   const t=THEMES[tn]||THEMES.dark;
@@ -2105,6 +2223,7 @@ const [authError, setAuthError] = useState("");
   const [search,setSearch]=useState("");
   const [showTr,setShowTr]=useState(false);
   const [showTj,setShowTj]=useState(false);
+  const [pageMode,setPageMode]=useState(()=>ld('qpagemode',false));
   const [showTf,setShowTf]=useState(false);
   const [showTutorial,setShowTutorial]=useState(false);
   const [tutorialPage,setTutorialPage]=useState(0);
@@ -2350,12 +2469,12 @@ const handleReset=async()=>{
       juz30.forEach(n=>{
         const cacheKey="qv5_"+n;
         try{if(localStorage.getItem(cacheKey))return;}catch{return;}
-        fetch("https://api.qurancdn.com/api/qdc/verses/by_chapter/"+n+"?language=fr&words=false&per_page=300&fields=text_uthmani_tajweed,text_uthmani&translations=31")
+        fetch("https://api.qurancdn.com/api/qdc/verses/by_chapter/"+n+"?language=fr&words=false&per_page=300&fields=text_uthmani_tajweed,text_uthmani,page_number,page_number&translations=31")
           .then(r=>r.json()).then(data=>{
             const ayahs=data?.verses||[];
             if(!ayahs.length)return;
             const localQ=Q[n]||[];
-            const result=ayahs.map((a,i)=>({n:a.verse_number,ar:a.text_uthmani_tajweed||a.text_uthmani||"",fr:a.translations?.[0]?.text||localQ[i]?.fr||"",tf:localQ[i]?.tf||""}));
+            const result=ayahs.map((a,i)=>({n:a.verse_number,ar:a.text_uthmani_tajweed||a.text_uthmani||"",fr:a.translations?.[0]?.text||localQ[i]?.fr||"",tf:localQ[i]?.tf||"",pg:a.page_number||localQ[i]?.pg||0}));
             try{localStorage.setItem(cacheKey,JSON.stringify(result));}catch{}
           }).catch(()=>{});
       });
@@ -4291,6 +4410,7 @@ return (
                       <button className="tbtn" onClick={()=>setArabicSize(s=>Math.max(1,s-0.15))}>A-</button>
                       <button className="tbtn" onClick={()=>setArabicSize(s=>Math.min(3,s+0.15))}>A+</button>
                     </div>
+                  <button className={"tbtn"+(pageMode?" on":"")} onClick={()=>{const v=!pageMode;setPageMode(v);sv("qpagemode",v);}} style={{borderColor:pageMode?t.acc:t.b1,color:pageMode?t.acc:t.tx3}} title="Mode page">📄</button>
                   </div>
 
                   {SURAH_INFO[selS.n]&&(<div style={{padding:"10px 14px",background:t.s3,borderBottom:`1px solid ${t.b1}`,fontSize:".7rem",color:t.tx2,lineHeight:1.6}}><div style={{fontWeight:700,color:t.acc,marginBottom:3,fontSize:".65rem",textTransform:"uppercase",letterSpacing:"1px"}}>Vertus & occasions</div><div style={{marginBottom:4}}>{SURAH_INFO[selS.n].virtue}</div><div style={{color:t.gr,fontWeight:600}}>Quand réciter : {SURAH_INFO[selS.n].occasion}</div></div>)}
@@ -4359,6 +4479,7 @@ return (
                     {loadState==="error"&&(<div style={{textAlign:"center",padding:"24px",fontSize:".78rem"}}><div style={{fontSize:"1.5rem",marginBottom:10}}>🔌</div><div style={{color:t.rd,fontWeight:700,marginBottom:6}}>Connexion requise</div><div style={{color:t.tx3,marginBottom:14,lineHeight:1.5}}>Les versets de cette sourate sont chargés depuis internet.<br/>Vérifie ta connexion et réessaie.</div><button onClick={()=>{setLoadState("idle");setTimeout(()=>setSelS(s=>({...s})),100);}} style={{padding:"8px 20px",background:t.acc,border:"none",borderRadius:10,color:"#fff",fontWeight:700,cursor:"pointer",fontSize:".75rem"}}>🔄 Réessayer</button>{Q[selS?.n]?.length>0&&<div style={{marginTop:12,fontSize:".65rem",color:t.tx3}}>ou <button onClick={()=>{setVerses(Q[selS.n]);setLoadState("done");}} style={{background:"none",border:"none",color:t.acc,cursor:"pointer",fontWeight:700}}>utiliser les données embarquées</button></div>}</div>)}
                     {loadState==="done"&&(
                       <div className="vscroll-inner">
+                        {pageMode?(<QuranPageView verses={verses} selS={selS} t={t} tjc={tjc} showTj={showTj} showTr={showTr} arabicSize={arabicSize} mem={mem} hifzMode={hifzMode} hifzLevel={hifzLevel} reviewMode={reviewMode} playing={playing} toggleV={toggleV} toggleFav={toggleFav} isFav={isFav} setShareVerse={setShareVerse} setWbwVerse={setWbwVerse} setWbwOpen={setWbwOpen} speechSupported={speechSupported} startListening={startListening} setSpeechScore={setSpeechScore} setRecitModal={setRecitModal} doPlay={doPlay} pageMode={pageMode} setPageMode={setPageMode} sv={sv}/>):(<>)
                         {selS.n!==1&&selS.n!==9&&(
                           <div style={{display:"block",textAlign:"center",padding:"8px 0 14px",fontSize:"1.4rem",color:t.acc,direction:"rtl"}}>
                             بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ
@@ -4426,6 +4547,7 @@ return (
                             </React.Fragment>
                           );
                         })}
+                        </>)}
                       </div>
                     )}
                   </div>
