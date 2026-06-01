@@ -1394,7 +1394,7 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
     }
   },[startListening,onClose,setSpeechScore,setSpeechResult]);
 
-  const onDone=React.useCallback((score)=>{
+  const onDone=React.useCallback((score)=>{ if(sm2Update&&curV) sm2Update(selS.n,curV.n,score.pct>=90?5:score.pct>=70?4:score.pct>=50?3:score.pct>=30?2:1);
     if(chainRef.current&&score.pct>=70) setTimeout(nextVerse,700);
   },[nextVerse]);
 
@@ -2256,6 +2256,7 @@ const [authError, setAuthError] = useState("");
   // Tilawa (تلاوة — lecture guidée)
   const [karaokeMode,setKaraokeMode]=useState(false);
   const [wordTimings,setWordTimings]=useState({}); // {sn_vn: [{text,start,end}]}
+  const [audioSegments,setAudioSegments]=React.useState({});
   const [activeWordIdx,setActiveWordIdx]=useState(-1);
   const karaokeRaf=useRef(null);
   const [khatmas,setKhatmas]=useState(()=>ld("qkhatmas",[]));
@@ -2610,7 +2611,7 @@ const handleReset=async()=>{
         const audio=audioRef.current;
         if(words.length&&audio){
           // Attendre que la durée soit connue
-          const onMeta=()=>{ startKaraokeLoop(words,audio.duration); };
+          const onMeta=()=>{ startKaraokeLoop(words,audio.duration,(audioSegments[selS.n]||{})[playing]); };
           if(audio.duration) startKaraokeLoop(words,audio.duration);
           else{ audio.addEventListener("loadedmetadata",onMeta,{once:true}); }
         }
@@ -2634,6 +2635,8 @@ const handleReset=async()=>{
     touchStartX.current=null;
   },[selS]);
 
+  const [toastMsg,setToastMsg]=useState(null);
+  React.useEffect(()=>{if(toastMsg){const t=setTimeout(()=>setToastMsg(null),2500);return()=>clearTimeout(t);}},[toastMsg]);
   const memStreak=useMemo(()=>{let s=0,d=new Date();while(true){const key=d.toISOString().split("T")[0];if(!hist[key])break;s++;d.setDate(d.getDate()-1);}return s;},[hist]);
 
   // Tracking temps d'engagement — toutes les 30s
@@ -2756,7 +2759,7 @@ const handleReset=async()=>{
 
   // FIX 1: doSelect — scroll uniquement sur mobile (<860px) — corrige le "saut" de page
   const doSelect=s=>{
-    setSelS(s);setPlaying(null);
+    setSelS(s);setPlaying(null);loadAudioSegments(s.n,rec?.qurancdn||7).catch(()=>{});
     setMushafPage(SURAH_PAGE[s.n]||1);
     if(audioRef.current){audioRef.current.pause();audioRef.current.src="";}
     if(window.innerWidth<860){
@@ -2770,7 +2773,7 @@ const handleReset=async()=>{
   const toggleV=(sn,vn,verseAr="")=>{
     const k=String(sn),vk=String(vn);
     const isNew=!(mem[k]||{})[vk];
-    if(isNew)updateStreak();
+    if(isNew)updateStreak(); if(memStreak>0) setToastMsg(memStreak>=7?"🔥 "+memStreak+" jours ! Māshāʾ Allāh !":memStreak>=3?"🔥 "+memStreak+" jours consécutifs !":"✦ Verset mémorisé !");
     setMem(p=>{
     const c={...p[k]||{}};
     const wasMemorized=!!c[vk];
@@ -2887,6 +2890,21 @@ const handleReset=async()=>{
       return words;
     }catch{return[];}
   },[wordTimings]);
+
+  const loadAudioSegments=async(sn,recId)=>{
+    try{
+      const r=await fetch(`https://api.qurancdn.com/api/qdc/audio/reciters/${recId}/audio_files?chapter_id=${sn}&segments=true`);
+      const d=await r.json();
+      const timings=d.audio_files?.[0]?.verse_timings||[];
+      const map={};
+      timings.forEach(vt=>{
+        const vn=parseInt(vt.verse_key?.split(":")?.[1]||0);
+        if(vn&&vt.segments) map[vn]=vt.segments;
+      });
+      setAudioSegments(p=>({...p,[sn]:map}));
+      return map;
+    }catch{return {};}
+  };
 
   // RAF loop pour le highlight Tilawa (basé sur currentTime)
   const startKaraokeLoop=useCallback((words,duration)=>{
@@ -3626,10 +3644,11 @@ return (
           startListening={startListening} stopListening={stopListening}
           setSpeechScore={setSpeechScore} setSpeechResult={setSpeechResult}
           countdownRef={countdownRef} setSpeechCountdown={setSpeechCountdown}
-          doPlay={doPlay}
+          doPlay={doPlay} sm2Update={sm2Update}
           onClose={()=>{setRecitModal(false);stopListening();setContinuousMode(false);setSpeechScore(null);setSpeechResult("");}}
         />
       )}
+        {toastMsg&&(<div style={{position:"fixed",top:"max(60px,env(safe-area-inset-top)+60px)",left:"50%",transform:"translateX(-50%)",zIndex:999,background:"rgba(20,20,20,.92)",color:"#fff",padding:"10px 20px",borderRadius:24,fontSize:".85rem",fontWeight:700,boxShadow:"0 4px 20px rgba(0,0,0,.3)",pointerEvents:"none",whiteSpace:"nowrap"}}>{toastMsg}</div>)}
 
       {/* Modal Lecture partielle */}
       {partialVerse&&(
