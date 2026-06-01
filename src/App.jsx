@@ -4593,7 +4593,7 @@ return (
                 <div style={{fontFamily:"Amiri,serif",fontSize:"1.2rem",color:t.acc,fontWeight:700,lineHeight:1.2}}>{selS.ar}</div>
                 <div style={{fontSize:".55rem",color:t.tx3,letterSpacing:"1px",textTransform:"uppercase"}}>{selS.name} · {selS.v} v.</div>
               </div>
-              <button onClick={()=>setPlaying(p=>p===null?verses[0]?.n||1:null)}
+              <button 
                 style={{width:34,height:34,borderRadius:"50%",border:"1px solid "+(playing!==null?t.acc:t.b1),background:playing!==null?t.acc:"transparent",color:playing!==null?"#fff":t.tx,cursor:"pointer",fontSize:".9rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}
                 onClick={()=>{if(playing!==null){audioRef.current?.pause();setPlaying(null);}else doPlay(verses[0]?.n||1);}}>
                 {playing!==null?"⏸":"▶"}
