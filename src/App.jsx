@@ -2133,7 +2133,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
                 {showTr&&v.fr&&<div style={{display:"block",direction:"ltr",textAlign:"left",fontSize:".68rem",color:t.tx3,fontStyle:"italic",lineHeight:1.5,margin:"2px 0 6px",fontFamily:"sans-serif"}}>{v.fr.replace(/<[^>]*>/g,"")}</div>}
 
                 {/* BARRE D'ACTIONS — apparaît au tap */}
-                {isSel&&(
+                {isSel&&(<>
                   <span style={{display:"inline-flex",alignItems:"center",gap:0,background:t.s1,borderRadius:20,border:"1px solid "+t.b1,boxShadow:"0 2px 12px rgba(0,0,0,.12)",padding:"0 2px",margin:"0 4px",verticalAlign:"middle",direction:"ltr"}}
                     onClick={e=>e.stopPropagation()}>
                     {[
@@ -2148,7 +2148,24 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
                       </button>
                     ))}
                   </span>
-                )}
+                  {partialV?.n===v.n&&(
+                    <span style={{display:"inline-flex",alignItems:"center",gap:4,background:t.pu+"18",borderRadius:16,border:"1px solid "+t.pu,padding:"3px 8px",margin:"2px 4px",verticalAlign:"middle",direction:"ltr"}}
+                      onClick={e=>e.stopPropagation()}>
+                      <span style={{fontSize:".6rem",color:t.pu,fontWeight:700}}>✂ v.</span>
+                      <input type="number" defaultValue={v.n} min="1" max={verses.length} id={"ps_"+v.n}
+                        style={{width:34,padding:"2px 3px",borderRadius:6,border:"1px solid "+t.pu+"80",background:t.bg,color:t.tx,fontSize:".65rem",textAlign:"center"}}
+                        onClick={e=>e.stopPropagation()}/>
+                      <span style={{fontSize:".6rem",color:t.pu}}>→</span>
+                      <input type="number" defaultValue={Math.min(v.n+4,verses.length)} min="1" max={verses.length} id={"pe_"+v.n}
+                        style={{width:34,padding:"2px 3px",borderRadius:6,border:"1px solid "+t.pu+"80",background:t.bg,color:t.tx,fontSize:".65rem",textAlign:"center"}}
+                        onClick={e=>e.stopPropagation()}/>
+                      <button onClick={e=>{e.stopPropagation();const s=parseInt(document.getElementById("ps_"+v.n)?.value)||v.n;const en=parseInt(document.getElementById("pe_"+v.n)?.value)||(v.n+4);if(typeof partialPlayRef!=="undefined")partialPlayRef.current={startAt:s,stopAt:en};doPlay(s);setPartialV(null);setSelVerse(null);}}
+                        style={{padding:"3px 9px",borderRadius:12,border:"none",background:t.pu,color:"#fff",fontSize:".65rem",cursor:"pointer",fontWeight:700}}>
+                        ▶ Lire
+                      </button>
+                    </span>
+                  )}
+                </>)}
               </React.Fragment>
             );
           })}
