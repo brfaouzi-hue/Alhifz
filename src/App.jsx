@@ -2116,7 +2116,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
                 <span onClick={e=>{e.stopPropagation();handleTap(v);}}
                   style={{
                     color: isPlay?t.acc:isMem?t.gr:"inherit",
-                    background: isSel?t.acc+"10":isPlay?t.acc+"15":"transparent",
+                    background: isSel?t.acc+"08":isPlay?t.acc+"15":"transparent",
                     borderRadius:6, padding:"1px 3px",
                     cursor:"pointer", outline:"none",
                     WebkitTapHighlightColor:"transparent",
@@ -2141,6 +2141,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
                       {icon:"▶",tip:"Écouter",color:t.acc,fn:()=>{doPlay(v.n);setSelVerse(null);}},
                       {icon:isMem?"✦":"○",tip:"Mémo",color:isMem?t.gr:t.tx3,fn:()=>{try{if(selS)toggleV(String(selS.n),String(v.n),v.ar||'');}catch(e){}setSelVerse(null);}},
                       {icon:"❤",tip:"Favori",color:(selS&&isFav?isFav(String(selS.n),String(v.n)):false)?t.rd:t.tx3,fn:()=>{try{if(selS)toggleFav(String(selS.n),String(v.n));}catch(e){}setSelVerse(null);}},
+                      {icon:"✂",tip:"Partiel",color:t.pu,fn:()=>{setPartialV(pv=>pv?.n===v.n?null:v);}},
                       {icon:"⋯",tip:"WBW",color:t.tx3,fn:()=>{if(wbwVerseRef)wbwVerseRef.current={sn:selS.n,vn:v.n};setWbwOpen&&setWbwOpen(true);setSelVerse(null);}},
                     ].map(a=>(
                       <button key={a.tip} onClick={a.fn} title={a.tip}
@@ -3849,11 +3850,11 @@ return (
             <button className="tbtn" style={{borderColor:t.pu,color:t.pu,fontSize:".6rem"}} onClick={()=>setShowAIPlan(true)}>✦ Mon Parcours</button>
             <button className="tbtn" style={{borderColor:timerRunning?t.acc:t.gr,color:timerRunning?t.acc:t.gr,fontSize:".6rem",fontWeight:timerRunning?800:400}} onClick={()=>setTimerOpen(true)}>{timerRunning&&timerLeft?fmtTime(timerLeft):"⏱"}</button>
             <button className="ib" title={tn==="light"?"Passer en mode nuit":"Passer en mode jour"} onClick={()=>setTn(tn==="light"?"emerald":"light")}>{tn==="light"?<Icons.Moon size={14}/>:<Icons.Sun size={14}/>}</button>
-            {(()=>{const todayKey=today();const todayV=hist[todayKey]||0;const vpd_=settings?.dailyGoal||settings?.goal||5;return(<div style={{display:"flex",alignItems:"center",gap:3,padding:"3px 8px",background:todayV>=vpd_?t.gr+"18":t.acc+"12",borderRadius:20,border:"1px solid "+(todayV>=vpd_?t.gr:t.acc)+"30"}}><span style={{fontSize:".62rem",fontWeight:800,color:todayV>=vpd_?t.gr:t.acc}}>{todayV}/{vpd_}</span><span style={{fontSize:".48rem",color:t.tx3,marginLeft:1}}>v.</span></div>);})()}
-            {memStreak>0&&<div style={{display:"flex",alignItems:"center",gap:2,padding:"3px 7px",background:"rgba(249,115,22,.15)",borderRadius:8,border:"1px solid rgba(249,115,22,.3)",flexShrink:0}}>
-              <span style={{fontSize:".85rem",lineHeight:1}}>🔥</span>
-              <span style={{fontSize:".65rem",fontWeight:800,color:"#f97316"}}>{memStreak}</span>
-            </div>}
+
+
+
+
+
             {user?<button onClick={()=>setPage("settings")} title={user.email} style={{width:30,height:30,borderRadius:"50%",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:".8rem",fontWeight:800,color:"#000",flexShrink:0,boxShadow:`0 0 8px ${t.acc}66`}}>{(user.email||"?")[0].toUpperCase()}</button>:<button onClick={()=>setShowAuthModal(true)} style={{padding:"4px 10px",borderRadius:20,border:"1px solid "+t.acc,background:"transparent",color:t.acc,fontSize:".6rem",fontWeight:700,cursor:"pointer"}}>Se connecter</button>}
           </div>
         </div>
@@ -3881,7 +3882,7 @@ return (
           </div>
         )}
         {/* Streak cliquable → Stats */}
-        {memStreak>0&&(
+        {false&&(
           <div onClick={()=>setPage("stats")} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 12px",background:"rgba(249,115,22,.08)",borderRadius:9,border:"1px solid rgba(249,115,22,.2)",cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>{e.currentTarget.style.background="rgba(249,115,22,.14)";e.currentTarget.style.transform="translateY(-1px)";}} onMouseLeave={e=>{e.currentTarget.style.background="rgba(249,115,22,.08)";e.currentTarget.style.transform="";}}>
             <span style={{fontSize:"1.1rem"}}>🔥</span>
             <span style={{fontSize:".72rem",fontWeight:700,color:"#f97316",flex:1}}>{memStreak} jour{memStreak>1?"s":""} de suite</span>
@@ -3889,8 +3890,8 @@ return (
           </div>
         )}
         {/* Progression quotidienne */}
-        {settings&&(()=>{
-          const todayKey=today();
+        {settings&&false&&(()=>{
+{/* badge supprimé */}
           const todayV=hist[todayKey]||0;
           const goal_=(settings?.dailyGoal||settings?.goal||5);
           const pct_=Math.min(100,Math.round(todayV/goal_*100));
@@ -4052,7 +4053,7 @@ return (
                 {spacedDue.length>0&&(<div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${t.rd}15`,borderRadius:8,border:`1px solid ${t.rd}30`,cursor:"pointer"}} onClick={()=>setPage("pages")}><div style={{width:6,height:6,borderRadius:"50%",background:t.rd,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".63rem",color:t.rd,fontWeight:600,flex:1}}>{spacedDue.length} verset{spacedDue.length>1?"s":""} à réviser aujourd'hui</span><span style={{fontSize:".58rem",color:t.rd,opacity:.7}}>Voir →</span></div>)}
                 {bookmark&&(<div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${acc}10`,borderRadius:8,border:`1px solid ${acc}25`,cursor:"pointer"}} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>x.n===bookmark.sn);if(s)doSelect(s);}}><span style={{fontSize:".7rem",color:acc}}>◈</span><span style={{fontSize:".63rem",color:t.tx,fontWeight:600,flex:1}}>Reprendre : {bookmark.name}</span><span style={{fontSize:".58rem",color:t.tx3}}>→</span></div>)}
                 {/* Streak */}
-                {memStreak>0&&(<div onClick={()=>setPage("stats")} style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"6px 10px",background:"rgba(249,115,22,.08)",borderRadius:9,border:"1px solid rgba(249,115,22,.2)",cursor:"pointer"}}><span style={{fontSize:"1.1rem"}}>🔥</span><span style={{fontSize:".7rem",fontWeight:700,color:"#f97316",flex:1}}>{memStreak} jour{memStreak>1?"s":""} de suite</span><span style={{fontSize:".58rem",color:"#f97316",opacity:.7}}>Stats →</span></div>)}
+                {false&&(<div onClick={()=>setPage("stats")} style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"6px 10px",background:"rgba(249,115,22,.08)",borderRadius:9,border:"1px solid rgba(249,115,22,.2)",cursor:"pointer"}}><span style={{fontSize:"1.1rem"}}>🔥</span><span style={{fontSize:".7rem",fontWeight:700,color:"#f97316",flex:1}}>{memStreak} jour{memStreak>1?"s":""} de suite</span><span style={{fontSize:".58rem",color:"#f97316",opacity:.7}}>Stats →</span></div>)}
               </div>
             </div>
 
@@ -4420,7 +4421,7 @@ return (
                   </div>
 
                   <div className="vtoolbar">
-                  <button className={"tbtn"+(pageMode?" on":"")} onClick={()=>{const v=!pageMode;setPageMode(v);sv("qpagemode",v);}} style={{borderColor:pageMode?t.acc:t.b1,color:pageMode?t.acc:t.tx3}} title="Mode page">Page</button>
+                  <button className={"tbtn"+(pageMode?" on":"")} onClick={()=>{const v=!pageMode;setPageMode(v);sv("qpagemode",v);}} style={{borderColor:pageMode?t.acc:t.b1,color:pageMode?"#fff":t.tx3}} title="Mode page">Page</button>
                     <button className={`tbtn ${showTj?"on":""}`} onClick={()=>setShowTj(v=>!v)}>Tajwid</button>
                     <button className={`tbtn ${showTr?"on":""}`} onClick={()=>setShowTr(v=>!v)}>Traduction</button>
                     <button className={`tbtn ${showTf?"on":""}`} onClick={()=>setShowTf(v=>!v)}>Tafsir</button>
@@ -6086,7 +6087,7 @@ return (
             <div style={{display:"flex",gap:8,flexWrap:"wrap",justifyContent:"center"}} onClick={e=>e.stopPropagation()}>
               {[5,10,15,20,25,30,45,60].map(m=>(
                 <button key={m} onClick={()=>setTimerDuration(m)} style={{padding:"8px 14px",borderRadius:10,border:`1.5px solid ${timerDuration===m?t.acc:"rgba(255,255,255,.12)"}`,background:timerDuration===m?`${t.acc}20`:"rgba(255,255,255,.04)",color:timerDuration===m?t.acc:"rgba(255,255,255,.5)",fontSize:".78rem",cursor:"pointer",fontWeight:timerDuration===m?700:400}}>
-                  {m}min{m===25?" 🍅":""}
+                  {m}min{m===25?"":""}
                 </button>
               ))}
             </div>
