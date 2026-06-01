@@ -2050,7 +2050,7 @@ body>*{position:relative;z-index:1;}
 function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
                         mem, hifzMode, hifzLevel, playing,
                         toggleV, toggleFav, isFav, doPlay, sv,
-                        onLongPress, setPage, wbwVerseRef, setWbwOpen}) {
+                        onLongPress, setPage, wbwVerseRef, setWbwOpen, partialPlayRef}) {
   const [curPage, setCurPage] = React.useState(0);
   const [selVerse, setSelVerse] = React.useState(null); // verset sélectionné
 
@@ -2069,7 +2069,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
 
   React.useEffect(()=>{setCurPage(0);setSelVerse(null);},[selS?.n]);
 
-  if(!verses.length||!pages.length) return null;
+  if(!verses||!verses.length||!pages.length) return null;
   const cur = pages[Math.min(curPage,pages.length-1)]||[];
   const total = pages.length;
 
@@ -2138,8 +2138,8 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
                     onClick={e=>e.stopPropagation()}>
                     {[
                       {icon:"▶",tip:"Écouter",color:t.acc,fn:()=>{doPlay(v.n);setSelVerse(null);}},
-                      {icon:isMem?"✦":"○",tip:"Mémo",color:isMem?t.gr:t.tx3,fn:()=>{toggleV(String(selS.n),String(v.n),v.ar);setSelVerse(null);}},
-                      {icon:"❤",tip:"Favori",color:isFav(String(selS?.n),String(v.n))?t.rd:t.tx3,fn:()=>{toggleFav(String(selS.n),String(v.n));setSelVerse(null);}},
+                      {icon:isMem?"✦":"○",tip:"Mémo",color:isMem?t.gr:t.tx3,fn:()=>{try{if(selS)toggleV(String(selS.n),String(v.n),v.ar||'');}catch(e){}setSelVerse(null);}},
+                      {icon:"❤",tip:"Favori",color:(selS&&isFav?isFav(String(selS.n),String(v.n)):false)?t.rd:t.tx3,fn:()=>{try{if(selS)toggleFav(String(selS.n),String(v.n));}catch(e){}setSelVerse(null);}},
                       {icon:"⋯",tip:"WBW",color:t.tx3,fn:()=>{if(wbwVerseRef)wbwVerseRef.current={sn:selS.n,vn:v.n};setWbwOpen&&setWbwOpen(true);setSelVerse(null);}},
                     ].map(a=>(
                       <button key={a.tip} onClick={a.fn} title={a.tip}
@@ -4521,7 +4521,7 @@ return (
                                 onTouchEnd={()=>clearTimeout(longPressTimer.current)}
                                 onTouchMove={()=>clearTimeout(longPressTimer.current)}
                                 onMouseDown={()=>{longPressTimer.current=setTimeout(()=>setActiveVerseActions(vn=>vn===v.n?null:v.n),500);}}
-                                onMouseUp={()=>clearTimeout(longPressTimer.current)}
+                                onMouseUp={()=>clearTimeout(longPressTimer.current)} onClick={()=>{if(!isActive)doPlay(v.n);}}
                                 style={{display:"inline",color:isMem?t.gr:isPl?t.acc:isDue?t.rd:t.tx,background:isActive?t.acc+"15":"transparent",borderRadius:4,cursor:"pointer",WebkitUserSelect:"none",userSelect:"none"}}
                               >
                                 {reviewMode&&!revealedVerses[v.n]
