@@ -2715,7 +2715,7 @@ const handleReset=async()=>{
 
   // FIX 1: doSelect — scroll uniquement sur mobile (<860px) — corrige le "saut" de page
   const doSelect=s=>{
-    setSelS(s);setPlaying(null);setPage("reader");
+    setSelS(s);setPlaying(null);
     setMushafPage(SURAH_PAGE[s.n]||1);
     if(audioRef.current){audioRef.current.pause();audioRef.current.src="";}
     if(window.innerWidth<860){
@@ -4579,6 +4579,13 @@ return (
                     style={{padding:"3px 10px",borderRadius:20,border:"1px solid "+t.pu,background:"transparent",color:t.pu,fontSize:".65rem",cursor:"pointer",marginLeft:4}}>
                     🎤 Réciter
                   </button>
+                </div>
+                <div style={{display:"flex",alignItems:"center",gap:5,marginTop:4,flexWrap:"wrap",borderTop:"1px solid "+t.b1,paddingTop:6}}>
+                  <span style={{fontSize:".6rem",color:t.tx3,flexShrink:0}}>Lecture v.</span>
+                  <input type="number" min="1" max={verses.length||286} defaultValue="1" id="pS" style={{width:38,padding:"2px 4px",borderRadius:6,border:"1px solid "+t.b1,background:t.s2,color:t.tx,fontSize:".7rem",textAlign:"center"}}/>
+                  <span style={{fontSize:".6rem",color:t.tx3}}>→</span>
+                  <input type="number" min="1" max={verses.length||286} defaultValue={verses.length||7} id="pE" style={{width:38,padding:"2px 4px",borderRadius:6,border:"1px solid "+t.b1,background:t.s2,color:t.tx,fontSize:".7rem",textAlign:"center"}}/>
+                  <button onClick={()=>{const s=parseInt(document.getElementById("pS")?.value)||1;const e2=parseInt(document.getElementById("pE")?.value)||verses.length;if(partialPlayRef)partialPlayRef.current={startAt:s,stopAt:e2};doPlay(s);setShowReaderSettings(false);}} style={{padding:"3px 10px",borderRadius:20,border:"1px solid "+t.acc,background:t.acc+"15",color:t.acc,fontSize:".65rem",cursor:"pointer",fontWeight:700}}>▶ Lire</button>
                 </div>
               </div>
             )}
