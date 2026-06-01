@@ -2087,6 +2087,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
           style={{padding:"4px 12px",borderRadius:20,border:"1px solid "+(curPage<total-1?t.acc:t.b1),background:curPage<total-1?t.acc+"15":"transparent",color:curPage<total-1?t.acc:t.tx3,cursor:curPage<total-1?"pointer":"default",fontSize:".7rem",fontWeight:700}}>
           Suiv. →
         </button>
+        <button onClick={()=>setPage("reader")} title="Plein écran" style={{padding:"4px 10px",borderRadius:20,border:"1px solid "+t.acc,background:t.acc+"15",color:t.acc,cursor:"pointer",fontSize:".75rem",fontWeight:700,flexShrink:0}}>⛶</button>
       </div>
 
       {/* Texte en flux continu style Mushaf */}
@@ -4604,25 +4605,53 @@ return (
 
             {/* ── MENU CONTEXTUEL VERSET (appui long) ── */}
             {verseMenu&&(
-              <div style={{position:"absolute",inset:0,zIndex:200,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"flex-end"}} onClick={()=>setVerseMenu(null)}>
-                <div onClick={e=>e.stopPropagation()} style={{width:"100%",background:t.s1,borderRadius:"20px 20px 0 0",padding:"16px 16px max(16px,env(safe-area-inset-bottom)) 16px"}}>
-                  <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.1rem",color:t.tx,textAlign:"right",direction:"rtl",lineHeight:1.8,marginBottom:14,padding:"0 4px"}}>
+              <div style={{position:"absolute",inset:0,zIndex:300,background:"rgba(0,0,0,.55)",display:"flex",flexDirection:"column",justifyContent:"flex-end"}} onClick={()=>setVerseMenu(null)}>
+                <div onClick={e=>e.stopPropagation()} style={{background:t.s1,borderRadius:"20px 20px 0 0",padding:"16px 14px 28px",boxShadow:"0 -4px 30px rgba(0,0,0,.15)"}}>
+                  {/* Verset sélectionné */}
+                  <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.05rem",color:t.tx,textAlign:"right",direction:"rtl",lineHeight:1.9,marginBottom:14,padding:"8px 10px",background:t.s2,borderRadius:10,borderRight:"3px solid "+t.acc}}>
+                    <span style={{fontSize:".6rem",color:t.acc,fontFamily:"sans-serif",marginLeft:6}}>v.{verseMenu.n}</span>
                     {verseMenu.ar.replace(/<[^>]*>/g,"")}
                   </div>
-                  <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
+                  {/* Rangée 1: actions principales */}
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:8}}>
                     {[
-                      {icon:"✦",label:mem[String(selS.n)]?.[String(verseMenu.n)]?"Mémorisé":"Mémoriser",color:mem[String(selS.n)]?.[String(verseMenu.n)]?t.gr:t.tx,fn:()=>{toggleV(String(selS.n),String(verseMenu.n),verseMenu.ar);setVerseMenu(null);}},
-                      {icon:"❤",label:isFav(String(selS.n),String(verseMenu.n))?"Favori ✓":"Favori",color:isFav(String(selS.n),String(verseMenu.n))?t.rd:t.tx,fn:()=>{toggleFav(String(selS.n),String(verseMenu.n));setVerseMenu(null);}},
-                      {icon:"▶",label:"Écouter",color:t.acc,fn:()=>{doPlay(verseMenu.n);setVerseMenu(null);}},
-                      {icon:"⋯",label:"WBW",color:t.tx,fn:()=>{wbwVerseRef.current={sn:selS.n,vn:verseMenu.n};setWbwOpen(true);setVerseMenu(null);}},
+                      {icon: mem[String(selS?.n)]?.[String(verseMenu.n)]?"✦":"○", label:mem[String(selS?.n)]?.[String(verseMenu.n)]?"Mémorisé":"Mémoriser", color:mem[String(selS?.n)]?.[String(verseMenu.n)]?t.gr:t.tx,
+                        fn:()=>{toggleV(String(selS.n),String(verseMenu.n),verseMenu.ar);setVerseMenu(null);}},
+                      {icon:"❤", label:isFav(String(selS?.n),String(verseMenu.n))?"Favori ✓":"Favori", color:isFav(String(selS?.n),String(verseMenu.n))?t.rd:t.tx,
+                        fn:()=>{toggleFav(String(selS.n),String(verseMenu.n));setVerseMenu(null);}},
+                      {icon:"▶", label:"Écouter", color:t.acc,
+                        fn:()=>{doPlay(verseMenu.n);setVerseMenu(null);}},
+                      {icon:"⋯", label:"Mot/mot", color:t.tx,
+                        fn:()=>{wbwVerseRef.current={sn:selS.n,vn:verseMenu.n};setWbwOpen(true);setVerseMenu(null);}},
                     ].map(item=>(
                       <button key={item.label} onClick={item.fn}
-                        style={{display:"flex",flexDirection:"column",alignItems:"center",gap:5,padding:"10px 4px",borderRadius:12,border:"1px solid "+t.b1,background:t.s2,cursor:"pointer"}}>
-                        <span style={{fontSize:"1.2rem"}}>{item.icon}</span>
-                        <span style={{fontSize:".6rem",color:item.color,fontWeight:600}}>{item.label}</span>
+                        style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4,padding:"10px 4px",borderRadius:12,border:"1px solid "+t.b1,background:t.s2,cursor:"pointer",WebkitTapHighlightColor:"transparent"}}>
+                        <span style={{fontSize:"1.3rem"}}>{item.icon}</span>
+                        <span style={{fontSize:".58rem",color:item.color,fontWeight:600,textAlign:"center"}}>{item.label}</span>
                       </button>
                     ))}
                   </div>
+                  {/* Rangée 2: lecture partielle */}
+                  <div style={{display:"flex",alignItems:"center",gap:6,padding:"8px 10px",background:t.s2,borderRadius:10,marginBottom:8}}>
+                    <span style={{fontSize:".62rem",color:t.tx3,flexShrink:0}}>Lecture partielle :</span>
+                    <span style={{fontSize:".62rem",color:t.tx3}}>v.</span>
+                    <input type="number" defaultValue={verseMenu.n} id="vm_s" min="1" max={verses.length}
+                      style={{width:40,padding:"3px 4px",borderRadius:6,border:"1px solid "+t.b1,background:t.bg,color:t.tx,fontSize:".7rem",textAlign:"center"}}
+                      onClick={e=>e.stopPropagation()}/>
+                    <span style={{fontSize:".62rem",color:t.tx3}}>→ v.</span>
+                    <input type="number" defaultValue={Math.min(verseMenu.n+4,verses.length)} id="vm_e" min="1" max={verses.length}
+                      style={{width:40,padding:"3px 4px",borderRadius:6,border:"1px solid "+t.b1,background:t.bg,color:t.tx,fontSize:".7rem",textAlign:"center"}}
+                      onClick={e=>e.stopPropagation()}/>
+                    <button onClick={e=>{e.stopPropagation();const s=parseInt(document.getElementById("vm_s")?.value)||verseMenu.n;const end=parseInt(document.getElementById("vm_e")?.value)||verseMenu.n+4;if(partialPlayRef)partialPlayRef.current={startAt:s,stopAt:end};doPlay(s);setVerseMenu(null);}}
+                      style={{padding:"4px 10px",borderRadius:20,border:"1px solid "+t.acc,background:t.acc,color:"#fff",fontSize:".65rem",cursor:"pointer",fontWeight:700,flexShrink:0}}>
+                      ▶
+                    </button>
+                  </div>
+                  {/* Bouton fermer */}
+                  <button onClick={()=>setVerseMenu(null)}
+                    style={{width:"100%",padding:"10px",borderRadius:12,border:"1px solid "+t.b1,background:"transparent",color:t.tx3,fontSize:".75rem",cursor:"pointer",marginTop:2}}>
+                    Fermer
+                  </button>
                 </div>
               </div>
             )}
