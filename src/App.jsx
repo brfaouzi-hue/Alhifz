@@ -3308,7 +3308,7 @@ const handleReset=async()=>{
 
   // Analyse mot par mot — tolère l'ordre et les omissions mineures
   const analyzeRecitation=(targetAr,spoken)=>{
-    const stripH=s=>(s||"").replace(/[ًٌٍَُِّْٰٓٔءۭۨ]/g,"").replace(/[أإآٱ]/g,"ا").replace(/[ىة]/g,"ي").replace(/ؤ/g,"و").replace(/ئ/g,"ي").trim();
+    const stripH=s=>((s||"").replace(/<[^>]*>/g,"").replace(/[﴿﴾]/g,"").replace(/\s*[١٢٣٤٥٦٧٨٩٠]+\s*$/,"")).replace(/[ًٌٍَُِّْٰٓٔءۭۨ]/g,"").replace(/[أإآٱ]/g,"ا").replace(/[ىة]/g,"ي").replace(/ؤ/g,"و").replace(/ئ/g,"ي").trim();
     const target=stripH(targetAr).split(/\s+/).filter(Boolean);
     const said=stripH(spoken).split(/\s+/).filter(Boolean);
     if(!said.length) return target.map(tw=>({word:tw,status:"missing"}));
@@ -3329,7 +3329,7 @@ const handleReset=async()=>{
     const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
     if(!SR)return;
 
-    setSpeechVerseTarget({ar:verseAr,vn});
+    setSpeechVerseTarget({ar:verseAr.replace(/<[^>]*>/g,"").replace(/[﴿﴾]/g,"").replace(/\s*[١٢٣٤٥٦٧٨٩٠]+\s*$/,"").trim(),vn});
     setSpeechResult("");
     setSpeechScore(null);
     setSpeechCountdown(0);
