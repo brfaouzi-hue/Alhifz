@@ -413,7 +413,7 @@ const THEMES={
     navBg:"#090c10",cardBg:"#090c10",inputBg:"#0e1218",hero:"linear-gradient(160deg,#0e1218,#13181f)"},
   light:{bg:"#f0f7f0",s1:"#ffffff",s2:"#f4faf4",s3:"#e8f5e8",b1:"#d0e8d0",b2:"#bddcbd",
     acc:"#2e7d32",acc2:"#388e3c",acc3:"#43a047",gr:"#2e7d32",grD:"rgba(46,125,50,.12)",
-    tx:"#1a2e1a",tx2:"#3d5c3d",tx3:"#6a8f6a",rd:"#c62828",bl:"#1565c0",pu:"#6a1b9a",
+    tx:"#1a1a1a",tx2:"#3d5c3d",tx3:"#6a8f6a",rd:"#c62828",bl:"#1565c0",pu:"#6a1b9a",
     navBg:"#ffffff",cardBg:"#ffffff",inputBg:"#f4faf4",hero:"linear-gradient(160deg,#e8f5e8,#c8e6c9)"},
   // Andalousie — grenade, alhambra, azulejos
   andalous:{bg:"#0d0a06",s1:"#130e08",s2:"#1a1409",s3:"#221a0e",b1:"#2e2010",b2:"#3d2c15",
@@ -2091,7 +2091,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
 
       {/* Texte en flux continu style Mushaf */}
       <div style={{flex:1,overflowY:"auto",padding:"16px 14px 20px",WebkitOverflowScrolling:"touch"}}>
-        <div style={{direction:"rtl",textAlign:"justify",lineHeight:2.4,fontFamily:"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.5)+"rem"}}>
+        <div style={{direction:"rtl",textAlign:"justify",color:t.tx,lineHeight:2.4,fontFamily:"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.5)+"rem"}}>
           {cur.map((v,idx)=>{
             const isMem=!!(mem[String(selS?.n)]?.[String(v.n)]);
             const isPlay=playing===v.n;
@@ -2103,7 +2103,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
                   onTouchStart={e=>{const timer=setTimeout(()=>{onLongPress&&onLongPress(v);},500);e.currentTarget._t=timer;}}
                   onTouchEnd={e=>{clearTimeout(e.currentTarget._t);}}
                   style={{
-                    color: isPlay?t.acc:isMem?t.gr:t.tx,
+                    color: isPlay?t.acc:isMem?t.gr:"inherit",
                     cursor:"pointer",
                     background: isPlay?t.acc+"15":"transparent",
                     borderRadius:4,
@@ -4359,7 +4359,7 @@ return (
                   </div>
 
                   <div className="vtoolbar">
-                  <button className={"tbtn"+(pageMode?" on":"")} onClick={()=>{const v=!pageMode;setPageMode(v);sv("qpagemode",v);}} style={{borderColor:pageMode?t.acc:t.b1,color:pageMode?t.acc:t.tx3}} title="Mode page">📄</button>
+                  <button className={"tbtn"+(pageMode?" on":"")} onClick={()=>{const v=!pageMode;setPageMode(v);sv("qpagemode",v);}} style={{borderColor:pageMode?t.acc:t.b1,color:pageMode?t.acc:t.tx3}} title="Mode page">Page</button>
                     <button className={`tbtn ${showTj?"on":""}`} onClick={()=>setShowTj(v=>!v)}>Tajwid</button>
                     <button className={`tbtn ${showTr?"on":""}`} onClick={()=>setShowTr(v=>!v)}>Traduction</button>
                     <button className={`tbtn ${showTf?"on":""}`} onClick={()=>setShowTf(v=>!v)}>Tafsir</button>
