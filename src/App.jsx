@@ -2049,10 +2049,11 @@ body>*{position:relative;z-index:1;}
 
 function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
                         mem, hifzMode, hifzLevel, playing,
-                        toggleV, toggleFav, isFav, doPlay, sv, onLongPress, setPage}) {
+                        toggleV, toggleFav, isFav, doPlay, sv,
+                        onLongPress, setPage, wbwVerseRef, setWbwOpen}) {
   const [curPage, setCurPage] = React.useState(0);
+  const [selVerse, setSelVerse] = React.useState(null); // verset sélectionné
 
-  // Grouper en pages de 15 versets (ou par v.pg si dispo)
   const pages = React.useMemo(() => {
     if(!verses.length) return [];
     const hasPg = verses.some(v => v.pg > 0);
@@ -2066,65 +2067,87 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
     return chunks;
   }, [verses]);
 
-  React.useEffect(()=>{setCurPage(0);},[selS?.n]);
+  React.useEffect(()=>{setCurPage(0);setSelVerse(null);},[selS?.n]);
 
   if(!verses.length||!pages.length) return null;
   const cur = pages[Math.min(curPage,pages.length-1)]||[];
   const total = pages.length;
 
+  const handleTap = (v) => {
+    if(selVerse?.n === v.n) {
+      // 2e tap = lecture audio
+      doPlay(v.n);
+      setSelVerse(null);
+    } else {
+      // 1er tap = sélectionne
+      setSelVerse(v);
+    }
+  };
+
   return (
-    <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0}}>
-      {/* Navigation haut */}
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"6px 12px",borderBottom:"1px solid "+t.b1,flexShrink:0}}>
-        <button onClick={()=>setCurPage(p=>Math.max(0,p-1))} disabled={curPage===0}
-          style={{padding:"4px 12px",borderRadius:20,border:"1px solid "+(curPage>0?t.acc:t.b1),background:curPage>0?t.acc+"15":"transparent",color:curPage>0?t.acc:t.tx3,cursor:curPage>0?"pointer":"default",fontSize:".7rem",fontWeight:700}}>
+    <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0}} onClick={()=>setSelVerse(null)}>
+      {/* Navigation */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"5px 10px",borderBottom:"1px solid "+t.b1,flexShrink:0,gap:6}}>
+        <button onClick={e=>{e.stopPropagation();setCurPage(p=>Math.max(0,p-1));}} disabled={curPage===0}
+          style={{padding:"4px 12px",borderRadius:20,border:"1px solid "+(curPage>0?t.acc:t.b1),background:curPage>0?t.acc+"15":"transparent",color:curPage>0?t.acc:t.tx3,cursor:curPage>0?"pointer":"default",fontSize:".7rem",fontWeight:700,flexShrink:0}}>
           ← Préc.
         </button>
-        <span style={{fontSize:".65rem",color:t.tx3,fontWeight:600}}>
-          {cur[0]?.pg?"Page "+cur[0].pg:curPage+1+" / "+total}
+        <span style={{fontSize:".65rem",color:t.tx3,fontWeight:600,flexShrink:0}}>
+          {cur[0]?.pg ? "Page "+cur[0].pg : curPage+1+" / "+total}
         </span>
-        <button onClick={()=>setCurPage(p=>Math.min(total-1,p+1))} disabled={curPage>=total-1}
-          style={{padding:"4px 12px",borderRadius:20,border:"1px solid "+(curPage<total-1?t.acc:t.b1),background:curPage<total-1?t.acc+"15":"transparent",color:curPage<total-1?t.acc:t.tx3,cursor:curPage<total-1?"pointer":"default",fontSize:".7rem",fontWeight:700}}>
+        <button onClick={e=>{e.stopPropagation();setCurPage(p=>Math.min(total-1,p+1));}} disabled={curPage>=total-1}
+          style={{padding:"4px 12px",borderRadius:20,border:"1px solid "+(curPage<total-1?t.acc:t.b1),background:curPage<total-1?t.acc+"15":"transparent",color:curPage<total-1?t.acc:t.tx3,cursor:curPage<total-1?"pointer":"default",fontSize:".7rem",fontWeight:700,flexShrink:0}}>
           Suiv. →
         </button>
-        <button onClick={()=>setPage("reader")} title="Plein écran" style={{padding:"4px 10px",borderRadius:20,border:"1px solid "+t.acc,background:t.acc+"15",color:t.acc,cursor:"pointer",fontSize:".75rem",fontWeight:700,flexShrink:0}}>⛶</button>
+        {setPage&&<button onClick={e=>{e.stopPropagation();setPage("reader");}}
+          style={{padding:"4px 10px",borderRadius:20,border:"1px solid "+t.acc,background:t.acc+"15",color:t.acc,cursor:"pointer",fontSize:".75rem",fontWeight:700,flexShrink:0}}>⛶</button>}
       </div>
 
-      {/* Texte en flux continu style Mushaf */}
-      <div style={{flex:1,overflowY:"auto",padding:"16px 14px 20px",WebkitOverflowScrolling:"touch"}}>
-        <div style={{direction:"rtl",textAlign:"justify",color:t.tx,lineHeight:2.4,fontFamily:"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.5)+"rem"}}>
-          {cur.map((v,idx)=>{
+      {/* Texte en flux continu */}
+      <div style={{flex:1,overflowY:"auto",padding:"14px 12px 80px",WebkitOverflowScrolling:"touch"}} onClick={e=>e.stopPropagation()}>
+        <div style={{direction:"rtl",textAlign:"justify",lineHeight:2.5,fontFamily:"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.5)+"rem",color:t.tx}}>
+          {cur.map((v)=>{
             const isMem=!!(mem[String(selS?.n)]?.[String(v.n)]);
             const isPlay=playing===v.n;
+            const isSel=selVerse?.n===v.n;
             return (
               <React.Fragment key={v.n}>
-                <span
-                  onClick={()=>doPlay(v.n)}
-                  onContextMenu={e=>{e.preventDefault();onLongPress&&onLongPress(v);}}
-                  onTouchStart={e=>{const timer=setTimeout(()=>{onLongPress&&onLongPress(v);},500);e.currentTarget._t=timer;}}
-                  onTouchEnd={e=>{clearTimeout(e.currentTarget._t);}}
+                <span onClick={e=>{e.stopPropagation();handleTap(v);}}
                   style={{
                     color: isPlay?t.acc:isMem?t.gr:"inherit",
-                    cursor:"pointer",
-                    background: isPlay?t.acc+"15":"transparent",
-                    borderRadius:4,
-                    padding:"0 2px",
-                    transition:"color .15s,background .15s",
+                    background: isSel?t.acc+"20":isPlay?t.acc+"15":"transparent",
+                    borderRadius:6, padding:"1px 3px",
+                    cursor:"pointer", outline:"none",
+                    WebkitTapHighlightColor:"transparent",
+                    transition:"background .15s",
                   }}>
                   {hifzMode
                     ? <HifzVerseText ar={v.ar} level={hifzLevel[v.n]||0} tjc={tjc} showTj={showTj} vmark={v.n}/>
                     : <TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/>
                   }
                 </span>
-                {/* Numéro de verset inline */}
-                <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"1.4em",height:"1.4em",borderRadius:"50%",background:isMem?t.gr:t.acc,color:"#fff",fontSize:".5rem",fontWeight:800,margin:"0 4px",verticalAlign:"middle",flexShrink:0,fontFamily:"sans-serif",cursor:"pointer"}}
-                  onClick={()=>doPlay(v.n)}>
+                <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"1.3em",height:"1.3em",borderRadius:"50%",background:isMem?t.gr:isPlay?t.acc:t.acc+"40",color:"#fff",fontSize:".48rem",fontWeight:800,margin:"0 3px",verticalAlign:"middle",fontFamily:"sans-serif",cursor:"pointer",WebkitTapHighlightColor:"transparent",flexShrink:0}}
+                  onClick={e=>{e.stopPropagation();handleTap(v);}}>
                   {v.n}
                 </span>
-                {showTr&&v.fr&&(
-                  <div style={{display:"block",direction:"ltr",textAlign:"left",fontSize:".7rem",color:t.tx3,fontStyle:"italic",lineHeight:1.5,margin:"2px 0 8px",fontFamily:"sans-serif"}}>
-                    {v.fr.replace(/<[^>]*>/g,"")}
-                  </div>
+                {showTr&&v.fr&&<div style={{display:"block",direction:"ltr",textAlign:"left",fontSize:".68rem",color:t.tx3,fontStyle:"italic",lineHeight:1.5,margin:"2px 0 6px",fontFamily:"sans-serif"}}>{v.fr.replace(/<[^>]*>/g,"")}</div>}
+
+                {/* BARRE D'ACTIONS — apparaît au tap */}
+                {isSel&&(
+                  <span style={{display:"inline-flex",alignItems:"center",gap:0,background:t.s1,borderRadius:20,border:"1px solid "+t.b1,boxShadow:"0 2px 12px rgba(0,0,0,.12)",padding:"0 2px",margin:"0 4px",verticalAlign:"middle",direction:"ltr"}}
+                    onClick={e=>e.stopPropagation()}>
+                    {[
+                      {icon:"▶",tip:"Écouter",color:t.acc,fn:()=>{doPlay(v.n);setSelVerse(null);}},
+                      {icon:isMem?"✦":"○",tip:"Mémo",color:isMem?t.gr:t.tx3,fn:()=>{toggleV(String(selS.n),String(v.n),v.ar);setSelVerse(null);}},
+                      {icon:"❤",tip:"Favori",color:isFav(String(selS?.n),String(v.n))?t.rd:t.tx3,fn:()=>{toggleFav(String(selS.n),String(v.n));setSelVerse(null);}},
+                      {icon:"⋯",tip:"WBW",color:t.tx3,fn:()=>{if(wbwVerseRef)wbwVerseRef.current={sn:selS.n,vn:v.n};setWbwOpen&&setWbwOpen(true);setSelVerse(null);}},
+                    ].map(a=>(
+                      <button key={a.tip} onClick={a.fn} title={a.tip}
+                        style={{width:32,height:32,borderRadius:"50%",border:"none",background:"transparent",color:a.color,fontSize:".85rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",WebkitTapHighlightColor:"transparent",flexShrink:0}}>
+                        {a.icon}
+                      </button>
+                    ))}
+                  </span>
                 )}
               </React.Fragment>
             );
@@ -4442,7 +4465,7 @@ return (
                     {loadState==="error"&&(<div style={{textAlign:"center",padding:"24px",fontSize:".78rem"}}><div style={{fontSize:"1.5rem",marginBottom:10}}>🔌</div><div style={{color:t.rd,fontWeight:700,marginBottom:6}}>Connexion requise</div><div style={{color:t.tx3,marginBottom:14,lineHeight:1.5}}>Les versets de cette sourate sont chargés depuis internet.<br/>Vérifie ta connexion et réessaie.</div><button onClick={()=>{setLoadState("idle");setTimeout(()=>setSelS(s=>({...s})),100);}} style={{padding:"8px 20px",background:t.acc,border:"none",borderRadius:10,color:"#fff",fontWeight:700,cursor:"pointer",fontSize:".75rem"}}>🔄 Réessayer</button>{Q[selS?.n]?.length>0&&<div style={{marginTop:12,fontSize:".65rem",color:t.tx3}}>ou <button onClick={()=>{setVerses(Q[selS.n]);setLoadState("done");}} style={{background:"none",border:"none",color:t.acc,cursor:"pointer",fontWeight:700}}>utiliser les données embarquées</button></div>}</div>)}
                     {loadState==="done"&&(
                       <div className="vscroll-inner" style={pageMode?{direction:"ltr",textAlign:"left",padding:0,display:"flex",flexDirection:"column",height:"100%"}:{}}>
-                        {pageMode?(<QuranPageView verses={verses} selS={selS} t={t} tjc={tjc} showTj={showTj} showTr={showTr} arabicSize={arabicSize} mem={mem} hifzMode={hifzMode} hifzLevel={hifzLevel} playing={playing} toggleV={toggleV} toggleFav={toggleFav} isFav={isFav} doPlay={doPlay} sv={sv} setPage={setPage}/>):(<>
+                        {pageMode?(<QuranPageView verses={verses} selS={selS} t={t} tjc={tjc} showTj={showTj} showTr={showTr} arabicSize={arabicSize} mem={mem} hifzMode={hifzMode} hifzLevel={hifzLevel} playing={playing} toggleV={toggleV} toggleFav={toggleFav} isFav={isFav} doPlay={doPlay} sv={sv} setPage={setPage} wbwVerseRef={wbwVerseRef} setWbwOpen={setWbwOpen}/>):(<>
                         {selS.n!==1&&selS.n!==9&&(
                           <div style={{display:"block",textAlign:"center",padding:"8px 0 14px",fontSize:"1.4rem",color:t.acc,direction:"rtl"}}>
                             بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ
