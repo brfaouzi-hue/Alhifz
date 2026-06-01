@@ -3770,7 +3770,7 @@ return (
       )}
 
       {/* Topbar */}
-      <div className="topbar" style={{marginTop:(timerRunning&&timerLeft!==null&&timerLeft>0)||timerLeft===0?36:0,transition:"margin-top .2s"}}>
+      <div className="topbar" style={{display:page==="reader"?"none":"flex",marginTop:(timerRunning&&timerLeft!==null&&timerLeft>0)||timerLeft===0?36:0,transition:"margin-top .2s"}} >
         <div className="tb">
           <div className="logo">
             <div style={{display:"flex",flexDirection:"column",lineHeight:1.1}}>
@@ -4520,7 +4520,7 @@ return (
         )}
 
         {page==="reader"&&selS&&(
-          <div style={{position:"fixed",inset:0,zIndex:50,background:t.bg,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+          <div style={{position:"fixed",inset:0,zIndex:100,background:t.bg,display:"flex",flexDirection:"column",overflow:"hidden"}}>
 
             {/* ── HEADER ── */}
             <div style={{display:"flex",alignItems:"center",gap:8,padding:"10px 12px",borderBottom:"1px solid "+t.b1,background:t.navBg,backdropFilter:"blur(16px)",flexShrink:0,paddingTop:"max(10px,env(safe-area-inset-top))"}}>
@@ -6062,7 +6062,7 @@ return (
       <button onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{position:"fixed",bottom:"calc(76px + env(safe-area-inset-bottom))",right:14,zIndex:50,width:38,height:38,borderRadius:"50%",background:t.s2,border:`1px solid ${t.b2}`,color:t.tx2,fontSize:"1rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 8px rgba(0,0,0,.15)",transition:"all .2s",opacity:0.7}} onMouseEnter={e=>{e.currentTarget.style.opacity="1";e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.borderColor=t.acc;e.currentTarget.style.color=t.acc;}} onMouseLeave={e=>{e.currentTarget.style.opacity="0.7";e.currentTarget.style.transform="";e.currentTarget.style.borderColor=t.b2;e.currentTarget.style.color=t.tx2;}}>↑</button>
 
       {/* Bottom nav */}
-      <div className="bnav">
+      <div className="bnav" style={{display:page==="reader"?"none":"flex"}}>
         {[
           {id:"home",icon:<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,label:"Accueil"},
           {id:"quran",icon:<Icons.Book size={19}/>,label:"Coran"},
