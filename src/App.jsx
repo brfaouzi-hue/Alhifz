@@ -2116,7 +2116,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
                 <span onClick={e=>{e.stopPropagation();handleTap(v);}}
                   style={{
                     color: isPlay?t.acc:isMem?t.gr:"inherit",
-                    background: isSel?t.acc+"20":isPlay?t.acc+"15":"transparent",
+                    background: isSel?t.acc+"10":isPlay?t.acc+"15":"transparent",
                     borderRadius:6, padding:"1px 3px",
                     cursor:"pointer", outline:"none",
                     WebkitTapHighlightColor:"transparent",
