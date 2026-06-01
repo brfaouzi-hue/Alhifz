@@ -2053,6 +2053,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
                         onLongPress, setPage, wbwVerseRef, setWbwOpen, partialPlayRef}) {
   const [curPage, setCurPage] = React.useState(0);
   const [selVerse, setSelVerse] = React.useState(null); // verset sélectionné
+  const [partialV, setPartialV] = React.useState(null);
 
   const pages = React.useMemo(() => {
     if(!verses.length) return [];
