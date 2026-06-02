@@ -741,7 +741,7 @@ function WbwModal({sn,vn,t}){
 }
 function TajwidSpan({text,enabled,tjc}) {
   const raw=text||"";
-  const clean=raw.replace(/\[[a-z]+\](.*?)\[\/[a-z]+\]/g,"$1").replace(/[﴿﴾]/g,"").replace(/\s+[١٢٣٤٥٦٧٨٩٠]+\s*$/,"");
+  const clean=raw.replace(/\[[a-z]+\](.*?)\[\/[a-z]+\]/g,"$1").replace(/[﴿﴾٠١٢٣٤٥٦٧٨٩]/g,"").replace(/\s+[١٢٣٤٥٦٧٨٩٠]+\s*$/,"");
   if(!enabled) return <bdi style={{direction:"rtl"}}>{clean.replace(/<[^>]*>/g,"")}</bdi>;
   if(!clean.includes("<tajweed")) return <bdi style={{direction:"rtl",letterSpacing:0}}>{clean.replace(/<[^>]*>/g,"")}</bdi>;
   // Remplacer les balises tajweed par des spans colorés
@@ -2637,7 +2637,7 @@ const handleReset=async()=>{
 
 
   const [toastMsg,setToastMsg]=useState(null);
-  React.useEffect(()=>{if(toastMsg){const t=setTimeout(()=>setToastMsg(null),2500);return()=>clearTimeout(t);}},[toastMsg]);
+  const [verseCtxMenu,setVerseCtxMenu]=useState(null); // {vn,sn,ar,fr}
   const memStreak=useMemo(()=>{let s=0,d=new Date();while(true){const key=d.toISOString().split("T")[0];if(!hist[key])break;s++;d.setDate(d.getDate()-1);}return s;},[hist]);
 
   // Tracking temps d'engagement — toutes les 30s
@@ -4463,9 +4463,9 @@ return (
 
                   <div className="vtoolbar">
                   <button className={"tbtn"+(pageMode?" on":"")} onClick={()=>{const v=!pageMode;setPageMode(v);sv("qpagemode",v);}} style={{borderColor:pageMode?t.acc:t.b1,color:pageMode?"#fff":t.tx3}} title="Mode page">Page</button>
-                    <button className={`tbtn ${showTj?"on":""}`} onClick={()=>setShowTj(v=>!v)}>Tajwid</button>
-                    <button className={`tbtn ${showTr?"on":""}`} onClick={()=>setShowTr(v=>!v)}>Traduction</button>
-                    <button className={`tbtn ${showTf?"on":""}`} onClick={()=>setShowTf(v=>!v)}>Tafsir</button>
+                    <button style={{display:"none"}} className={`tbtn ${showTj?"on":""}`} onClick={()=>setShowTj(v=>!v)}>Tajwid</button>
+                    <button style={{display:"none"}} className={`tbtn ${showTr?"on":""}`} onClick={()=>setShowTr(v=>!v)}>Traduction</button>
+                    <button style={{display:"none"}} className={`tbtn ${showTf?"on":""}`} onClick={()=>setShowTf(v=>!v)}>Tafsir</button>
 
                     <button className={`tbtn ${reviewMode?"on":""}`} style={reviewMode?{background:t.rd,borderColor:t.rd,color:"#fff"}:{}} onClick={()=>{setReviewMode(v=>!v);setRevealedVerses({});}}>{reviewMode?"Quitter révision":"Révision"}</button>
                     <button className={`tbtn ${karaokeMode?"on":""}`} style={karaokeMode?{background:"#e91e63",borderColor:"#e91e63",color:"#fff"}:{borderColor:t.b2}} onClick={()=>{setKaraokeMode(v=>!v);setActiveWordIdx(-1);}}>Tilawa</button>
