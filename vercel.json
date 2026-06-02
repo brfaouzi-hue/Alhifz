@@ -1,7 +1,4 @@
 {
-  "functions": {
-    "api/tajweed.js": {
-      "maxDuration": 10
-    }
-  }
+  "buildCommand": "echo skip",
+  "outputDirectory": "dist"
 }
