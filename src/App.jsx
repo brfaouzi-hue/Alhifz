@@ -1875,8 +1875,8 @@ body>*{position:relative;z-index:1;}
 .sname{font-size:.76rem;font-weight:500;}
 .smeta{font-size:.56rem;color:${t.tx3};margin-top:1px;}
 .sar{font-family:'Amiri',serif;font-size:.9rem;color:${acc};}
-.mbar{width:36px;height:3px;background:${t.b2};border-radius:99px;overflow:hidden;margin-top:3px;}
-.mfill{height:100%;background:${t.gr};border-radius:99px;}
+.mbar{position:absolute;bottom:0;left:0;right:0;height:3px;background:${t.b2};overflow:hidden;border-radius:0 0 10px 10px;}
+.mfill{border-radius:0 0 10px 10px;height:100%;background:${t.gr};border-radius:99px;}
 /* ── Juz grid ── */
 .jg{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:7px;}
 .jc{background:${t.s2};border:1px solid ${t.b1};border-radius:7px;padding:6px 3px;text-align:center;cursor:pointer;transition:all .2s;}
@@ -2065,7 +2065,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
       return Object.keys(groups).map(Number).sort((a,b)=>a-b).map(pg=>groups[pg]);
     }
     const chunks=[];
-    for(let i=0;i<verses.length;i+=15) chunks.push(verses.slice(i,i+15));
+    for(let i=0;i<verses.length;i+=15) chunks.push(verses.slice(i,i+6));
     return chunks;
   }, [verses]);
 
@@ -3146,6 +3146,7 @@ const handleReset=async()=>{
     }
   };
   const toggleFav=(sn,vn,ar,fr,surah)=>{const key=`${sn}_${vn}`;setFavorites(p=>p.find(f=>f.key===key)?p.filter(f=>f.key!==key):[...p,{key,sn,vn,ar,fr,surah}]);};
+  const isMem=(sn,vn)=>!!(mem[String(sn)]?.[String(vn)]);
   const isFav=(sn,vn)=>favorites.some(f=>f.key===`${sn}_${vn}`);
   const saveNote=(sn,vn,text)=>{const k=`${sn}_${vn}`;if(text.trim())setNotes(p=>({...p,[k]:text.trim()}));else setNotes(p=>{const n={...p};delete n[k];return n;});setEditingNote(null);};
   // Génération plan mémorisation via Anthropic API
@@ -4564,7 +4565,7 @@ return (
                                 onTouchStart={()=>{longPressTimer.current=setTimeout(()=>setVerseCtxMenu({vn:v.n,sn:selS?.n,ar:v.ar,fr:v.fr}),500);}}
                                 onTouchEnd={()=>clearTimeout(longPressTimer.current)}
                                 onTouchMove={()=>clearTimeout(longPressTimer.current)}
-                                onMouseDown={()=>{longPressTimer.current=setTimeout(()=>setActiveVerseActions(vn=>vn===v.n?null:v.n),500);}}
+                                onMouseDown={()=>{longPressTimer.current=setTimeout(()=>setVerseCtxMenu({vn:v.n,sn:selS?.n,ar:v.ar,fr:v.fr}),500);}}
                                 onMouseUp={()=>clearTimeout(longPressTimer.current)} onClick={()=>{if(!isActive)doPlay(v.n);}}
                                 style={{display:"inline",color:isMem?t.gr:isPl?t.acc:isDue?t.rd:t.tx,background:isActive?t.acc+"15":"transparent",borderRadius:4,cursor:"pointer",WebkitUserSelect:"none",userSelect:"none"}}
                               >
@@ -6263,6 +6264,7 @@ return (
           </div>
         </div>
       )}
+      {selS&&page==="coran"&&(<div style={{position:"fixed",bottom:56,left:0,right:0,zIndex:90,background:t.s1,borderTop:"1px solid "+t.b1,boxShadow:"0 -2px 12px rgba(0,0,0,.1)",padding:"5px 10px",display:"flex",flexDirection:"column",gap:3}}><div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:".8rem",flexShrink:0}}>🎙️</span><select value={rec.id} onChange={e=>setRec(RECITERS.find(r=>r.id===e.target.value)||RECITERS[0])} style={{flex:1,minWidth:0,fontSize:".68rem",padding:"3px 6px",borderRadius:8,border:"1px solid "+t.b1,background:t.bg,color:t.tx}}>{RECITERS.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</select><button onClick={()=>{if(!verses.length)return;stopListening();setSpeechScore(null);setContinuousMode(false);setContinuousIdx(playing&&verses.findIndex(v=>v.n===playing)>-1?verses.findIndex(v=>v.n===playing):0);setRecitModal(true);}} style={{flexShrink:0,padding:"4px 9px",borderRadius:8,border:"1px solid "+t.acc,background:t.acc+"18",color:t.acc,fontSize:".62rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>🎤 Réciter</button><button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,1);}} style={{flexShrink:0,padding:"4px 9px",borderRadius:8,border:"none",background:playlistActive&&playlist[0]?.sn===selS.n?"#e53935":t.acc,color:"#fff",fontSize:".62rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>{playlistActive&&playlist[0]?.sn===selS.n?"■ Stop":"▶ Sourate"}</button></div><div style={{display:"flex",alignItems:"center",gap:3,overflowX:"auto",WebkitOverflowScrolling:"touch"}}><span style={{fontSize:".56rem",color:t.tx3,flexShrink:0}}>Répét.</span>{[1,3,5,10].map(n=>(<button key={n} onClick={()=>{setLoopCount(n);setLoopInfinite(false);}} style={{padding:"2px 6px",borderRadius:10,border:"1px solid "+(loopCount===n&&!loopInfinite?t.acc:t.b1),background:loopCount===n&&!loopInfinite?t.acc:"transparent",color:loopCount===n&&!loopInfinite?"#fff":t.tx3,fontSize:".62rem",cursor:"pointer",flexShrink:0}}>{n}×</button>))}<button onClick={()=>setLoopInfinite(p=>!p)} style={{padding:"2px 6px",borderRadius:10,border:"1px solid "+(loopInfinite?t.acc:t.b1),background:loopInfinite?t.acc:"transparent",color:loopInfinite?"#fff":t.tx3,fontSize:".62rem",cursor:"pointer",flexShrink:0}}>∞</button><span style={{fontSize:".56rem",color:t.tx3,flexShrink:0,marginLeft:3}}>Vitesse</span>{[0.75,1,1.25,1.5].map(s=>(<button key={s} onClick={()=>setPlaybackRate(s)} style={{padding:"2px 6px",borderRadius:10,border:"1px solid "+(playbackRate===s?t.acc:t.b1),background:playbackRate===s?t.acc:"transparent",color:playbackRate===s?"#fff":t.tx3,fontSize:".62rem",cursor:"pointer",flexShrink:0}}>{s}×</button>))}<button onClick={()=>setBookmark(b=>b?.sn===selS.n?null:{sn:selS.n,vn:playing||1})} style={{padding:"2px 8px",borderRadius:10,border:"1px solid "+(bookmark?.sn===selS.n?t.acc:t.b1),background:"transparent",color:bookmark?.sn===selS.n?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer",flexShrink:0,marginLeft:"auto"}}>{bookmark?.sn===selS.n?"🔖":"○ Signet"}</button></div></div>)}
       <div className="bnav" style={{display:page==="reader"?"none":"flex"}}>
         {[
           {id:"home",icon:<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,label:"Accueil"},
