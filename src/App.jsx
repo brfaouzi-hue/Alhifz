@@ -2047,50 +2047,6 @@ body>*{position:relative;z-index:1;}
 
 // ── Composant page par page (style Tarteel) ──
 
-function WordPartialPanel({v, t, doPlayPartial, selS}) {
-  const words = React.useMemo(()=>
-    (v.ar||'').replace(/<[^>]*>/g,'').replace(/[﴿﴾]/g,'').trim().split(/\s+/).filter(Boolean)
-  ,[v.ar]);
-  const [sel, setSel] = React.useState([0, Math.min(3, words.length-1)]);
-  
-  const toggle = (idx) => {
-    setSel(prev => {
-      if(idx < prev[0]) return [idx, prev[1]];
-      if(idx > prev[1]) return [prev[0], idx];
-      if(idx === prev[0] && idx < prev[1]) return [idx+1, prev[1]];
-      if(idx === prev[1] && idx > prev[0]) return [prev[0], idx-1];
-      return [idx, idx];
-    });
-  };
-
-  return (
-    <span style={{display:"inline-flex",flexDirection:"column",gap:6,background:t.pu+"12",borderRadius:12,border:"1px solid "+t.pu,padding:"8px 10px",margin:"2px 4px",verticalAlign:"middle",direction:"rtl",maxWidth:"100%"}}
-      onClick={e=>e.stopPropagation()}>
-      <span style={{fontSize:".58rem",color:t.pu,fontWeight:700,direction:"ltr"}}>
-        ✂ Sélectionne les mots à lire
-      </span>
-      <span style={{display:"flex",flexWrap:"wrap",gap:4,direction:"rtl",justifyContent:"flex-end"}}>
-        {words.map((w,i)=>(
-          <button key={i} onClick={e=>{e.stopPropagation();toggle(i);}}
-            style={{padding:"3px 6px",borderRadius:8,border:"1px solid "+(i>=sel[0]&&i<=sel[1]?t.pu:t.b1),
-              background:i>=sel[0]&&i<=sel[1]?t.pu:"transparent",
-              color:i>=sel[0]&&i<=sel[1]?"#fff":t.tx,
-              fontFamily:"Amiri Quran,serif",fontSize:"1rem",cursor:"pointer",
-              WebkitTapHighlightColor:"transparent"}}>
-            {w}
-          </button>
-        ))}
-      </span>
-      <span style={{display:"flex",alignItems:"center",gap:6,direction:"ltr"}}>
-        <span style={{fontSize:".58rem",color:t.tx3}}>Mots {sel[0]+1}–{sel[1]+1} / {words.length}</span>
-        <button onClick={e=>{e.stopPropagation();doPlayPartial&&doPlayPartial(v.n,sel[0],sel[1],words.length);}}
-          style={{padding:"4px 12px",borderRadius:20,border:"none",background:t.pu,color:"#fff",fontSize:".7rem",cursor:"pointer",fontWeight:700,marginLeft:"auto"}}>
-          ▶ Lire ces mots
-        </button>
-      </span>
-    </span>
-  );
-}
 
 function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
                         mem, hifzMode, hifzLevel, playing,
@@ -2196,9 +2152,28 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
                       </button>
                     ))}
                   </span>
-                {partialV?.n===v.n&&(
-                  <WordPartialPanel v={v} t={t} doPlayPartial={doPlayPartial} selS={selS}/>
-                )}
+                {partialV?.n===v.n&&(()=>{
+                  const w2=(v.ar||'').replace(/<[^>]*>/g,'').replace(/[﴿﴾]/g,'').trim().split(/\s+/).filter(Boolean);
+                  const si=partialV.s??0; const ei=partialV.e??Math.min(3,w2.length-1);
+                  const lo=Math.min(si,ei); const hi=Math.max(si,ei);
+                  return(
+                    <span style={{display:"inline-flex",flexDirection:"column",gap:5,background:t.pu+"12",borderRadius:12,border:"1px solid "+t.pu,padding:"8px 10px",margin:"2px 4px",verticalAlign:"middle",direction:"rtl",maxWidth:"100%"}} onClick={e=>e.stopPropagation()}>
+                      <span style={{fontSize:".58rem",color:t.pu,fontWeight:700,direction:"ltr"}}>✂ Sélectionne les mots · tap 1er puis dernier</span>
+                      <span style={{display:"flex",flexWrap:"wrap",gap:4,direction:"rtl",justifyContent:"flex-end"}}>
+                        {w2.map((w,wi)=>(
+                          <button key={wi} onClick={e=>{e.stopPropagation();setPartialV(p=>p.s===undefined?{...p,s:wi,e:wi}:{...p,e:wi});}}
+                            style={{padding:"3px 6px",borderRadius:8,fontFamily:"Amiri Quran,serif",fontSize:"1rem",cursor:"pointer",WebkitTapHighlightColor:"transparent",border:"1px solid "+(wi>=lo&&wi<=hi?t.pu:t.b1),background:wi>=lo&&wi<=hi?t.pu:"transparent",color:wi>=lo&&wi<=hi?"#fff":t.tx}}>
+                            {w}
+                          </button>
+                        ))}
+                      </span>
+                      <span style={{display:"flex",gap:6,direction:"ltr",alignItems:"center"}}>
+                        <button onClick={e=>{e.stopPropagation();setPartialV(p=>({n:p.n}));}} style={{padding:"3px 8px",borderRadius:10,border:"1px solid "+t.b1,background:"transparent",color:t.tx3,fontSize:".6rem",cursor:"pointer"}}>Réinitialiser</button>
+                        <button onClick={e=>{e.stopPropagation();doPlayPartial&&doPlayPartial(v.n,lo,hi,w2.length);setPartialV(null);setSelVerse(null);}} style={{padding:"4px 12px",borderRadius:20,border:"none",background:t.pu,color:"#fff",fontSize:".7rem",cursor:"pointer",fontWeight:700,marginLeft:"auto"}}>▶ Lire ces mots</button>
+                      </span>
+                    </span>
+                  );
+                })()}
                 </>)}
               </React.Fragment>
             );
