@@ -2860,7 +2860,7 @@ const handleReset=async()=>{
     if(!selS||!audioRef.current) return;
     const audio=audioRef.current;
     const segs=(audioSegments[selS.n]||{})[vn]||[];
-    const url=buildUrl(selS.n,vn);
+    const _s2=String(selS.n).padStart(3,"0"),_v2=String(vn).padStart(3,"0");const url=`https://everyayah.com/data/${rec?.everyayah||"Alafasy_128kbps"}/${_s2}${_v2}.mp3`;
     audio.pause();
     audio.src=url;
     setPlaying(vn);
