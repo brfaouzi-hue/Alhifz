@@ -2831,45 +2831,39 @@ const handleReset=async()=>{
   };
 
   // Lecture partielle d'un verset (mots startW à endW, 0-indexed)
-  const doPlayPartial=useCallback((vn,startW,endW,totalWords)=>{
-    if(!selS||!audioRef.current) return;
-    const audio=audioRef.current;
-    const segs=(audioSegments[selS.n]||{})[vn]||[];
-    const _s2=String(selS.n).padStart(3,"0"),_v2=String(vn).padStart(3,"0");const url=`https://everyayah.com/data/${rec?.everyayah||"Alafasy_128kbps"}/${_s2}${_v2}.mp3`;
-    audio.pause();
-    audio.src=url;
-    setPlaying(vn);
-    
-    const onCanPlay=()=>{
-      // Calculer startTime et endTime
-      let startT=0, endT=audio.duration||30;
-      if(segs.length){
-        const startSeg=segs.find(s=>s[0]>=startW);
-        const endSeg=segs.filter(s=>s[0]<=endW).pop();
-        if(startSeg) startT=startSeg[1]/1000;
-        if(endSeg) endT=(endSeg[1]+endSeg[2])/1000;
-      } else {
-        // Estimation linéaire
-        const d=audio.duration||30;
-        startT=d*(startW/totalWords);
-        endT=d*((endW+1)/totalWords);
-      }
-      audio.currentTime=startT;
-      audio.play().catch(()=>{});
-      // Arrêter à endT
-      const stopFn=()=>{
-        if(audio.currentTime>=endT){
-          audio.pause();
-          setPlaying(null);
-          audio.removeEventListener('timeupdate',stopFn);
+  // Lecture partielle via ref pour éviter TDZ Rolldown
+  const _dpRef=useRef(null);
+  useEffect(()=>{
+    _dpRef.current=(vn,startW,endW,totalWords)=>{
+      if(!selS||!audioRef.current) return;
+      const audio=audioRef.current;
+      const segs=(audioSegments[selS.n]||{})[vn]||[];
+      const _s=String(selS.n).padStart(3,"0"),_v=String(vn).padStart(3,"0");
+      const url=`https://everyayah.com/data/${rec?.everyayah||"Alafasy_128kbps"}/${_s}${_v}.mp3`;
+      audio.pause(); audio.src=url; setPlaying(vn);
+      const onCanPlay=()=>{
+        let startT=0,endT=audio.duration||30;
+        if(segs.length){
+          const ss=segs.find(s=>s[0]>=startW);
+          const es=[...segs].filter(s=>s[0]<=endW).pop();
+          if(ss) startT=ss[1]/1000;
+          if(es) endT=(es[1]+es[2])/1000;
+        } else {
+          const dur=audio.duration||30;
+          startT=dur*(startW/totalWords);
+          endT=dur*((endW+1)/totalWords);
         }
+        audio.currentTime=startT;
+        audio.play().catch(()=>{});
+        const stopFn=()=>{if(audio.currentTime>=endT){audio.pause();setPlaying(null);audio.removeEventListener("timeupdate",stopFn);}};
+        audio.addEventListener("timeupdate",stopFn);
+        audio.removeEventListener("canplay",onCanPlay);
       };
-      audio.addEventListener('timeupdate',stopFn);
-      audio.removeEventListener('canplay',onCanPlay);
+      audio.addEventListener("canplay",onCanPlay);
+      audio.load();
     };
-    audio.addEventListener('canplay',onCanPlay);
-    audio.load();
-  },[selS,audioSegments,buildUrl]);
+  },[selS,audioSegments,rec]);
+  const doPlayPartial=useCallback((...a)=>_dpRef.current?.(...a),[]);
 
   // Moteur audio unifié — préchargement + zéro latence
   // Charge le tafsir Ibn Kathir (FR) — 3 sources en cascade
