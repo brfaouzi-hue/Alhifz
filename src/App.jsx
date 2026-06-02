@@ -2628,10 +2628,9 @@ const handleReset=async()=>{
       });
     }
   },[playing,karaokeMode]);
-      const key=`enc_${pagesRead}`;
 
   const weeklyReport=useMemo(()=>{
-    for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);const key=d.toISOString().split("T")[0];const val=hist[key]||0;const prev=i<6?(hist[Object.keys(hist).sort()[Object.keys(hist).sort().indexOf(key)-1]]||0):0;days.push({date:key,label:d.toLocaleDateString("fr-FR",{weekday:"short"}),total:val,gained:Math.max(0,val-prev)});}
+    for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const key=d.toISOString().split("T")[0];const val=hist[key]||0;const prev=i<6?(hist[Object.keys(hist).sort()[Object.keys(hist).sort().indexOf(key)-1]]||0):0;days.push({date:key,label:d.toLocaleDateString("fr-FR",{weekday:"short"}),total:val,gained:Math.max(0,val-prev)});}
     const totalWeek=days.reduce((s,d)=>s+d.gained,0);const activeDays=days.filter(d=>d.gained>0).length;const best=days.reduce((a,b)=>b.gained>a.gained?b:a,days[0]);
     return{days,totalWeek,activeDays,best};
   },[hist]);
