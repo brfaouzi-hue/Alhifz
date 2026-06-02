@@ -2878,10 +2878,10 @@ const handleReset=async()=>{
       setTafsirLoading(p=>({...p,[key]:false}));
       tafsirLoadingRef.current[key]=false;
     };
-    const clean=(s)=>s.replace(/&amp;/g,"&").replace(/&nbsp;/g," ").replace(/&#\d+;/g,"").replace(/\s+/g," ").trim();
+    const clean=(s)=>(s||"").replace(/<[^>]*>/g," ").replace(/&amp;/g,"&").replace(/&nbsp;/g," ").replace(/&#\d+;/g,"").replace(/\[\d+\]/g,"").replace(/\s+/g," ").trim();
 
     // Source 1 : quran.com API — essayer plusieurs IDs tafsir FR
-    for(const tid of [31,169,817]){
+    for(const tid of [817,31]){
       try{
         const r=await fetch(`https://api.quran.com/api/v4/tafsirs/${tid}/by_ayah/${sn}:${vn}`,{headers:{"Accept":"application/json"}});
         if(r.ok){
@@ -6201,7 +6201,7 @@ return (
       <button onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{position:"fixed",bottom:"calc(76px + env(safe-area-inset-bottom))",right:14,zIndex:50,width:38,height:38,borderRadius:"50%",background:t.s2,border:`1px solid ${t.b2}`,color:t.tx2,fontSize:"1rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 8px rgba(0,0,0,.15)",transition:"all .2s",opacity:0.7}} onMouseEnter={e=>{e.currentTarget.style.opacity="1";e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.borderColor=t.acc;e.currentTarget.style.color=t.acc;}} onMouseLeave={e=>{e.currentTarget.style.opacity="0.7";e.currentTarget.style.transform="";e.currentTarget.style.borderColor=t.b2;e.currentTarget.style.color=t.tx2;}}>↑</button>
 
       {/* Bottom nav */}
-      <div className="bnav" style={{display:page==="reader"?"none":"flex"}}>
+      <div className="bnav" style={{display:(page==="reader"||page==="mushaf")?"none":"flex"}}>
         {[
           {id:"home",icon:<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,label:"Accueil"},
           {id:"quran",icon:<Icons.Book size={19}/>,label:"Coran"},
