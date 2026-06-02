@@ -741,9 +741,9 @@ function WbwModal({sn,vn,t}){
 }
 function TajwidSpan({text,enabled,tjc}) {
   const raw=text||"";
-  const clean=raw.replace(/\[[a-z]+\](.*?)\[\/[a-z]+\]/g,"$1").replace(/[﴿﴾]/g,"").replace(/\s+[١٢٣٤٥٦٧٨٩٠]+\s*$/,"");
-  if(!enabled) return <bdi style={{direction:"rtl"}}>{clean.replace(/<[^>]*>/g,"")}</bdi>;
-  if(!clean.includes("<tajweed")) return <bdi style={{direction:"rtl",letterSpacing:0}}>{clean.replace(/<[^>]*>/g,"")}</bdi>;
+  const clean=raw.replace(/\[[a-z]+\](.*?)\[\/[a-z]+\]/g,"$1").replace(/[﴿﴾۰-۹٠-٩]/g,"").replace(/\s+[١٢٣٤٥٦٧٨٩٠]+\s*$/,"");
+  if(!enabled) return <bdi style={{direction:"rtl"}}>{clean.replace(/<[^>]*>/g,"").replace(/[۰-۹٠-٩]/g,"")}</bdi>;
+  if(!clean.includes("<tajweed")) return <bdi style={{direction:"rtl",letterSpacing:0}}>{clean.replace(/<[^>]*>/g,"").replace(/[۰-۹٠-٩]/g,"")}</bdi>;
   // Remplacer les balises tajweed par des spans colorés
   const colored=clean
     .replace(/<tajweed[^>]*class=["']?([^"'> ]+)["']?[^>]*>/g,(m,cls)=>{
