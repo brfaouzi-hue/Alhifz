@@ -2639,6 +2639,7 @@ const handleReset=async()=>{
 
   const [toastMsg,setToastMsg]=useState(null);
   const [versePages,setVersePages]=useState({}); // {sn: {vn: pageNum}}
+  const [playerOpen,setPlayerOpen]=useState(false);
   const [verseCtxMenu,setVerseCtxMenu]=useState(null); // {vn,sn,ar,fr}
   const memStreak=useMemo(()=>{let s=0,d=new Date();while(true){const key=d.toISOString().split("T")[0];if(!hist[key])break;s++;d.setDate(d.getDate()-1);}return s;},[hist]);
 
@@ -6267,45 +6268,137 @@ return (
         </div>
       )}
 
-      {/* Bulle player style Tarteel */}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      {/* Mini player flottant */}
       {selS&&(
-        <div style={{position:"fixed",bottom:68,left:"50%",transform:"translateX(-50%)",zIndex:95,
-          background:t.s1,borderRadius:40,boxShadow:"0 4px 24px rgba(0,0,0,.18)",
-          border:"1px solid "+t.b1,padding:"6px 12px",
-          display:"flex",alignItems:"center",gap:8,
-          maxWidth:"min(420px,94vw)",width:"fit-content"}}>
-          {/* Réciteur compact */}
-          <select value={rec.id} onChange={e=>setRec(RECITERS.find(r=>r.id===e.target.value)||RECITERS[0])}
-            style={{fontSize:".6rem",padding:"3px 6px",borderRadius:20,border:"1px solid "+t.b1,
-              background:t.bg,color:t.tx,maxWidth:90,cursor:"pointer"}}>
-            {RECITERS.map(r=><option key={r.id} value={r.id}>{r.name.split(' ')[0]}</option>)}
-          </select>
-          {/* Vitesse */}
-          <select value={playbackRate} onChange={e=>setPlaybackRate(parseFloat(e.target.value))}
-            style={{fontSize:".6rem",padding:"3px 4px",borderRadius:20,border:"1px solid "+t.b1,
-              background:t.bg,color:t.tx,width:52,cursor:"pointer"}}>
-            {[0.5,0.75,1,1.25,1.5].map(s=><option key={s} value={s}>{s}×</option>)}
-          </select>
-          {/* Répétitions */}
-          <select value={loopInfinite?"inf":loopCount} onChange={e=>{if(e.target.value==="inf"){setLoopInfinite(true);}else{setLoopInfinite(false);setLoopCount(parseInt(e.target.value));}}}
-            style={{fontSize:".6rem",padding:"3px 4px",borderRadius:20,border:"1px solid "+t.b1,
-              background:t.bg,color:t.tx,width:48,cursor:"pointer"}}>
-            {[1,3,5,10].map(n=><option key={n} value={n}>{n}×</option>)}
-            <option value="inf">∞</option>
-          </select>
-          {/* ▶ Sourate */}
-          <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,1);}}
-            style={{padding:"7px 14px",borderRadius:30,border:"none",
-              background:playlistActive&&playlist[0]?.sn===selS.n?"#e53935":t.acc,
-              color:"#fff",fontSize:".72rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
-            {playlistActive&&playlist[0]?.sn===selS.n?"⏸":"▶"}
-          </button>
-          {/* 🎤 Réciter */}
-          <button onClick={()=>{if(!verses.length)return;stopListening();setSpeechScore(null);setContinuousMode(false);setContinuousIdx(playing&&verses.findIndex(v=>v.n===playing)>-1?verses.findIndex(v=>v.n===playing):0);setRecitModal(true);}}
-            style={{padding:"7px 12px",borderRadius:30,border:"1px solid "+t.acc,
-              background:t.acc+"18",color:t.acc,fontSize:".72rem",fontWeight:700,cursor:"pointer",flexShrink:0}}>
-            🎤
-          </button>
+        <div style={{position:"fixed",bottom:70,right:16,zIndex:95}}>
+          {playerOpen?(
+            <div style={{background:t.s1,borderRadius:20,boxShadow:"0 4px 20px rgba(0,0,0,.15)",
+              border:"1px solid "+t.b1,padding:"12px 14px",width:220,
+              display:"flex",flexDirection:"column",gap:8}}>
+              {/* Header avec fermeture */}
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span style={{fontSize:".65rem",fontWeight:700,color:t.acc}}>{selS.name||"Sourate "+selS.n}</span>
+                <button onClick={()=>setPlayerOpen(false)} style={{background:"none",border:"none",color:t.tx3,cursor:"pointer",fontSize:"1rem",lineHeight:1}}>×</button>
+              </div>
+              {/* Réciteur */}
+              <div style={{display:"flex",flexDirection:"column",gap:4}}>
+                <span style={{fontSize:".55rem",color:t.tx3,textTransform:"uppercase",letterSpacing:".5px"}}>Réciteur</span>
+                <div style={{display:"flex",flexWrap:"wrap",gap:3}}>
+                  {RECITERS.slice(0,4).map(r=>(
+                    <button key={r.id} onClick={()=>setRec(r)}
+                      style={{padding:"3px 8px",borderRadius:10,fontSize:".6rem",cursor:"pointer",
+                        border:"1px solid "+(rec.id===r.id?t.acc:t.b1),
+                        background:rec.id===r.id?t.acc:"transparent",
+                        color:rec.id===r.id?"#fff":t.tx}}>
+                      {r.name.split(' ')[0]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {/* Vitesse */}
+              <div style={{display:"flex",flexDirection:"column",gap:4}}>
+                <span style={{fontSize:".55rem",color:t.tx3,textTransform:"uppercase",letterSpacing:".5px"}}>Vitesse</span>
+                <div style={{display:"flex",gap:3}}>
+                  {[0.75,1,1.25,1.5].map(s=>(
+                    <button key={s} onClick={()=>setPlaybackRate(s)}
+                      style={{flex:1,padding:"3px 0",borderRadius:10,fontSize:".6rem",cursor:"pointer",
+                        border:"1px solid "+(playbackRate===s?t.acc:t.b1),
+                        background:playbackRate===s?t.acc:"transparent",
+                        color:playbackRate===s?"#fff":t.tx}}>
+                      {s}×
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {/* Répétitions */}
+              <div style={{display:"flex",flexDirection:"column",gap:4}}>
+                <span style={{fontSize:".55rem",color:t.tx3,textTransform:"uppercase",letterSpacing:".5px"}}>Répétitions</span>
+                <div style={{display:"flex",gap:3}}>
+                  {[1,3,5,10].map(n=>(
+                    <button key={n} onClick={()=>{setLoopCount(n);setLoopInfinite(false);}}
+                      style={{flex:1,padding:"3px 0",borderRadius:10,fontSize:".6rem",cursor:"pointer",
+                        border:"1px solid "+(loopCount===n&&!loopInfinite?t.acc:t.b1),
+                        background:loopCount===n&&!loopInfinite?t.acc:"transparent",
+                        color:loopCount===n&&!loopInfinite?"#fff":t.tx}}>
+                      {n}×
+                    </button>
+                  ))}
+                  <button onClick={()=>setLoopInfinite(p=>!p)}
+                    style={{flex:1,padding:"3px 0",borderRadius:10,fontSize:".6rem",cursor:"pointer",
+                      border:"1px solid "+(loopInfinite?t.acc:t.b1),
+                      background:loopInfinite?t.acc:"transparent",
+                      color:loopInfinite?"#fff":t.tx}}>
+                    ∞
+                  </button>
+                </div>
+              </div>
+              {/* Boutons action */}
+              <div style={{display:"flex",gap:6,marginTop:2}}>
+                <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,1);}}
+                  style={{flex:1,padding:"8px 0",borderRadius:12,border:"none",fontWeight:700,fontSize:".75rem",cursor:"pointer",
+                    background:playlistActive&&playlist[0]?.sn===selS.n?"#e53935":t.acc,color:"#fff"}}>
+                  {playlistActive&&playlist[0]?.sn===selS.n?"⏸ Stop":"▶ Sourate"}
+                </button>
+                <button onClick={()=>{if(!verses.length)return;stopListening();setSpeechScore(null);setContinuousMode(false);setContinuousIdx(playing&&verses.findIndex(v=>v.n===playing)>-1?verses.findIndex(v=>v.n===playing):0);setRecitModal(true);setPlayerOpen(false);}}
+                  style={{flex:1,padding:"8px 0",borderRadius:12,border:"1px solid "+t.acc,fontWeight:700,fontSize:".75rem",cursor:"pointer",background:"transparent",color:t.acc}}>
+                  🎤 Réciter
+                </button>
+              </div>
+            </div>
+          ):(
+            /* Pastille compacte fermée */
+            <button onClick={()=>setPlayerOpen(true)}
+              style={{width:44,height:44,borderRadius:"50%",border:"none",
+                background:playing!==null?t.acc:t.s1,
+                boxShadow:"0 3px 14px rgba(0,0,0,.2)",
+                border:"1px solid "+(playing!==null?t.acc:t.b1),
+                color:playing!==null?"#fff":t.acc,
+                fontSize:"1.1rem",cursor:"pointer",
+                display:"flex",alignItems:"center",justifyContent:"center"}}>
+              {playing!==null?"▶":"🎙"}
+            </button>
+          )}
         </div>
       )}
       <div className="bnav" style={{display:page==="reader"?"none":"flex"}}>
