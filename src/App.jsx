@@ -2051,7 +2051,7 @@ body>*{position:relative;z-index:1;}
 function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
                         mem, hifzMode, hifzLevel, playing,
                         toggleV, toggleFav, isFav, doPlay, sv,
-                        onLongPress, setPage, wbwVerseRef, setWbwOpen, partialPlayRef, showTf, tafsirData, loadTafsir, doPlayPartial, setVerseCtxMenu}) {
+                        onLongPress, setPage, wbwVerseRef, setWbwOpen, partialPlayRef, showTf, tafsirData, loadTafsir, doPlayPartial, setVerseCtxMenu, versePages}) {
   const _lpTimer=React.useRef(null);
   const [curPage, setCurPage] = React.useState(0);
   const [selVerse, setSelVerse] = React.useState(null); // verset sélectionné
@@ -2059,10 +2059,10 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
 
   const pages = React.useMemo(() => {
     if(!verses.length) return [];
-    const hasPg = verses.some(v => v.pg > 0);
+    const pageMap = versePages&&versePages[selS?.n]; const hasPg = pageMap ? verses.some(v=>pageMap[v.n]>0) : verses.some(v => v.pg > 0);
     if(hasPg) {
       const groups = {};
-      verses.forEach(v => { const pg=v.pg||1; if(!groups[pg]) groups[pg]=[]; groups[pg].push(v); });
+      verses.forEach(v => { const pg=(pageMap&&pageMap[v.n])||v.pg||1; if(!groups[pg]) groups[pg]=[]; groups[pg].push(v); });
       return Object.keys(groups).map(Number).sort((a,b)=>a-b).map(pg=>groups[pg]);
     }
     const chunks=[];
@@ -2638,6 +2638,7 @@ const handleReset=async()=>{
 
 
   const [toastMsg,setToastMsg]=useState(null);
+  const [versePages,setVersePages]=useState({}); // {sn: {vn: pageNum}}
   const [verseCtxMenu,setVerseCtxMenu]=useState(null); // {vn,sn,ar,fr}
   const memStreak=useMemo(()=>{let s=0,d=new Date();while(true){const key=d.toISOString().split("T")[0];if(!hist[key])break;s++;d.setDate(d.getDate()-1);}return s;},[hist]);
 
@@ -2760,7 +2761,7 @@ const handleReset=async()=>{
 
   // FIX 1: doSelect — scroll uniquement sur mobile (<860px) — corrige le "saut" de page
   const doSelect=s=>{
-    setSelS(s);setPlaying(null);loadAudioSegments(s.n,rec?.qurancdn||7).catch(()=>{});
+    setSelS(s);setPlaying(null); if(!versePages[s.n]){fetch(`https://api.qurancdn.com/api/qdc/verses/by_chapter/${s.n}?per_page=300&fields=page_number`).then(r=>r.json()).then(d=>{const m={};(d.verses||[]).forEach(v=>{m[v.verse_number]=v.page_number;});setVersePages(p=>({...p,[s.n]:m}));}).catch(()=>{});}loadAudioSegments(s.n,rec?.qurancdn||7).catch(()=>{});
     setMushafPage(SURAH_PAGE[s.n]||1);
     if(audioRef.current){audioRef.current.pause();audioRef.current.src="";}
     if(window.innerWidth<860){
@@ -4547,7 +4548,7 @@ return (
                     {loadState==="error"&&(<div style={{textAlign:"center",padding:"24px",fontSize:".78rem"}}><div style={{fontSize:"1.5rem",marginBottom:10}}>🔌</div><div style={{color:t.rd,fontWeight:700,marginBottom:6}}>Connexion requise</div><div style={{color:t.tx3,marginBottom:14,lineHeight:1.5}}>Les versets de cette sourate sont chargés depuis internet.<br/>Vérifie ta connexion et réessaie.</div><button onClick={()=>{setLoadState("idle");setTimeout(()=>setSelS(s=>({...s})),100);}} style={{padding:"8px 20px",background:t.acc,border:"none",borderRadius:10,color:"#fff",fontWeight:700,cursor:"pointer",fontSize:".75rem"}}>🔄 Réessayer</button>{Q[selS?.n]?.length>0&&<div style={{marginTop:12,fontSize:".65rem",color:t.tx3}}>ou <button onClick={()=>{setVerses(Q[selS.n]);setLoadState("done");}} style={{background:"none",border:"none",color:t.acc,cursor:"pointer",fontWeight:700}}>utiliser les données embarquées</button></div>}</div>)}
                     {loadState==="done"&&(
                       <div className="vscroll-inner" style={pageMode?{direction:"ltr",textAlign:"left",padding:0,display:"flex",flexDirection:"column",height:"100%"}:{}}>
-                        {pageMode?(<QuranPageView verses={verses} selS={selS} t={t} tjc={tjc} showTj={showTj} showTr={showTr} arabicSize={arabicSize} mem={mem} hifzMode={hifzMode} hifzLevel={hifzLevel} playing={playing} toggleV={toggleV} toggleFav={toggleFav} isFav={isFav} doPlay={doPlay} sv={sv} setPage={setPage} wbwVerseRef={wbwVerseRef} setWbwOpen={setWbwOpen} partialPlayRef={partialPlayRef} showTf={showTf} tafsirData={tafsirData} loadTafsir={loadTafsir} doPlayPartial={doPlayPartial} setVerseCtxMenu={setVerseCtxMenu}/>):(<>
+                        {pageMode?(<QuranPageView verses={verses} selS={selS} t={t} tjc={tjc} showTj={showTj} showTr={showTr} arabicSize={arabicSize} mem={mem} hifzMode={hifzMode} hifzLevel={hifzLevel} playing={playing} toggleV={toggleV} toggleFav={toggleFav} isFav={isFav} doPlay={doPlay} sv={sv} setPage={setPage} wbwVerseRef={wbwVerseRef} setWbwOpen={setWbwOpen} partialPlayRef={partialPlayRef} showTf={showTf} tafsirData={tafsirData} loadTafsir={loadTafsir} doPlayPartial={doPlayPartial} setVerseCtxMenu={setVerseCtxMenu} versePages={versePages}/>):(<>
                         {selS.n!==1&&selS.n!==9&&(
                           <div style={{display:"block",textAlign:"center",padding:"8px 0 14px",fontSize:"1.4rem",color:t.acc,direction:"rtl"}}>
                             بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ
@@ -6265,7 +6266,48 @@ return (
           </div>
         </div>
       )}
-      {selS&&page==="coran"&&(<div style={{position:"fixed",bottom:62,left:0,right:0,zIndex:90,background:t.s1,borderTop:"1px solid "+t.b1,boxShadow:"0 -2px 12px rgba(0,0,0,.1)",padding:"5px 10px",display:"flex",flexDirection:"column",gap:3}}><div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:".8rem",flexShrink:0}}>🎙️</span><select value={rec.id} onChange={e=>setRec(RECITERS.find(r=>r.id===e.target.value)||RECITERS[0])} style={{flex:1,minWidth:0,fontSize:".68rem",padding:"3px 6px",borderRadius:8,border:"1px solid "+t.b1,background:t.bg,color:t.tx}}>{RECITERS.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</select><button onClick={()=>{if(!verses.length)return;stopListening();setSpeechScore(null);setContinuousMode(false);setContinuousIdx(playing&&verses.findIndex(v=>v.n===playing)>-1?verses.findIndex(v=>v.n===playing):0);setRecitModal(true);}} style={{flexShrink:0,padding:"4px 9px",borderRadius:8,border:"1px solid "+t.acc,background:t.acc+"18",color:t.acc,fontSize:".62rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>🎤 Réciter</button><button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,1);}} style={{flexShrink:0,padding:"4px 9px",borderRadius:8,border:"none",background:playlistActive&&playlist[0]?.sn===selS.n?"#e53935":t.acc,color:"#fff",fontSize:".62rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>{playlistActive&&playlist[0]?.sn===selS.n?"■ Stop":"▶ Sourate"}</button></div><div style={{display:"flex",alignItems:"center",gap:3,overflowX:"auto",WebkitOverflowScrolling:"touch"}}><span style={{fontSize:".56rem",color:t.tx3,flexShrink:0}}>Répét.</span>{[1,3,5,10].map(n=>(<button key={n} onClick={()=>{setLoopCount(n);setLoopInfinite(false);}} style={{padding:"2px 6px",borderRadius:10,border:"1px solid "+(loopCount===n&&!loopInfinite?t.acc:t.b1),background:loopCount===n&&!loopInfinite?t.acc:"transparent",color:loopCount===n&&!loopInfinite?"#fff":t.tx3,fontSize:".62rem",cursor:"pointer",flexShrink:0}}>{n}×</button>))}<button onClick={()=>setLoopInfinite(p=>!p)} style={{padding:"2px 6px",borderRadius:10,border:"1px solid "+(loopInfinite?t.acc:t.b1),background:loopInfinite?t.acc:"transparent",color:loopInfinite?"#fff":t.tx3,fontSize:".62rem",cursor:"pointer",flexShrink:0}}>∞</button><span style={{fontSize:".56rem",color:t.tx3,flexShrink:0,marginLeft:3}}>Vitesse</span>{[0.75,1,1.25,1.5].map(s=>(<button key={s} onClick={()=>setPlaybackRate(s)} style={{padding:"2px 6px",borderRadius:10,border:"1px solid "+(playbackRate===s?t.acc:t.b1),background:playbackRate===s?t.acc:"transparent",color:playbackRate===s?"#fff":t.tx3,fontSize:".62rem",cursor:"pointer",flexShrink:0}}>{s}×</button>))}<button onClick={()=>setBookmark(b=>b?.sn===selS.n?null:{sn:selS.n,vn:playing||1})} style={{padding:"2px 8px",borderRadius:10,border:"1px solid "+(bookmark?.sn===selS.n?t.acc:t.b1),background:"transparent",color:bookmark?.sn===selS.n?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer",flexShrink:0,marginLeft:"auto"}}>{bookmark?.sn===selS.n?"🔖":"○ Signet"}</button></div></div>)}
+
+      {/* Bulle player style Tarteel */}
+      {selS&&(
+        <div style={{position:"fixed",bottom:68,left:"50%",transform:"translateX(-50%)",zIndex:95,
+          background:t.s1,borderRadius:40,boxShadow:"0 4px 24px rgba(0,0,0,.18)",
+          border:"1px solid "+t.b1,padding:"6px 12px",
+          display:"flex",alignItems:"center",gap:8,
+          maxWidth:"min(420px,94vw)",width:"fit-content"}}>
+          {/* Réciteur compact */}
+          <select value={rec.id} onChange={e=>setRec(RECITERS.find(r=>r.id===e.target.value)||RECITERS[0])}
+            style={{fontSize:".6rem",padding:"3px 6px",borderRadius:20,border:"1px solid "+t.b1,
+              background:t.bg,color:t.tx,maxWidth:90,cursor:"pointer"}}>
+            {RECITERS.map(r=><option key={r.id} value={r.id}>{r.name.split(' ')[0]}</option>)}
+          </select>
+          {/* Vitesse */}
+          <select value={playbackRate} onChange={e=>setPlaybackRate(parseFloat(e.target.value))}
+            style={{fontSize:".6rem",padding:"3px 4px",borderRadius:20,border:"1px solid "+t.b1,
+              background:t.bg,color:t.tx,width:52,cursor:"pointer"}}>
+            {[0.5,0.75,1,1.25,1.5].map(s=><option key={s} value={s}>{s}×</option>)}
+          </select>
+          {/* Répétitions */}
+          <select value={loopInfinite?"inf":loopCount} onChange={e=>{if(e.target.value==="inf"){setLoopInfinite(true);}else{setLoopInfinite(false);setLoopCount(parseInt(e.target.value));}}}
+            style={{fontSize:".6rem",padding:"3px 4px",borderRadius:20,border:"1px solid "+t.b1,
+              background:t.bg,color:t.tx,width:48,cursor:"pointer"}}>
+            {[1,3,5,10].map(n=><option key={n} value={n}>{n}×</option>)}
+            <option value="inf">∞</option>
+          </select>
+          {/* ▶ Sourate */}
+          <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,1);}}
+            style={{padding:"7px 14px",borderRadius:30,border:"none",
+              background:playlistActive&&playlist[0]?.sn===selS.n?"#e53935":t.acc,
+              color:"#fff",fontSize:".72rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
+            {playlistActive&&playlist[0]?.sn===selS.n?"⏸":"▶"}
+          </button>
+          {/* 🎤 Réciter */}
+          <button onClick={()=>{if(!verses.length)return;stopListening();setSpeechScore(null);setContinuousMode(false);setContinuousIdx(playing&&verses.findIndex(v=>v.n===playing)>-1?verses.findIndex(v=>v.n===playing):0);setRecitModal(true);}}
+            style={{padding:"7px 12px",borderRadius:30,border:"1px solid "+t.acc,
+              background:t.acc+"18",color:t.acc,fontSize:".72rem",fontWeight:700,cursor:"pointer",flexShrink:0}}>
+            🎤
+          </button>
+        </div>
+      )}
       <div className="bnav" style={{display:page==="reader"?"none":"flex"}}>
         {[
           {id:"home",icon:<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,label:"Accueil"},
