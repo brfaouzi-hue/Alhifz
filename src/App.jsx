@@ -6414,54 +6414,16 @@ return (
               </div>
             </div>
           ):(
-            <div style={{display:"flex",alignItems:"center",gap:5,background:t.s1,
-              borderRadius:30,boxShadow:"0 3px 14px rgba(0,0,0,.18)",
-              border:"1px solid "+t.b1,padding:"5px 8px 5px 5px",flexShrink:0}}>
-              <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,1);}}
-                style={{width:34,height:34,borderRadius:"50%",border:"none",
-                  background:playlistActive&&playlist[0]?.sn===selS.n?"#e53935":t.acc,
-                  color:"#fff",fontSize:"1rem",cursor:"pointer",
-                  display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                {playlistActive&&playlist[0]?.sn===selS.n?"⏸":"▶"}
-              </button>
-              <div style={{display:"flex",flexDirection:"column",gap:2}}>
-                <div style={{display:"flex",gap:2}}>
-                  {[0.75,1,1.25,1.5].map(s=>(
-                    <button key={s} onClick={()=>setPlaybackRate(s)}
-                      style={{padding:"1px 5px",borderRadius:6,fontSize:".55rem",cursor:"pointer",
-                        border:"1px solid "+(playbackRate===s?t.acc:t.b1),
-                        background:playbackRate===s?t.acc:"transparent",
-                        color:playbackRate===s?"#fff":t.tx3,fontWeight:playbackRate===s?700:400,lineHeight:1.6}}>
-                      {s}x
-                    </button>
-                  ))}
-                </div>
-                <div style={{display:"flex",gap:2}}>
-                  {[1,3,5,10].map(n=>(
-                    <button key={n} onClick={()=>{setLoopInfinite(false);setLoopCount(n);}}
-                      style={{padding:"1px 5px",borderRadius:6,fontSize:".55rem",cursor:"pointer",
-                        border:"1px solid "+(loopCount===n&&!loopInfinite?t.acc:t.b1),
-                        background:loopCount===n&&!loopInfinite?t.acc:"transparent",
-                        color:loopCount===n&&!loopInfinite?"#fff":t.tx3,lineHeight:1.6}}>
-                      {n}x
-                    </button>
-                  ))}
-                  <button onClick={()=>setLoopInfinite(p=>!p)}
-                    style={{padding:"1px 5px",borderRadius:6,fontSize:".55rem",cursor:"pointer",
-                      border:"1px solid "+(loopInfinite?t.acc:t.b1),
-                      background:loopInfinite?t.acc:"transparent",
-                      color:loopInfinite?"#fff":t.tx3,lineHeight:1.6}}>
-                    inf
-                  </button>
-                </div>
-              </div>
-              <button onClick={()=>setPlayerOpen(true)}
-                style={{width:26,height:26,borderRadius:"50%",border:"1px solid "+t.b1,
-                  background:"transparent",color:t.tx3,cursor:"pointer",fontSize:".7rem",
-                  display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                +
-              </button>
-            </div>
+            <button onClick={()=>setPlayerOpen(true)}
+              style={{width:44,height:44,borderRadius:"50%",border:"none",
+                background:playing!==null?t.acc:t.s1,
+                boxShadow:"0 3px 14px rgba(0,0,0,.2)",
+                outline:"1px solid "+(playing!==null?t.acc:t.b1),
+                color:playing!==null?"#fff":t.acc,
+                fontSize:"1.1rem",cursor:"pointer",
+                display:"flex",alignItems:"center",justifyContent:"center"}}>
+              {playing!==null?"&#9654;":"mic"}
+            </button>
           )}
         </div>
       )}
