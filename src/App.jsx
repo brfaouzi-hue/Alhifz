@@ -3873,7 +3873,7 @@ return (
       )}
 
       {/* Topbar */}
-      <div className="topbar" style={{display:page==="reader"?"none":"flex",marginTop:(timerRunning&&timerLeft!==null&&timerLeft>0)||timerLeft===0?36:0,transition:"margin-top .2s"}} >
+      <div className="topbar" style={{display:(page==="reader"||page==="mushaf")?"none":"flex",marginTop:(timerRunning&&timerLeft!==null&&timerLeft>0)||timerLeft===0?36:0,transition:"margin-top .2s"}} >
         <div className="tb">
           <div className="logo">
             <div style={{display:"flex",flexDirection:"column",lineHeight:1.1}}>
