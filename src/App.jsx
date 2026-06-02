@@ -454,27 +454,27 @@ const THEME_META={
   emerald:{label:"Émeraude",sub:"Vert profond — login",preview:["#050f08","#4ade80","#22c55e"]},
 };
 const TJC_DARK={
-  m:"#4FC3F7",      // Madd naturel (2h) — bleu clair comme Mushaf
-  mr:"#0288D1",     // Madd permissible (2-4-6h) — bleu moyen
+  m:"#29B6F6",      // Madd naturel (2h) — bleu clair comme Mushaf
+  mr:"#039BE5",     // Madd permissible (2-4-6h) — bleu moyen
   mo:"#880E4F",     // Madd wajib muttasil (4-5h) — bordeaux/magenta
   ml:"#B71C1C",     // Madd lazim (6h) — rouge foncé comme Mushaf
-  g:"#2E7D32",      // Ghunna — vert foncé
-  idg:"#388E3C",    // Idgham avec ghunna — vert
-  q:"#B71C1C",      // Qalqala — rouge (comme Mushaf standard)
-  ikh:"#F57F17",    // Ikhfa — jaune-orange
-  iql:"#E65100",    // Iqlab — orange foncé
+  g:"#EF5350",      // Ghunna — vert foncé
+  idg:"#43A047",    // Idgham avec ghunna — vert
+  q:"#7B1FA2",      // Qalqala — rouge (comme Mushaf standard)
+  ikh:"#FB8C00",    // Ikhfa — jaune-orange
+  iql:"#F4511E",    // Iqlab — orange foncé
   ls:"#01579B",     // Lam shamsiyya — bleu foncé
   hw:"#546E7A",     // Ham Wasl — gris bleu
   sl:"#607d8b",     // Silence/Sakt — gris bleu
 };
 const TJC_LIGHT={
-  m:"#0277BD",      // Madd naturel — bleu
+  m:"#0288D1",      // Madd naturel — bleu
   mr:"#01579B",     // Madd permissible — bleu foncé
   mo:"#880E4F",     // Madd wajib — bordeaux
   ml:"#B71C1C",     // Madd lazim — rouge foncé
-  g:"#1B5E20",      // Ghunna — vert très foncé
-  idg:"#2E7D32",    // Idgham — vert foncé
-  q:"#B71C1C",      // Qalqala — rouge
+  g:"#EF5350",      // Ghunna — vert très foncé
+  idg:"#EF5350",    // Idgham — vert foncé
+  q:"#7B1FA2",      // Qalqala — rouge
   ikh:"#E65100",    // Ikhfa — orange
   iql:"#BF360C",    // Iqlab — orange-rouge
   ls:"#01579B",     // Lam shamsiyya
@@ -2050,7 +2050,7 @@ body>*{position:relative;z-index:1;}
 function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
                         mem, hifzMode, hifzLevel, playing,
                         toggleV, toggleFav, isFav, doPlay, sv,
-                        onLongPress, setPage, wbwVerseRef, setWbwOpen, partialPlayRef}) {
+                        onLongPress, setPage, wbwVerseRef, setWbwOpen, partialPlayRef, showTf, tafsirData, loadTafsir}) {
   const [curPage, setCurPage] = React.useState(0);
   const [selVerse, setSelVerse] = React.useState(null); // verset sélectionné
   const [partialV, setPartialV] = React.useState(null);
@@ -2132,6 +2132,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
                   {v.n}
                 </span>
                 {showTr&&v.fr&&<div style={{display:"block",direction:"ltr",textAlign:"left",fontSize:".68rem",color:t.tx3,fontStyle:"italic",lineHeight:1.5,margin:"2px 0 6px",fontFamily:"sans-serif"}}>{v.fr.replace(/<[^>]*>/g,"")}</div>}
+                  {showTf&&(()=>{const k=`${selS?.n}_${v.n}`;if(!tafsirData[k]&&loadTafsir)loadTafsir(selS?.n,v.n);return tafsirData[k]?<div style={{display:"block",direction:"ltr",textAlign:"left",fontSize:".72rem",color:"#5d4037",background:"#fff8e1",borderRadius:6,padding:"6px 8px",marginTop:4,fontFamily:"sans-serif",lineHeight:1.6,borderLeft:"3px solid #f9a825"}}><span style={{fontWeight:700,fontSize:".6rem",color:"#f9a825",display:"block",marginBottom:2}}>📖 Tafsir</span>{tafsirData[k]}</div>:null;})()}
 
                 {/* BARRE D'ACTIONS — apparaît au tap */}
                 {isSel&&(<>
@@ -4503,7 +4504,7 @@ return (
                     {loadState==="error"&&(<div style={{textAlign:"center",padding:"24px",fontSize:".78rem"}}><div style={{fontSize:"1.5rem",marginBottom:10}}>🔌</div><div style={{color:t.rd,fontWeight:700,marginBottom:6}}>Connexion requise</div><div style={{color:t.tx3,marginBottom:14,lineHeight:1.5}}>Les versets de cette sourate sont chargés depuis internet.<br/>Vérifie ta connexion et réessaie.</div><button onClick={()=>{setLoadState("idle");setTimeout(()=>setSelS(s=>({...s})),100);}} style={{padding:"8px 20px",background:t.acc,border:"none",borderRadius:10,color:"#fff",fontWeight:700,cursor:"pointer",fontSize:".75rem"}}>🔄 Réessayer</button>{Q[selS?.n]?.length>0&&<div style={{marginTop:12,fontSize:".65rem",color:t.tx3}}>ou <button onClick={()=>{setVerses(Q[selS.n]);setLoadState("done");}} style={{background:"none",border:"none",color:t.acc,cursor:"pointer",fontWeight:700}}>utiliser les données embarquées</button></div>}</div>)}
                     {loadState==="done"&&(
                       <div className="vscroll-inner" style={pageMode?{direction:"ltr",textAlign:"left",padding:0,display:"flex",flexDirection:"column",height:"100%"}:{}}>
-                        {pageMode?(<QuranPageView verses={verses} selS={selS} t={t} tjc={tjc} showTj={showTj} showTr={showTr} arabicSize={arabicSize} mem={mem} hifzMode={hifzMode} hifzLevel={hifzLevel} playing={playing} toggleV={toggleV} toggleFav={toggleFav} isFav={isFav} doPlay={doPlay} sv={sv} setPage={setPage} wbwVerseRef={wbwVerseRef} setWbwOpen={setWbwOpen} partialPlayRef={partialPlayRef}/>):(<>
+                        {pageMode?(<QuranPageView verses={verses} selS={selS} t={t} tjc={tjc} showTj={showTj} showTr={showTr} arabicSize={arabicSize} mem={mem} hifzMode={hifzMode} hifzLevel={hifzLevel} playing={playing} toggleV={toggleV} toggleFav={toggleFav} isFav={isFav} doPlay={doPlay} sv={sv} setPage={setPage} wbwVerseRef={wbwVerseRef} setWbwOpen={setWbwOpen} partialPlayRef={partialPlayRef} showTf={showTf} tafsirData={tafsirData} loadTafsir={loadTafsir}/>):(<>
                         {selS.n!==1&&selS.n!==9&&(
                           <div style={{display:"block",textAlign:"center",padding:"8px 0 14px",fontSize:"1.4rem",color:t.acc,direction:"rtl"}}>
                             بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ
