@@ -8,3 +8,4 @@ createRoot(document.getElementById('root')).render(
     <App />
   </StrictMode>,
 )
+/* cache bust Mar  2 jui 2026 11:28:16 CEST */
