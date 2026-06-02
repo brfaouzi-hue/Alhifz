@@ -2528,6 +2528,7 @@ const handleReset=async()=>{
   const remaining=TOTAL_VERSES-totalMem;
   const pct=+(totalMem/TOTAL_VERSES*100).toFixed(1);
 
+    const now=new Date();const days=[];
   const {vpd,daysLeft,eta}=useMemo(()=>{
     if(!settings) return{vpd:parseInt(settings?.dailyGoal)||5,daysLeft:0,eta:"-"};
     const baseline=settings.baselineVerses||0;
@@ -2627,22 +2628,14 @@ const handleReset=async()=>{
       });
     }
   },[playing,karaokeMode]);
+      const key=`enc_${pagesRead}`;
 
   const weeklyReport=useMemo(()=>{
-    const now=new Date();const days=[];
     for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);const key=d.toISOString().split("T")[0];const val=hist[key]||0;const prev=i<6?(hist[Object.keys(hist).sort()[Object.keys(hist).sort().indexOf(key)-1]]||0):0;days.push({date:key,label:d.toLocaleDateString("fr-FR",{weekday:"short"}),total:val,gained:Math.max(0,val-prev)});}
     const totalWeek=days.reduce((s,d)=>s+d.gained,0);const activeDays=days.filter(d=>d.gained>0).length;const best=days.reduce((a,b)=>b.gained>a.gained?b:a,days[0]);
     return{days,totalWeek,activeDays,best};
   },[hist]);
 
-  const handleTouchStart=useCallback(e=>{touchStartX.current=e.touches[0].clientX;touchStartY.current=e.touches[0].clientY;},[]);
-  const handleTouchEnd=useCallback(e=>{
-    if(!touchStartX.current||!selS)return;
-    const dx=touchStartX.current-e.changedTouches[0].clientX;
-    const dy=Math.abs(touchStartY.current-e.changedTouches[0].clientY);
-    if(Math.abs(dx)>60&&dy<50){const idx=SURAHS.findIndex(s=>s.n===selS.n);if(dx>0&&idx<SURAHS.length-1)doSelect(SURAHS[idx+1]);if(dx<0&&idx>0)doSelect(SURAHS[idx-1]);}
-    touchStartX.current=null;
-  },[selS]);
 
   const [toastMsg,setToastMsg]=useState(null);
   React.useEffect(()=>{if(toastMsg){const t=setTimeout(()=>setToastMsg(null),2500);return()=>clearTimeout(t);}},[toastMsg]);
@@ -2703,7 +2696,6 @@ const handleReset=async()=>{
       604:"🎉 Khatma complète ! بارك الله فيك — ختمت القرآن الكريم",
     };
     if(milestones.includes(pagesRead)&&msgs[pagesRead]){
-      const key=`enc_${pagesRead}`;
       if(!ld(key,false)){
         setEncouragementMsg({pages:pagesRead,msg:msgs[pagesRead]});
         sv(key,true);
@@ -2778,6 +2770,14 @@ const handleReset=async()=>{
       },80);
     }
   };
+  const handleTouchStart=useCallback(e=>{touchStartX.current=e.touches[0].clientX;touchStartY.current=e.touches[0].clientY;},[]);
+  const handleTouchEnd=useCallback(e=>{
+    if(!touchStartX.current||!selS)return;
+    const dx=touchStartX.current-e.changedTouches[0].clientX;
+    const dy=Math.abs(touchStartY.current-e.changedTouches[0].clientY);
+    if(Math.abs(dx)>60&&dy<50){const idx=SURAHS.findIndex(s=>s.n===selS.n);if(dx>0&&idx<SURAHS.length-1)doSelect(SURAHS[idx+1]);if(dx<0&&idx>0)doSelect(SURAHS[idx-1]);}
+    touchStartX.current=null;
+  },[selS]);
 
   const toggleV=(sn,vn,verseAr="")=>{
     const k=String(sn),vk=String(vn);
