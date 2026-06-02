@@ -2107,8 +2107,8 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
       </div>
 
       {/* Texte en flux continu */}
-      <div style={{flex:1,overflowY:"auto",padding:"14px 12px 80px",WebkitOverflowScrolling:"touch"}} onClick={e=>e.stopPropagation()}>
-        <div style={{direction:"rtl",textAlign:"justify",lineHeight:2.5,fontFamily:"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.5)+"rem",color:t.tx}}>
+      <div style={{flex:1,overflowY:"auto",padding:"20px 18px 100px",WebkitOverflowScrolling:"touch"}} onClick={e=>e.stopPropagation()}>
+        <div style={{direction:"rtl",textAlign:"justify",lineHeight:3,fontFamily:"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.6)+"rem",color:t.tx}}>
           {cur.map((v)=>{
             const isMem=!!(mem[String(selS?.n)]?.[String(v.n)]);
             const isPlay=playing===v.n;
@@ -6324,8 +6324,8 @@ return (
               {/* Réciteur */}
               <div style={{display:"flex",flexDirection:"column",gap:4}}>
                 <span style={{fontSize:".55rem",color:t.tx3,textTransform:"uppercase",letterSpacing:".5px"}}>Réciteur</span>
-                <div style={{display:"flex",flexWrap:"wrap",gap:3}}>
-                  {RECITERS.slice(0,4).map(r=>(
+                <div style={{display:"flex",flexWrap:"wrap",gap:3,maxHeight:68,overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+                  {RECITERS.map(r=>(
                     <button key={r.id} onClick={()=>setRec(r)}
                       style={{padding:"3px 8px",borderRadius:10,fontSize:".6rem",cursor:"pointer",
                         border:"1px solid "+(rec.id===r.id?t.acc:t.b1),
