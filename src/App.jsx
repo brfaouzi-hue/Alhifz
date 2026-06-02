@@ -2051,7 +2051,8 @@ body>*{position:relative;z-index:1;}
 function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
                         mem, hifzMode, hifzLevel, playing,
                         toggleV, toggleFav, isFav, doPlay, sv,
-                        onLongPress, setPage, wbwVerseRef, setWbwOpen, partialPlayRef, showTf, tafsirData, loadTafsir, doPlayPartial}) {
+                        onLongPress, setPage, wbwVerseRef, setWbwOpen, partialPlayRef, showTf, tafsirData, loadTafsir, doPlayPartial, setVerseCtxMenu}) {
+  const _lpTimer=React.useRef(null);
   const [curPage, setCurPage] = React.useState(0);
   const [selVerse, setSelVerse] = React.useState(null); // verset sélectionné
   const [partialV, setPartialV] = React.useState(null);
@@ -2114,7 +2115,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
             const isSel=selVerse?.n===v.n;
             return (
               <React.Fragment key={v.n}>
-                <span onClick={e=>{e.stopPropagation();handleTap(v);}}
+                <span onClick={e=>{e.stopPropagation();handleTap(v);}} onContextMenu={e=>{e.preventDefault();e.stopPropagation();setVerseCtxMenu({vn:v.n,sn:selS?.n,ar:v.ar,fr:v.fr});}} onTouchStart={e=>{_lpTimer.current=setTimeout(()=>setVerseCtxMenu({vn:v.n,sn:selS?.n,ar:v.ar,fr:v.fr}),500);}} onTouchEnd={()=>clearTimeout(_lpTimer.current)} onTouchMove={()=>clearTimeout(_lpTimer.current)}
                   style={{
                     color: isPlay?t.acc:isMem?t.gr:"inherit",
                     background: isSel?t.acc+"08":isPlay?t.acc+"15":"transparent",
@@ -4495,38 +4496,38 @@ return (
                   </div>)}
 
 {/* audio block hidden - see fixed bottom bar */}
-                  <div style={{display:"none",padding:"10px 14px",background:t.s1,borderBottom:`1px solid ${t.b1}`,display:"flex",flexDirection:"column",gap:8}}>
-                    <div style={{display:"flex",alignItems:"center",gap:8}}>
-                      <span style={{fontSize:"1rem",flexShrink:0}}>🎙️</span>
-                      <div style={{flex:1,position:"relative"}}>
-                        <select value={rec.id} onChange={e=>setRec(RECITERS.find(r=>r.id===e.target.value)||RECITERS[0])} style={{width:"100%",appearance:"none",WebkitAppearance:"none",background:t.s2,border:`1.5px solid ${t.b1}`,borderRadius:10,padding:"8px 30px 8px 12px",fontSize:".72rem",color:t.tx,fontWeight:500,cursor:"pointer",outline:"none"}}>
-                          {RECITERS.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}
-                        </select>
-                        <span style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",color:t.tx3,fontSize:".75rem",pointerEvents:"none"}}>▾</span>
-                      </div>
-                      <button onClick={()=>{
-                        if(!verses.length)return;
-                        stopListening();
-                        setSpeechScore(null);
-                        setContinuousMode(false);
-                        setContinuousIdx(0);
-                        setRecitModal(true);
-                      }} style={{flexShrink:0,display:"flex",alignItems:"center",gap:5,background:`${t.acc}18`,border:`1px solid ${t.acc}`,borderRadius:10,padding:"7px 14px",color:t.acc,fontSize:".7rem",fontWeight:700,cursor:"pointer",transition:"all .2s"}} onMouseEnter={e=>{e.currentTarget.style.background=`${t.acc}30`;}} onMouseLeave={e=>{e.currentTarget.style.background=`${t.acc}18`;}}>
-                        🎤 Récitation
-                      </button>
-                    <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,1);}} style={{flexShrink:0,display:"flex",alignItems:"center",gap:5,background:playlistActive&&playlist[0]?.sn===selS.n?"#e53935":t.acc,border:"none",borderRadius:10,padding:"8px 14px",color:"#fff",fontSize:".72rem",fontWeight:700,cursor:"pointer",boxShadow:`0 2px 8px ${t.acc}44`,transition:"transform .15s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-1px)"} onMouseLeave={e=>e.currentTarget.style.transform=""}>{playlistActive&&playlist[0]?.sn===selS.n?"■ Stop":"▶ Sourate"}</button>
-                    </div>
-                    <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
-                      <span style={{fontSize:".6rem",color:t.tx3}}>Répét.</span>
-                      {[1,3,5,10].map(n=>(<button key={n} className={`tbtn ${loopCount===n&&!loopInfinite?"on":""}`} onClick={()=>{setLoopCount(n);setLoopInfinite(false);}} style={{minWidth:26,padding:"3px 6px"}}>{n}×</button>))}
-                      <button className={`tbtn ${loopInfinite?"on":""}`} onClick={()=>setLoopInfinite(p=>!p)} style={{minWidth:26,padding:"3px 8px",fontWeight:700,fontSize:".8rem",borderColor:loopInfinite?t.acc:t.b2,color:loopInfinite?t.acc:t.tx3}}>∞</button>
-                      {!loopInfinite&&loopCurrent>1&&<span style={{fontSize:".6rem",color:t.acc,fontWeight:700}}>{loopCurrent}{"/"}{loopCount}</span>}
-                      {loopInfinite&&playing!==null&&<span style={{fontSize:".6rem",color:t.acc,fontWeight:700,animation:"pulse 1s infinite"}}>∞ en boucle</span>}
-                      <span style={{fontSize:".6rem",color:t.tx3,marginLeft:4}}>Vitesse</span>
-                      {[0.75,1,1.25,1.5].map(s=>(<button key={s} className={`tbtn ${playbackRate===s?"on":""}`} onClick={()=>setPlaybackRate(s)} style={{minWidth:32,padding:"3px 5px"}}>{s}×</button>))}
-                      <button className="tbtn" style={{marginLeft:"auto",borderColor:bookmark?.sn===selS.n?t.acc:t.b2,color:bookmark?.sn===selS.n?t.acc:t.tx3,fontWeight:bookmark?.sn===selS.n?700:400}} onClick={()=>setBookmark(bookmark?.sn===selS.n?null:{sn:selS.n,name:selS.name})}>{bookmark?.sn===selS.n?"● Signet":"○ Signet"}</button>
-                    </div>
-                  </div>
+{/*audio_inline_hidden*/null}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4546,7 +4547,7 @@ return (
                     {loadState==="error"&&(<div style={{textAlign:"center",padding:"24px",fontSize:".78rem"}}><div style={{fontSize:"1.5rem",marginBottom:10}}>🔌</div><div style={{color:t.rd,fontWeight:700,marginBottom:6}}>Connexion requise</div><div style={{color:t.tx3,marginBottom:14,lineHeight:1.5}}>Les versets de cette sourate sont chargés depuis internet.<br/>Vérifie ta connexion et réessaie.</div><button onClick={()=>{setLoadState("idle");setTimeout(()=>setSelS(s=>({...s})),100);}} style={{padding:"8px 20px",background:t.acc,border:"none",borderRadius:10,color:"#fff",fontWeight:700,cursor:"pointer",fontSize:".75rem"}}>🔄 Réessayer</button>{Q[selS?.n]?.length>0&&<div style={{marginTop:12,fontSize:".65rem",color:t.tx3}}>ou <button onClick={()=>{setVerses(Q[selS.n]);setLoadState("done");}} style={{background:"none",border:"none",color:t.acc,cursor:"pointer",fontWeight:700}}>utiliser les données embarquées</button></div>}</div>)}
                     {loadState==="done"&&(
                       <div className="vscroll-inner" style={pageMode?{direction:"ltr",textAlign:"left",padding:0,display:"flex",flexDirection:"column",height:"100%"}:{}}>
-                        {pageMode?(<QuranPageView verses={verses} selS={selS} t={t} tjc={tjc} showTj={showTj} showTr={showTr} arabicSize={arabicSize} mem={mem} hifzMode={hifzMode} hifzLevel={hifzLevel} playing={playing} toggleV={toggleV} toggleFav={toggleFav} isFav={isFav} doPlay={doPlay} sv={sv} setPage={setPage} wbwVerseRef={wbwVerseRef} setWbwOpen={setWbwOpen} partialPlayRef={partialPlayRef} showTf={showTf} tafsirData={tafsirData} loadTafsir={loadTafsir} doPlayPartial={doPlayPartial}/>):(<>
+                        {pageMode?(<QuranPageView verses={verses} selS={selS} t={t} tjc={tjc} showTj={showTj} showTr={showTr} arabicSize={arabicSize} mem={mem} hifzMode={hifzMode} hifzLevel={hifzLevel} playing={playing} toggleV={toggleV} toggleFav={toggleFav} isFav={isFav} doPlay={doPlay} sv={sv} setPage={setPage} wbwVerseRef={wbwVerseRef} setWbwOpen={setWbwOpen} partialPlayRef={partialPlayRef} showTf={showTf} tafsirData={tafsirData} loadTafsir={loadTafsir} doPlayPartial={doPlayPartial} setVerseCtxMenu={setVerseCtxMenu}/>):(<>
                         {selS.n!==1&&selS.n!==9&&(
                           <div style={{display:"block",textAlign:"center",padding:"8px 0 14px",fontSize:"1.4rem",color:t.acc,direction:"rtl"}}>
                             بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ
