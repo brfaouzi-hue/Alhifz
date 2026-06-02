@@ -2065,7 +2065,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
       return Object.keys(groups).map(Number).sort((a,b)=>a-b).map(pg=>groups[pg]);
     }
     const chunks=[];
-    for(let i=0;i<verses.length;i+=15) chunks.push(verses.slice(i,i+6));
+    for(let i=0;i<verses.length;i+=15) chunks.push(verses.slice(i,i+15));
     return chunks;
   }, [verses]);
 
