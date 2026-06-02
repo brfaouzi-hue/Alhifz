@@ -4495,7 +4495,7 @@ return (
                   </div>)}
 
 {/* audio block hidden - see fixed bottom bar */}
-                  <div style={{padding:"10px 14px",background:t.s1,borderBottom:`1px solid ${t.b1}`,display:"flex",flexDirection:"column",gap:8}}>
+                  <div style={{display:"none",padding:"10px 14px",background:t.s1,borderBottom:`1px solid ${t.b1}`,display:"flex",flexDirection:"column",gap:8}}>
                     <div style={{display:"flex",alignItems:"center",gap:8}}>
                       <span style={{fontSize:"1rem",flexShrink:0}}>🎙️</span>
                       <div style={{flex:1,position:"relative"}}>
