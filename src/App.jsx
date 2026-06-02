@@ -4498,7 +4498,34 @@ return (
                   </div>)}
 
 {/* audio block hidden - see fixed bottom bar */}
-{/*audio_inline_hidden*/null}
+                  {selS&&(<div style={{padding:"8px 14px 6px",borderBottom:"1px solid "+t.b1,
+                    display:"flex",alignItems:"center",gap:8,flexWrap:"nowrap",overflowX:"auto",
+                    WebkitOverflowScrolling:"touch"}}>
+                    <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,1);}}
+                      style={{flexShrink:0,padding:"5px 12px",borderRadius:20,border:"none",
+                        background:playlistActive&&playlist[0]?.sn===selS.n?"#e53935":t.acc,
+                        color:"#fff",fontSize:".7rem",fontWeight:700,cursor:"pointer"}}>
+                      {playlistActive&&playlist[0]?.sn===selS.n?"⏸ Stop":"▶ Sourate"}
+                    </button>
+                    <button onClick={()=>{if(!verses.length)return;stopListening();setSpeechScore(null);setContinuousMode(false);setContinuousIdx(playing&&verses.findIndex(v=>v.n===playing)>-1?verses.findIndex(v=>v.n===playing):0);setRecitModal(true);}}
+                      style={{flexShrink:0,padding:"5px 10px",borderRadius:20,border:"1px solid "+t.acc,
+                        background:"transparent",color:t.acc,fontSize:".7rem",fontWeight:700,cursor:"pointer"}}>
+                      🎤 Réciter
+                    </button>
+                    <div style={{width:"1px",height:20,background:t.b1,flexShrink:0}}/>
+                    <span style={{fontSize:".58rem",color:t.tx3,flexShrink:0}}>Vitesse</span>
+                    {[0.75,1,1.25,1.5].map(s=>(<button key={s} onClick={()=>setPlaybackRate(s)}
+                      className={"tbtn"+(playbackRate===s?" on":"")}
+                      style={{flexShrink:0,minWidth:36,fontSize:".62rem"}}>{s}x</button>))}
+                    <div style={{width:"1px",height:20,background:t.b1,flexShrink:0}}/>
+                    <span style={{fontSize:".58rem",color:t.tx3,flexShrink:0}}>Répét.</span>
+                    {[1,3,5,10].map(n=>(<button key={n} onClick={()=>{setLoopCount(n);setLoopInfinite(false);}}
+                      className={"tbtn"+(loopCount===n&&!loopInfinite?" on":"")}
+                      style={{flexShrink:0,minWidth:30,fontSize:".62rem"}}>{n}x</button>))}
+                    <button onClick={()=>setLoopInfinite(p=>!p)}
+                      className={"tbtn"+(loopInfinite?" on":"")}
+                      style={{flexShrink:0,fontSize:".62rem"}}>inf</button>
+                  </div>)}
 
 
 
