@@ -1894,7 +1894,7 @@ body>*{position:relative;z-index:1;}
 .vbar{height:4px;background:${t.b2};border-radius:99px;overflow:hidden;margin-top:7px;}
 .vfill{height:100%;background:${t.gr};border-radius:99px;transition:width .5s;}
 .vtoolbar{overflow-x:auto;padding:7px 12px;border-bottom:1px solid ${t.b1};display:flex;align-items:center;gap:5px;flex-wrap:nowrap;background:${t.s2};}
-.tbtn{padding:4px 9px;border-radius:99px;border:1px solid ${t.b2};background:transparent;color:${t.tx2};font-size:.65rem;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.tbtn{white-space:nowrap;padding:4px 9px;border-radius:99px;border:1px solid ${t.b2};background:transparent;color:${t.tx2};font-size:.65rem;cursor:pointer;transition:all .2s;white-space:nowrap;}
 .tbtn:hover{border-color:${acc};color:${acc};transform:translateY(-1px);}
 .tbtn.on{background:${acc};border-color:${acc};color:#fff;font-weight:600;}
 .tsel{background:${t.inputBg};border:1px solid ${t.b2};color:${t.tx};padding:4px 8px;border-radius:8px;font-size:.65rem;outline:none;}
@@ -2108,7 +2108,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
 
       {/* Texte en flux continu */}
       <div style={{flex:1,overflowY:"auto",padding:"20px 18px 100px",WebkitOverflowScrolling:"touch"}} onClick={e=>e.stopPropagation()}>
-        <div style={{direction:"rtl",textAlign:"justify",lineHeight:3,fontFamily:"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.6)+"rem",color:t.tx}}>
+        <div style={{direction:"rtl",textAlign:"justify",textAlignLast:"right",lineHeight:3,fontFamily:"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.6)+"rem",color:t.tx}}>
           {cur.map((v)=>{
             const isMem=!!(mem[String(selS?.n)]?.[String(v.n)]);
             const isPlay=playing===v.n;
@@ -2638,6 +2638,36 @@ const handleReset=async()=>{
 
 
   const [toastMsg,setToastMsg]=useState(null);
+
+  // Notifications push quotidiennes
+  React.useEffect(()=>{
+    if(!("Notification" in window)) return;
+    if(Notification.permission==="default"){
+      setTimeout(()=>{
+        Notification.requestPermission().then(p=>{
+          if(p==="granted") setToastMsg("🔔 Rappels activés");
+        });
+      }, 5000);
+    }
+    // Rappel quotidien via localStorage
+    const checkReminder=()=>{
+      const last=localStorage.getItem("lastNotif");
+      const today=new Date().toISOString().split("T")[0];
+      if(last!==today && Notification.permission==="granted"){
+        const h=new Date().getHours();
+        if(h>=7&&h<=21){
+          const hist=JSON.parse(localStorage.getItem("hifz_hist")||"{}");
+          const todayKey=new Date().toISOString().split("T")[0];
+          if(!hist[todayKey]){
+            new Notification("Al-Hifz ✨",{body:"Tu n'as pas encore mémorisé aujourd'hui. 5 minutes suffisent !",icon:"/icon-192.png"});
+            localStorage.setItem("lastNotif",today);
+          }
+        }
+      }
+    };
+    const t=setTimeout(checkReminder,3000);
+    return()=>clearTimeout(t);
+  },[]);
   const [versePages,setVersePages]=useState({}); // {sn: {vn: pageNum}}
   const [playerOpen,setPlayerOpen]=useState(false);
   const [verseCtxMenu,setVerseCtxMenu]=useState(null); // {vn,sn,ar,fr}
@@ -3696,7 +3726,7 @@ return (
         />
       )}
         {toastMsg&&(<div style={{position:"fixed",top:"max(60px,env(safe-area-inset-top)+60px)",left:"50%",transform:"translateX(-50%)",zIndex:999,background:"rgba(20,20,20,.92)",color:"#fff",padding:"10px 20px",borderRadius:24,fontSize:".85rem",fontWeight:700,boxShadow:"0 4px 20px rgba(0,0,0,.3)",pointerEvents:"none",whiteSpace:"nowrap"}}>{toastMsg}</div>)}
-        {verseCtxMenu&&(<div onClick={()=>setVerseCtxMenu(null)} style={{position:"fixed",inset:0,zIndex:998,background:"rgba(0,0,0,.45)"}}><div onClick={e=>e.stopPropagation()} style={{position:"fixed",bottom:130,left:"50%",transform:"translateX(-50%)",width:"min(380px,94vw)",background:t.s1,borderRadius:24,overflow:"hidden",boxShadow:"0 12px 50px rgba(0,0,0,.35)"}}><div style={{padding:"14px 18px 12px",borderBottom:"1px solid "+t.b1,textAlign:"center"}}><div style={{fontSize:".65rem",color:t.tx3,marginBottom:4,direction:"ltr"}}>{verseCtxMenu.sn}:{verseCtxMenu.vn}</div><div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.1rem",color:t.tx,direction:"rtl",lineHeight:1.9}}>{(verseCtxMenu.ar||"").replace(/<[^>]*>/g,"").replace(/[﴿﴾]/g,"")}</div>{verseCtxMenu.fr&&<div style={{fontSize:".7rem",color:t.tx3,fontStyle:"italic",marginTop:4,direction:"ltr"}}>{verseCtxMenu.fr.replace(/<[^>]*>/g,"")}</div>}</div><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",borderBottom:"1px solid "+t.b1}}>{[{icon:"▶",label:"Écouter",fn:()=>{doPlay(verseCtxMenu.vn);setVerseCtxMenu(null);}},{icon:isMem(verseCtxMenu.sn,verseCtxMenu.vn)?"✓":"○",label:isMem(verseCtxMenu.sn,verseCtxMenu.vn)?"Mémorisé":"Mémoriser",color:isMem(verseCtxMenu.sn,verseCtxMenu.vn)?t.gr:t.tx,fn:()=>{toggleV(verseCtxMenu.sn,verseCtxMenu.vn,"");setVerseCtxMenu(null);}},{icon:"❤",label:isFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn))?"Retiré":"Favori",color:isFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn))?t.rd:t.tx,fn:()=>{toggleFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn));setVerseCtxMenu(null);}},{icon:"🔖",label:"Signet",color:bookmark?.sn===verseCtxMenu.sn&&bookmark?.vn===verseCtxMenu.vn?t.acc:t.tx,fn:()=>{setBookmark(b=>b?.sn===verseCtxMenu.sn&&b?.vn===verseCtxMenu.vn?null:{sn:verseCtxMenu.sn,vn:verseCtxMenu.vn});setVerseCtxMenu(null);}}].map(a=>(<button key={a.label} onClick={a.fn} style={{padding:"12px 4px",background:"transparent",border:"none",color:a.color||t.tx,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:3,WebkitTapHighlightColor:"transparent"}}><span style={{fontSize:"1.1rem"}}>{a.icon}</span><span style={{fontSize:".55rem",color:t.tx3}}>{a.label}</span></button>))}</div>{[{icon:"📖",label:"Tafsir",fn:()=>{setShowTf(true);setVerseCtxMenu(null);}},{icon:"🌍",label:"Traduction",fn:()=>{setShowTr(true);setVerseCtxMenu(null);}},{icon:"✏️",label:"Mot-à-mot",fn:()=>{if(wbwVerseRef)wbwVerseRef.current={sn:verseCtxMenu.sn,vn:verseCtxMenu.vn};setWbwOpen&&setWbwOpen(true);setVerseCtxMenu(null);}},{icon:"📋",label:"Copier",fn:()=>{try{navigator.clipboard?.writeText((verseCtxMenu.ar||"").replace(/<[^>]*>/g,"").replace(/[﴿﴾]/g,""));}catch(e){}setToastMsg("✓ Copié");setVerseCtxMenu(null);}},{icon:"↗",label:"Partager",fn:()=>{try{navigator.share?.({text:(verseCtxMenu.ar||"").replace(/<[^>]*>/g,"").replace(/[﴿﴾]/g,"")+" ("+verseCtxMenu.sn+":"+verseCtxMenu.vn+")"});}catch(e){}setVerseCtxMenu(null);}}].map(a=>(<button key={a.label} onClick={a.fn} style={{display:"flex",alignItems:"center",gap:14,width:"100%",padding:"13px 20px",background:"transparent",border:"none",borderTop:"1px solid "+t.b1,color:t.tx,fontSize:".88rem",cursor:"pointer",textAlign:"left",WebkitTapHighlightColor:"transparent"}}><span style={{width:22,textAlign:"center"}}>{a.icon}</span>{a.label}</button>))}<button onClick={()=>setVerseCtxMenu(null)} style={{width:"100%",padding:"13px",background:"transparent",border:"none",borderTop:"2px solid "+t.b1,color:t.tx3,fontSize:".85rem",cursor:"pointer",fontWeight:600}}>Annuler</button></div></div>)}
+        {verseCtxMenu&&(<div onClick={()=>setVerseCtxMenu(null)} style={{position:"fixed",inset:0,zIndex:998,background:"rgba(0,0,0,.45)"}}><div onClick={e=>e.stopPropagation()} style={{position:"fixed",bottom:130,left:"50%",transform:"translateX(-50%)",width:"min(380px,94vw)",background:t.s1,borderRadius:24,overflow:"hidden",boxShadow:"0 12px 50px rgba(0,0,0,.35)"}}><div style={{padding:"14px 18px 12px",borderBottom:"1px solid "+t.b1,textAlign:"center"}}><div style={{fontSize:".65rem",color:t.tx3,marginBottom:4,direction:"ltr"}}>{verseCtxMenu.sn}:{verseCtxMenu.vn}</div><div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.1rem",color:t.tx,direction:"rtl",lineHeight:1.9}}>{((verseCtxMenu.ar||"").replace(/<[^>]*>/g,"").replace(/[﴿﴾]/g,"")).slice(0,150)+(verseCtxMenu.ar?.length>150?"...":"")}</div>{verseCtxMenu.fr&&<div style={{fontSize:".7rem",color:t.tx3,fontStyle:"italic",marginTop:4,direction:"ltr"}}>{verseCtxMenu.fr.replace(/<[^>]*>/g,"")}</div>}</div><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",borderBottom:"1px solid "+t.b1}}>{[{icon:"▶",label:"Écouter",fn:()=>{doPlay(verseCtxMenu.vn);setVerseCtxMenu(null);}},{icon:isMem(verseCtxMenu.sn,verseCtxMenu.vn)?"✓":"○",label:isMem(verseCtxMenu.sn,verseCtxMenu.vn)?"Mémorisé":"Mémoriser",color:isMem(verseCtxMenu.sn,verseCtxMenu.vn)?t.gr:t.tx,fn:()=>{toggleV(verseCtxMenu.sn,verseCtxMenu.vn,"");setVerseCtxMenu(null);}},{icon:"❤",label:isFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn))?"Retiré":"Favori",color:isFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn))?t.rd:t.tx,fn:()=>{toggleFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn));setVerseCtxMenu(null);}},{icon:"🔖",label:"Signet",color:bookmark?.sn===verseCtxMenu.sn&&bookmark?.vn===verseCtxMenu.vn?t.acc:t.tx,fn:()=>{setBookmark(b=>b?.sn===verseCtxMenu.sn&&b?.vn===verseCtxMenu.vn?null:{sn:verseCtxMenu.sn,vn:verseCtxMenu.vn});setVerseCtxMenu(null);}}].map(a=>(<button key={a.label} onClick={a.fn} style={{padding:"12px 4px",background:"transparent",border:"none",color:a.color||t.tx,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:3,WebkitTapHighlightColor:"transparent"}}><span style={{fontSize:"1.1rem"}}>{a.icon}</span><span style={{fontSize:".55rem",color:t.tx3}}>{a.label}</span></button>))}</div>{[{icon:"📖",label:"Tafsir",fn:()=>{setShowTf(true);setVerseCtxMenu(null);}},{icon:"🌍",label:"Traduction",fn:()=>{setShowTr(true);setVerseCtxMenu(null);}},{icon:"✏️",label:"Traduction mot à mot",fn:()=>{if(wbwVerseRef)wbwVerseRef.current={sn:verseCtxMenu.sn,vn:verseCtxMenu.vn};setWbwOpen&&setWbwOpen(true);setVerseCtxMenu(null);}},{icon:"📋",label:"Copier",fn:()=>{try{navigator.clipboard?.writeText(((verseCtxMenu.ar||"").replace(/<[^>]*>/g,"").replace(/[﴿﴾]/g,"")).slice(0,150)+(verseCtxMenu.ar?.length>150?"...":""));}catch(e){}setToastMsg("✓ Copié");setVerseCtxMenu(null);}},{icon:"↗",label:"Partager",fn:()=>{try{navigator.share?.({text:((verseCtxMenu.ar||"").replace(/<[^>]*>/g,"").replace(/[﴿﴾]/g,"")).slice(0,150)+(verseCtxMenu.ar?.length>150?"...":"")+" ("+verseCtxMenu.sn+":"+verseCtxMenu.vn+")"});}catch(e){}setVerseCtxMenu(null);}}].map(a=>(<button key={a.label} onClick={a.fn} style={{display:"flex",alignItems:"center",gap:14,width:"100%",padding:"13px 20px",background:"transparent",border:"none",borderTop:"1px solid "+t.b1,color:t.tx,fontSize:".88rem",cursor:"pointer",textAlign:"left",WebkitTapHighlightColor:"transparent"}}><span style={{width:22,textAlign:"center"}}>{a.icon}</span>{a.label}</button>))}<button onClick={()=>setVerseCtxMenu(null)} style={{width:"100%",padding:"13px",background:"transparent",border:"none",borderTop:"2px solid "+t.b1,color:t.tx3,fontSize:".85rem",cursor:"pointer",fontWeight:600}}>Annuler</button></div></div>)}
 
       {/* Modal Lecture partielle */}
       {partialVerse&&(
