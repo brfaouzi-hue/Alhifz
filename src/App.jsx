@@ -2108,7 +2108,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
 
       {/* Texte en flux continu */}
       <div style={{flex:1,overflowY:"auto",padding:"20px 18px 100px",WebkitOverflowScrolling:"touch"}} onClick={e=>e.stopPropagation()}>
-        <div style={{direction:"rtl",textAlign:"justify",textAlignLast:"right",lineHeight:3,fontFamily:"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.6)+"rem",color:t.tx}}>
+        <div style={{direction:"rtl",textAlign:"justify",wordSpacing:"0.1em",WebkitTextAlignLast:"right",textAlignLast:"right",lineHeight:3,fontFamily:"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.6)+"rem",color:t.tx}}>
           {cur.map((v)=>{
             const isMem=!!(mem[String(selS?.n)]?.[String(v.n)]);
             const isPlay=playing===v.n;
@@ -2639,6 +2639,7 @@ const handleReset=async()=>{
 
   const [toastMsg,setToastMsg]=useState(null);
 
+  React.useEffect(()=>{try{if('Notification'in window){if(Notification.permission==='default')Notification.requestPermission();if(Notification.permission==='granted'){const k=new Date().toISOString().split('T')[0];if(!(hist[k]||0)){const ms=new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate(),20,0,0)-new Date();if(ms>0&&ms<86400000)setTimeout(()=>new Notification('Al-Hifz',{body:'Pense à mémoriser quelques versets ce soir !',icon:'/icons/icon-192.png'}),ms);}}}}catch(e){}},[ hist]);
   // Notifications push quotidiennes
   React.useEffect(()=>{
     if(!("Notification" in window)) return;
@@ -2670,6 +2671,7 @@ const handleReset=async()=>{
   },[]);
   const [versePages,setVersePages]=useState({}); // {sn: {vn: pageNum}}
   const [playerOpen,setPlayerOpen]=useState(false);
+  const [firstLaunch,setFirstLaunch]=useState(()=>!localStorage.getItem("alhifz_launched"));
   const [verseCtxMenu,setVerseCtxMenu]=useState(null); // {vn,sn,ar,fr}
   const memStreak=useMemo(()=>{let s=0,d=new Date();while(true){const key=d.toISOString().split("T")[0];if(!hist[key])break;s++;d.setDate(d.getDate()-1);}return s;},[hist]);
 
@@ -3726,7 +3728,37 @@ return (
         />
       )}
         {toastMsg&&(<div style={{position:"fixed",top:"max(60px,env(safe-area-inset-top)+60px)",left:"50%",transform:"translateX(-50%)",zIndex:999,background:"rgba(20,20,20,.92)",color:"#fff",padding:"10px 20px",borderRadius:24,fontSize:".85rem",fontWeight:700,boxShadow:"0 4px 20px rgba(0,0,0,.3)",pointerEvents:"none",whiteSpace:"nowrap"}}>{toastMsg}</div>)}
-        {verseCtxMenu&&(<div onClick={()=>setVerseCtxMenu(null)} style={{position:"fixed",inset:0,zIndex:998,background:"rgba(0,0,0,.45)"}}><div onClick={e=>e.stopPropagation()} style={{position:"fixed",bottom:130,left:"50%",transform:"translateX(-50%)",width:"min(380px,94vw)",background:t.s1,borderRadius:24,overflow:"hidden",boxShadow:"0 12px 50px rgba(0,0,0,.35)"}}><div style={{padding:"14px 18px 12px",borderBottom:"1px solid "+t.b1,textAlign:"center"}}><div style={{fontSize:".65rem",color:t.tx3,marginBottom:4,direction:"ltr"}}>{verseCtxMenu.sn}:{verseCtxMenu.vn}</div><div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.1rem",color:t.tx,direction:"rtl",lineHeight:1.9}}>{((verseCtxMenu.ar||"").replace(/<[^>]*>/g,"").replace(/[﴿﴾]/g,"")).slice(0,150)+(verseCtxMenu.ar?.length>150?"...":"")}</div>{verseCtxMenu.fr&&<div style={{fontSize:".7rem",color:t.tx3,fontStyle:"italic",marginTop:4,direction:"ltr"}}>{verseCtxMenu.fr.replace(/<[^>]*>/g,"")}</div>}</div><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",borderBottom:"1px solid "+t.b1}}>{[{icon:"▶",label:"Écouter",fn:()=>{doPlay(verseCtxMenu.vn);setVerseCtxMenu(null);}},{icon:isMem(verseCtxMenu.sn,verseCtxMenu.vn)?"✓":"○",label:isMem(verseCtxMenu.sn,verseCtxMenu.vn)?"Mémorisé":"Mémoriser",color:isMem(verseCtxMenu.sn,verseCtxMenu.vn)?t.gr:t.tx,fn:()=>{toggleV(verseCtxMenu.sn,verseCtxMenu.vn,"");setVerseCtxMenu(null);}},{icon:"❤",label:isFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn))?"Retiré":"Favori",color:isFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn))?t.rd:t.tx,fn:()=>{toggleFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn));setVerseCtxMenu(null);}},{icon:"🔖",label:"Signet",color:bookmark?.sn===verseCtxMenu.sn&&bookmark?.vn===verseCtxMenu.vn?t.acc:t.tx,fn:()=>{setBookmark(b=>b?.sn===verseCtxMenu.sn&&b?.vn===verseCtxMenu.vn?null:{sn:verseCtxMenu.sn,vn:verseCtxMenu.vn});setVerseCtxMenu(null);}}].map(a=>(<button key={a.label} onClick={a.fn} style={{padding:"12px 4px",background:"transparent",border:"none",color:a.color||t.tx,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:3,WebkitTapHighlightColor:"transparent"}}><span style={{fontSize:"1.1rem"}}>{a.icon}</span><span style={{fontSize:".55rem",color:t.tx3}}>{a.label}</span></button>))}</div>{[{icon:"📖",label:"Tafsir",fn:()=>{setShowTf(true);setVerseCtxMenu(null);}},{icon:"🌍",label:"Traduction",fn:()=>{setShowTr(true);setVerseCtxMenu(null);}},{icon:"✏️",label:"Traduction mot à mot",fn:()=>{if(wbwVerseRef)wbwVerseRef.current={sn:verseCtxMenu.sn,vn:verseCtxMenu.vn};setWbwOpen&&setWbwOpen(true);setVerseCtxMenu(null);}},{icon:"📋",label:"Copier",fn:()=>{try{navigator.clipboard?.writeText(((verseCtxMenu.ar||"").replace(/<[^>]*>/g,"").replace(/[﴿﴾]/g,"")).slice(0,150)+(verseCtxMenu.ar?.length>150?"...":""));}catch(e){}setToastMsg("✓ Copié");setVerseCtxMenu(null);}},{icon:"↗",label:"Partager",fn:()=>{try{navigator.share?.({text:((verseCtxMenu.ar||"").replace(/<[^>]*>/g,"").replace(/[﴿﴾]/g,"")).slice(0,150)+(verseCtxMenu.ar?.length>150?"...":"")+" ("+verseCtxMenu.sn+":"+verseCtxMenu.vn+")"});}catch(e){}setVerseCtxMenu(null);}}].map(a=>(<button key={a.label} onClick={a.fn} style={{display:"flex",alignItems:"center",gap:14,width:"100%",padding:"13px 20px",background:"transparent",border:"none",borderTop:"1px solid "+t.b1,color:t.tx,fontSize:".88rem",cursor:"pointer",textAlign:"left",WebkitTapHighlightColor:"transparent"}}><span style={{width:22,textAlign:"center"}}>{a.icon}</span>{a.label}</button>))}<button onClick={()=>setVerseCtxMenu(null)} style={{width:"100%",padding:"13px",background:"transparent",border:"none",borderTop:"2px solid "+t.b1,color:t.tx3,fontSize:".85rem",cursor:"pointer",fontWeight:600}}>Annuler</button></div></div>)}
+        {firstLaunch&&(
+          <div style={{position:"fixed",inset:0,zIndex:9999,background:"rgba(0,0,0,.7)",display:"flex",alignItems:"flex-end"}}>
+            <div style={{background:t.s1,borderRadius:"24px 24px 0 0",padding:"28px 24px 40px",width:"100%",maxHeight:"80vh",overflowY:"auto"}}>
+              <div style={{textAlign:"center",marginBottom:20}}>
+                <div style={{fontSize:"2.5rem",marginBottom:8}}>📖</div>
+                <div style={{fontSize:"1.3rem",fontWeight:800,color:t.tx,marginBottom:4}}>Bienvenue sur Al-Hifz</div>
+                <div style={{fontSize:".8rem",color:t.tx3}}>Ton compagnon de mémorisation du Coran</div>
+              </div>
+              {[
+                {icon:"📚",title:"Lis & Mémorise",desc:"Choisis une sourate, active le mode Hifz pour mémoriser verset par verset"},
+                {icon:"🎵",title:"Écoute",desc:"Appuie sur ▶ en bas à droite pour lancer la lecture par un réciteur"},
+                {icon:"✋",title:"Appui long",desc:"Maintiens un verset appuyé pour accéder au Tafsir, la traduction, et plus"},
+                {icon:"📊",title:"Suis ta progression",desc:"L'onglet Stats montre ta courbe de mémorisation jour par jour"},
+              ].map(f=>(
+                <div key={f.title} style={{display:"flex",gap:14,marginBottom:16,alignItems:"flex-start"}}>
+                  <div style={{fontSize:"1.4rem",flexShrink:0,marginTop:2}}>{f.icon}</div>
+                  <div>
+                    <div style={{fontWeight:700,fontSize:".85rem",color:t.tx,marginBottom:2}}>{f.title}</div>
+                    <div style={{fontSize:".75rem",color:t.tx3,lineHeight:1.5}}>{f.desc}</div>
+                  </div>
+                </div>
+              ))}
+              <button onClick={()=>{localStorage.setItem("alhifz_launched","1");setFirstLaunch(false);}}
+                style={{width:"100%",padding:"14px",borderRadius:16,border:"none",
+                  background:t.acc,color:"#fff",fontSize:"1rem",fontWeight:700,cursor:"pointer",marginTop:8}}>
+                Commencer ✦
+              </button>
+            </div>
+          </div>
+        )}
+        {verseCtxMenu&&(<div onClick={()=>setVerseCtxMenu(null)} style={{position:"fixed",inset:0,zIndex:998,background:"rgba(0,0,0,.45)"}}><div onClick={e=>e.stopPropagation()} style={{position:"fixed",bottom:130,left:"50%",transform:"translateX(-50%)",width:"min(380px,94vw)",background:t.s1,borderRadius:24,overflow:"hidden",boxShadow:"0 12px 50px rgba(0,0,0,.35)"}}><div style={{padding:"14px 18px 12px",borderBottom:"1px solid "+t.b1,textAlign:"center"}}><div style={{fontSize:".65rem",color:t.tx3,marginBottom:4,direction:"ltr"}}>{verseCtxMenu.sn}:{verseCtxMenu.vn}</div><div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.1rem",color:t.tx,direction:"rtl",lineHeight:1.9,maxHeight:80,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:3,WebkitBoxOrient:"vertical"}}>{((verseCtxMenu.ar||"").replace(/<[^>]*>/g,"").replace(/[﴿﴾]/g,"")).slice(0,150)+(verseCtxMenu.ar?.length>150?"...":"")}</div>{verseCtxMenu.fr&&<div style={{fontSize:".7rem",color:t.tx3,fontStyle:"italic",marginTop:4,direction:"ltr"}}>{verseCtxMenu.fr.replace(/<[^>]*>/g,"")}</div>}</div><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",borderBottom:"1px solid "+t.b1}}>{[{icon:"▶",label:"Écouter",fn:()=>{doPlay(verseCtxMenu.vn);setVerseCtxMenu(null);}},{icon:isMem(verseCtxMenu.sn,verseCtxMenu.vn)?"✓":"○",label:isMem(verseCtxMenu.sn,verseCtxMenu.vn)?"Mémorisé":"Mémoriser",color:isMem(verseCtxMenu.sn,verseCtxMenu.vn)?t.gr:t.tx,fn:()=>{toggleV(verseCtxMenu.sn,verseCtxMenu.vn,"");setVerseCtxMenu(null);}},{icon:"❤",label:isFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn))?"Retiré":"Favori",color:isFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn))?t.rd:t.tx,fn:()=>{toggleFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn));setVerseCtxMenu(null);}},{icon:"🔖",label:"Signet",color:bookmark?.sn===verseCtxMenu.sn&&bookmark?.vn===verseCtxMenu.vn?t.acc:t.tx,fn:()=>{setBookmark(b=>b?.sn===verseCtxMenu.sn&&b?.vn===verseCtxMenu.vn?null:{sn:verseCtxMenu.sn,vn:verseCtxMenu.vn});setVerseCtxMenu(null);}}].map(a=>(<button key={a.label} onClick={a.fn} style={{padding:"12px 4px",background:"transparent",border:"none",color:a.color||t.tx,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:3,WebkitTapHighlightColor:"transparent"}}><span style={{fontSize:"1.1rem"}}>{a.icon}</span><span style={{fontSize:".55rem",color:t.tx3}}>{a.label}</span></button>))}</div>{[{icon:"📖",label:"Tafsir",fn:()=>{setShowTf(true);setVerseCtxMenu(null);}},{icon:"🌍",label:"Traduction",fn:()=>{setShowTr(true);setVerseCtxMenu(null);}},{icon:"✏️",label:"Traduction mot à mot",fn:()=>{if(wbwVerseRef)wbwVerseRef.current={sn:verseCtxMenu.sn,vn:verseCtxMenu.vn};setWbwOpen&&setWbwOpen(true);setVerseCtxMenu(null);}},{icon:"📋",label:"Copier",fn:()=>{try{navigator.clipboard?.writeText(((verseCtxMenu.ar||"").replace(/<[^>]*>/g,"").replace(/[﴿﴾]/g,"")).slice(0,150)+(verseCtxMenu.ar?.length>150?"...":""));}catch(e){}setToastMsg("✓ Copié");setVerseCtxMenu(null);}},{icon:"↗",label:"Partager",fn:()=>{try{navigator.share?.({text:((verseCtxMenu.ar||"").replace(/<[^>]*>/g,"").replace(/[﴿﴾]/g,"")).slice(0,150)+(verseCtxMenu.ar?.length>150?"...":"")+" ("+verseCtxMenu.sn+":"+verseCtxMenu.vn+")"});}catch(e){}setVerseCtxMenu(null);}}].map(a=>(<button key={a.label} onClick={a.fn} style={{display:"flex",alignItems:"center",gap:14,width:"100%",padding:"13px 20px",background:"transparent",border:"none",borderTop:"1px solid "+t.b1,color:t.tx,fontSize:".88rem",cursor:"pointer",textAlign:"left",WebkitTapHighlightColor:"transparent"}}><span style={{width:22,textAlign:"center"}}>{a.icon}</span>{a.label}</button>))}<button onClick={()=>setVerseCtxMenu(null)} style={{width:"100%",padding:"13px",background:"transparent",border:"none",borderTop:"2px solid "+t.b1,color:t.tx3,fontSize:".85rem",cursor:"pointer",fontWeight:600}}>Annuler</button></div></div>)}
 
       {/* Modal Lecture partielle */}
       {partialVerse&&(
@@ -4505,8 +4537,8 @@ return (
                     <button className={`tbtn ${reviewMode?"on":""}`} style={reviewMode?{background:t.rd,borderColor:t.rd,color:"#fff"}:{}} onClick={()=>{setReviewMode(v=>!v);setRevealedVerses({});}}>{reviewMode?"Quitter révision":"Révision"}</button>
                     <button className={`tbtn ${karaokeMode?"on":""}`} style={karaokeMode?{background:"#e91e63",borderColor:"#e91e63",color:"#fff"}:{borderColor:t.b2}} onClick={()=>{setKaraokeMode(v=>!v);setActiveWordIdx(-1);}}>Tilawa</button>
                     <button className={`tbtn ${hifzMode?"on":""}`} style={hifzMode?{background:t.pu,borderColor:t.pu,color:"#fff"}:{}} onClick={()=>{setHifzMode(v=>!v);setHifzLevel({});setRevealedVerses({});}}>Hifz</button>
-                    <button className="tbtn" onClick={()=>setImmersive(true)}>Immersif</button>
-                    <button className={`tbtn ${focusMode?"on":""}`} style={focusMode?{background:"#1a1a1a",borderColor:"#444",color:"#fff"}:{}} onClick={()=>{setFocusMode(v=>!v);setFocusIdx(0);}}>Concentration</button>
+                    <button className="tbtn" onClick={()=>setImmersive(true)}>Imm.</button>
+                    <button className={`tbtn ${focusMode?"on":""}`} style={focusMode?{background:"#1a1a1a",borderColor:"#444",color:"#fff"}:{}} onClick={()=>{setFocusMode(v=>!v);setFocusIdx(0);}}>Conc.</button>
                     <div style={{display:"flex",alignItems:"center",gap:4,marginLeft:"auto"}}>
                       <button className="tbtn" onClick={()=>setArabicSize(s=>Math.max(1,s-0.15))}>A-</button>
                       <button className="tbtn" onClick={()=>setArabicSize(s=>Math.min(3,s+0.15))}>A+</button>
@@ -5481,6 +5513,29 @@ return (
         {/* STATS */}
         {page==="stats"&&(
           <div className="sp">
+            {/* Graphe 7 derniers jours */}
+            {(()=>{
+              const days7=[];
+              for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const k=d.toISOString().slice(0,10);days7.push({label:["D","L","M","M","J","V","S"][d.getDay()],count:hist[k]||0,isToday:i===0});}
+              const maxV=Math.max(...days7.map(d=>d.count),1);
+              return(
+                <div style={{padding:"14px 16px",marginBottom:8}}>
+                  <div style={{fontSize:".62rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginBottom:10}}>7 derniers jours</div>
+                  <div style={{display:"flex",alignItems:"flex-end",gap:6,height:60}}>
+                    {days7.map((d,i)=>(
+                      <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
+                        <span style={{fontSize:".52rem",color:d.count>0?t.acc:t.tx3,fontWeight:d.isToday?700:400}}>{d.count||""}</span>
+                        <div style={{width:"100%",borderRadius:"4px 4px 0 0",
+                          background:d.isToday?t.acc:d.count>0?t.gr:t.b1,
+                          height:Math.max(3,Math.round((d.count/maxV)*44))+"px",
+                          transition:"height .3s"}}/>
+                        <span style={{fontSize:".55rem",color:d.isToday?t.acc:t.tx3,fontWeight:d.isToday?700:400}}>{d.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
             {/* ── Calendrier GitHub-style ── */}
             {(()=>{
               const today2=new Date();
