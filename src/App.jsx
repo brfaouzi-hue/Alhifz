@@ -2669,7 +2669,7 @@ const handleReset=async()=>{
     const t=setTimeout(checkReminder,3000);
     return()=>clearTimeout(t);
   },[]);
-  const [versePages,setVersePages]=useState({}); // {sn: {vn: pageNum}}
+  const [versePages,setVersePages]=useState(()=>{try{return JSON.parse(localStorage.getItem("vp")||"{}");}catch{return {};}}); // {sn: {vn: pageNum}}
   const [playerOpen,setPlayerOpen]=useState(false);
   const [firstLaunch,setFirstLaunch]=useState(()=>!localStorage.getItem("alhifz_launched"));
   const [verseCtxMenu,setVerseCtxMenu]=useState(null); // {vn,sn,ar,fr}
@@ -2794,7 +2794,7 @@ const handleReset=async()=>{
 
   // FIX 1: doSelect — scroll uniquement sur mobile (<860px) — corrige le "saut" de page
   const doSelect=s=>{
-    setSelS(s);setPlaying(null); if(!versePages[s.n]){fetch(`https://api.qurancdn.com/api/qdc/verses/by_chapter/${s.n}?per_page=300&fields=page_number`).then(r=>r.json()).then(d=>{const m={};(d.verses||[]).forEach(v=>{m[v.verse_number]=v.page_number;});setVersePages(p=>({...p,[s.n]:m}));}).catch(()=>{});}loadAudioSegments(s.n,rec?.qurancdn||7).catch(()=>{});
+    setSelS(s);setPlaying(null); if(!versePages[s.n]){fetch(`https://api.qurancdn.com/api/qdc/verses/by_chapter/${s.n}?per_page=300&fields=page_number`).then(r=>r.json()).then(d=>{const m={};(d.verses||[]).forEach(v=>{m[v.verse_number]=v.page_number;});setVersePages(p=>{const nv={...p,[s.n]:m};try{localStorage.setItem("vp",JSON.stringify(nv));}catch{}return nv;});}).catch(()=>{});}loadAudioSegments(s.n,rec?.qurancdn||7).catch(()=>{});
     setMushafPage(SURAH_PAGE[s.n]||1);
     if(audioRef.current){audioRef.current.pause();audioRef.current.src="";}
     if(window.innerWidth<860){
@@ -2816,7 +2816,7 @@ const handleReset=async()=>{
   const toggleV=(sn,vn,verseAr="")=>{
     const k=String(sn),vk=String(vn);
     const isNew=!(mem[k]||{})[vk];
-    if(isNew)updateStreak(); if(memStreak>0) setToastMsg(memStreak>=7?"🔥 "+memStreak+" jours ! Māshāʾ Allāh !":memStreak>=3?"🔥 "+memStreak+" jours consécutifs !":"✦ Verset mémorisé !");
+    if(isNew)updateStreak(); if(memStreak>0) setToastMsg(memStreak>=7?"🔥 "+memStreak+" jours ! Mashaʾ Allāh !":memStreak>=3?"🔥 "+memStreak+" jours consécutifs !":"✦ Verset mémorisé !");
     setMem(p=>{
     const c={...p[k]||{}};
     const wasMemorized=!!c[vk];
@@ -4530,7 +4530,7 @@ return (
 
                   <div className="vtoolbar">
                   <button className={"tbtn"+(pageMode?" on":"")} onClick={()=>{const v=!pageMode;setPageMode(v);sv("qpagemode",v);}} style={{borderColor:pageMode?t.acc:t.b1,color:pageMode?"#fff":t.tx3}} title="Mode page">Page</button>
-                    <button style={{display:"none"}} className={`tbtn ${showTj?"on":""}`} onClick={()=>setShowTj(v=>!v)}>Tajwid</button>
+                    <button className={`tbtn ${showTj?"on":""}`} onClick={()=>setShowTj(v=>!v)}>Tajwid</button>
                     <button style={{display:"none"}} className={`tbtn ${showTr?"on":""}`} onClick={()=>setShowTr(v=>!v)}>Traduction</button>
                     <button style={{display:"none"}} className={`tbtn ${showTf?"on":""}`} onClick={()=>setShowTf(v=>!v)}>Tafsir</button>
 
@@ -4679,15 +4679,31 @@ return (
                                 </div>
                               )}
                               {isActive&&(
-                                <div style={{display:"flex",flexWrap:"wrap",gap:5,padding:"10px 14px",margin:"4px 0 10px",background:t.s2,borderRadius:12,border:"1px solid "+t.b1,direction:"ltr"}}>
-                                  <button className={"vbtn"+(isMem?" mem":"")} onClick={()=>{toggleV(selS.n,v.n,v.ar);setActiveVerseActions(null);}}>{isMem?"✓ Mémorisé":"+ Mémoriser"}</button>
-                                  <button className="vbtn snd" onClick={()=>{setLoopCurrent(1);doPlay(v.n);addToHistory(selS.n,v.n);setActiveVerseActions(null);}}>{"▶ "+(isPl?"Stop":"Écouter")}</button>
-                                  <button className={"vbtn"+(isFav(selS.n,v.n)?" mem":"")} onClick={()=>{toggleFav(selS.n,v.n,v.ar,v.fr,selS.name);setActiveVerseActions(null);}}>{isFav(selS.n,v.n)?"♥ Favori":"♡ Favori"}</button>
-                                  {(()=>{const words=stripTags(v.ar||"").split(" ").filter(Boolean);return words.length>4&&<button className="vbtn" style={{borderColor:t.bl,color:t.bl}} onClick={()=>{setPartialVerse({sn:selS.n,vn:v.n,words,from:0,to:words.length-1,fr:v.fr});setActiveVerseActions(null);}}>✂ Partiel</button>;})()}
-                                  <button className="vbtn" onClick={()=>{wbwVerseRef.current={sn:selS.n,vn:v.n};setWbwOpen(true);setActiveVerseActions(null);}}>📖 Mot à mot</button>
-                                  <button className="vbtn" onClick={()=>{setShareVerse({sn:selS.n,vn:v.n,ar:v.ar,fr:v.fr,surah:selS.name,surahAr:selS.ar});setActiveVerseActions(null);}}>Partager</button>
-                                  {speechSupported&&<button className="vbtn" onClick={()=>{setSpeechScore(null);startListening(v.ar,v.n);setActiveVerseActions(null);}}>🎤 Réciter</button>}
-                                  <button className="vbtn" style={{marginLeft:"auto",borderColor:"#e91e63",color:"#e91e63"}} onClick={()=>setActiveVerseActions(null)}>✕</button>
+                                <div style={{display:"flex",gap:6,padding:"6px 12px 8px",justifyContent:"center"}}>
+                                  <button onClick={()=>{toggleV(selS.n,v.n,v.ar);setActiveVerseActions(null);}} title={isMem?"Retirer":"Mémoriser"}
+                                    style={{width:36,height:36,borderRadius:"50%",border:"none",cursor:"pointer",
+                                      background:isMem?t.gr:t.b1,color:isMem?"#fff":t.tx,fontSize:"1rem",
+                                      display:"flex",alignItems:"center",justifyContent:"center"}}>
+                                    {isMem?"✓":"○"}
+                                  </button>
+                                  <button onClick={()=>{doPlay(v.n);setActiveVerseActions(null);}} title="Écouter"
+                                    style={{width:36,height:36,borderRadius:"50%",border:"none",cursor:"pointer",
+                                      background:t.acc,color:"#fff",fontSize:".9rem",
+                                      display:"flex",alignItems:"center",justifyContent:"center"}}>
+                                    ▶
+                                  </button>
+                                  <button onClick={()=>{toggleFav(selS.n,v.n);setActiveVerseActions(null);}} title={isFav(selS.n,v.n)?"Retirer favori":"Favori"}
+                                    style={{width:36,height:36,borderRadius:"50%",border:"none",cursor:"pointer",
+                                      background:isFav(selS.n,v.n)?t.rd:t.b1,color:isFav(selS.n,v.n)?"#fff":t.tx,fontSize:"1rem",
+                                      display:"flex",alignItems:"center",justifyContent:"center"}}>
+                                    ❤
+                                  </button>
+                                  <button onClick={()=>{setVerseCtxMenu({vn:v.n,sn:selS?.n,ar:v.ar,fr:v.fr});setActiveVerseActions(null);}} title="Plus"
+                                    style={{width:36,height:36,borderRadius:"50%",border:"1px solid "+t.b1,cursor:"pointer",
+                                      background:"transparent",color:t.tx3,fontSize:"1rem",
+                                      display:"flex",alignItems:"center",justifyContent:"center"}}>
+                                    •••
+                                  </button>
                                 </div>
                               )}
                               {hasRecitScore&&(
