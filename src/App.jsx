@@ -2917,7 +2917,7 @@ const handleReset=async()=>{
     // Source 1 : quran.com API — essayer plusieurs IDs tafsir FR
     for(const tid of [817,31]){
       try{
-        const r=await fetch(`https://api.quran.com/api/v4/tafsirs/${tid}/by_ayah/${sn}:${vn}`,{headers:{"Accept":"application/json"}});
+        const r=await fetch(`https://api.quran.com/api/v4/tafsirs/${tid}/by_ayah/${sn}:${vn}`,{headers:{"Accept":"application/json","Accept-Language":"fr"}});
         if(r.ok){
           const d=await r.json();
           const raw=d?.tafsir?.text||d?.data?.text||"";
@@ -2957,7 +2957,7 @@ const handleReset=async()=>{
     const key=`${sn}_${vn}`;
     if(wordTimings[key])return wordTimings[key];
     try{
-      const r=await fetch(`https://api.qurancdn.com/api/qdc/verses/by_chapter/${sn}?verse_number=${vn}&words=true&word_fields=audio_url,location,text_uthmani&per_page=1`);
+      const r=await fetch(`https://api.qurancdn.com/api/qdc/verses/by_chapter/${sn}?verse_number=${vn}&language=fr&words=true&word_fields=audio_url,location,text_uthmani&per_page=1`);
       const d=await r.json();
       const words=(d.verses?.[0]?.words||[])
         .filter(w=>w.char_type_name==="word")
