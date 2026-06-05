@@ -2122,7 +2122,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
 
       {/* Texte en flux continu */}
       <div style={{flex:1,overflowY:"auto",padding:"20px 18px 100px",WebkitOverflowScrolling:"touch"}} onClick={e=>e.stopPropagation()}>
-        <div style={{direction:"rtl",textAlign:"justify",wordSpacing:"0.1em",WebkitTextAlignLast:"right",textAlignLast:"right",lineHeight:3,fontFamily:"Amiri Quran,Amiri,serif",fontSize:"clamp(1rem,"+((arabicSize||1.6)*3.5)+"vw,"+(arabicSize||1.6)+"rem)",color:t.tx}}>
+        <div style={{direction:"rtl",textAlign:"justify",wordSpacing:"0.1em",WebkitTextAlignLast:"right",textAlignLast:"right",lineHeight:3,fontFamily:"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.6)+"rem",color:t.tx}}>
           {cur.map((v)=>{
             const isMem=!!(mem[String(selS?.n)]?.[String(v.n)]);
             const isPlay=playing===v.n;
@@ -2931,7 +2931,7 @@ const handleReset=async()=>{
     // Source 1 : quran.com API — essayer plusieurs IDs tafsir FR
     for(const tid of [817,31]){
       try{
-        const r=await fetch(`https://api.quran.com/api/v4/tafsirs/${tid}/by_ayah/${sn}:${vn}`,{headers:{"Accept":"application/json","Accept-Language":"fr"}});
+        const r=await fetch(`https://api.alquran.cloud/v1/ayah/${sn}:${vn}/fr.hamidullah`);const d=await r.json();if(d.data?.text){setTafsirData({text:d.data.text.replace(/<[^>]*>/g,""),source:"Hamidullah"});return;}
         if(r.ok){
           const d=await r.json();
           const raw=d?.tafsir?.text||d?.data?.text||"";
@@ -6542,7 +6542,7 @@ return (
           )}
         </div>
       )}
-      <div className="bnav" style={{display:page==="reader"?"none":"flex"}}>
+      <div className="bnav" style={{position:"fixed",bottom:0,left:0,right:0,zIndex:100,display:page==="reader"?"none":"flex"}}>
         {[
           {id:"home",icon:<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,label:"Accueil"},
           {id:"quran",icon:<Icons.Book size={19}/>,label:"Coran"},
