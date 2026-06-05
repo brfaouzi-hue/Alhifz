@@ -1511,22 +1511,38 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
                 );
               });
             } else {
-              if(maskedMode&&chain){
-                var aw=verses.flatMap(function(v){return (stripArabicNums(v.ar||'').replace(/<[^>]*>/g,'')).split(' ').filter(Boolean).map(function(w){return {w:w,vn:v.n};});});
-                var cvi=verses.findIndex(function(v){return v.n===curV?.n;});
-                var wb=verses.slice(0,cvi).reduce(function(s,v){return s+(stripArabicNums(v.ar||'').replace(/<[^>]*>/g,'')).split(' ').filter(Boolean).length;},0);
-                var tr2=wb+spokenWords.length;
-                return React.createElement('div',{style:{direction:'rtl',textAlign:'justify',fontFamily:'Amiri Quran,serif',fontSize:'1.3rem',lineHeight:2.8,padding:'0 8px',width:'100%'}},
-                  aw.map(function(item,gi){
-                    var rev=gi<tr2; var isCur=gi===tr2;
-                    return React.createElement('span',{key:gi,style:{display:'inline-block',background:rev?'transparent':'rgba(255,255,255,.1)',color:rev?'rgba(255,255,255,.9)':'transparent',borderRadius:4,padding:'0 2px',margin:'0 1px',minWidth:'1.2em',transition:'all .25s',boxShadow:isCur?'0 0 12px '+acc:'none',fontWeight:isCur?900:400}},item.w,' ');
-                  })
+              // Idle — verset avec tajweed
+              {maskedMode&&chain?(()=>{
+                // Mode page masquée Tarteel: tous les mots de la sourate
+                const allWords=verses.flatMap((v,vi)=>
+                  stripArabicNums(v.ar||"").replace(/<[^>]*>/g,"").split(" ").filter(Boolean).map((w,wi)=>({w,vi,wi,vn:v.n}))
                 );
-              }
-              return React.createElement(TajwidSpan,{text:stripArabicNums(curV?.ar||''),enabled:showTj,tjc:tjc});
+                const curVI=verses.findIndex(v=>v.n===curV?.n);
+                let spokenCount=spokenWords.length;
+                let wordsBefore=verses.slice(0,curVI).reduce((s,v)=>s+stripArabicNums(v.ar||"").replace(/<[^>]*>/g,"").split(" ").filter(Boolean).length,0);
+                const totalRevealed=wordsBefore+spokenCount;
+                return(<div style={{direction:"rtl",textAlign:"justify",fontFamily:"Amiri Quran,serif",fontSize:"1.3rem",lineHeight:2.8,wordSpacing:".1em",padding:"0 8px"}}>
+                  {allWords.map(({w,vn},gi)=>{
+                    const revealed=gi<totalRevealed;
+                    const isCur=gi===totalRevealed;
+                    return(<span key={gi} style={{
+                      display:"inline-block",
+                      background:revealed?"transparent":"rgba(255,255,255,0.15)",
+                      color:revealed?(isCur?acc:(isListening?"rgba(255,255,255,.9)":"rgba(255,255,255,.8)")):"transparent",
+                      borderRadius:4,
+                      padding:"0 2px",
+                      margin:"0 1px",
+                      minWidth:"1.5em",
+                      transition:"all .2s",
+                      textShadow:isCur?`0 0 20px ${acc}`:revealed?"none":"none",
+                      fontWeight:isCur?900:400,
+                    }}>{w} </span>);
+                  })}
+                </div>);
+              })():(chain?(<div style={{direction:"rtl",textAlign:"justify",fontFamily:"Amiri Quran,serif",fontSize:"1.3rem",lineHeight:3,padding:"4px",width:"100%",overflowY:"auto",maxHeight:"52vh"}}>{verses.map(function(v){var ic=v.n===curV?.n;return(<span key={v.n} style={{color:ic?acc:"rgba(255,255,255,.85)",fontWeight:ic?700:400,fontSize:ic?"1.15em":"1em",transition:"color .3s",display:"inline"}}>{stripArabicNums(v.ar||"").replace(/<[^>]*>/g,"")}{" "}</span>);})}</div>):(<TajwidSpan text={stripArabicNums(curV?.ar||"")} enabled={showTj} tjc={tjc}/>))}
             }
           })()}
-
+{/*num removed*/}
         </div>
 
         {/* Traduction */}
@@ -1860,7 +1876,7 @@ body>*{position:relative;z-index:1;}
 .bn-lbl{font-size:.52rem;font-weight:500;}
 /* ── Layout ── */
 .wrap{max-width:1200px;margin:0 auto;padding:14px 16px calc(120px + env(safe-area-inset-bottom));padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));width:100%;box-sizing:border-box;overflow-x:hidden;overscroll-behavior-x:none;}
-.two{display:grid;grid-template-columns:300px 1fr;gap:12px;align-items:start;}
+.two{display:grid;grid-template-columns:min(260px,35%) 1fr;gap:8px;align-items:start;}
 /* ── Cards — hover effect ── */
 .card{background:${t.cardBg};border:1px solid ${t.b1};border-radius:14px;overflow:hidden;transition:box-shadow .25s,border-color .25s;}
 .card:hover{box-shadow:0 4px 24px ${acc}18;border-color:${acc}44;}
@@ -1901,7 +1917,7 @@ body>*{position:relative;z-index:1;}
 .jb{height:3px;background:${t.b1};border-radius:99px;overflow:hidden;margin-top:3px;}
 .jf{height:100%;background:${t.gr};border-radius:99px;}
 /* ── Verse viewer ── */
-.rp{position:sticky;top:58px;}
+.rp{position:sticky;top:58px;min-width:0;overflow:hidden;}
 .vhd{padding:12px 14px;border-bottom:1px solid ${t.b1};}
 .v-ar-title{font-family:${arFont};font-size:1.9rem;color:${acc};direction:rtl;text-align:right;line-height:1.5;margin-bottom:4px;}
 .v-info{font-size:.65rem;color:${t.tx3};}
@@ -1916,7 +1932,7 @@ body>*{position:relative;z-index:1;}
 .tj-item{display:flex;align-items:center;gap:3px;}
 .tj-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 .arow{padding:6px 12px;border-bottom:1px solid ${t.b1};background:${t.s2};display:flex;align-items:center;gap:7px;}
-.vscroll{overflow-y:auto;}
+.vscroll{overflow-y:auto;min-width:0;width:100%;box-sizing:border-box;}
 /* ── Verse items — mode flux Tarteel ── */
 .vscroll-inner{direction:rtl;text-align:justify;padding:20px 18px 80px;font-family:${arFont};font-size:1.7rem;line-height:2.8;word-spacing:3px;}
 .vitem{display:inline;}
@@ -2047,6 +2063,7 @@ body>*{position:relative;z-index:1;}
 .big-ar{font-family:${arFont};font-size:2rem;color:${acc};margin-bottom:8px;}
 @media(max-width:860px){
   .two{grid-template-columns:1fr;}.rp,.lp{position:static;max-height:none;}.vscroll{max-height:none;}
+  .lp{max-height:220px;overflow-y:auto;}
   .sg{grid-template-columns:repeat(2,1fr);}.two-h{grid-template-columns:1fr;}
 }
 @media(max-width:480px){
@@ -2121,8 +2138,8 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
       </div>
 
       {/* Texte en flux continu */}
-      <div style={{flex:1,overflowY:"auto",padding:"20px 18px 100px",WebkitOverflowScrolling:"touch"}} onClick={e=>e.stopPropagation()}>
-        <div style={{direction:"rtl",textAlign:"justify",wordSpacing:"0.1em",WebkitTextAlignLast:"right",textAlignLast:"right",lineHeight:3,fontFamily:"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.6)+"rem",color:t.tx}}>
+      <div style={{flex:1,overflowY:"auto",minWidth:0,width:"100%",boxSizing:"border-box",contain:"layout",padding:"20px 18px 100px",WebkitOverflowScrolling:"touch"}} onClick={e=>e.stopPropagation()}>
+        <div style={{direction:"rtl",textAlign:"justify",width:"100%",boxSizing:"border-box",overflowWrap:"break-word",wordBreak:"break-word",wordSpacing:"0.1em",WebkitTextAlignLast:"right",textAlignLast:"right",lineHeight:3,fontFamily:"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.6)+"rem",maxWidth:"100%",color:t.tx}}>
           {cur.map((v)=>{
             const isMem=!!(mem[String(selS?.n)]?.[String(v.n)]);
             const isPlay=playing===v.n;
@@ -2206,7 +2223,7 @@ export default function App() {
   const [fontId,setFontId]=useState(()=>ld("qfont","amiri-quran"));
   const arFont=(FONTS.find(f=>f.id===fontId)||FONTS[0]).css;
   const [mem,setMem]=useState(()=>ld("qmem6",{}));
-  const memHistory=React.useMemo(()=>{const h={};Object.entries(mem||{}).forEach(([sn,vs])=>{Object.entries(vs||{}).forEach(([vn,info])=>{if(info&&info.date){var d=info.date.slice(0,10);h[d]=(h[d]||0)+1;}});});return h;},[mem]);
+  const memHistory=React.useMemo(()=>{const h={};Object.entries(mem||{}).forEach(([sn,vs])=>{Object.entries(vs||{}).forEach(([vn,info])=>{if(info?.date){const d=info.date.slice(0,10);h[d]=(h[d]||0)+1;}});});return h;},[mem]);
   const [settings,setSettings]=useState(()=>ld("qset6",null));
   const [hist,setHist]=useState(()=>ld("qhist6",{}));
   const [setup,setSetup]=useState(()=>!ld("qset6",null));
@@ -2932,7 +2949,7 @@ const handleReset=async()=>{
     // Source 1 : quran.com API — essayer plusieurs IDs tafsir FR
     for(const tid of [817,31]){
       try{
-        const r=await fetch(`https://api.alquran.cloud/v1/ayah/${sn}:${vn}/fr.hamidullah`);const d=await r.json();if(d.data?.text){setTafsirData({text:d.data.text.replace(/<[^>]*>/g,""),source:"Hamidullah"});return;}
+        const r=await fetch(`https://api.alquran.cloud/v1/ayah/${sn}:${vn}/fr.hamidullah`);const d=await r.json();if(d.data?.text){setTafsirData({text:d.data.text,source:"Trad. Hamidullah"});return;}
         if(r.ok){
           const d=await r.json();
           const raw=d?.tafsir?.text||d?.data?.text||"";
@@ -4648,7 +4665,7 @@ return (
                   {playing!==null&&(<div className="arow"><button className="vbtn snd" style={{flexShrink:0}} onClick={()=>doPlay(playing)}>{audioPlaying?"⏸":"▶ "+playing}</button><span style={{fontSize:".62rem",color:t.tx2,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{selS?.name} · v.{playing} · {rec.name}</span><button className="tbtn" style={{flexShrink:0}} onClick={()=>{setPlaying(null);partialPlayRef.current=null;if(audioRef.current){audioRef.current.pause();audioRef.current.src="";}}}>✕</button></div>)}
 
                   {/* Banner mode récitation continue */}
-                   <div className="vscroll" style={pageMode?{overflow:"visible",flex:1,display:"flex",flexDirection:"column",paddingBottom:selS?"140px":"0"}:{paddingBottom:selS?"140px":"0"}} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+                   <div className="vscroll" style={{paddingBottom:selS?"140px":"0"}} style={pageMode?{overflow:"visible",flex:1,display:"flex",flexDirection:"column"}:{}} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
                     {loadState==="loading"&&(<div style={{textAlign:"center",padding:"30px 14px",color:t.tx3}}><div style={{width:22,height:22,border:"2px solid #ccc",borderTopColor:"#c9a84c",borderRadius:"50%",animation:"spin .7s linear infinite",margin:"0 auto 10px"}}/><div style={{fontSize:".8rem"}}>Chargement…</div></div>)}
                     {loadState==="error"&&(<div style={{textAlign:"center",padding:"24px",fontSize:".78rem"}}><div style={{fontSize:"1.5rem",marginBottom:10}}>🔌</div><div style={{color:t.rd,fontWeight:700,marginBottom:6}}>Connexion requise</div><div style={{color:t.tx3,marginBottom:14,lineHeight:1.5}}>Les versets de cette sourate sont chargés depuis internet.<br/>Vérifie ta connexion et réessaie.</div><button onClick={()=>{setLoadState("idle");setTimeout(()=>setSelS(s=>({...s})),100);}} style={{padding:"8px 20px",background:t.acc,border:"none",borderRadius:10,color:"#fff",fontWeight:700,cursor:"pointer",fontSize:".75rem"}}>🔄 Réessayer</button>{Q[selS?.n]?.length>0&&<div style={{marginTop:12,fontSize:".65rem",color:t.tx3}}>ou <button onClick={()=>{setVerses(Q[selS.n]);setLoadState("done");}} style={{background:"none",border:"none",color:t.acc,cursor:"pointer",fontWeight:700}}>utiliser les données embarquées</button></div>}</div>)}
                     {loadState==="done"&&(
