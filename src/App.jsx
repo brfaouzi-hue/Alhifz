@@ -1511,50 +1511,22 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
                 );
               });
             } else {
-              // Idle — verset avec tajweed
-              {maskedMode&&chain?(()=>{
-                // Mode page masquée Tarteel: tous les mots de la sourate
-                const allWords=verses.flatMap((v,vi)=>
-                  stripArabicNums(v.ar||"").replace(/<[^>]*>/g,"").split(" ").filter(Boolean).map((w,wi)=>({w,vi,wi,vn:v.n}))
+              if(maskedMode&&chain){
+                var aw=verses.flatMap(function(v){return (stripArabicNums(v.ar||'').replace(/<[^>]*>/g,'')).split(' ').filter(Boolean).map(function(w){return {w:w,vn:v.n};});});
+                var cvi=verses.findIndex(function(v){return v.n===curV?.n;});
+                var wb=verses.slice(0,cvi).reduce(function(s,v){return s+(stripArabicNums(v.ar||'').replace(/<[^>]*>/g,'')).split(' ').filter(Boolean).length;},0);
+                var tr2=wb+spokenWords.length;
+                return React.createElement('div',{style:{direction:'rtl',textAlign:'justify',fontFamily:'Amiri Quran,serif',fontSize:'1.3rem',lineHeight:2.8,padding:'0 8px',width:'100%'}},
+                  aw.map(function(item,gi){
+                    var rev=gi<tr2; var isCur=gi===tr2;
+                    return React.createElement('span',{key:gi,style:{display:'inline-block',background:rev?'transparent':'rgba(255,255,255,.1)',color:rev?'rgba(255,255,255,.9)':'transparent',borderRadius:4,padding:'0 2px',margin:'0 1px',minWidth:'1.2em',transition:'all .25s',boxShadow:isCur?'0 0 12px '+acc:'none',fontWeight:isCur?900:400}},item.w,' ');
+                  })
                 );
-                const curVI=verses.findIndex(v=>v.n===curV?.n);
-                let spokenCount=spokenWords.length;
-                let wordsBefore=verses.slice(0,curVI).reduce((s,v)=>s+stripArabicNums(v.ar||"").replace(/<[^>]*>/g,"").split(" ").filter(Boolean).length,0);
-                const totalRevealed=wordsBefore+spokenCount;
-                return(<div style={{direction:"rtl",textAlign:"justify",fontFamily:"Amiri Quran,serif",fontSize:"1.3rem",lineHeight:2.8,wordSpacing:".1em",padding:"0 8px"}}>
-                  {allWords.map(({w,vn},gi)=>{
-                    const revealed=gi<totalRevealed;
-                    const isCur=gi===totalRevealed;
-                    return(<span key={gi} style={{
-                      display:"inline-block",
-                      background:revealed?"transparent":"rgba(255,255,255,0.15)",
-                      color:revealed?(isCur?acc:(isListening?"rgba(255,255,255,.9)":"rgba(255,255,255,.8)")):"transparent",
-                      borderRadius:4,
-                      padding:"0 2px",
-                      margin:"0 1px",
-                      minWidth:"1.5em",
-                      transition:"all .2s",
-                      textShadow:isCur?`0 0 20px ${acc}`:revealed?"none":"none",
-                      fontWeight:isCur?900:400,
-                    }}>{w} </span>);
-                  })}
-                </div>);
-              {maskedMode&&chain?(()=>{
-                const allWords=verses.flatMap((v,vi)=>stripArabicNums(v.ar||"").replace(/<[^>]*>/g,"").split(" ").filter(Boolean).map((w,wi)=>({w,vi,wi,vn:v.n})));
-                const curVI=verses.findIndex(v=>v.n===curV?.n);
-                const wordsBefore=verses.slice(0,curVI).reduce((s,v)=>s+stripArabicNums(v.ar||"").replace(/<[^>]*>/g,"").split(" ").filter(Boolean).length,0);
-                const totalRevealed=wordsBefore+spokenWords.length;
-                return(<div style={{direction:"rtl",textAlign:"justify",fontFamily:"Amiri Quran,serif",fontSize:"1.3rem",lineHeight:2.8,padding:"0 8px"}}>
-                  {allWords.map(({w},gi)=>{
-                    const revealed=gi<totalRevealed;
-                    const isCur=gi===totalRevealed;
-                    return(<span key={gi} style={{display:"inline-block",background:revealed?"transparent":"rgba(255,255,255,0.12)",color:revealed?"rgba(255,255,255,.9)":"transparent",borderRadius:4,padding:"0 2px",margin:"0 1px",minWidth:"1.2em",transition:"all .25s",textShadow:isCur?`0 0 20px ${acc}`:"none",fontWeight:isCur?900:400,transform:isCur?"scale(1.05)":"scale(1)"}}>{w} </span>);
-                  })}
-                </div>);
-              })():(<TajwidSpan text={stripArabicNums(curV?.ar||"")} enabled={showTj} tjc={tjc}/>)}
+              }
+              return React.createElement(TajwidSpan,{text:stripArabicNums(curV?.ar||''),enabled:showTj,tjc:tjc});
             }
           })()}
-{/*num removed*/}
+
         </div>
 
         {/* Traduction */}
@@ -1914,7 +1886,7 @@ body>*{position:relative;z-index:1;}
 .snum{width:21px;height:21px;border-radius:50%;border:1px solid ${t.b2};display:flex;align-items:center;justify-content:center;font-size:.56rem;color:${t.tx3};flex-shrink:0;cursor:pointer;transition:all .2s;}
 .snum:hover{border-color:${acc};color:${acc};transform:scale(1.15);}
 .snum.done{background:${t.grD};border-color:${t.gr};color:${t.gr};}
-.sname{font-size:.76rem;font-weight:500;}
+.sname{font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;}
 .smeta{font-size:.56rem;color:${t.tx3};margin-top:1px;}
 .sar{font-family:'Amiri',serif;font-size:.9rem;color:${acc};}
 .mbar{position:absolute;bottom:0;left:0;right:0;height:3px;background:${t.b2};overflow:hidden;border-radius:0 0 10px 10px;}
@@ -2150,7 +2122,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
 
       {/* Texte en flux continu */}
       <div style={{flex:1,overflowY:"auto",padding:"20px 18px 100px",WebkitOverflowScrolling:"touch"}} onClick={e=>e.stopPropagation()}>
-        <div style={{direction:"rtl",textAlign:"justify",wordSpacing:"0.1em",WebkitTextAlignLast:"right",textAlignLast:"right",lineHeight:3,fontFamily:"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.6)+"rem",color:t.tx}}>
+        <div style={{direction:"rtl",textAlign:"justify",wordSpacing:"0.1em",WebkitTextAlignLast:"right",textAlignLast:"right",lineHeight:3,fontFamily:"Amiri Quran,Amiri,serif",fontSize:"clamp(1rem,"+((arabicSize||1.6)*3.5)+"vw,"+(arabicSize||1.6)+"rem)",color:t.tx}}>
           {cur.map((v)=>{
             const isMem=!!(mem[String(selS?.n)]?.[String(v.n)]);
             const isPlay=playing===v.n;
