@@ -2119,7 +2119,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
   };
 
   return (
-    <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0,background:tn==="mushaf"?"#f7f3e9":tn==="light"?"#faf8f3":undefined,borderRadius:8}} onClick={()=>setSelVerse(null)}>
+    <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0}} onClick={()=>setSelVerse(null)}>
       {/* Navigation */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"5px 10px",borderBottom:"1px solid "+t.b1,flexShrink:0,gap:6}}>
         <button onClick={e=>{e.stopPropagation();setCurPage(p=>Math.max(0,p-1));}} disabled={curPage===0}
@@ -2132,14 +2132,15 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
         <button onClick={e=>{e.stopPropagation();setCurPage(p=>Math.min(total-1,p+1));}} disabled={curPage>=total-1}
           style={{padding:"4px 12px",borderRadius:20,border:"1px solid "+(curPage<total-1?t.acc:t.b1),background:curPage<total-1?t.acc+"15":"transparent",color:curPage<total-1?t.acc:t.tx3,cursor:curPage<total-1?"pointer":"default",fontSize:".7rem",fontWeight:700,flexShrink:0}}>
           Suiv. →
-        </button><button onClick={e=>{e.stopPropagation();setRecitModal&&setRecitModal(true);}} style={{padding:"4px 10px",borderRadius:20,border:"1px solid "+t.acc,background:t.acc+"15",color:t.acc,fontSize:".65rem",cursor:"pointer",flexShrink:0}}>🎤</button>
+        </button>
+        <button onClick={e=>{e.stopPropagation();setRecitModal&&setRecitModal(true);}} style={{padding:"4px 10px",borderRadius:20,border:"1px solid "+t.acc,background:t.acc+"15",color:t.acc,fontSize:".65rem",cursor:"pointer",flexShrink:0}}>🎤</button>
         {setPage&&<button onClick={e=>{e.stopPropagation();setPage("reader");}}
           style={{padding:"4px 10px",borderRadius:20,border:"1px solid "+t.acc,background:t.acc+"15",color:t.acc,cursor:"pointer",fontSize:".75rem",fontWeight:700,flexShrink:0}}>⛶</button>}
       </div>
 
       {/* Texte en flux continu */}
-      <div style={{flex:1,overflowY:"auto",minWidth:0,width:"100%",boxSizing:"border-box",contain:"layout",padding:"20px 18px 100px",WebkitOverflowScrolling:"touch"}} onClick={e=>e.stopPropagation()}>
-        <div style={{direction:"rtl",textAlign:"justify",width:"100%",boxSizing:"border-box",overflowWrap:"break-word",wordBreak:"break-word",wordSpacing:"0.1em",WebkitTextAlignLast:"right",textAlignLast:"right",lineHeight:3,fontFamily:"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.6)+"rem",maxWidth:"100%",color:t.tx}}>
+      <div style={{flex:1,overflowY:"auto",minWidth:0,width:"100%",boxSizing:"border-box",contain:"layout",padding:"24px 20px 120px",WebkitOverflowScrolling:"touch"}} onClick={e=>e.stopPropagation()}>
+        <div style={{direction:"rtl",textAlign:"justify",width:"100%",boxSizing:"border-box",overflowWrap:"break-word",wordBreak:"break-word",wordSpacing:"0.15em",WebkitTextAlignLast:"right",textAlignLast:"right",lineHeight:3.2,fontFamily:"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.6)+"rem",maxWidth:"100%",color:t.tx}}>
           {cur.map((v)=>{
             const isMem=!!(mem[String(selS?.n)]?.[String(v.n)]);
             const isPlay=playing===v.n;
@@ -2218,7 +2219,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
 
 export default function App() {
   const [tn,setTn]=useState(()=>ld("qtheme2","light")); // qtheme2 = new key with new themes
-  React.useEffect(()=>{const mq=window.matchMedia('(prefers-color-scheme: dark)');const fn=()=>{if(!localStorage.getItem('qtheme2'))setTn(mq.matches?'dark':'light');};fn();mq.addEventListener('change',fn);return()=>mq.removeEventListener('change',fn);},[]);
+  React.useEffect(()=>{const mq=window.matchMedia("(prefers-color-scheme: dark)");const apply=()=>{if(!localStorage.getItem("qtheme2")){setTn(mq.matches?"dark":"light");}};apply();mq.addEventListener("change",apply);return()=>mq.removeEventListener("change",apply);},[]);
   const t=THEMES[tn]||THEMES.dark;
   const tjc=(tn==="light")?TJC_LIGHT:TJC_DARK; // dark for all dark-bg themes
   const [fontId,setFontId]=useState(()=>ld("qfont","amiri-quran"));
@@ -5056,8 +5057,24 @@ return (
                   })}
                 </div>
               </div>
-
-             <div className="card"><div className="ch"><span className="ct">Progression par Juz</span></div><div style={{padding:"10px 14px"}}><div style={{display:"flex",alignItems:"flex-end",gap:3,height:56,overflowX:"auto"}}>{Array.from({length:30},function(_,k){var jn=k+1;var done=Object.entries(mem||{}).reduce(function(s,e){var sn=Number(e[0]);var sr=SURAHS&&SURAHS.find(function(x){return x.n===sn;});if(sr&&sr.juz===jn)s+=Object.keys(e[1]||{}).length;return s;},0);var pct=Math.min(100,Math.round(done/208*100));return(<div key={jn} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2,flex:1,minWidth:8}}><div style={{width:"100%",height:Math.max(2,Math.round(pct/100*48))+"px",borderRadius:"3px 3px 0 0",background:pct>0?t.acc:t.b1,transition:"height .3s"}}/><span style={{fontSize:".4rem",color:t.tx3}}>{jn}</span></div>);})}</div></div></div>            </div>
+            </div>
+             {/* Graphe par Juz */}
+             <div className="card">
+               <div className="ch"><span className="ct">Progression par Juz</span></div>
+               <div style={{padding:"10px 14px"}}>
+                 <div style={{display:"flex",alignItems:"flex-end",gap:3,height:56,overflowX:"auto"}}>
+                   {Array.from({length:30},function(_,k){
+                     var jn=k+1;
+                     var done=Object.entries(mem||{}).reduce(function(s,e){var sn=Number(e[0]);var sr=SURAHS&&SURAHS.find(function(x){return x.n===sn;});if(sr&&sr.juz===jn)s+=Object.keys(e[1]||{}).length;return s;},0);
+                     var pct=Math.min(100,Math.round(done/208*100));
+                     return(<div key={jn} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2,flex:1,minWidth:8}}>
+                       <div style={{width:"100%",height:Math.max(2,Math.round(pct/100*48))+"px",borderRadius:"3px 3px 0 0",background:pct>0?t.acc:t.b1,transition:"height .3s"}}/>
+                       <span style={{fontSize:".4rem",color:t.tx3}}>{jn}</span>
+                     </div>);
+                   })}
+                 </div>
+               </div>
+             </div>
 
           </div>
         )}
