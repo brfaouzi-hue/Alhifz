@@ -1348,6 +1348,22 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
       </div>
     </div>
   );
+class AppErrorBoundary extends React.Component {
+  constructor(props){super(props);this.state={hasError:false,error:null};}
+  static getDerivedStateFromError(e){return{hasError:true,error:e};}
+  componentDidCatch(e,info){console.error("AlHifz crash:",e,info);}
+  render(){
+    if(this.state.hasError){
+      return React.createElement("div",{style:{padding:20,textAlign:"center",fontFamily:"sans-serif"}},
+        React.createElement("div",{style:{fontSize:"2rem",marginBottom:12}},"⚠️"),
+        React.createElement("div",{style:{fontWeight:700,marginBottom:8}},"Erreur de chargement"),
+        React.createElement("div",{style:{fontSize:".8rem",color:"#666",marginBottom:16}},this.state.error?.message||"Erreur inconnue"),
+        React.createElement("button",{onClick:()=>window.location.reload(),style:{padding:"8px 20px",background:"#2d7a4f",color:"#fff",border:"none",borderRadius:8,cursor:"pointer"}},"Recharger l'app")
+      );
+    }
+    return this.props.children;
+  }
+}
 }
 
 function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx,continuousMode:initChain,setContinuousMode,speechListening,speechVerseTarget,speechCountdown,speechScore,speechResult,showTj,tjc,mem,startListening,stopListening,setSpeechScore,setSpeechResult,countdownRef,setSpeechCountdown,doPlay,onClose}){
@@ -2119,7 +2135,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize,
   };
 
   return (
-    <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0,background:t.bg,borderRadius:6,overflow:"hidden"}} onClick={()=>setSelVerse(null)}>
+    <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0,background:"#ffffff",backgroundImage:'url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2760%27%20height%3D%2760%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%2523c8a87a%27%20stroke-width%3D%270.4%27%20opacity%3D%270.18%27%3E%3Cpath%20d%3D%27M30%200%20L60%2030%20L30%2060%20L0%2030%20Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2720%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2712%27/%3E%3Cpath%20d%3D%27M10%2010%20Q30%200%2050%2010%20Q60%2030%2050%2050%20Q30%2060%2010%2050%20Q0%2030%2010%2010Z%27/%3E%3Cpath%20d%3D%27M30%208%20L52%2030%20L30%2052%20L8%2030Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%276%27/%3E%3Cline%20x1%3D%2730%27%20y1%3D%270%27%20x2%3D%2730%27%20y2%3D%2760%27/%3E%3Cline%20x1%3D%270%27%20y1%3D%2730%27%20x2%3D%2760%27%20y2%3D%2730%27/%3E%3C/g%3E%3C/svg%3E")',backgroundSize:"60px 60px",borderRadius:6,overflow:"hidden"}} onClick={()=>setSelVerse(null)}>
       {/* Navigation */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"5px 10px",borderBottom:"1px solid "+t.b1,flexShrink:0,gap:6}}>
         <button onClick={e=>{e.stopPropagation();setCurPage(p=>Math.max(0,p-1));}} disabled={curPage===0}
@@ -2674,11 +2690,11 @@ const handleReset=async()=>{
 
   const [toastMsg,setToastMsg]=useState(null);
 
-  React.useEffect(()=>{try{if('Notification'in window){if(Notification.permission==='default')Notification.requestPermission();if(Notification.permission==='granted'){const k=new Date().toISOString().split('T')[0];if(!(hist[k]||0)){const ms=new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate(),20,0,0)-new Date();if(ms>0&&ms<86400000)setTimeout(()=>new Notification('Al-Hifz',{body:'Pense à mémoriser quelques versets ce soir !',icon:'/icons/icon-192.png'}),ms);}}}}catch(e){}},[ hist]);
+  React.useEffect(()=>{try{if('Notification'in window){if((typeof Notification!=="undefined"?Notification.permission:"denied")==='default')Notification.requestPermission();if((typeof Notification!=="undefined"?Notification.permission:"denied")==='granted'){const k=new Date().toISOString().split('T')[0];if(!(hist[k]||0)){const ms=new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate(),20,0,0)-new Date();if(ms>0&&ms<86400000)setTimeout(()=>typeof Notification!=="undefined"&&new Notification('Al-Hifz',{body:'Pense à mémoriser quelques versets ce soir !',icon:'/icons/icon-192.png'}),ms);}}}}catch(e){}},[ hist]);
   // Notifications push quotidiennes
   React.useEffect(()=>{
     if(!("Notification" in window)) return;
-    if(Notification.permission==="default"){
+    if((typeof Notification!=="undefined"?Notification.permission:"denied")==="default"){
       setTimeout(()=>{
         Notification.requestPermission().then(p=>{
           if(p==="granted") setToastMsg("🔔 Rappels activés");
@@ -2689,13 +2705,13 @@ const handleReset=async()=>{
     const checkReminder=()=>{
       const last=localStorage.getItem("lastNotif");
       const today=new Date().toISOString().split("T")[0];
-      if(last!==today && Notification.permission==="granted"){
+      if(last!==today && (typeof Notification!=="undefined"?Notification.permission:"denied")==="granted"){
         const h=new Date().getHours();
         if(h>=7&&h<=21){
           const hist=JSON.parse(localStorage.getItem("hifz_hist")||"{}");
           const todayKey=new Date().toISOString().split("T")[0];
           if(!hist[todayKey]){
-            new Notification("Al-Hifz ✨",{body:"Tu n'as pas encore mémorisé aujourd'hui. 5 minutes suffisent !",icon:"/icon-192.png"});
+            typeof Notification!=="undefined"&&new Notification("Al-Hifz ✨",{body:"Tu n'as pas encore mémorisé aujourd'hui. 5 minutes suffisent !",icon:"/icon-192.png"});
             localStorage.setItem("lastNotif",today);
           }
         }
@@ -3343,12 +3359,12 @@ const handleReset=async()=>{
     const perm=await Notification.requestPermission();
     if(perm==="granted"){
       setNotifEnabled(true);sv("qnotif",true);
-      new Notification("Al-Hifz 📖",{body:"Notifications activées ! Tu seras rappelé chaque jour.",icon:"/icon-192.png"});
+      typeof Notification!=="undefined"&&new Notification("Al-Hifz 📖",{body:"Notifications activées ! Tu seras rappelé chaque jour.",icon:"/icon-192.png"});
     }
   };
   const sendTestNotif=()=>{
-    if(Notification.permission==="granted"){
-      new Notification("Al-Hifz 📖",{body:`🔥 Al-Hifz — Continue ta mémorisation aujourd'hui !`,icon:"/icon-192.png"});
+    if((typeof Notification!=="undefined"?Notification.permission:"denied")==="granted"){
+      typeof Notification!=="undefined"&&new Notification("Al-Hifz 📖",{body:`🔥 Al-Hifz — Continue ta mémorisation aujourd'hui !`,icon:"/icon-192.png"});
     }
   };
 
