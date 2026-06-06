@@ -1868,7 +1868,7 @@ body>*{position:relative;z-index:1;}
 .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 10% 50%,${acc}08 0%,transparent 60%),radial-gradient(ellipse at 90% 50%,${acc}08 0%,transparent 60%);pointer-events:none;}
 .hero-i{max-width:1200px;margin:0 auto;position:relative;}
 /* ── Bottom nav ── */
-.bnav{position:fixed;bottom:0;left:0;right:0;z-index:60;background:${t.navBg}ee;border-top:1px solid ${t.b1};display:flex;align-items:stretch;height:calc(62px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);backdrop-filter:blur(16px);}
+.bnav{position:fixed;bottom:0;left:0;right:0;-webkit-transform:translateZ(0);transform:translateZ(0);will-change:transform;z-index:60;background:${t.navBg}ee;border-top:1px solid ${t.b1};display:flex;align-items:stretch;height:calc(62px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);backdrop-filter:blur(16px);}
 .bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:transparent;color:${t.tx3};font-size:.58rem;font-weight:500;cursor:pointer;transition:all .25s;padding:6px 2px;position:relative;}
 .bn:hover{color:${t.tx2};transform:translateY(-2px);}
 .bn.on{color:${acc};}
@@ -2119,7 +2119,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
   };
 
   return (
-    <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0}} onClick={()=>setSelVerse(null)}>
+    <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0,background:tn==="mushaf"?"#f7f3e9":tn==="light"?"#faf8f3":undefined,borderRadius:8}} onClick={()=>setSelVerse(null)}>
       {/* Navigation */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"5px 10px",borderBottom:"1px solid "+t.b1,flexShrink:0,gap:6}}>
         <button onClick={e=>{e.stopPropagation();setCurPage(p=>Math.max(0,p-1));}} disabled={curPage===0}
@@ -2132,7 +2132,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
         <button onClick={e=>{e.stopPropagation();setCurPage(p=>Math.min(total-1,p+1));}} disabled={curPage>=total-1}
           style={{padding:"4px 12px",borderRadius:20,border:"1px solid "+(curPage<total-1?t.acc:t.b1),background:curPage<total-1?t.acc+"15":"transparent",color:curPage<total-1?t.acc:t.tx3,cursor:curPage<total-1?"pointer":"default",fontSize:".7rem",fontWeight:700,flexShrink:0}}>
           Suiv. →
-        </button>
+        </button><button onClick={e=>{e.stopPropagation();setRecitModal&&setRecitModal(true);}} style={{padding:"4px 10px",borderRadius:20,border:"1px solid "+t.acc,background:t.acc+"15",color:t.acc,fontSize:".65rem",cursor:"pointer",flexShrink:0}}>🎤</button>
         {setPage&&<button onClick={e=>{e.stopPropagation();setPage("reader");}}
           style={{padding:"4px 10px",borderRadius:20,border:"1px solid "+t.acc,background:t.acc+"15",color:t.acc,cursor:"pointer",fontSize:".75rem",fontWeight:700,flexShrink:0}}>⛶</button>}
       </div>
@@ -2218,6 +2218,7 @@ function QuranPageView({verses, selS, t, tjc, showTj, showTr, arabicSize,
 
 export default function App() {
   const [tn,setTn]=useState(()=>ld("qtheme2","light")); // qtheme2 = new key with new themes
+  React.useEffect(()=>{const mq=window.matchMedia('(prefers-color-scheme: dark)');const fn=()=>{if(!localStorage.getItem('qtheme2'))setTn(mq.matches?'dark':'light');};fn();mq.addEventListener('change',fn);return()=>mq.removeEventListener('change',fn);},[]);
   const t=THEMES[tn]||THEMES.dark;
   const tjc=(tn==="light")?TJC_LIGHT:TJC_DARK; // dark for all dark-bg themes
   const [fontId,setFontId]=useState(()=>ld("qfont","amiri-quran"));
@@ -5055,7 +5056,8 @@ return (
                   })}
                 </div>
               </div>
-            </div>
+
+             <div className="card"><div className="ch"><span className="ct">Progression par Juz</span></div><div style={{padding:"10px 14px"}}><div style={{display:"flex",alignItems:"flex-end",gap:3,height:56,overflowX:"auto"}}>{Array.from({length:30},function(_,k){var jn=k+1;var done=Object.entries(mem||{}).reduce(function(s,e){var sn=Number(e[0]);var sr=SURAHS&&SURAHS.find(function(x){return x.n===sn;});if(sr&&sr.juz===jn)s+=Object.keys(e[1]||{}).length;return s;},0);var pct=Math.min(100,Math.round(done/208*100));return(<div key={jn} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2,flex:1,minWidth:8}}><div style={{width:"100%",height:Math.max(2,Math.round(pct/100*48))+"px",borderRadius:"3px 3px 0 0",background:pct>0?t.acc:t.b1,transition:"height .3s"}}/><span style={{fontSize:".4rem",color:t.tx3}}>{jn}</span></div>);})}</div></div></div>            </div>
 
           </div>
         )}
@@ -5923,7 +5925,7 @@ return (
 
         {/* SETTINGS */}
         {page==="settings"&&(
-          <div className="settings-wrap" style={{paddingBottom:"calc(120px + env(safe-area-inset-bottom))",WebkitOverflowScrolling:"touch",overscrollBehavior:"none"}}>
+          <div className="settings-wrap" style={{paddingBottom:"calc(80px + env(safe-area-inset-bottom))",WebkitOverflowScrolling:"touch",overscrollBehavior:"none"}}>
 
             {/* Compte */}
             <div className="settings-section">
@@ -6560,7 +6562,7 @@ return (
           )}
         </div>
       )}
-      <div className="bnav" style={{position:"fixed",bottom:0,left:0,right:0,zIndex:100,display:page==="reader"?"none":"flex"}}>
+      <div className="bnav" style={{position:"fixed",bottom:0,left:0,right:0,zIndex:100,transform:"translateZ(0)",WebkitTransform:"translateZ(0)",willChange:"transform",display:page==="reader"?"none":"flex"}}>
         {[
           {id:"home",icon:<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,label:"Accueil"},
           {id:"quran",icon:<Icons.Book size={19}/>,label:"Coran"},
