@@ -276,12 +276,6 @@ const Q = {
   {n:5,ar:"ٱلَّذِى يُوَسْوِسُ فِى صُدُورِ ٱلنَّاسِ",fr:"qui souffle le mal dans les poitrines des hommes,",tf:"Shaytan suggère doucement depuis l'intérieur."},
   {n:6,ar:"مِنَ ٱلْجِنَّةِ وَٱلنَّاسِ",fr:"qu'il soit parmi les djinns ou parmi les hommes.",tf:"Le tentateur peut être djinn ou humain."},
 ],
-  mushaf:{bg:"#faf8f3",s1:"#f5f1e8",s2:"#ede8db",s3:"#e5dece",b1:"#c8b98a",b2:"#b8a878",
-    acc:"#8b6914",acc2:"#a07c20",acc3:"#b89030",gr:"#2e7d32",grD:"rgba(139,105,20,.12)",
-    tx:"#1c1208",tx2:"#3d2b1f",tx3:"#8b7355",rd:"#c0392b",bl:"#1565c0",pu:"#6a1b9a",
-    navBg:"#f5f1e8",cardBg:"#faf8f3",inputBg:"#ede8db",
-    hero:"linear-gradient(160deg,#f5f1e8,#ede8db)",
-    arabesque:true},
 };
 
 // Constants
@@ -448,6 +442,13 @@ const THEMES={
     tx:"#e8fff2",tx2:"#86efac",tx3:"#4a7a5a",rd:"#f87171",bl:"#60a5fa",pu:"#c084fc",
     navBg:"#050f08",cardBg:"#081510",inputBg:"#0d1f15",
     hero:"linear-gradient(160deg,#081510,#122a1c)"},
+  // Mushaf — ivoire et encre, fond de page de Coran
+  mushaf:{bg:"#faf8f3",s1:"#f5f1e8",s2:"#ede8db",s3:"#e5dece",b1:"#c8b98a",b2:"#b8a878",
+    acc:"#8b6914",acc2:"#a07c20",acc3:"#b89030",gr:"#2e7d32",grD:"rgba(139,105,20,.12)",
+    tx:"#1c1208",tx2:"#3d2b1f",tx3:"#8b7355",rd:"#c0392b",bl:"#1565c0",pu:"#6a1b9a",
+    navBg:"#f5f1e8",cardBg:"#faf8f3",inputBg:"#ede8db",
+    hero:"linear-gradient(160deg,#f5f1e8,#ede8db)",
+    arabesque:true},
 };
 
 // Métadonnées des thèmes pour l'UI de sélection
@@ -2156,7 +2157,8 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize,
           style={{padding:"4px 12px",borderRadius:20,border:"1px solid "+(curPage<total-1?t.acc:t.b1),background:curPage<total-1?t.acc+"15":"transparent",color:curPage<total-1?t.acc:t.tx3,cursor:curPage<total-1?"pointer":"default",fontSize:".7rem",fontWeight:700,flexShrink:0}}>
           Suiv. →
         </button>
-                {setPage&&<button onClick={e=>{e.stopPropagation();setPage("reader");}}
+        <button onClick={e=>{e.stopPropagation();setRecitModal&&setRecitModal(true);}} style={{padding:"4px 10px",borderRadius:20,border:"1px solid "+t.acc,background:t.acc+"15",color:t.acc,fontSize:".65rem",cursor:"pointer",flexShrink:0}}>🎤</button>
+        {setPage&&<button onClick={e=>{e.stopPropagation();setPage("reader");}}
           style={{padding:"4px 10px",borderRadius:20,border:"1px solid "+t.acc,background:t.acc+"15",color:t.acc,cursor:"pointer",fontSize:".75rem",fontWeight:700,flexShrink:0}}>⛶</button>}
       </div>
 
@@ -4807,10 +4809,14 @@ return (
                 onClick={()=>{if(playing!==null){audioRef.current?.pause();setPlaying(null);}else doPlay(verses[0]?.n||1);}}>
                 {playing!==null?"⏸":"▶"}
               </button>
-              <button
-                onClick={()=>{setContinuousMode(true);setContinuousIdx(0);setRecitModal(true);}}
+              <button 
+                onClick={()=>{
+                  setContinuousMode(true);
+                  setContinuousIdx(0);
+                  setRecitModal(true);
+                }}
                 style={{width:34,height:34,borderRadius:"50%",border:"1px solid "+t.acc,background:t.acc+"15",color:t.acc,cursor:"pointer",fontSize:"1rem",display:"flex",alignItems:"center",justifyContent:"center"}}
-                title="Réciter"
+                title="Réciter la page"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V6zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-2.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
               </button>
@@ -6597,14 +6603,25 @@ return (
             </div>
           ):(
             <button onClick={()=>setPlayerOpen(true)}
-              style={{width:44,height:44,borderRadius:"50%",border:"none",
+              style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+                width:54,height:54,borderRadius:"50%",border:"none",
                 background:playing!==null?t.acc:t.s1,
-                boxShadow:"0 3px 14px rgba(0,0,0,.2)",
-                outline:"1px solid "+(playing!==null?t.acc:t.b1),
-                color:playing!==null?"#fff":t.acc,
-                fontSize:"1.1rem",cursor:"pointer",
-                display:"flex",alignItems:"center",justifyContent:"center"}}>
-              {playing!==null?"\u25B6":"\u25B6"}
+                boxShadow:"0 3px 14px rgba(0,0,0,.25)",
+                outline:"2px solid "+(playing!==null?t.acc:t.b1),
+                cursor:"pointer",gap:1,padding:0}}>
+              <span style={{fontFamily:"Georgia,serif",fontSize:playing!==null?".65rem":".7rem",fontWeight:700,
+                color:playing!==null?"#fff":t.acc,lineHeight:1,letterSpacing:"-.3px"}}>
+                Al-Hifz
+              </span>
+              <span style={{fontFamily:"Amiri,serif",fontSize:playing!==null?".55rem":".58rem",
+                color:playing!==null?"rgba(255,255,255,.8)":t.acc,lineHeight:1,
+                direction:"rtl"}}>
+                {playing!==null?"▶ القرآن":"القرآن"}
+              </span>
+              <span style={{fontSize:".48rem",color:playing!==null?"rgba(255,255,255,.7)":t.tx3,
+                textTransform:"uppercase",letterSpacing:".5px",marginTop:1}}>
+                {playing!==null?"En cours":"Réciter"}
+              </span>
             </button>
           )}
         </div>
