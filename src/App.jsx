@@ -1822,7 +1822,7 @@ const acc3=ramadan?"#f5e0a0":t.acc3;
 return `
 @import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Lateef:wght@400&family=Noto+Naskh+Arabic:wght@400;600&family=Noto+Nastaliq+Urdu:wght@400;700&family=Reem+Kufi:wght@400;700&family=Cairo:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-*{box-sizing:border-box;}html{overflow-x:hidden;max-width:100vw;overscroll-behavior:none;}body{overflow-x:hidden;overscroll-behavior:none;}
+*{box-sizing:border-box;}html{overflow-x:hidden;max-width:100vw;overscroll-behavior:none;}body{overflow-x:clip;overscroll-behavior:none;}
 body{background:${bg};color:${t.tx};font-family:'DM Sans',sans-serif;min-height:100vh;min-height:100dvh;padding-bottom:80px;transition:background .4s,color .4s;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);}
 :root{--sat:env(safe-area-inset-top);--sab:env(safe-area-inset-bottom);--sal:env(safe-area-inset-left);--sar:env(safe-area-inset-right);}
 ${t.arabesque ? (
@@ -1868,7 +1868,7 @@ body>*{position:relative;z-index:1;}
 .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 10% 50%,${acc}08 0%,transparent 60%),radial-gradient(ellipse at 90% 50%,${acc}08 0%,transparent 60%);pointer-events:none;}
 .hero-i{max-width:1200px;margin:0 auto;position:relative;}
 /* ── Bottom nav ── */
-.bnav{position:fixed;bottom:0;left:0;right:0;-webkit-transform:translateZ(0);transform:translateZ(0);will-change:transform;z-index:60;background:${t.navBg}ee;border-top:1px solid ${t.b1};display:flex;align-items:stretch;height:calc(62px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);backdrop-filter:blur(16px);}
+.bnav{position:fixed;bottom:0;bottom:env(safe-area-inset-bottom, 0px);left:0;right:0;isolation:isolate;-webkit-transform:translateZ(0);transform:translateZ(0);will-change:transform;z-index:60;background:${t.navBg}ee;border-top:1px solid ${t.b1};display:flex;align-items:stretch;height:calc(62px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);backdrop-filter:blur(16px);}
 .bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:transparent;color:${t.tx3};font-size:.58rem;font-weight:500;cursor:pointer;transition:all .25s;padding:6px 2px;position:relative;}
 .bn:hover{color:${t.tx2};transform:translateY(-2px);}
 .bn.on{color:${acc};}
@@ -2271,8 +2271,8 @@ const [authError, setAuthError] = useState("");
  const [page,setPage]=useState("home");
   useEffect(()=>{
     // Bloquer le scroll du body sur mushaf pour éviter le saut iOS
-    document.body.style.overflow=page==="mushaf"?"hidden":"";
-    return()=>{document.body.style.overflow="";};
+    // body overflow supprimé - casse position:fixed sur iOS Safari
+    return()=>{};
   },[page]);
   const [pageTransition,setPageTransition]=useState(false);
   const [ltab,setLtab]=useState("list");
@@ -2680,7 +2680,7 @@ const handleReset=async()=>{
     if(!("Notification" in window)) return;
     if(Notification.permission==="default"){
       setTimeout(()=>{
-        Notification.requestPermission().then?.(p=>{
+        Notification.requestPermission().then(p=>{
           if(p==="granted") setToastMsg("🔔 Rappels activés");
         });
       }, 5000);
@@ -6580,7 +6580,7 @@ return (
           )}
         </div>
       )}
-      <div className="bnav" style={{position:"fixed",bottom:0,left:0,right:0,zIndex:100,transform:"translateZ(0)",WebkitTransform:"translateZ(0)",willChange:"transform",display:page==="reader"?"none":"flex"}}>
+      <div className="bnav" style={{position:"fixed",bottom:0,left:0,right:0,zIndex:100,display:page==="reader"?"none":"flex"}}>
         {[
           {id:"home",icon:<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,label:"Accueil"},
           {id:"quran",icon:<Icons.Book size={19}/>,label:"Coran"},
