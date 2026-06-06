@@ -2119,7 +2119,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize,
   };
 
   return (
-    <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0}} onClick={()=>setSelVerse(null)}>
+    <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0,background:t.bg,borderRadius:6,overflow:"hidden"}} onClick={()=>setSelVerse(null)}>
       {/* Navigation */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"5px 10px",borderBottom:"1px solid "+t.b1,flexShrink:0,gap:6}}>
         <button onClick={e=>{e.stopPropagation();setCurPage(p=>Math.max(0,p-1));}} disabled={curPage===0}
@@ -2233,6 +2233,7 @@ const [user, setUser] = useState(null);
 const [authReady, setAuthReady] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
+  React.useEffect(()=>{const cv="v2025-06";if(localStorage.getItem("_ahv")!==cv){localStorage.setItem("_ahv",cv);if(typeof caches!=="undefined"){caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k);});});}}},[]);
   // iOS viewport-fit=cover + PWA setup
   useEffect(()=>{
     // viewport-fit for iPhone notch
@@ -2679,7 +2680,7 @@ const handleReset=async()=>{
     if(!("Notification" in window)) return;
     if(Notification.permission==="default"){
       setTimeout(()=>{
-        Notification.requestPermission().then(p=>{
+        Notification.requestPermission().then?.(p=>{
           if(p==="granted") setToastMsg("🔔 Rappels activés");
         });
       }, 5000);
