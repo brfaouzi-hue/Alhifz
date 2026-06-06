@@ -276,6 +276,12 @@ const Q = {
   {n:5,ar:"ٱلَّذِى يُوَسْوِسُ فِى صُدُورِ ٱلنَّاسِ",fr:"qui souffle le mal dans les poitrines des hommes,",tf:"Shaytan suggère doucement depuis l'intérieur."},
   {n:6,ar:"مِنَ ٱلْجِنَّةِ وَٱلنَّاسِ",fr:"qu'il soit parmi les djinns ou parmi les hommes.",tf:"Le tentateur peut être djinn ou humain."},
 ],
+  mushaf:{bg:"#faf8f3",s1:"#f5f1e8",s2:"#ede8db",s3:"#e5dece",b1:"#c8b98a",b2:"#b8a878",
+    acc:"#8b6914",acc2:"#a07c20",acc3:"#b89030",gr:"#2e7d32",grD:"rgba(139,105,20,.12)",
+    tx:"#1c1208",tx2:"#3d2b1f",tx3:"#8b7355",rd:"#c0392b",bl:"#1565c0",pu:"#6a1b9a",
+    navBg:"#f5f1e8",cardBg:"#faf8f3",inputBg:"#ede8db",
+    hero:"linear-gradient(160deg,#f5f1e8,#ede8db)",
+    arabesque:true},
 };
 
 // Constants
@@ -452,6 +458,7 @@ const THEME_META={
   ottoman:{label:"Ottomane",sub:"İznik — rouge impérial",preview:["#04080f","#c8102e","#2ecc71"]},
   abbasid:{label:"Abbasside",sub:"Bagdad — or sur noir",preview:["#080600","#f0c040","#50c878"]},
   emerald:{label:"Émeraude",sub:"Vert profond — login",preview:["#050f08","#4ade80","#22c55e"]},
+  mushaf:{label:"Mushaf",sub:"Ivoire et encre — Coran",preview:["#faf8f3","#8b6914","#2e7d32"]},
 };
 const TJC_DARK={
   m:"#29B6F6",      // Madd naturel (2h) — bleu clair comme Mushaf
@@ -2149,8 +2156,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize,
           style={{padding:"4px 12px",borderRadius:20,border:"1px solid "+(curPage<total-1?t.acc:t.b1),background:curPage<total-1?t.acc+"15":"transparent",color:curPage<total-1?t.acc:t.tx3,cursor:curPage<total-1?"pointer":"default",fontSize:".7rem",fontWeight:700,flexShrink:0}}>
           Suiv. →
         </button>
-        <button onClick={e=>{e.stopPropagation();setRecitModal&&setRecitModal(true);}} style={{padding:"4px 10px",borderRadius:20,border:"1px solid "+t.acc,background:t.acc+"15",color:t.acc,fontSize:".65rem",cursor:"pointer",flexShrink:0}}>🎤</button>
-        {setPage&&<button onClick={e=>{e.stopPropagation();setPage("reader");}}
+                {setPage&&<button onClick={e=>{e.stopPropagation();setPage("reader");}}
           style={{padding:"4px 10px",borderRadius:20,border:"1px solid "+t.acc,background:t.acc+"15",color:t.acc,cursor:"pointer",fontSize:".75rem",fontWeight:700,flexShrink:0}}>⛶</button>}
       </div>
 
@@ -4800,6 +4806,13 @@ return (
                 style={{width:34,height:34,borderRadius:"50%",border:"1px solid "+(playing!==null?t.acc:t.b1),background:playing!==null?t.acc:"transparent",color:playing!==null?"#fff":t.tx,cursor:"pointer",fontSize:".9rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}
                 onClick={()=>{if(playing!==null){audioRef.current?.pause();setPlaying(null);}else doPlay(verses[0]?.n||1);}}>
                 {playing!==null?"⏸":"▶"}
+              </button>
+              <button
+                onClick={()=>{setContinuousMode(true);setContinuousIdx(0);setRecitModal(true);}}
+                style={{width:34,height:34,borderRadius:"50%",border:"1px solid "+t.acc,background:t.acc+"15",color:t.acc,cursor:"pointer",fontSize:"1rem",display:"flex",alignItems:"center",justifyContent:"center"}}
+                title="Réciter"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V6zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-2.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
               </button>
               <button onClick={()=>setShowReaderSettings(p=>!p)}
                 style={{width:34,height:34,borderRadius:"50%",border:"1px solid "+(showReaderSettings?t.acc:t.b1),background:showReaderSettings?t.acc+"15":"transparent",color:showReaderSettings?t.acc:t.tx,cursor:"pointer",fontSize:".85rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
