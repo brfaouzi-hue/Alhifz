@@ -714,13 +714,11 @@ function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,au
       .catch(()=>setWords(null));
   };
 
-  if(!words)return (
+  return !words ? (
     <bdi style={{direction:"rtl"}} onMouseEnter={loadWords}>
       {ar}
     </bdi>
-  );
-
-  return (
+  ) : (
     <bdi style={{direction:"rtl",lineHeight:2.5}}>
       {words.filter(w=>w.char_type_name==="word").map((w,i)=>(
         <span key={i} style={{position:"relative",display:"inline-block",margin:"0 2px",cursor:"pointer",padding:"2px 4px",borderRadius:4,transition:"background .15s"}}
