@@ -1657,10 +1657,10 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
 
 function TajweedLegend({effectiveTjc}){
   const [show,setShow]=React.useState(true);
-  if(!show) return(
+  return !show ? (
     <button onClick={()=>setShow(true)} style={{padding:"3px 10px",background:"rgba(26,10,0,.8)",border:"none",borderTop:"1px solid rgba(201,168,76,.1)",color:"#7a6a5a",fontSize:".5rem",cursor:"pointer",flexShrink:0,textAlign:"center",width:"100%"}}>● Afficher légende tajweed</button>
-  );
-  return(
+  ) : (
+
     <div style={{padding:"4px 10px",background:"rgba(26,10,0,.92)",borderTop:"1px solid rgba(201,168,76,.15)",display:"flex",gap:6,flexWrap:"wrap",alignItems:"center",flexShrink:0}}>
       {[[effectiveTjc.m,"Madd nat."],[effectiveTjc.mr,"Madd perm."],[effectiveTjc.mo,"Madd wajib"],[effectiveTjc.ml,"Madd lazim"],[effectiveTjc.g,"Ghunna"],[effectiveTjc.q,"Qalqala"],[effectiveTjc.ikh,"Ikhfa"],[effectiveTjc.iql,"Iqlab"]].map(([c,l])=>(
         <div key={l} style={{display:"flex",alignItems:"center",gap:3}}>
