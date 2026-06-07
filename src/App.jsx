@@ -1889,7 +1889,7 @@ body>*{position:relative;z-index:1;}
 .sinp:focus{border-color:${acc};}.sinp::placeholder{color:${t.tx3};}
 .slist{flex:1;overflow-y:auto;}
 /* ── Surah rows — hover ── */
-.srow{padding:8px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:background .15s,border-left-color .15s;border-left:3px solid transparent;position:relative;overflow:hidden;touch-action:pan-y;user-select:none;}
+.srow{padding:5px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:background .15s,border-left-color .15s;border-left:3px solid transparent;position:relative;overflow:hidden;touch-action:pan-y;user-select:none;}
 .srow:hover{background:${t.s2};}
 .srow:hover .srow-hint{opacity:1;}
 .srow.sel{background:${t.s2};border-left-color:${acc};}.srow.done{border-left-color:${t.gr};}
@@ -1899,7 +1899,7 @@ body>*{position:relative;z-index:1;}
 .snum{width:21px;height:21px;border-radius:50%;border:1px solid ${t.b2};display:flex;align-items:center;justify-content:center;font-size:.56rem;color:${t.tx3};flex-shrink:0;cursor:pointer;transition:all .2s;}
 .snum:hover{border-color:${acc};color:${acc};transform:scale(1.15);}
 .snum.done{background:${t.grD};border-color:${t.gr};color:${t.gr};}
-.sname{font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;}
+.sname{font-size:.78rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;}
 .smeta{font-size:.56rem;color:${t.tx3};margin-top:1px;}
 .sar{font-family:'Amiri',serif;font-size:.9rem;color:${acc};}
 .mbar{position:absolute;bottom:0;left:0;right:0;height:3px;background:${t.b2};overflow:hidden;border-radius:0 0 10px 10px;}
