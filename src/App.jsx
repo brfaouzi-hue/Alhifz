@@ -1741,7 +1741,8 @@ function MushafTajweedView({page,fullscreen,edition,nightMode=false}){
         <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:14,background:nightMode?"#0d0d0d":"#f5f0e8",zIndex:1}}>
           <div style={{width:32,height:32,border:"3px solid #c9a84c",borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite"}}/>
           <div style={{fontFamily:"Amiri,serif",fontSize:".9rem",color:"#c9a84c"}}>جاري التحميل…</div>
-        </div>,document.body)}
+        </div>
+      )}
       {error&&(
         <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,padding:20}}>
           <div style={{fontSize:"2rem"}}>⚠️</div>
@@ -2894,12 +2895,7 @@ const handleReset=async()=>{
     setSelS(s);setPlaying(null); if(!versePages[s.n]){fetch(`https://api.qurancdn.com/api/qdc/verses/by_chapter/${s.n}?per_page=300&fields=page_number`).then(r=>r.json()).then(d=>{const m={};(d.verses||[]).forEach(v=>{m[v.verse_number]=v.page_number;});setVersePages(p=>{const nv={...p,[s.n]:m};try{localStorage.setItem("vp",JSON.stringify(nv));}catch{}return nv;});}).catch(()=>{});}loadAudioSegments(s.n,rec?.qurancdn||7).catch(()=>{});
     setMushafPage(SURAH_PAGE[s.n]||1);
     if(audioRef.current){audioRef.current.pause();audioRef.current.src="";}
-    if(window.innerWidth<860){
-      setTimeout(()=>{
-        const panel=document.getElementById("verse-panel");
-        if(panel)panel.scrollIntoView({behavior:"smooth",block:"start"});
-      },80);
-    }
+    // scroll supprimé — causait le saut sur iOS
   };
   const handleTouchStart=useCallback(e=>{touchStartX.current=e.touches[0].clientX;touchStartY.current=e.touches[0].clientY;},[]);
   const handleTouchEnd=useCallback(e=>{
@@ -6569,7 +6565,7 @@ return (
 
 
       {/* Mini player flottant */}
-      {selS&&page==="quran"&&ReactDOM.createPortal(<div style={{position:"fixed",bottom:"calc(env(safe-area-inset-bottom,0px) + 68px)",right:16,zIndex:95,width:44,height:44,touchAction:"none"}}>
+      {selS&&page==="quran"&&(<div style={{position:"fixed",bottom:"calc(env(safe-area-inset-bottom,0px) + 68px)",right:16,zIndex:95,width:44,height:44,touchAction:"none"}}>
           {playerOpen?(
             <div style={{position:"absolute",bottom:54,right:0,background:t.s1,borderRadius:20,boxShadow:"0 4px 24px rgba(0,0,0,.2)",border:"1px solid "+t.b1,padding:"12px 14px",width:230,display:"flex",flexDirection:"column",gap:8}}>
               {/* Header avec fermeture */}
