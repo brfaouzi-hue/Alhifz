@@ -1741,8 +1741,7 @@ function MushafTajweedView({page,fullscreen,edition,nightMode=false}){
         <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:14,background:nightMode?"#0d0d0d":"#f5f0e8",zIndex:1}}>
           <div style={{width:32,height:32,border:"3px solid #c9a84c",borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite"}}/>
           <div style={{fontFamily:"Amiri,serif",fontSize:".9rem",color:"#c9a84c"}}>جاري التحميل…</div>
-        </div>
-      )}
+        </div>,document.body)}
       {error&&(
         <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,padding:20}}>
           <div style={{fontSize:"2rem"}}>⚠️</div>
@@ -2123,13 +2122,6 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize,
                         onLongPress, setPage, wbwVerseRef, setWbwOpen, partialPlayRef, showTf, tafsirData, loadTafsir, doPlayPartial, setVerseCtxMenu, versePages}) {
   const _lpTimer=React.useRef(null);
   const [curPage, setCurPage] = React.useState(0);
-  const [pageReciteMode, setPageReciteMode] = React.useState(false);
-  const [pageMaskedMode, setPageMaskedMode] = React.useState(false);
-  const [pageSpoken, setPageSpoken] = React.useState([]); // [{vn,wi}] mots corrects
-  const [pageErrors, setPageErrors] = React.useState([]); // [{vn,wi}] mots erronés
-  const [pageCurWord, setPageCurWord] = React.useState({vn:0,wi:0}); // mot courant
-  const pageRecogRef = React.useRef(null);
-  const pageWordsRef = React.useRef([]); // tous les mots [{vn,wi,word}]
   const [selVerse, setSelVerse] = React.useState(null); // verset sélectionné
   const [partialV, setPartialV] = React.useState(null);
 
@@ -2148,7 +2140,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize,
 
   React.useEffect(()=>{setCurPage(0);setSelVerse(null);},[selS?.n]);
 
-  if(!verses||!verses.length||!pages.length) return null;
+  // guard moved below hooks
   const cur = pages[Math.min(curPage,pages.length-1)]||[];
   const total = pages.length;
 
@@ -2163,73 +2155,6 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize,
     }
   };
 
-  // Normalisation arabe pour comparaison
-  const normalizeAr = React.useCallback((s) => {
-    return (s||'').replace(/[ً-ٰٟۖ-ۜ۟-۪ۤۧۨ-ۭ]/g,'')
-      .replace(/آ|أ|إ/g,'ا').replace(/ى/g,'ي')
-      .replace(/ة/g,'ه').trim();
-  }, []);
-
-  // Démarrer/arrêter la récitation de page
-  const startPageRecite = React.useCallback(() => {
-    if(pageReciteMode) {
-      // Arrêter
-      if(pageRecogRef.current) { try{pageRecogRef.current.stop();}catch(e){} pageRecogRef.current=null; }
-      setPageReciteMode(false);
-      setPageSpoken([]); setPageErrors([]); setPageCurWord({vn:0,wi:0});
-      return;
-    }
-    // Construire la liste de tous les mots de la page courante
-    const words = [];
-    cur.forEach(v => {
-      const txt = stripArabicNums(v.ar||'').replace(/<[^>]*>/g,'').trim();
-      txt.split(/\s+/).filter(Boolean).forEach((w,wi) => words.push({vn:v.n,wi,word:w}));
-    });
-    pageWordsRef.current = words;
-    setPageSpoken([]); setPageErrors([]); setPageCurWord(words[0]||{vn:0,wi:0});
-    setPageReciteMode(true);
-
-    // Lancer la reconnaissance vocale
-    const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
-    if(!SR) { alert('Reconnaissance vocale non supportée sur ce navigateur'); return; }
-    const recog = new SR();
-    recog.lang = 'ar-SA';
-    recog.continuous = true;
-    recog.interimResults = true;
-    pageRecogRef.current = recog;
-
-    let wordIdx = 0; // index dans words[]
-
-    recog.onresult = (e) => {
-      for(let i = e.resultIndex; i < e.results.length; i++) {
-        const transcript = e.results[i][0].transcript.trim();
-        const isFinal = e.results[i].isFinal;
-        if(!transcript) continue;
-        // Découper en mots
-        const spoken = transcript.split(/\s+/).filter(Boolean);
-        spoken.forEach(spokenWord => {
-          if(wordIdx >= words.length) return;
-          const expected = words[wordIdx];
-          const normSpoken = normalizeAr(spokenWord);
-          const normExpected = normalizeAr(expected.word);
-          if(normSpoken === normExpected || normExpected.includes(normSpoken) || normSpoken.includes(normExpected)) {
-            // Correct
-            setPageSpoken(prev => [...prev, {vn:expected.vn,wi:expected.wi}]);
-            wordIdx++;
-            if(wordIdx < words.length) setPageCurWord(words[wordIdx]);
-          } else if(isFinal) {
-            // Erreur
-            setPageErrors(prev => [...prev, {vn:expected.vn,wi:expected.wi}]);
-            wordIdx++;
-            if(wordIdx < words.length) setPageCurWord(words[wordIdx]);
-          }
-        });
-      }
-    };
-    recog.onend = () => { if(pageReciteMode) try{recog.start();}catch(e){} };
-    recog.onerror = (e) => { if(e.error!=='aborted' && e.error!=='no-speech') console.warn('SR error:',e.error); };
-    recog.start();
-  }, [pageReciteMode, cur, normalizeAr, stripArabicNums]);
   return (
     <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0,background:"#ffffff",backgroundImage:'url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2760%27%20height%3D%2760%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%2523c8a87a%27%20stroke-width%3D%270.4%27%20opacity%3D%270.18%27%3E%3Cpath%20d%3D%27M30%200%20L60%2030%20L30%2060%20L0%2030%20Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2720%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2712%27/%3E%3Cpath%20d%3D%27M10%2010%20Q30%200%2050%2010%20Q60%2030%2050%2050%20Q30%2060%2010%2050%20Q0%2030%2010%2010Z%27/%3E%3Cpath%20d%3D%27M30%208%20L52%2030%20L30%2052%20L8%2030Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%276%27/%3E%3Cline%20x1%3D%2730%27%20y1%3D%270%27%20x2%3D%2730%27%20y2%3D%2760%27/%3E%3Cline%20x1%3D%270%27%20y1%3D%2730%27%20x2%3D%2760%27%20y2%3D%2730%27/%3E%3C/g%3E%3C/svg%3E")',backgroundSize:"60px 60px",borderRadius:6,overflow:"hidden"}} onClick={()=>setSelVerse(null)}>
       {/* Navigation */}
@@ -6644,8 +6569,7 @@ return (
 
 
       {/* Mini player flottant */}
-      {selS&&page==="quran"&&(
-        <div style={{position:"fixed",bottom:"calc(env(safe-area-inset-bottom,0px) + 68px)",right:16,zIndex:95,width:44,height:44,touchAction:"none"}}>
+      {selS&&page==="quran"&&ReactDOM.createPortal(<div style={{position:"fixed",bottom:"calc(env(safe-area-inset-bottom,0px) + 68px)",right:16,zIndex:95,width:44,height:44,touchAction:"none"}}>
           {playerOpen?(
             <div style={{position:"absolute",bottom:54,right:0,background:t.s1,borderRadius:20,boxShadow:"0 4px 24px rgba(0,0,0,.2)",border:"1px solid "+t.b1,padding:"12px 14px",width:230,display:"flex",flexDirection:"column",gap:8}}>
               {/* Header avec fermeture */}
