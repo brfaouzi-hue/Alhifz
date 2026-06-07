@@ -6536,7 +6536,7 @@ return (
       )}
 
       {/* Scroll to top */}
-      <button onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{position:"fixed",touchAction:"manipulation",bottom:"calc(76px + env(safe-area-inset-bottom))",right:14,zIndex:50,width:38,height:38,borderRadius:"50%",background:t.s2,border:`1px solid ${t.b2}`,color:t.tx2,fontSize:"1rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 8px rgba(0,0,0,.15)",transition:"all .2s",opacity:0.7}} onMouseEnter={e=>{e.currentTarget.style.opacity="1";e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.borderColor=t.acc;e.currentTarget.style.color=t.acc;}} onMouseLeave={e=>{e.currentTarget.style.opacity="0.7";e.currentTarget.style.transform="";e.currentTarget.style.borderColor=t.b2;e.currentTarget.style.color=t.tx2;}}>↑</button>
+      <button onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{position:"fixed",touchAction:"manipulation",bottom:"calc(76px + env(safe-area-inset-bottom))",left:14,zIndex:50,width:38,height:38,borderRadius:"50%",background:t.s2,border:`1px solid ${t.b2}`,color:t.tx2,fontSize:"1rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 8px rgba(0,0,0,.15)",transition:"all .2s",opacity:0.7}} onMouseEnter={e=>{e.currentTarget.style.opacity="1";e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.borderColor=t.acc;e.currentTarget.style.color=t.acc;}} onMouseLeave={e=>{e.currentTarget.style.opacity="0.7";e.currentTarget.style.transform="";e.currentTarget.style.borderColor=t.b2;e.currentTarget.style.color=t.tx2;}}>↑</button>
 
       {/* Bottom nav */}
 
@@ -6645,11 +6645,9 @@ return (
 
       {/* Mini player flottant */}
       {selS&&page==="quran"&&(
-        <div style={{position:"fixed",bottom:"calc(env(safe-area-inset-bottom,0px) + 68px)",right:16,zIndex:95,touchAction:"none"}}>
+        <div style={{position:"fixed",bottom:"calc(env(safe-area-inset-bottom,0px) + 68px)",right:16,zIndex:95,width:44,height:44,touchAction:"none"}}>
           {playerOpen?(
-            <div style={{background:t.s1,borderRadius:20,boxShadow:"0 4px 20px rgba(0,0,0,.15)",
-              border:"1px solid "+t.b1,padding:"12px 14px",width:220,
-              display:"flex",flexDirection:"column",gap:8}}>
+            <div style={{position:"absolute",bottom:54,right:0,background:t.s1,borderRadius:20,boxShadow:"0 4px 24px rgba(0,0,0,.2)",border:"1px solid "+t.b1,padding:"12px 14px",width:230,display:"flex",flexDirection:"column",gap:8}}>
               {/* Header avec fermeture */}
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <span style={{fontSize:".65rem",fontWeight:700,color:t.acc}}>{selS.name||"Sourate "+selS.n}</span>
@@ -6721,13 +6719,13 @@ return (
               </div>
             </div>
           ):(
-            <button onClick={e=>{e.preventDefault();e.stopPropagation();setPlayerOpen(true);}}
+            <button onClick={()=>setPlayerOpen(true)}
               style={{width:44,height:44,borderRadius:"50%",border:"none",touchAction:"manipulation",
                 background:playing!==null?t.acc:t.s1,
                 boxShadow:"0 3px 14px rgba(0,0,0,.2)",
                 outline:"1px solid "+(playing!==null?t.acc:t.b1),
                 color:playing!==null?"#fff":t.acc,
-                fontSize:"1.1rem",cursor:"pointer",touchAction:"manipulation",
+                fontSize:"1.1rem",cursor:"pointer",
                 display:"flex",alignItems:"center",justifyContent:"center"}}>
               {playing!==null?"▶":"▶"}
             </button>
