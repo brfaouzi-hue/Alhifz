@@ -6645,7 +6645,7 @@ return (
 
       {/* Mini player flottant */}
       {selS&&page==="quran"&&(
-        <div style={{position:"fixed",bottom:"calc(env(safe-area-inset-bottom, 0px) + 68px)",right:16,zIndex:95,isolation:"isolate"}}>
+        <div style={{position:"fixed",bottom:"calc(env(safe-area-inset-bottom,0px) + 68px)",right:16,zIndex:95,touchAction:"none"}}>
           {playerOpen?(
             <div style={{background:t.s1,borderRadius:20,boxShadow:"0 4px 20px rgba(0,0,0,.15)",
               border:"1px solid "+t.b1,padding:"12px 14px",width:220,
@@ -6721,13 +6721,13 @@ return (
               </div>
             </div>
           ):(
-            <button onClick={()=>setPlayerOpen(true)}
+            <button onClick={e=>{e.preventDefault();e.stopPropagation();setPlayerOpen(true);}}
               style={{width:44,height:44,borderRadius:"50%",border:"none",touchAction:"manipulation",
                 background:playing!==null?t.acc:t.s1,
                 boxShadow:"0 3px 14px rgba(0,0,0,.2)",
                 outline:"1px solid "+(playing!==null?t.acc:t.b1),
                 color:playing!==null?"#fff":t.acc,
-                fontSize:"1.1rem",cursor:"pointer",
+                fontSize:"1.1rem",cursor:"pointer",touchAction:"manipulation",
                 display:"flex",alignItems:"center",justifyContent:"center"}}>
               {playing!==null?"▶":"▶"}
             </button>
