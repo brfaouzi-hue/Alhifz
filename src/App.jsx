@@ -692,13 +692,11 @@ function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,au
       .catch(()=>setWords(null));
   };
 
-  if(!words)return (
+  return !words ? (
     <bdi style={{direction:"rtl"}} onMouseEnter={loadWords}>
       {ar}
     </bdi>
-  );
-
-  return (
+  ) : (
     <bdi style={{direction:"rtl",lineHeight:2.5}}>
       {words.filter(w=>w.char_type_name==="word").map((w,i)=>(
         <span key={i} style={{position:"relative",display:"inline-block",margin:"0 2px",cursor:"pointer",padding:"2px 4px",borderRadius:4,transition:"background .15s"}}
@@ -726,8 +724,7 @@ function WbwModal({sn,vn,t}){
       .catch(()=>{if(!cancelled)setWords([]);});
     return()=>{cancelled=true;};
   },[sn,vn]);
-  if(!words)return <div style={{textAlign:"center",padding:20,color:t.tx3}}>Chargement…</div>;
-  return (
+  return !words ? <div style={{textAlign:"center",padding:20,color:t.tx3}}>Chargement…</div> : (
     <div style={{display:"flex",flexDirection:"column",gap:8}}>
       {words.map((w,i)=>(
         <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",background:"rgba(255,255,255,.04)",borderRadius:10,border:`1px solid ${t.b1}`}}>
