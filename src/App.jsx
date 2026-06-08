@@ -1655,7 +1655,7 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
   );
 }
 
-function TajweedLegend({effectiveTjc}){// v2
+function TajweedLegend({effectiveTjc}){
   const [show,setShow]=React.useState(true);
   return !show ? (
     <button onClick={()=>setShow(true)} style={{padding:"3px 10px",background:"rgba(26,10,0,.8)",border:"none",borderTop:"1px solid rgba(201,168,76,.1)",color:"#7a6a5a",fontSize:".5rem",cursor:"pointer",flexShrink:0,textAlign:"center",width:"100%"}}>● Afficher légende tajweed</button>
@@ -6787,4 +6787,4 @@ return (
       )}
     </>
   );
-}// Dim  7 jui 2026 21:46:06 CEST
+}// build-1780948654
