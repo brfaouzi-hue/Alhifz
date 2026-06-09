@@ -2318,6 +2318,9 @@ const [authError, setAuthError] = useState("");
   const [mushafSurahSearch,setMushafSurahSearch]=useState("");
   const [rec,setRec]=useState(RECITERS[0]);
   const [playing,setPlaying]=useState(null);
+  const playingRef=useRef(null);
+  const playlistRef=useRef([]);
+  const playlistActiveRef=useRef(false);
   const [audioPlaying,setAudioPlaying]=useState(false); // état réactif pour l'UI
   const [audioPct,setAudioPct]=useState(0);
   // Tilawa (تلاوة — lecture guidée)
@@ -3067,16 +3070,18 @@ const handleReset=async()=>{
     if(pre.src!==url){pre.src=url;pre.load();}
   },[playing,playlistActive,playlist,rec]);
 
+  playingRef.current=playing;
+  playlistRef.current=playlist;
+  playlistActiveRef.current=playlistActive;
   // handleEnded unifié — playlist prioritaire, sinon loop
   useEffect(()=>{
     const audio=audioRef.current;
     if(!audio)return;
     const handleEnded=()=>{
-      // Mode playlist
-      if(playlistActive){
-        const curIdx=playlist.findIndex(p=>p.vn===playing);
-        if(curIdx>=0&&curIdx<playlist.length-1){
-          const next=playlist[curIdx+1];
+      if(playlistActiveRef.current){
+        const curIdx=playlistRef.current.findIndex(p=>p.vn===playingRef.current);
+        if(curIdx>=0&&curIdx<playlistRef.current.length-1){
+          const next=playlistRef.current[curIdx+1];
           const pre=preloadRef.current;
           const url=buildUrl(next.sn,next.vn);
           // Swap instantané si déjà préchargé, sinon chargement normal
@@ -3115,7 +3120,7 @@ const handleReset=async()=>{
     audio.addEventListener("ended",handleEnded);
     return()=>audio.removeEventListener("ended",handleEnded);
   // dépendances minimales pour éviter les ré-attachements inutiles
-  },[playlistActive,playlist,playing,loopCount,loopCurrent,loopInfinite,rec]);
+  },[loopCount,loopCurrent,loopInfinite,rec]);
 
   // Chargement versets — TOUJOURS depuis l'API pour avoir le tajweed HTML correct
   // Q[s.n] utilisé uniquement comme fallback traduction hors ligne
