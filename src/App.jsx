@@ -6434,7 +6434,7 @@ return (
                 background:t.acc+"18",color:t.acc,fontSize:".65rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
               🎤 Réciter
             </button>
-            <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,1);}}
+            <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,playing||sv||1);}}
               style={{flexShrink:0,padding:"5px 10px",borderRadius:8,border:"none",
                 background:playlistActive&&playlist[0]?.sn===selS.n?"#e53935":t.acc,
                 color:"#fff",fontSize:".65rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
@@ -6584,7 +6584,7 @@ return (
               </div>
               {/* Boutons action */}
               <div style={{display:"flex",gap:6,marginTop:2}}>
-                <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,1);}}
+                <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,playing||sv||1);}}
                   style={{flex:1,padding:"8px 0",borderRadius:12,border:"none",fontWeight:700,fontSize:".75rem",cursor:"pointer",
                     background:playlistActive&&playlist[0]?.sn===selS.n?"#e53935":t.acc,color:"#fff"}}>
                   {playlistActive&&playlist[0]?.sn===selS.n?"⏸ Stop":"▶ Sourate"}
