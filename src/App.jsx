@@ -3070,7 +3070,7 @@ const handleReset=async()=>{
     if(pre.src!==url){pre.src=url;pre.load();}
   },[playing,playlistActive,playlist,rec]);
 
-  playingRef.current=playing;
+  playingRef.current=playing; // sync
   playlistRef.current=playlist;
   playlistActiveRef.current=playlistActive;
   // handleEnded unifié — playlist prioritaire, sinon loop
