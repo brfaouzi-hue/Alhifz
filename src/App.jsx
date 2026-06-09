@@ -714,11 +714,13 @@ function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,au
       .catch(()=>setWords(null));
   };
 
-  return !words ? (
+  if(!words)return (
     <bdi style={{direction:"rtl"}} onMouseEnter={loadWords}>
       {ar}
     </bdi>
-  ) : (
+  );
+
+  return (
     <bdi style={{direction:"rtl",lineHeight:2.5}}>
       {words.filter(w=>w.char_type_name==="word").map((w,i)=>(
         <span key={i} style={{position:"relative",display:"inline-block",margin:"0 2px",cursor:"pointer",padding:"2px 4px",borderRadius:4,transition:"background .15s"}}
@@ -746,7 +748,8 @@ function WbwModal({sn,vn,t}){
       .catch(()=>{if(!cancelled)setWords([]);});
     return()=>{cancelled=true;};
   },[sn,vn]);
-  return !words ? <div style={{textAlign:"center",padding:20,color:t.tx3}}>Chargement…</div> : (
+  if(!words)return <div style={{textAlign:"center",padding:20,color:t.tx3}}>Chargement…</div>;
+  return (
     <div style={{display:"flex",flexDirection:"column",gap:8}}>
       {words.map((w,i)=>(
         <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",background:"rgba(255,255,255,.04)",borderRadius:10,border:`1px solid ${t.b1}`}}>
@@ -1657,10 +1660,10 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
 
 function TajweedLegend({effectiveTjc}){
   const [show,setShow]=React.useState(true);
-  return !show ? (
+  if(!show) return(
     <button onClick={()=>setShow(true)} style={{padding:"3px 10px",background:"rgba(26,10,0,.8)",border:"none",borderTop:"1px solid rgba(201,168,76,.1)",color:"#7a6a5a",fontSize:".5rem",cursor:"pointer",flexShrink:0,textAlign:"center",width:"100%"}}>● Afficher légende tajweed</button>
-  ) : (
-
+  );
+  return(
     <div style={{padding:"4px 10px",background:"rgba(26,10,0,.92)",borderTop:"1px solid rgba(201,168,76,.15)",display:"flex",gap:6,flexWrap:"wrap",alignItems:"center",flexShrink:0}}>
       {[[effectiveTjc.m,"Madd nat."],[effectiveTjc.mr,"Madd perm."],[effectiveTjc.mo,"Madd wajib"],[effectiveTjc.ml,"Madd lazim"],[effectiveTjc.g,"Ghunna"],[effectiveTjc.q,"Qalqala"],[effectiveTjc.ikh,"Ikhfa"],[effectiveTjc.iql,"Iqlab"]].map(([c,l])=>(
         <div key={l} style={{display:"flex",alignItems:"center",gap:3}}>
@@ -1927,7 +1930,7 @@ body>*{position:relative;z-index:1;}
 .sinp:focus{border-color:${acc};}.sinp::placeholder{color:${t.tx3};}
 .slist{flex:1;overflow-y:auto;}
 /* ── Surah rows — hover ── */
-.srow{padding:5px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:background .15s,border-left-color .15s;border-left:3px solid transparent;position:relative;overflow:hidden;touch-action:pan-y;user-select:none;}
+.srow{padding:8px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:background .15s,border-left-color .15s;border-left:3px solid transparent;position:relative;overflow:hidden;touch-action:pan-y;user-select:none;}
 .srow:hover{background:${t.s2};}
 .srow:hover .srow-hint{opacity:1;}
 .srow.sel{background:${t.s2};border-left-color:${acc};}.srow.done{border-left-color:${t.gr};}
@@ -1937,7 +1940,7 @@ body>*{position:relative;z-index:1;}
 .snum{width:21px;height:21px;border-radius:50%;border:1px solid ${t.b2};display:flex;align-items:center;justify-content:center;font-size:.56rem;color:${t.tx3};flex-shrink:0;cursor:pointer;transition:all .2s;}
 .snum:hover{border-color:${acc};color:${acc};transform:scale(1.15);}
 .snum.done{background:${t.grD};border-color:${t.gr};color:${t.gr};}
-.sname{font-size:.78rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;}
+.sname{font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;}
 .smeta{font-size:.56rem;color:${t.tx3};margin-top:1px;}
 .sar{font-family:'Amiri',serif;font-size:.9rem;color:${acc};}
 .mbar{position:absolute;bottom:0;left:0;right:0;height:3px;background:${t.b2};overflow:hidden;border-radius:0 0 10px 10px;}
@@ -2118,14 +2121,6 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize,
                         mem, hifzMode, hifzLevel, playing,
                         toggleV, toggleFav, isFav, doPlay, sv,
                         onLongPress, setPage, wbwVerseRef, setWbwOpen, partialPlayRef, showTf, tafsirData, loadTafsir, doPlayPartial, setVerseCtxMenu, versePages}) {
-  // ── Récitation in-page ──
-  const [reciteActive, setReciteActive] = React.useState(false);
-  const [maskedMode, setMaskedMode] = React.useState(false);
-  const [reciteWords, setReciteWords] = React.useState([]); // [{vn,wi,word,norm}]
-  const [reciteCurIdx, setReciteCurIdx] = React.useState(0);
-  const [reciteOk, setReciteOk] = React.useState(new Set()); // "vn-wi"
-  const [reciteErr, setReciteErr] = React.useState(new Set()); // "vn-wi"
-  const recogRef = React.useRef(null);
   const _lpTimer=React.useRef(null);
   const [curPage, setCurPage] = React.useState(0);
   const [selVerse, setSelVerse] = React.useState(null); // verset sélectionné
@@ -2160,61 +2155,6 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize,
       setSelVerse(v);
     }
   };
-
-
-  // Normalisation pour comparaison arabe
-  const normAr = (s) => (s||'').replace(/[ً-ٰٟۖ-ۜ۟-۪ۤۧۨ-ۭ]/g,'').replace(/[آأإ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').trim();
-
-  // Toggle récitation in-page
-  const toggleRecite = React.useCallback(() => {
-    if(reciteActive) {
-      if(recogRef.current){try{recogRef.current.stop();}catch(e){} recogRef.current=null;}
-      setReciteActive(false);
-      setReciteOk(new Set()); setReciteErr(new Set()); setReciteCurIdx(0);
-      return;
-    }
-    // Construire la liste des mots de la page courante
-    const words = [];
-    (cur||[]).forEach(v => {
-      const txt = (v.ar||'').replace(/[ۖ-ۭؐ-ًؚ-ٰٟ]/g,'').replace(/<[^>]*>/g,'').trim();
-      txt.split(/\s+/).filter(Boolean).forEach((w,wi) => words.push({vn:v.n,wi,word:w,norm:normAr(w)}));
-    });
-    setReciteWords(words);
-    setReciteCurIdx(0);
-    setReciteOk(new Set()); setReciteErr(new Set());
-    setReciteActive(true);
-    const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
-    if(!SR){alert('Micro non supporté');return;}
-    const r = new SR();
-    r.lang='ar-SA'; r.continuous=true; r.interimResults=true;
-    recogRef.current = r;
-    let idx = 0;
-    r.onresult = (e) => {
-      for(let i=e.resultIndex;i<e.results.length;i++){
-        const words2 = e.results[i][0].transcript.trim().split(/\s+/).filter(Boolean);
-        words2.forEach(spoken => {
-          if(idx>=words.length)return;
-          const expected = words[idx];
-          const ns = normAr(spoken);
-          const ne = expected.norm;
-          const ok = ns===ne || ne.includes(ns) || ns.includes(ne);
-          const key = expected.vn+'-'+expected.wi;
-          if(ok){
-            setReciteOk(prev=>{const s=new Set(prev);s.add(key);return s;});
-            idx++;
-            setReciteCurIdx(idx);
-          } else if(e.results[i].isFinal){
-            setReciteErr(prev=>{const s=new Set(prev);s.add(key);return s;});
-            idx++;
-            setReciteCurIdx(idx);
-          }
-        });
-      }
-    };
-    r.onend=()=>{if(reciteActive)try{r.start();}catch(e){}};
-    r.onerror=(e)=>{if(e.error!=='aborted'&&e.error!=='no-speech')console.warn(e.error);};
-    r.start();
-  }, [reciteActive, cur]);
 
   return (
     <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0,background:"#ffffff",backgroundImage:'url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2760%27%20height%3D%2760%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%2523c8a87a%27%20stroke-width%3D%270.4%27%20opacity%3D%270.18%27%3E%3Cpath%20d%3D%27M30%200%20L60%2030%20L30%2060%20L0%2030%20Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2720%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2712%27/%3E%3Cpath%20d%3D%27M10%2010%20Q30%200%2050%2010%20Q60%2030%2050%2050%20Q30%2060%2010%2050%20Q0%2030%2010%2010Z%27/%3E%3Cpath%20d%3D%27M30%208%20L52%2030%20L30%2052%20L8%2030Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%276%27/%3E%3Cline%20x1%3D%2730%27%20y1%3D%270%27%20x2%3D%2730%27%20y2%3D%2760%27/%3E%3Cline%20x1%3D%270%27%20y1%3D%2730%27%20x2%3D%2760%27%20y2%3D%2730%27/%3E%3C/g%3E%3C/svg%3E")',backgroundSize:"60px 60px",borderRadius:6,overflow:"hidden"}} onClick={()=>setSelVerse(null)}>
@@ -2254,28 +2194,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize,
                     WebkitTapHighlightColor:"transparent",
                     transition:"background .15s",
                   }}>
-                  {reciteActive ? (
-                    <span style={{direction:"rtl",fontFamily:"Amiri Quran,serif",fontSize:(arabicSize||1.6)+"rem",lineHeight:3,display:"inline"}}>
-                      {(v.ar||"").replace(/<[^>]*>/g,"").trim().split(/\s+/).filter(Boolean).map((w,wi)=>{
-                        const key=v.n+"-"+wi;
-                        const isOk=reciteOk.has(key);
-                        const isErr=reciteErr.has(key);
-                        const wIdx=reciteWords.findIndex(x=>x.vn===v.n&&x.wi===wi);
-                        const isCur=reciteCurIdx===wIdx&&wIdx>=0;
-                        const isMasked=maskedMode&&!isOk&&!isErr&&!isCur;
-                        return <span key={wi} style={{
-                          display:"inline",margin:"0 1px",borderRadius:3,
-                          background:isCur?"rgba(251,191,36,.35)":isOk?"rgba(34,197,94,.18)":isErr?"rgba(239,68,68,.18)":"transparent",
-                          color:isMasked?"transparent":isOk?"#16a34a":isErr?"#dc2626":isCur?t.acc:t.tx,
-                          textShadow:isMasked?"0 0 8px "+t.tx:"none",
-                          transition:"color .15s,background .15s",
-                          fontWeight:isCur?700:400,
-                          outline:isCur?"2px solid "+t.acc+"88":"none",
-                          outlineOffset:1,
-                        }}>{w}{" "}</span>;
-                      })}
-                    </span>
-                  ) : hifzMode
+                  {hifzMode
                     ? <HifzVerseText ar={v.ar} level={hifzLevel[v.n]||0} tjc={tjc} showTj={showTj} vmark={v.n}/>
                     : <TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/>
                   }
@@ -6787,4 +6706,4 @@ return (
       )}
     </>
   );
-}// build-1780948654
+}
