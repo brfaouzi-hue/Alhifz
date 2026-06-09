@@ -6222,7 +6222,7 @@ return (
               <div style={{fontSize:".62rem",color:t.tx3}}>Juz {selS.juz} · {selS.v} versets · Mode immersif</div>
             </div>
             <div style={{display:"flex",gap:8}}>
-              <button className="tbtn" onClick={()=>{if(verses.length>0)startPlaylist(selS.n,verses,1);}}>{playlistActive&&playlist[0]?.sn===selS.n?"■ Stop":"▶ Tout"}</button>
+              <button className="tbtn" onClick={()=>{if(verses.length>0)startPlaylist(selS.n,verses,playing||sv||1);}}>{playlistActive&&playlist[0]?.sn===selS.n?"■ Stop":"▶ Tout"}</button>
               <button className="tbtn" onClick={()=>setImmersive(false)}>✕ Fermer</button>
             </div>
           </div>
@@ -6406,7 +6406,7 @@ return (
           </div>
           <div style={{display:"flex",gap:6,alignItems:"center",flexShrink:0}}>
             <button onClick={()=>doPlay(Math.max(1,playing-1))} style={{background:"none",border:`1px solid ${t.b2}`,borderRadius:7,padding:"4px 9px",color:t.tx2,cursor:"pointer",fontSize:".7rem",transition:"border-color .15s"}} onMouseEnter={e=>e.currentTarget.style.borderColor=t.acc} onMouseLeave={e=>e.currentTarget.style.borderColor=t.b2}>◄◄</button>
-            <button onClick={()=>doPlay(playing)} style={{background:t.acc,border:"none",borderRadius:7,padding:"5px 12px",color:"#fff",cursor:"pointer",fontSize:".75rem",fontWeight:700,minWidth:36}}>
+            <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS?.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current){audioRef.current.pause();}}else if(verses.length>0)startPlaylist(selS.n,verses,playing||1);}} style={{background:t.acc,border:"none",borderRadius:7,padding:"5px 12px",color:"#fff",cursor:"pointer",fontSize:".75rem",fontWeight:700,minWidth:36}}>
               {audioPlaying?"⏸":"▶"}
             </button>
             <button onClick={()=>doPlay(Math.min(selS.v,playing+1))} style={{background:"none",border:`1px solid ${t.b2}`,borderRadius:7,padding:"4px 9px",color:t.tx2,cursor:"pointer",fontSize:".7rem",transition:"border-color .15s"}} onMouseEnter={e=>e.currentTarget.style.borderColor=t.acc} onMouseLeave={e=>e.currentTarget.style.borderColor=t.b2}>►►</button>
