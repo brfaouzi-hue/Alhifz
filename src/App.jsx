@@ -1490,7 +1490,7 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
             :<><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>Verset/verset</>
           }
         </button>
-        <button onClick={()=>setMaskedMode(p=>!p)} title={maskedMode?"Afficher":"Masquer"} style={{width:30,height:30,borderRadius:"50%",border:"1px solid "+(maskedMode?acc:t.b2),background:maskedMode?acc+"20":"transparent",color:maskedMode?acc:t.tx2,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">{maskedMode?<><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></>:<><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8"/><circle cx="12" cy="12" r="3"/></>}</svg></button>
+        
         <span style={{fontSize:".62rem",color:t.tx3,fontWeight:600,flexShrink:0}}>{idx+1}{"/"}{verses.length}</span>
         <button onClick={onClose} style={{width:30,height:30,borderRadius:"50%",border:`1px solid ${t.b2}`,background:t.s2,color:t.tx3,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -2119,13 +2119,13 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize,
                         toggleV, toggleFav, isFav, doPlay, sv,
                         onLongPress, setPage, wbwVerseRef, setWbwOpen, partialPlayRef, showTf, tafsirData, loadTafsir, doPlayPartial, setVerseCtxMenu, versePages}) {
   // ── Récitation in-page ──
-  const [reciteActive, setReciteActive] = React.useState(false);
-  const [maskedMode, setMaskedMode] = React.useState(false);
-  const [reciteWords, setReciteWords] = React.useState([]); // [{vn,wi,word,norm}]
-  const [reciteCurIdx, setReciteCurIdx] = React.useState(0);
-  const [reciteOk, setReciteOk] = React.useState(new Set()); // "vn-wi"
-  const [reciteErr, setReciteErr] = React.useState(new Set()); // "vn-wi"
-  const recogRef = React.useRef(null);
+
+
+
+
+
+
+
   const _lpTimer=React.useRef(null);
   const [curPage, setCurPage] = React.useState(0);
   const [selVerse, setSelVerse] = React.useState(null); // verset sélectionné
@@ -2254,29 +2254,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize,
                     WebkitTapHighlightColor:"transparent",
                     transition:"background .15s",
                   }}>
-                  {reciteActive ? (
-                    <span style={{direction:"rtl",fontFamily:"Amiri Quran,serif",fontSize:(arabicSize||1.6)+"rem",lineHeight:3,display:"inline"}}>
-                      {(v.ar||"").replace(/<[^>]*>/g,"").trim().split(/\s+/).filter(Boolean).map((w,wi)=>{
-                        const key=v.n+"-"+wi;
-                        const isOk=reciteOk.has(key);
-                        const isErr=reciteErr.has(key);
-                        const wIdx=reciteWords.findIndex(x=>x.vn===v.n&&x.wi===wi);
-                        const isCur=reciteCurIdx===wIdx&&wIdx>=0;
-                        const isMasked=maskedMode&&!isOk&&!isErr&&!isCur;
-                        return <span key={wi} style={{
-                          display:"inline",margin:"0 1px",borderRadius:3,
-                          background:isCur?"rgba(251,191,36,.35)":isOk?"rgba(34,197,94,.18)":isErr?"rgba(239,68,68,.18)":"transparent",
-                          color:isMasked?"transparent":isOk?"#16a34a":isErr?"#dc2626":isCur?t.acc:t.tx,
-                          textShadow:isMasked?"0 0 8px "+t.tx:"none",
-                          transition:"color .15s,background .15s",
-                          fontWeight:isCur?700:400,
-                          outline:isCur?"2px solid "+t.acc+"88":"none",
-                          outlineOffset:1,
-                        }}>{w}{" "}</span>;
-                      })}
-                    </span>
-                  ) : hifzMode
-                    ? <HifzVerseText ar={v.ar} level={hifzLevel[v.n]||0} tjc={tjc} showTj={showTj} vmark={v.n}/>
+                                      ? <HifzVerseText ar={v.ar} level={hifzLevel[v.n]||0} tjc={tjc} showTj={showTj} vmark={v.n}/>
                     : <TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/>
                   }
                 </span>
