@@ -6779,6 +6779,29 @@ return (
           )}
         </div>
       )}
+      {showMore&&<div onClick={()=>setShowMore(false)} style={{position:"fixed",inset:0,zIndex:99,background:"rgba(0,0,0,.4)"}}/>}
+      {showMore&&(
+        <div style={{position:"fixed",bottom:"calc(62px + env(safe-area-inset-bottom))",left:0,right:0,zIndex:101,background:t.navBg,borderTop:"1px solid "+t.b1,padding:"16px 20px 12px",backdropFilter:"blur(12px)"}}>
+          <div style={{fontSize:".6rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginBottom:12,fontWeight:700}}>Plus</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:10}}>
+            {[
+              {id:"pages",emoji:"📚",label:"Révision",badge:spacedDue.length},
+              {id:"khatma",emoji:"📖",label:"Khatma"},
+              {id:"quiz",emoji:"✔️",label:"Quiz"},
+              {id:"stats",emoji:"📊",label:"Stats"},
+              {id:"settings",emoji:"⚙️",label:"Réglages"},
+              {id:"donation",emoji:"💚",label:"Don"},
+            ].map(item=>(
+              <button key={item.id} onClick={()=>{setShowMore(false);setPage(item.id);}}
+                style={{display:"flex",flexDirection:"column",alignItems:"center",gap:5,padding:"10px 14px",borderRadius:14,border:"1px solid "+t.b1,background:page===item.id?t.acc+"22":t.s1,color:page===item.id?t.acc:t.tx2,cursor:"pointer",minWidth:70,flex:"1 1 auto",position:"relative"}}>
+                <span style={{fontSize:"1.3rem"}}>{item.emoji}</span>
+                <span style={{fontSize:".6rem",fontWeight:600}}>{item.label}</span>
+                {item.badge>0&&<span style={{position:"absolute",top:4,right:4,background:t.rd,color:"#fff",borderRadius:"50%",width:15,height:15,fontSize:".45rem",display:"flex",alignItems:"center",justifyContent:"center"}}>{item.badge}</span>}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="bnav" style={{position:"fixed",bottom:0,left:0,right:0,zIndex:100,display:page==="reader"?"none":"flex"}}>
         {[
           {id:"home",icon:<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,label:"Accueil"},
