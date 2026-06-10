@@ -6806,7 +6806,7 @@ return (
         {[
           {id:"home",icon:<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,label:"Accueil"},
           {id:"quran",icon:<Icons.Book size={19}/>,label:"Coran"},
-          {id:"mushaf",icon:<Icons.BookOpen size={19}/>,label:"Mushaf"},
+          {id:"mushaf",icon:<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,label:"Mushaf"},
           {id:"more",icon:<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>,label:"Autres"},
         ].map(tab=>(
           <button key={tab.id} className={`bn ${(tab.id==="more"?showMore:(page===tab.id))?"on":""}`}
