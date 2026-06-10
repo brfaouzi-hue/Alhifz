@@ -1389,7 +1389,7 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
   // Index interne — ne dépend pas du re-render parent
   const [idx,setIdx]=React.useState(initIdx);
   const [chain,setChain]=React.useState(true); // enchaîné par défaut
-  const [maskedMode,setMaskedMode]=React.useState(false);
+
   const idxRef=React.useRef(idx);
   const chainRef=React.useRef(true);
   const versesRef=React.useRef(verses);
