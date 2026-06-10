@@ -6785,16 +6785,16 @@ return (
           <div style={{fontSize:".6rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginBottom:12,fontWeight:700}}>Plus</div>
           <div style={{display:"flex",flexWrap:"wrap",gap:10}}>
             {[
-              {id:"pages",emoji:"📚",label:"Révision",badge:spacedDue.length},
-              {id:"khatma",emoji:"📖",label:"Khatma"},
-              {id:"quiz",emoji:"✔️",label:"Quiz"},
-              {id:"stats",emoji:"📊",label:"Stats"},
-              {id:"settings",emoji:"⚙️",label:"Réglages"},
-              {id:"donation",emoji:"💚",label:"Don"},
+              {id:"pages",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,label:"Révision",badge:spacedDue.length},
+              {id:"khatma",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,label:"Khatma"},
+              {id:"quiz",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,label:"Quiz"},
+              {id:"stats",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>,label:"Stats"},
+              {id:"settings",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,label:"Réglages"},
+              {id:"donation",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,label:"Don"},
             ].map(item=>(
               <button key={item.id} onClick={()=>{setShowMore(false);setPage(item.id);}}
                 style={{display:"flex",flexDirection:"column",alignItems:"center",gap:5,padding:"10px 14px",borderRadius:14,border:"1px solid "+t.b1,background:page===item.id?t.acc+"22":t.s1,color:page===item.id?t.acc:t.tx2,cursor:"pointer",minWidth:70,flex:"1 1 auto",position:"relative"}}>
-                <span style={{fontSize:"1.3rem"}}>{item.emoji}</span>
+                {item.icon}
                 <span style={{fontSize:".6rem",fontWeight:600}}>{item.label}</span>
                 {item.badge>0&&<span style={{position:"absolute",top:4,right:4,background:t.rd,color:"#fff",borderRadius:"50%",width:15,height:15,fontSize:".45rem",display:"flex",alignItems:"center",justifyContent:"center"}}>{item.badge}</span>}
               </button>
