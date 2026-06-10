@@ -2415,6 +2415,9 @@ const [authError, setAuthError] = useState("");
   const [mushafSurahSearch,setMushafSurahSearch]=useState("");
   const [rec,setRec]=useState(RECITERS[0]);
   const [playing,setPlaying]=useState(null);
+  const playingRef=useRef(null);
+  const playlistRef=useRef([]);
+  const playlistActiveRef=useRef(false);
   const [audioPlaying,setAudioPlaying]=useState(false); // état réactif pour l'UI
   const [audioPct,setAudioPct]=useState(0);
   // Tilawa (تلاوة — lecture guidée)
@@ -2850,6 +2853,7 @@ const handleReset=async()=>{
   },[]);
   const [versePages,setVersePages]=useState(()=>{try{return JSON.parse(localStorage.getItem("vp")||"{}");}catch{return {};}}); // {sn: {vn: pageNum}}
   const [playerOpen,setPlayerOpen]=useState(false);
+  const [showMore,setShowMore]=useState(false);
   const [firstLaunch,setFirstLaunch]=useState(()=>!localStorage.getItem("alhifz_launched"));
   const [verseCtxMenu,setVerseCtxMenu]=useState(null); // {vn,sn,ar,fr}
   const memStreak=useMemo(()=>{let s=0,d=new Date();while(true){const key=d.toISOString().split("T")[0];if(!hist[key])break;s++;d.setDate(d.getDate()-1);}return s;},[hist]);
@@ -3184,16 +3188,21 @@ const handleReset=async()=>{
     if(pre.src!==url){pre.src=url;pre.load();}
   },[playing,playlistActive,playlist,rec]);
 
+  // Synchronisation refs pour handleEnded (évite closure stale)
+  playingRef.current=playing;
+  playlistRef.current=playlist;
+  playlistActiveRef.current=playlistActive;
+
   // handleEnded unifié — playlist prioritaire, sinon loop
   useEffect(()=>{
     const audio=audioRef.current;
     if(!audio)return;
     const handleEnded=()=>{
-      // Mode playlist
-      if(playlistActive){
-        const curIdx=playlist.findIndex(p=>p.vn===playing);
-        if(curIdx>=0&&curIdx<playlist.length-1){
-          const next=playlist[curIdx+1];
+      // Mode playlist (utilise refs pour avoir les valeurs à jour)
+      if(playlistActiveRef.current){
+        const curIdx=playlistRef.current.findIndex(p=>p.vn===playingRef.current);
+        if(curIdx>=0&&curIdx<playlistRef.current.length-1){
+          const next=playlistRef.current[curIdx+1];
           const pre=preloadRef.current;
           const url=buildUrl(next.sn,next.vn);
           // Swap instantané si déjà préchargé, sinon chargement normal
@@ -3232,7 +3241,7 @@ const handleReset=async()=>{
     audio.addEventListener("ended",handleEnded);
     return()=>audio.removeEventListener("ended",handleEnded);
   // dépendances minimales pour éviter les ré-attachements inutiles
-  },[playlistActive,playlist,playing,loopCount,loopCurrent,loopInfinite,rec]);
+  },[loopCount,loopCurrent,loopInfinite,rec]);
 
   // Chargement versets — TOUJOURS depuis l'API pour avoir le tajweed HTML correct
   // Q[s.n] utilisé uniquement comme fallback traduction hors ligne
@@ -6092,7 +6101,44 @@ return (
         )}
 
         {/* SETTINGS */}
-        {page==="settings"&&(
+        {page==="donation"&&(
+        <div style={{padding:"20px 16px",maxWidth:480,margin:"0 auto"}}>
+          <div style={{textAlign:"center",marginBottom:24}}>
+            <div style={{fontSize:"2rem",marginBottom:8}}>💚</div>
+            <h2 style={{fontFamily:"Amiri,serif",fontSize:"1.4rem",color:t.acc,margin:"0 0 8px"}}>
+              Soutenir Al-Hifz
+            </h2>
+            <p style={{fontSize:".78rem",color:t.tx2,lineHeight:1.6,margin:0}}>
+              Al-Hifz est gratuit et sans publicité.<br/>
+              Votre soutien permet de maintenir et améliorer l'application.
+            </p>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:12}}>
+            {[
+              {label:"🤲 Petit soutien",amount:"2€",desc:"Un café"},
+              {label:"📖 Soutien régulier",amount:"5€",desc:"Une session de mémorisation"},
+              {label:"🌟 Grand soutien",amount:"10€",desc:"Une semaine de développement"},
+              {label:"💎 Mécène",amount:"Autre",desc:"Montant libre"},
+            ].map(opt=>(
+              <button key={opt.amount}
+                style={{padding:"14px 18px",borderRadius:14,border:"1px solid "+t.b1,
+                  background:t.s1,cursor:"pointer",display:"flex",alignItems:"center",
+                  justifyContent:"space-between",textAlign:"left"}}>
+                <div>
+                  <div style={{fontSize:".82rem",fontWeight:700,color:t.tx,marginBottom:2}}>{opt.label}</div>
+                  <div style={{fontSize:".68rem",color:t.tx3}}>{opt.desc}</div>
+                </div>
+                <span style={{fontSize:"1rem",fontWeight:700,color:t.acc}}>{opt.amount}</span>
+              </button>
+            ))}
+          </div>
+          <p style={{fontSize:".62rem",color:t.tx3,textAlign:"center",marginTop:20,lineHeight:1.5}}>
+            Bientôt disponible via PayPal · Stripe · Virement<br/>
+            Que Allah vous récompense au centuple 🤲
+          </p>
+        </div>
+      )}
+      {page==="settings"&&(
           <div className="settings-wrap" style={{paddingBottom:"calc(80px + env(safe-area-inset-bottom))",WebkitOverflowScrolling:"touch",overscrollBehavior:"none"}}>
 
             {/* Compte */}
@@ -6344,7 +6390,7 @@ return (
               <div style={{fontSize:".62rem",color:t.tx3}}>Juz {selS.juz} · {selS.v} versets · Mode immersif</div>
             </div>
             <div style={{display:"flex",gap:8}}>
-              <button className="tbtn" onClick={()=>{if(verses.length>0)startPlaylist(selS.n,verses,1);}}>{playlistActive&&playlist[0]?.sn===selS.n?"■ Stop":"▶ Tout"}</button>
+              <button className="tbtn" onClick={()=>{if(verses.length>0)startPlaylist(selS.n,verses,playing||sv||1);}}>{playlistActive&&playlist[0]?.sn===selS.n?"■ Stop":"▶ Tout"}</button>
               <button className="tbtn" onClick={()=>setImmersive(false)}>✕ Fermer</button>
             </div>
           </div>
@@ -6528,7 +6574,7 @@ return (
           </div>
           <div style={{display:"flex",gap:6,alignItems:"center",flexShrink:0}}>
             <button onClick={()=>doPlay(Math.max(1,playing-1))} style={{background:"none",border:`1px solid ${t.b2}`,borderRadius:7,padding:"4px 9px",color:t.tx2,cursor:"pointer",fontSize:".7rem",transition:"border-color .15s"}} onMouseEnter={e=>e.currentTarget.style.borderColor=t.acc} onMouseLeave={e=>e.currentTarget.style.borderColor=t.b2}>◄◄</button>
-            <button onClick={()=>doPlay(playing)} style={{background:t.acc,border:"none",borderRadius:7,padding:"5px 12px",color:"#fff",cursor:"pointer",fontSize:".75rem",fontWeight:700,minWidth:36}}>
+            <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS?.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current){audioRef.current.pause();}}else if(verses.length>0)startPlaylist(selS.n,verses,playing||1);}} style={{background:t.acc,border:"none",borderRadius:7,padding:"5px 12px",color:"#fff",cursor:"pointer",fontSize:".75rem",fontWeight:700,minWidth:36}}>
               {audioPlaying?"⏸":"▶"}
             </button>
             <button onClick={()=>doPlay(Math.min(selS.v,playing+1))} style={{background:"none",border:`1px solid ${t.b2}`,borderRadius:7,padding:"4px 9px",color:t.tx2,cursor:"pointer",fontSize:".7rem",transition:"border-color .15s"}} onMouseEnter={e=>e.currentTarget.style.borderColor=t.acc} onMouseLeave={e=>e.currentTarget.style.borderColor=t.b2}>►►</button>
@@ -6561,7 +6607,7 @@ return (
                 background:t.acc+"18",color:t.acc,fontSize:".65rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="verticalAlign:middle"><path d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V6zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-2.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg> Réciter
             </button>
-            <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,1);}}
+            <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,playing||sv||1);}}
               style={{flexShrink:0,padding:"5px 10px",borderRadius:8,border:"none",
                 background:playlistActive&&playlist[0]?.sn===selS.n?"#e53935":t.acc,
                 color:"#fff",fontSize:".65rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
@@ -6708,7 +6754,7 @@ return (
               </div>
               {/* Boutons action */}
               <div style={{display:"flex",gap:6,marginTop:2}}>
-                <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,1);}}
+                <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,playing||sv||1);}}
                   style={{flex:1,padding:"8px 0",borderRadius:12,border:"none",fontWeight:700,fontSize:".75rem",cursor:"pointer",
                     background:playlistActive&&playlist[0]?.sn===selS.n?"#e53935":t.acc,color:"#fff"}}>
                   {playlistActive&&playlist[0]?.sn===selS.n?"⏸ Stop":"▶ Sourate"}
@@ -6737,18 +6783,13 @@ return (
         {[
           {id:"home",icon:<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,label:"Accueil"},
           {id:"quran",icon:<Icons.Book size={19}/>,label:"Coran"},
-          {id:"mushaf",icon:<Icons.Scroll size={19}/>,label:"Mushaf"},
-          {id:"pages",icon:<Icons.Brain size={19}/>,label:"Révision",badge:spacedDue.length},
-          {id:"khatma",icon:<Icons.Star size={19}/>,label:"Khatma"},
-          {id:"quiz",icon:<Icons.Check size={19}/>,label:"Quiz"},
-          {id:"stats",icon:<Icons.Chart size={19}/>,label:"Stats"},
-          {id:"settings",icon:<Icons.Settings size={19}/>,label:"Réglages"},
+          {id:"mushaf",icon:<Icons.BookOpen size={19}/>,label:"Mushaf"},
+          {id:"more",icon:<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>,label:"Autres"},
         ].map(tab=>(
-          <button key={tab.id} className={`bn ${page===tab.id?"on":""}`} onClick={()=>{if(tab.id===page)return;setPageTransition(true);setTimeout(()=>{setPage(tab.id);setPageTransition(false);},120);}}>
-            <div style={{position:"relative",display:"inline-flex"}}>
-              {tab.icon}
-              {tab.badge>0&&<span style={{position:"absolute",top:-4,right:-6,background:t.rd,color:"#fff",borderRadius:99,fontSize:".42rem",fontWeight:800,minWidth:14,height:14,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 3px",lineHeight:1}}>{tab.badge>99?"99+":tab.badge}</span>}
-            </div>
+          <button key={tab.id} className={`bn ${(tab.id==="more"?showMore:(page===tab.id))?"on":""}`}
+            onClick={()=>{if(tab.id==="more"){setShowMore(p=>!p);}else{setPage(tab.id);setShowMore(false);}}}
+            style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,padding:"6px 0",background:"none",border:"none",cursor:"pointer",color:(tab.id==="more"?showMore:(page===tab.id))?t.acc:t.tx3}}>
+            {tab.icon}
             <span className="bn-lbl">{tab.label}</span>
           </button>
         ))}
