@@ -1547,34 +1547,34 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
               });
             } else {
               // Idle — verset avec tajweed
-              {maskedMode&&chain?(()=>{
-                // Mode page masquée Tarteel: tous les mots de la sourate
-                const allWords=verses.flatMap((v,vi)=>
-                  stripArabicNums(v.ar||"").replace(/<[^>]*>/g,"").split(" ").filter(Boolean).map((w,wi)=>({w,vi,wi,vn:v.n}))
-                );
-                const curVI=verses.findIndex(v=>v.n===curV?.n);
-                let spokenCount=spokenWords.length;
-                let wordsBefore=verses.slice(0,curVI).reduce((s,v)=>s+stripArabicNums(v.ar||"").replace(/<[^>]*>/g,"").split(" ").filter(Boolean).length,0);
-                const totalRevealed=wordsBefore+spokenCount;
-                return(<div style={{direction:"rtl",textAlign:"justify",fontFamily:"Amiri Quran,serif",fontSize:"1.3rem",lineHeight:2.8,wordSpacing:".1em",padding:"0 8px"}}>
-                  {allWords.map(({w,vn},gi)=>{
-                    const revealed=gi<totalRevealed;
-                    const isCur=gi===totalRevealed;
-                    return(<span key={gi} style={{
-                      display:"inline-block",
-                      background:revealed?"transparent":"rgba(255,255,255,0.15)",
-                      color:revealed?(isCur?acc:(isListening?"rgba(255,255,255,.9)":"rgba(255,255,255,.8)")):"transparent",
-                      borderRadius:4,
-                      padding:"0 2px",
-                      margin:"0 1px",
-                      minWidth:"1.5em",
-                      transition:"all .2s",
-                      textShadow:isCur?`0 0 20px ${acc}`:revealed?"none":"none",
-                      fontWeight:isCur?900:400,
-                    }}>{w} </span>);
-                  })}
-                </div>);
-              })():(chain?(<div style={{direction:"rtl",textAlign:"justify",fontFamily:"Amiri Quran,serif",fontSize:"1.3rem",lineHeight:3,padding:"4px",width:"100%",overflowY:"auto",maxHeight:"52vh"}}>{verses.map(function(v){var ic=v.n===curV?.n;return(<span key={v.n} style={{color:ic?acc:"rgba(255,255,255,.85)",fontWeight:ic?700:400,fontSize:ic?"1.15em":"1em",transition:"color .3s",display:"inline"}}>{stripArabicNums(v.ar||"").replace(/<[^>]*>/g,"")}{" "}</span>);})}</div>):(<TajwidSpan text={stripArabicNums(curV?.ar||"")} enabled={showTj} tjc={tjc}/>))}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             }
           })()}
 {/*num removed*/}
@@ -2163,58 +2163,6 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize,
 
 
   // Normalisation pour comparaison arabe
-  const normAr = (s) => (s||'').replace(/[ً-ٰٟۖ-ۜ۟-۪ۤۧۨ-ۭ]/g,'').replace(/[آأإ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').trim();
-
-  // Toggle récitation in-page
-  const toggleRecite = React.useCallback(() => {
-    if(reciteActive) {
-      if(recogRef.current){try{recogRef.current.stop();}catch(e){} recogRef.current=null;}
-      setReciteActive(false);
-      setReciteOk(new Set()); setReciteErr(new Set()); setReciteCurIdx(0);
-      return;
-    }
-    // Construire la liste des mots de la page courante
-    const words = [];
-    (cur||[]).forEach(v => {
-      const txt = (v.ar||'').replace(/[ۖ-ۭؐ-ًؚ-ٰٟ]/g,'').replace(/<[^>]*>/g,'').trim();
-      txt.split(/\s+/).filter(Boolean).forEach((w,wi) => words.push({vn:v.n,wi,word:w,norm:normAr(w)}));
-    });
-    setReciteWords(words);
-    setReciteCurIdx(0);
-    setReciteOk(new Set()); setReciteErr(new Set());
-    setReciteActive(true);
-    const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
-    if(!SR){alert('Micro non supporté');return;}
-    const r = new SR();
-    r.lang='ar-SA'; r.continuous=true; r.interimResults=true;
-    recogRef.current = r;
-    let idx = 0;
-    r.onresult = (e) => {
-      for(let i=e.resultIndex;i<e.results.length;i++){
-        const words2 = e.results[i][0].transcript.trim().split(/\s+/).filter(Boolean);
-        words2.forEach(spoken => {
-          if(idx>=words.length)return;
-          const expected = words[idx];
-          const ns = normAr(spoken);
-          const ne = expected.norm;
-          const ok = ns===ne || ne.includes(ns) || ns.includes(ne);
-          const key = expected.vn+'-'+expected.wi;
-          if(ok){
-            setReciteOk(prev=>{const s=new Set(prev);s.add(key);return s;});
-            idx++;
-            setReciteCurIdx(idx);
-          } else if(e.results[i].isFinal){
-            setReciteErr(prev=>{const s=new Set(prev);s.add(key);return s;});
-            idx++;
-            setReciteCurIdx(idx);
-          }
-        });
-      }
-    };
-    r.onend=()=>{if(reciteActive)try{r.start();}catch(e){}};
-    r.onerror=(e)=>{if(e.error!=='aborted'&&e.error!=='no-speech')console.warn(e.error);};
-    r.start();
-  }, [reciteActive, cur]);
 
   return (
     <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0,background:"#ffffff",backgroundImage:'url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2760%27%20height%3D%2760%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%2523c8a87a%27%20stroke-width%3D%270.4%27%20opacity%3D%270.18%27%3E%3Cpath%20d%3D%27M30%200%20L60%2030%20L30%2060%20L0%2030%20Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2720%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2712%27/%3E%3Cpath%20d%3D%27M10%2010%20Q30%200%2050%2010%20Q60%2030%2050%2050%20Q30%2060%2010%2050%20Q0%2030%2010%2010Z%27/%3E%3Cpath%20d%3D%27M30%208%20L52%2030%20L30%2052%20L8%2030Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%276%27/%3E%3Cline%20x1%3D%2730%27%20y1%3D%270%27%20x2%3D%2730%27%20y2%3D%2760%27/%3E%3Cline%20x1%3D%270%27%20y1%3D%2730%27%20x2%3D%2760%27%20y2%3D%2730%27/%3E%3C/g%3E%3C/svg%3E")',backgroundSize:"60px 60px",borderRadius:6,overflow:"hidden"}} onClick={()=>setSelVerse(null)}>
