@@ -1502,6 +1502,143 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
         <div style={{height:"100%",width:`${progress}%`,background:`linear-gradient(90deg,${acc},${t.acc2||acc})`,transition:"width .5s ease",boxShadow:`0 0 6px ${acc}55`}}/>
       </div>
 
+            {/* Page entière — style Tarteel */}
+      <div style={{flex:1,overflowY:"auto",padding:"16px 12px 8px",WebkitOverflowScrolling:"touch"}}
+        ref={el=>{if(el&&idx!=null){const active=el.querySelector('[data-active="true"]');if(active)active.scrollIntoView({block:"center",behavior:"smooth"});}}}
+      >
+        {verses.map((v,vi)=>{
+          const isCur=vi===idx;
+          const isDone=vi<idx;
+          const isNext=vi===idx+1;
+          const vAr=stripTags(v&&v.ar||"").trim();
+          const vWords=vAr.split(/\\s+/).filter(Boolean);
+          const spokenWords=isCur&&speechResult
+            ?(speechResult).replace(/[\\u064B-\\u065F\\u0670]/g,"").replace(/[\\u0623\\u0625\\u0622\\u0671]/g,"\\u0627").split(/\\s+/).filter(Boolean)
+            :[];
+          return(
+            <div key={v.n} data-active={String(isCur)}
+              style={{
+                marginBottom:10,padding:"10px 12px",borderRadius:14,
+                background:isCur?(tn==="light"?"rgba(46,125,50,.08)":"rgba(46,125,50,.15)")
+                  :isDone?(tn==="light"?"rgba(0,0,0,.03)":"rgba(255,255,255,.03)"):"transparent",
+                border:isCur?"1.5px solid "+acc+"55":"1.5px solid transparent",
+                transition:"all .3s",opacity:isDone?0.5:isNext?0.8:1,
+                cursor:isCur?"default":"pointer",
+              }}
+              onClick={()=>{if(!isCur)goTo(vi);}}
+            >
+              <div style={{direction:"rtl",textAlign:"justify",fontFamily:"Scheherazade New,Amiri Quran,serif",fontSize:"clamp(1.35rem,4vw,1.8rem)",lineHeight:2.1}}>
+                {(isCur&&(isListening||hasScore))
+                  ? vWords.map((word,wi)=>{
+                      const cleanW=word.replace(/[\\u064B-\\u065F\\u0670]/g,"").replace(/[\\u0623\\u0625\\u0622\\u0671]/g,"\\u0627").replace(/[\\u0649\\u0629]/g,"\\u064A");
+                      if(hasScore){
+                        const ws=speechScore.analysis&&speechScore.analysis[wi];
+                        return <span key={wi} style={{color:ws&&ws.status==="ok"?t.gr:ws&&ws.status==="wrong"?"#e91e63":t.tx3,margin:"0 2px",fontWeight:ws&&ws.status==="ok"?600:400}}>{word} </span>;
+                      }
+                      const cleanS=(spokenWords[wi]||"").replace(/[\\u0623\\u0625\\u0622\\u0671]/g,"\\u0627").replace(/[\\u0649\\u0629]/g,"\\u064A");
+                      const said=wi<spokenWords.length;
+                      const correct=said&&(cleanW===cleanS||cleanW.includes(cleanS)||cleanS.includes(cleanW));
+                      const wrong=said&&!correct;
+                      const isCurWord=wi===spokenWords.length;
+                      return(
+                        <span key={wi} style={{
+                          color:correct?t.gr:wrong?"#e91e63":isCurWord?acc:t.tx,
+                          margin:"0 2px",fontWeight:isCurWord?700:400,
+                          fontSize:isCurWord?"1.06em":"1em",
+                          textShadow:isCurWord?"0 0 10px "+acc+"99":"none",
+                          opacity:wi>spokenWords.length+3?0.35:1,
+                          background:isCurWord?acc+"18":"transparent",
+                          borderRadius:3,padding:"1px 2px",
+                          transition:"color .1s,opacity .1s",
+                        }}>{word} </span>
+                      );
+                    })
+                  : <span style={{color:isDone?t.tx3:t.tx}}>{vAr} </span>
+                }
+                <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"1.4em",height:"1.4em",borderRadius:"50%",border:"1px solid "+(isCur?acc:isDone?t.gr:t.b2),fontSize:".55em",fontWeight:600,color:isCur?acc:isDone?t.gr:t.tx3,background:isDone?t.gr+"22":"transparent",marginRight:4,verticalAlign:"middle"}}>{v.n}</span>
+              </div>
+              {isDone&&<div style={{fontSize:".58rem",color:t.gr,marginTop:3,display:"flex",alignItems:"center",gap:3}}>
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Récité
+              </div>}
+              {isCur&&!isListening&&!isCountdown&&!hasScore&&<div style={{fontSize:".6rem",color:acc,marginTop:5,display:"flex",alignItems:"center",gap:4,opacity:.75}}>
+                <div style={{width:5,height:5,borderRadius:"50%",background:acc}}/>
+                Appuie sur le micro pour réciter
+              </div>}
+            </div>
+          );
+        })}
+      </div>
+      
+            {/* Page entière — style Tarteel */}
+      <div style={{flex:1,overflowY:"auto",padding:"16px 12px 8px",WebkitOverflowScrolling:"touch"}}
+        ref={el=>{if(el&&idx!=null){const active=el.querySelector('[data-active="true"]');if(active)active.scrollIntoView({block:"center",behavior:"smooth"});}}}
+      >
+        {verses.map((v,vi)=>{
+          const isCur=vi===idx;
+          const isDone=vi<idx;
+          const isNext=vi===idx+1;
+          const vAr=stripTags(v&&v.ar||"").trim();
+          const vWords=vAr.split(/\\s+/).filter(Boolean);
+          const spokenWords=isCur&&speechResult
+            ?(speechResult).replace(/[\\u064B-\\u065F\\u0670]/g,"").replace(/[\\u0623\\u0625\\u0622\\u0671]/g,"\\u0627").split(/\\s+/).filter(Boolean)
+            :[];
+          return(
+            <div key={v.n} data-active={String(isCur)}
+              style={{
+                marginBottom:10,padding:"10px 12px",borderRadius:14,
+                background:isCur?(tn==="light"?"rgba(46,125,50,.08)":"rgba(46,125,50,.15)")
+                  :isDone?(tn==="light"?"rgba(0,0,0,.03)":"rgba(255,255,255,.03)"):"transparent",
+                border:isCur?"1.5px solid "+acc+"55":"1.5px solid transparent",
+                transition:"all .3s",opacity:isDone?0.5:isNext?0.8:1,
+                cursor:isCur?"default":"pointer",
+              }}
+              onClick={()=>{if(!isCur)goTo(vi);}}
+            >
+              <div style={{direction:"rtl",textAlign:"justify",fontFamily:"Scheherazade New,Amiri Quran,serif",fontSize:"clamp(1.35rem,4vw,1.8rem)",lineHeight:2.1}}>
+                {(isCur&&(isListening||hasScore))
+                  ? vWords.map((word,wi)=>{
+                      const cleanW=word.replace(/[\\u064B-\\u065F\\u0670]/g,"").replace(/[\\u0623\\u0625\\u0622\\u0671]/g,"\\u0627").replace(/[\\u0649\\u0629]/g,"\\u064A");
+                      if(hasScore){
+                        const ws=speechScore.analysis&&speechScore.analysis[wi];
+                        return <span key={wi} style={{color:ws&&ws.status==="ok"?t.gr:ws&&ws.status==="wrong"?"#e91e63":t.tx3,margin:"0 2px",fontWeight:ws&&ws.status==="ok"?600:400}}>{word} </span>;
+                      }
+                      const cleanS=(spokenWords[wi]||"").replace(/[\\u0623\\u0625\\u0622\\u0671]/g,"\\u0627").replace(/[\\u0649\\u0629]/g,"\\u064A");
+                      const said=wi<spokenWords.length;
+                      const correct=said&&(cleanW===cleanS||cleanW.includes(cleanS)||cleanS.includes(cleanW));
+                      const wrong=said&&!correct;
+                      const isCurWord=wi===spokenWords.length;
+                      return(
+                        <span key={wi} style={{
+                          color:correct?t.gr:wrong?"#e91e63":isCurWord?acc:t.tx,
+                          margin:"0 2px",fontWeight:isCurWord?700:400,
+                          fontSize:isCurWord?"1.06em":"1em",
+                          textShadow:isCurWord?"0 0 10px "+acc+"99":"none",
+                          opacity:wi>spokenWords.length+3?0.35:1,
+                          background:isCurWord?acc+"18":"transparent",
+                          borderRadius:3,padding:"1px 2px",
+                          transition:"color .1s,opacity .1s",
+                        }}>{word} </span>
+                      );
+                    })
+                  : <span style={{color:isDone?t.tx3:t.tx}}>{vAr} </span>
+                }
+                <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"1.4em",height:"1.4em",borderRadius:"50%",border:"1px solid "+(isCur?acc:isDone?t.gr:t.b2),fontSize:".55em",fontWeight:600,color:isCur?acc:isDone?t.gr:t.tx3,background:isDone?t.gr+"22":"transparent",marginRight:4,verticalAlign:"middle"}}>{v.n}</span>
+              </div>
+              {isDone&&<div style={{fontSize:".58rem",color:t.gr,marginTop:3,display:"flex",alignItems:"center",gap:3}}>
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Récité
+              </div>}
+              {isCur&&!isListening&&!isCountdown&&!hasScore&&<div style={{fontSize:".6rem",color:acc,marginTop:5,display:"flex",alignItems:"center",gap:4,opacity:.75}}>
+                <div style={{width:5,height:5,borderRadius:"50%",background:acc}}/>
+                Appuie sur le micro pour réciter
+              </div>}
+            </div>
+          );
+        })}
+      </div>
+      
+      
       {/* Corps */}
       <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"20px",gap:20,overflowY:"auto"}}>
 
@@ -6267,7 +6404,7 @@ return (
               <div style={{fontSize:".6rem",color:"#555",marginTop:2}}>{focusIdx+1}{"/"}{verses.length}</div>
             </div>
             <div style={{display:"flex",gap:8}}>
-              <button onClick={()=>doPlay(verses[focusIdx]?.n)} style={{background:audioPlaying?"#c9a84c":"rgba(201,168,76,.15)",border:"1px solid rgba(201,168,76,.3)",color:"#c9a84c",borderRadius:8,padding:"5px 14px",cursor:"pointer",fontSize:".75rem",transition:"all .2s"}}>{audioPlaying?"⏸":"▶"}</button>
+              <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS?.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,verses[focusIdx]?.n||1);}} style={{background:audioPlaying?"#c9a84c":"rgba(201,168,76,.15)",border:"1px solid rgba(201,168,76,.3)",color:"#c9a84c",borderRadius:8,padding:"5px 14px",cursor:"pointer",fontSize:".75rem",transition:"all .2s"}}>{audioPlaying?"⏸":"▶"}</button>
               <button onClick={()=>setFocusMode(false)} style={{background:"none",border:"1px solid #333",color:"#666",borderRadius:8,padding:"5px 12px",cursor:"pointer",fontSize:".75rem"}}>✕</button>
             </div>
           </div>
@@ -6777,4 +6914,4 @@ return (
       )}
     </>
   );
-}// fix
+}
