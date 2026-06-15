@@ -1456,8 +1456,9 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
   };
 
   // Rendu mots avec surlignage
-  const renderWords=(vAr,isCurVerse)=>{
-    const words=vAr.split(/\s+/).filter(Boolean);
+  const renderWords=(displayAr,isCurVerse,cleanAr)=>{
+    const vAr=cleanAr||displayAr;
+    const words=displayAr.split(/\s+/).filter(Boolean);
     const spoken=isCurVerse&&speechResult
       ?stripAr(speechResult).split(/\s+/).filter(Boolean):[];
     return words.map((word,wi)=>{
@@ -1519,7 +1520,7 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
 
           {/* Verset arabe avec surlignage */}
           <div key={idx} style={{fontFamily:"Scheherazade New,Amiri Quran,serif",fontSize:"clamp(1.7rem,5.5vw,2.4rem)",direction:"rtl",textAlign:"center",lineHeight:2.3,padding:"0 8px",maxWidth:"100%"}}>
-            {renderWords(stripAr(curV?.ar||"").replace(/[\u064B-\u065F\u0670]/g,""),true)}
+            {renderWords(curV?.ar||"",true,stripAr(curV?.ar||""))}
           </div>
 
           {/* Score */}
@@ -1559,7 +1560,7 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
                   cursor:isCur?"default":"pointer"}}
               >
                 <div style={{direction:"rtl",textAlign:"justify",fontFamily:"Scheherazade New,Amiri Quran,serif",fontSize:"clamp(1.3rem,3.8vw,1.75rem)",lineHeight:2.1}}>
-                  {renderWords(vAr,isCur)}
+                  {renderWords(v?.ar||"",isCur,vAr)}
                   <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"1.3em",height:"1.3em",borderRadius:"50%",border:`1px solid ${isCur?acc:isDone?t.gr:t.b2}`,fontSize:".5em",fontWeight:600,color:isCur?acc:isDone?t.gr:t.tx3,background:isDone?t.gr+"22":"transparent",marginRight:4,verticalAlign:"middle"}}>{v.n}</span>
                 </div>
                 {isDone&&<div style={{fontSize:".58rem",color:t.gr,marginTop:2,display:"flex",alignItems:"center",gap:3}}>
@@ -2541,8 +2542,8 @@ const handleSignup=async()=>{
   setAuthLoading(false);
 };
 const handleReset=async()=>{
-  if(!email){setAuthError("Entre ton email d'abord");return;}
-  setAuthLoading(true);setAuthError("");
+  setAuthLoading(true);
+  if(!email){setAuthLoading(false);setAuthError("Entre ton email d'abord");return;}setAuthError("");
   const{error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:"https://alhifz.vercel.app"});
   if(error)setAuthError(error.message);
   else setAuthError("Email envoyé ! Vérifie ta boîte mail ✓");
