@@ -2161,6 +2161,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize,
                     WebkitTapHighlightColor:"transparent",
                     transition:"background .15s",
                   }}>
+                                      {hifzMode
                                       ? <HifzVerseText ar={v.ar} level={hifzLevel[v.n]||0} tjc={tjc} showTj={showTj} vmark={v.n}/>
                     : <TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/>
                   }
