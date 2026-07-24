@@ -6740,7 +6740,7 @@ return (
       {showAuthModal&&(
         <div style={{position:"fixed",inset:0,zIndex:999,background:"rgba(0,0,0,.75)",backdropFilter:"blur(8px)",display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>setShowAuthModal(false)}>
           <div onClick={e=>e.stopPropagation()} style={{width:"100%",maxWidth:440}}>
-            <AuthScreen authPage={authPage} setAuthPage={setAuthPage} email={email} setEmail={setEmail} password={password} setPassword={setPassword} authLoading={authLoading} authError={authError} onLogin={async()=>{await onLogin();setShowAuthModal(false);}} onSignup={async()=>{await onSignup();setShowAuthModal(false);}} onReset={onReset} t={t} acc={t.acc} tn={tn}/>
+            <AuthScreen authPage={authPage} setAuthPage={setAuthPage} email={email} setEmail={setEmail} password={password} setPassword={setPassword} authLoading={authLoading} authError={authError} onGoogle={handleGoogleLogin} onApple={handleAppleLogin} onLogin={async()=>{await handleLogin();setShowAuthModal(false);}} onSignup={async()=>{await handleSignup();setShowAuthModal(false);}} onReset={handleReset} t={t} acc={t.acc} tn={tn}/>
           </div>
         </div>
       )}
