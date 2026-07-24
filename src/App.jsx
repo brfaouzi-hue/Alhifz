@@ -3028,37 +3028,22 @@ const handleReset=async()=>{
     };
     const clean=(s)=>(s||"").replace(/<[^>]*>/g," ").replace(/&amp;/g,"&").replace(/&nbsp;/g," ").replace(/&#\d+;/g,"").replace(/\[\d+\]/g,"").replace(/\s+/g," ").trim();
 
-    // Source 1 : quran.com API — essayer plusieurs IDs tafsir FR
-    for(const tid of [817,31]){
+    // Aucun tafsir savant en français n'est disponible publiquement (quran.com et
+    // alquran.cloud n'ont du tafsir qu'en arabe/anglais/urdu/etc.). On utilise la
+    // traduction commentée de Rashid Maash (plus explicative que Hamidullah, avec
+    // notes intégrées au texte) comme meilleur substitut FR, avec Hamidullah en repli.
+    for(const translationId of [779,31]){
       try{
-        const r=await fetch(`https://api.alquran.cloud/v1/ayah/${sn}:${vn}/fr.hamidullah`);const d=await r.json();if(d.data?.text){setTafsirData({text:d.data.text,source:"Trad. Hamidullah"});return;}
+        const r=await fetch(`https://api.qurancdn.com/api/qdc/verses/by_key/${sn}:${vn}?translations=${translationId}&fields=text_uthmani`);
         if(r.ok){
           const d=await r.json();
-          const raw=d?.tafsir?.text||d?.data?.text||"";
+          const raw=d?.verse?.translations?.[0]?.text||"";
           const text=clean(raw);
-          if(text.length>40){done(text.slice(0,1000));return;}
+          if(text.length>10){done(text.slice(0,1200));return;}
         }
       }catch{}
     }
-    // Source 2 : raw GitHub spa5k (pas de cache CDN)
-    try{
-      const r=await fetch(`https://raw.githubusercontent.com/spa5k/tafsir_api/main/tafsir/fr-tafsir-ibn-kathir/${sn}/${vn}.json`);
-      if(r.ok){
-        const d=await r.json();
-        const text=clean(d?.text||d?.tafsir||"");
-        if(text.length>40){done(text.slice(0,1000));return;}
-      }
-    }catch{}
-    // Source 3 : API alquran.cloud — tafsir jalalayn FR (bon fallback)
-    try{
-      const r=await fetch(`https://api.alquran.cloud/v1/ayah/${sn}:${vn}/fr.jalalayn`);
-      if(r.ok){
-        const d=await r.json();
-        const text=clean(d?.data?.text||"");
-        if(text.length>20){done("Jalâlayn : "+text.slice(0,800));return;}
-      }
-    }catch{}
-    done("Tafsir non disponible hors ligne pour ce verset.");
+    done("Tafsir non disponible pour ce verset.");
   },[tafsirData]);
 
   const buildUrl=(sn,vn)=>{
@@ -3877,7 +3862,7 @@ return (
             </div>
           </div>
         )}
-        {verseCtxMenu&&(<div onClick={()=>setVerseCtxMenu(null)} style={{position:"fixed",inset:0,zIndex:999,background:"rgba(0,0,0,.5)"}}><div onClick={e=>e.stopPropagation()} style={{position:"fixed",bottom:0,left:0,right:0,background:t.s1,borderRadius:"20px 20px 0 0",boxShadow:"0 -4px 30px rgba(0,0,0,.15)",paddingBottom:"max(16px,env(safe-area-inset-bottom))",maxHeight:"70vh",overflowY:"auto"}}><div style={{width:36,height:4,borderRadius:2,background:t.b1,margin:"12px auto 0"}}/><div style={{padding:"12px 20px 14px",borderBottom:"1px solid "+t.b1}}><div style={{fontSize:".6rem",color:t.acc,fontWeight:700,marginBottom:4,textTransform:"uppercase"}}>{(SURAHS||[]).find(s=>s.n===verseCtxMenu.sn)?.name||"Sourate"} {verseCtxMenu.sn}:{verseCtxMenu.vn}</div><div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.2rem",color:t.tx,direction:"rtl",lineHeight:2,textAlign:"right"}}>{stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,""))}</div>{verseCtxMenu.fr&&<div style={{fontSize:".72rem",color:t.tx3,fontStyle:"italic",marginTop:4}}>{(verseCtxMenu.fr||"").replace(/<[^>]*>/g,"").slice(0,100)}</div>}</div><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",padding:"8px 0",borderBottom:"1px solid "+t.b1}}>{[{icon:"▶",label:"Ecouter",active:false,color:t.acc,fn:()=>{doPlay(verseCtxMenu.vn);setVerseCtxMenu(null);}},{icon:"✓",label:isMem(verseCtxMenu.sn,verseCtxMenu.vn)?"Memorise":"Memoriser",active:isMem(verseCtxMenu.sn,verseCtxMenu.vn),color:t.gr,fn:()=>{toggleV(verseCtxMenu.sn,verseCtxMenu.vn,"");setVerseCtxMenu(null);}},{icon:"❤",label:isFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn))?"Retire":"Favori",active:isFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn)),color:t.rd,fn:()=>{toggleFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn));setVerseCtxMenu(null);}},{icon:"🔖",label:"Signet",active:bookmark?.sn===verseCtxMenu.sn&&bookmark?.vn===verseCtxMenu.vn,color:t.acc,fn:()=>{setBookmark(b=>b?.sn===verseCtxMenu.sn&&b?.vn===verseCtxMenu.vn?null:{sn:verseCtxMenu.sn,vn:verseCtxMenu.vn});setVerseCtxMenu(null);}}].map(a=>(<button key={a.label} onClick={a.fn} style={{padding:"10px 4px 6px",background:"transparent",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:4}}><div style={{width:40,height:40,borderRadius:"50%",border:"2px solid "+(a.active?a.color:t.b1),background:a.active?a.color+"15":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.1rem",color:a.active?a.color:t.tx3}}>{a.icon}</div><span style={{fontSize:".55rem",color:a.active?a.color:t.tx3,fontWeight:a.active?700:400}}>{a.label}</span></button>))}</div>{[{icon:"📖",label:"Tafsir",sub:"Commentaire du verset",active:showTf,fn:()=>{setShowTf(p=>!p);setVerseCtxMenu(null);}},{icon:"🌍",label:"Traduction",sub:"Sens en français",active:showTr,fn:()=>{setShowTr(p=>!p);setVerseCtxMenu(null);}},{icon:"Aa",label:"Mot a mot",sub:"Sens de chaque mot",fn:()=>{if(wbwVerseRef)wbwVerseRef.current={sn:verseCtxMenu.sn,vn:verseCtxMenu.vn};setWbwOpen&&setWbwOpen(true);setVerseCtxMenu(null);}},{icon:"✂",label:"Lecture partielle",sub:"Lire une partie",fn:()=>{setVerseCtxMenu(null);}},{icon:"📋",label:"Copier",sub:null,fn:()=>{try{navigator.clipboard?.writeText(stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,"")));}catch(e){}setToastMsg("Copie!");setVerseCtxMenu(null);}},{icon:"⇗",label:"Partager",sub:null,fn:()=>{const artx=stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,""));const frtx=(verseCtxMenu.fr||"").replace(/<[^>]*>/g,"");try{navigator.share&&navigator.share({title:"Verset",text:artx+(frtx?" "+frtx:"")+" ("+verseCtxMenu.sn+":"+verseCtxMenu.vn+")"});}catch(e){navigator.clipboard&&navigator.clipboard.writeText(artx);setToastMsg("Copie!");}setVerseCtxMenu(null);}}].map(a=>(<button key={a.label} onClick={a.fn} style={{display:"flex",alignItems:"center",gap:14,width:"100%",padding:"13px 20px",background:"transparent",border:"none",borderTop:"1px solid "+t.b1,color:t.tx,cursor:"pointer",textAlign:"left"}}><div style={{width:36,height:36,borderRadius:12,background:t.b1,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1rem",flexShrink:0}}>{a.icon}</div><div style={{flex:1}}><div style={{fontSize:".85rem",fontWeight:600}}>{a.label}</div>{a.sub&&<div style={{fontSize:".68rem",color:t.tx3,marginTop:1}}>{a.sub}</div>}</div><div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>{a.active!==undefined&&(<div style={{width:20,height:20,borderRadius:"50%",background:a.active?t.acc:"transparent",border:"2px solid "+(a.active?t.acc:t.b1),transition:"all .2s"}}/>)}<span style={{color:t.tx3}}>›</span></div></button>))}<button onClick={()=>setVerseCtxMenu(null)} style={{width:"100%",padding:"14px",background:"transparent",border:"none",borderTop:"2px solid "+t.b1,color:t.tx3,fontSize:".85rem",cursor:"pointer",fontWeight:600}}>Annuler</button></div></div>)}
+        {verseCtxMenu&&(<div onClick={()=>setVerseCtxMenu(null)} style={{position:"fixed",inset:0,zIndex:999,background:"rgba(0,0,0,.5)"}}><div onClick={e=>e.stopPropagation()} style={{position:"fixed",bottom:0,left:0,right:0,background:t.s1,borderRadius:"20px 20px 0 0",boxShadow:"0 -4px 30px rgba(0,0,0,.15)",paddingBottom:"max(16px,env(safe-area-inset-bottom))",maxHeight:"70vh",overflowY:"auto"}}><div style={{width:36,height:4,borderRadius:2,background:t.b1,margin:"12px auto 0"}}/><div style={{padding:"12px 20px 14px",borderBottom:"1px solid "+t.b1}}><div style={{fontSize:".6rem",color:t.acc,fontWeight:700,marginBottom:4,textTransform:"uppercase"}}>{(SURAHS||[]).find(s=>s.n===verseCtxMenu.sn)?.name||"Sourate"} {verseCtxMenu.sn}:{verseCtxMenu.vn}</div><div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.2rem",color:t.tx,direction:"rtl",lineHeight:2,textAlign:"right"}}>{stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,""))}</div>{verseCtxMenu.fr&&<div style={{fontSize:".72rem",color:t.tx3,fontStyle:"italic",marginTop:4}}>{(verseCtxMenu.fr||"").replace(/<[^>]*>/g,"").slice(0,100)}</div>}</div><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",padding:"8px 0",borderBottom:"1px solid "+t.b1}}>{[{icon:"▶",label:"Ecouter",active:false,color:t.acc,fn:()=>{doPlay(verseCtxMenu.vn);setVerseCtxMenu(null);}},{icon:"✓",label:isMem(verseCtxMenu.sn,verseCtxMenu.vn)?"Memorise":"Memoriser",active:isMem(verseCtxMenu.sn,verseCtxMenu.vn),color:t.gr,fn:()=>{toggleV(verseCtxMenu.sn,verseCtxMenu.vn,"");setVerseCtxMenu(null);}},{icon:"❤",label:isFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn))?"Retire":"Favori",active:isFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn)),color:t.rd,fn:()=>{toggleFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn));setVerseCtxMenu(null);}},{icon:"🔖",label:"Signet",active:bookmark?.sn===verseCtxMenu.sn&&bookmark?.vn===verseCtxMenu.vn,color:t.acc,fn:()=>{setBookmark(b=>b?.sn===verseCtxMenu.sn&&b?.vn===verseCtxMenu.vn?null:{sn:verseCtxMenu.sn,vn:verseCtxMenu.vn});setVerseCtxMenu(null);}}].map(a=>(<button key={a.label} onClick={a.fn} style={{padding:"10px 4px 6px",background:"transparent",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:4}}><div style={{width:40,height:40,borderRadius:"50%",border:"2px solid "+(a.active?a.color:t.b1),background:a.active?a.color+"15":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.1rem",color:a.active?a.color:t.tx3}}>{a.icon}</div><span style={{fontSize:".55rem",color:a.active?a.color:t.tx3,fontWeight:a.active?700:400}}>{a.label}</span></button>))}</div>{[{icon:"📖",label:"Tafsir",sub:"Commentaire du verset",active:showTf,fn:()=>{setShowTf(p=>!p);setVerseCtxMenu(null);}},{icon:"🌍",label:"Traduction",sub:"Sens en français",active:showTr,fn:()=>{setShowTr(p=>!p);setVerseCtxMenu(null);}},{icon:"Aa",label:"Mot a mot",sub:"Sens de chaque mot (anglais)",fn:()=>{if(wbwVerseRef)wbwVerseRef.current={sn:verseCtxMenu.sn,vn:verseCtxMenu.vn};setWbwOpen&&setWbwOpen(true);setVerseCtxMenu(null);}},{icon:"✂",label:"Lecture partielle",sub:"Lire une partie",fn:()=>{const words=stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,"")).trim().split(/\s+/).filter(Boolean);setPartialVerse({sn:verseCtxMenu.sn,vn:verseCtxMenu.vn,words,from:0,to:words.length-1});setVerseCtxMenu(null);}},{icon:"📋",label:"Copier",sub:null,fn:()=>{try{navigator.clipboard?.writeText(stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,"")));}catch(e){}setToastMsg("Copie!");setVerseCtxMenu(null);}},{icon:"⇗",label:"Partager",sub:null,fn:()=>{const artx=stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,""));const frtx=(verseCtxMenu.fr||"").replace(/<[^>]*>/g,"");try{navigator.share&&navigator.share({title:"Verset",text:artx+(frtx?" "+frtx:"")+" ("+verseCtxMenu.sn+":"+verseCtxMenu.vn+")"});}catch(e){navigator.clipboard&&navigator.clipboard.writeText(artx);setToastMsg("Copie!");}setVerseCtxMenu(null);}}].map(a=>(<button key={a.label} onClick={a.fn} style={{display:"flex",alignItems:"center",gap:14,width:"100%",padding:"13px 20px",background:"transparent",border:"none",borderTop:"1px solid "+t.b1,color:t.tx,cursor:"pointer",textAlign:"left"}}><div style={{width:36,height:36,borderRadius:12,background:t.b1,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1rem",flexShrink:0}}>{a.icon}</div><div style={{flex:1}}><div style={{fontSize:".85rem",fontWeight:600}}>{a.label}</div>{a.sub&&<div style={{fontSize:".68rem",color:t.tx3,marginTop:1}}>{a.sub}</div>}</div><div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>{a.active!==undefined&&(<div style={{width:20,height:20,borderRadius:"50%",background:a.active?t.acc:"transparent",border:"2px solid "+(a.active?t.acc:t.b1),transition:"all .2s"}}/>)}<span style={{color:t.tx3}}>›</span></div></button>))}<button onClick={()=>setVerseCtxMenu(null)} style={{width:"100%",padding:"14px",background:"transparent",border:"none",borderTop:"2px solid "+t.b1,color:t.tx3,fontSize:".85rem",cursor:"pointer",fontWeight:600}}>Annuler</button></div></div>)}
 
       {/* Modal Lecture partielle */}
       {partialVerse&&(
@@ -4797,6 +4782,7 @@ return (
                                   {v.n+". "+v.fr}
                                 </div>
                               )}
+                              {showTf&&(()=>{const k=`${selS?.n}_${v.n}`;if(!tafsirData[k]&&loadTafsir)loadTafsir(selS?.n,v.n);return tafsirData[k]?<div style={{display:"block",fontSize:".72rem",color:t.tx2,fontStyle:"italic",lineHeight:1.6,margin:"4px 0 10px",direction:"ltr",textAlign:"left",background:t.pu+"10",borderRadius:8,padding:"8px 10px"}}><span style={{fontWeight:700,color:t.pu,display:"block",marginBottom:2,fontSize:".6rem",textTransform:"uppercase"}}>📖 Tafsir</span>{tafsirData[k]}</div>:<div style={{fontSize:".68rem",color:t.tx3,margin:"4px 0 10px"}}>Chargement du tafsir…</div>;})()}
                               {isActive&&(
                                 <div style={{display:"flex",gap:6,padding:"6px 12px 8px",justifyContent:"center"}}>
                                   <button onClick={()=>{toggleV(selS.n,v.n,v.ar);setActiveVerseActions(null);}} title={isMem?"Retirer":"Mémoriser"}
@@ -6367,10 +6353,11 @@ return (
       {wbwOpen&&wbwVerseRef.current&&(
   <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.85)",display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>{setWbwOpen(false);}}>
     <div style={{width:"100%",maxWidth:600,background:"#111",borderRadius:"20px 20px 0 0",padding:24,maxHeight:"70vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
         <div style={{fontSize:".8rem",color:t.acc,fontWeight:700}}>📖 Mot à mot — {wbwVerseRef.current.sn}:{wbwVerseRef.current.vn}</div>
         <button onClick={()=>{setWbwOpen(false);}} style={{background:"none",border:"none",color:t.tx3,fontSize:"1.2rem",cursor:"pointer"}}>✕</button>
       </div>
+      <div style={{fontSize:".62rem",color:t.tx3,marginBottom:12}}>Sens de chaque mot en anglais — aucune base mot-à-mot en français n'existe chez les fournisseurs de données coraniques.</div>
       <WbwModal sn={wbwVerseRef.current.sn} vn={wbwVerseRef.current.vn} t={t}/>
     </div>
   </div>
