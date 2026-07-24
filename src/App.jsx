@@ -283,6 +283,7 @@ const Q = {
 
 // Constants
 const FONTS = [
+  {id:"uthmanic-hafs",name:"Hafs (Tarteel)",css:"Uthmanic Hafs,Amiri Quran,serif",desc:"Police officielle Madina Mushaf — comme Tarteel/Quran.com"},
   {id:"amiri-quran",name:"Amiri Quran",css:"Amiri Quran,serif",desc:"Mushaf classique (Naskh)"},
   {id:"amiri",name:"Amiri",css:"Amiri,serif",desc:"Naskhi élégant"},
   {id:"scheherazade",name:"Scheherazade",css:"Scheherazade New,serif",desc:"Naskhi arabe raffiné"},
@@ -1820,6 +1821,7 @@ const acc2=ramadan?"#e8c87a":t.acc2;
 const acc3=ramadan?"#f5e0a0":t.acc3;
 return `
 @import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Lateef:wght@400&family=Noto+Naskh+Arabic:wght@400;600&family=Noto+Nastaliq+Urdu:wght@400;700&family=Reem+Kufi:wght@400;700&family=Cairo:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap');
+@font-face{font-family:'Uthmanic Hafs';src:url('/fonts/UthmanicHafs.woff2') format('woff2'),url('/fonts/UthmanicHafs.ttf') format('truetype');font-weight:normal;font-style:normal;font-display:swap;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 *{box-sizing:border-box;}html{overflow-x:hidden;max-width:100vw;overscroll-behavior:none;}body{overflow-x:clip;overscroll-behavior:none;}
 body{background:${bg};color:${t.tx};font-family:'DM Sans',sans-serif;min-height:100vh;min-height:100dvh;padding-bottom:80px;transition:background .4s,color .4s;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);}
@@ -2235,7 +2237,7 @@ export default function App() {
   React.useEffect(()=>{const mq=window.matchMedia("(prefers-color-scheme: dark)");const apply=()=>{if(!localStorage.getItem("qtheme2")){setTn(mq.matches?"dark":"light");}};apply();mq.addEventListener("change",apply);return()=>mq.removeEventListener("change",apply);},[]);
   const t=THEMES[tn]||THEMES.dark;
   const tjc=(tn==="light")?TJC_LIGHT:TJC_DARK; // dark for all dark-bg themes
-  const [fontId,setFontId]=useState(()=>ld("qfont","amiri-quran"));
+  const [fontId,setFontId]=useState(()=>ld("qfont","uthmanic-hafs"));
   const arFont=(FONTS.find(f=>f.id===fontId)||FONTS[0]).css;
   const [mem,setMem]=useState(()=>ld("qmem6",{}));
   const memHistory=React.useMemo(()=>{const h={};Object.entries(mem||{}).forEach(([sn,vs])=>{Object.entries(vs||{}).forEach(([vn,info])=>{if(info?.date){const d=info.date.slice(0,10);h[d]=(h[d]||0)+1;}});});return h;},[mem]);
