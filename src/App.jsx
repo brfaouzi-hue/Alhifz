@@ -710,6 +710,14 @@ function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,au
   const [words,setWords]=useState(null);
   const [tooltip,setTooltip]=useState(null);
   const [loaded,setLoaded]=useState(false);
+  const wordAudioRef=useRef(null);
+  const playWordAudio=(url)=>{
+    if(wordAudioRef.current){wordAudioRef.current.pause();wordAudioRef.current.currentTime=0;}
+    const a=new Audio(`https://audio.qurancdn.com/${url}`);
+    wordAudioRef.current=a;
+    a.play().catch(()=>{});
+  };
+  useEffect(()=>()=>{wordAudioRef.current?.pause();},[]);
 
   const loadWords=()=>{
     if(loaded)return;
@@ -730,7 +738,7 @@ function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,au
         <span key={i} style={{position:"relative",display:"inline-block",margin:"0 2px",cursor:"pointer",padding:"2px 4px",borderRadius:4,transition:"background .15s"}}
           onMouseEnter={e=>{setTooltip(i);e.currentTarget.style.background="rgba(201,168,76,.15)";}}
           onMouseLeave={e=>{setTooltip(null);e.currentTarget.style.background="transparent";}}
-          onClick={()=>{const a=new Audio(`https://audio.qurancdn.com/${w.audio_url}`);a.play();}}>
+          onClick={()=>playWordAudio(w.audio_url)}>
           {w.text_uthmani}
           {tooltip===i&&(
             <span style={{position:"absolute",bottom:"110%",left:"50%",transform:"translateX(-50%)",background:"#1a1a1a",color:"#c9a84c",padding:"4px 8px",borderRadius:6,fontSize:".65rem",whiteSpace:"nowrap",zIndex:99,border:"1px solid rgba(201,168,76,.3)",pointerEvents:"none"}}>
@@ -744,6 +752,13 @@ function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,au
 }
 function WbwModal({sn,vn,t}){
   const [words,setWords]=useState(null);
+  const wordAudioRef=useRef(null);
+  const playWordAudio=(url)=>{
+    if(wordAudioRef.current){wordAudioRef.current.pause();wordAudioRef.current.currentTime=0;}
+    const a=new Audio(`https://audio.qurancdn.com/${url}`);
+    wordAudioRef.current=a;
+    a.play().catch(()=>{});
+  };
   useEffect(()=>{
     let cancelled=false;
     fetch(`https://api.quran.com/api/v4/verses/by_key/${sn}:${vn}?words=true&word_fields=text_uthmani,translation&language=fr`)
@@ -752,13 +767,14 @@ function WbwModal({sn,vn,t}){
       .catch(()=>{if(!cancelled)setWords([]);});
     return()=>{cancelled=true;};
   },[sn,vn]);
+  useEffect(()=>()=>{wordAudioRef.current?.pause();},[]);
   return !words ? <div style={{textAlign:"center",padding:20,color:t.tx3}}>Chargement…</div> : (
     <div style={{display:"flex",flexDirection:"column",gap:8}}>
       {words.map((w,i)=>(
         <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",background:"rgba(255,255,255,.04)",borderRadius:10,border:`1px solid ${t.b1}`}}>
           <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.4rem",color:"#fff",direction:"rtl"}}>{w.text_uthmani}</div>
           <div style={{fontSize:".75rem",color:t.acc,textAlign:"center",flex:1,padding:"0 12px"}}>{w.translation?.text||""}</div>
-          <button onClick={()=>new Audio(`https://audio.qurancdn.com/${w.audio_url}`).play()} style={{background:`${t.acc}22`,border:`1px solid ${t.acc}44`,borderRadius:8,padding:"6px 10px",color:t.acc,cursor:"pointer",fontSize:".7rem"}}>▶</button>
+          <button onClick={()=>playWordAudio(w.audio_url)} style={{background:`${t.acc}22`,border:`1px solid ${t.acc}44`,borderRadius:8,padding:"6px 10px",color:t.acc,cursor:"pointer",fontSize:".7rem"}}>▶</button>
         </div>
       ))}
     </div>
