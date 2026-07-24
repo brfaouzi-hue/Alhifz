@@ -2099,6 +2099,10 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize,
   const [curPage, setCurPage] = React.useState(0);
   const [selVerse, setSelVerse] = React.useState(null); // verset sélectionné
   const [partialV, setPartialV] = React.useState(null);
+  const [gotoOpen, setGotoOpen] = React.useState(false);
+  const [gotoVal, setGotoVal] = React.useState("");
+  const pgTouchX=React.useRef(null);
+  const pgTouchY=React.useRef(null);
 
   const pages = React.useMemo(() => {
     if(!verses.length) return [];
@@ -2121,6 +2125,25 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize,
   const curPg = curEntry?.pg;
   const total = pages.length;
 
+  const handlePgTouchStart=e=>{e.stopPropagation();pgTouchX.current=e.touches[0].clientX;pgTouchY.current=e.touches[0].clientY;};
+  const handlePgTouchEnd=e=>{
+    e.stopPropagation();
+    if(pgTouchX.current==null)return;
+    const dx=pgTouchX.current-e.changedTouches[0].clientX;
+    const dy=Math.abs(pgTouchY.current-e.changedTouches[0].clientY);
+    if(Math.abs(dx)>60&&dy<50){
+      if(dx>0)setCurPage(p=>Math.min(total-1,p+1)); // swipe gauche → page suivante
+      else setCurPage(p=>Math.max(0,p-1)); // swipe droite → page précédente
+      setSelVerse(null);
+    }
+    pgTouchX.current=null;
+  };
+  const gotoPage=(pgNum)=>{
+    const idx=pages.findIndex(p=>p.pg===pgNum);
+    if(idx>=0)setCurPage(idx);
+    setGotoOpen(false);
+  };
+
   const handleTap = (v) => {
     if(selVerse?.n === v.n) {
       // 2e tap = lecture audio
@@ -2136,14 +2159,15 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize,
   // Normalisation pour comparaison arabe
 
   return (
-    <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0,background:"#ffffff",backgroundImage:'url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2760%27%20height%3D%2760%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%2523c8a87a%27%20stroke-width%3D%270.4%27%20opacity%3D%270.18%27%3E%3Cpath%20d%3D%27M30%200%20L60%2030%20L30%2060%20L0%2030%20Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2720%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2712%27/%3E%3Cpath%20d%3D%27M10%2010%20Q30%200%2050%2010%20Q60%2030%2050%2050%20Q30%2060%2010%2050%20Q0%2030%2010%2010Z%27/%3E%3Cpath%20d%3D%27M30%208%20L52%2030%20L30%2052%20L8%2030Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%276%27/%3E%3Cline%20x1%3D%2730%27%20y1%3D%270%27%20x2%3D%2730%27%20y2%3D%2760%27/%3E%3Cline%20x1%3D%270%27%20y1%3D%2730%27%20x2%3D%2760%27%20y2%3D%2730%27/%3E%3C/g%3E%3C/svg%3E")',backgroundSize:"60px 60px",borderRadius:6,overflow:"hidden"}} onClick={()=>setSelVerse(null)}>
+    <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0,background:"#ffffff",backgroundImage:'url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2760%27%20height%3D%2760%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%2523c8a87a%27%20stroke-width%3D%270.4%27%20opacity%3D%270.18%27%3E%3Cpath%20d%3D%27M30%200%20L60%2030%20L30%2060%20L0%2030%20Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2720%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2712%27/%3E%3Cpath%20d%3D%27M10%2010%20Q30%200%2050%2010%20Q60%2030%2050%2050%20Q30%2060%2010%2050%20Q0%2030%2010%2010Z%27/%3E%3Cpath%20d%3D%27M30%208%20L52%2030%20L30%2052%20L8%2030Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%276%27/%3E%3Cline%20x1%3D%2730%27%20y1%3D%270%27%20x2%3D%2730%27%20y2%3D%2760%27/%3E%3Cline%20x1%3D%270%27%20y1%3D%2730%27%20x2%3D%2760%27%20y2%3D%2730%27/%3E%3C/g%3E%3C/svg%3E")',backgroundSize:"60px 60px",borderRadius:6,overflow:"hidden"}} onClick={()=>setSelVerse(null)} onTouchStart={handlePgTouchStart} onTouchEnd={handlePgTouchEnd}>
       {/* Navigation */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"5px 10px",borderBottom:"1px solid "+t.b1,flexShrink:0,gap:6}}>
         <button onClick={e=>{e.stopPropagation();setCurPage(p=>Math.max(0,p-1));}} disabled={curPage===0}
           style={{padding:"4px 12px",borderRadius:20,border:"1px solid "+(curPage>0?t.acc:t.b1),background:curPage>0?t.acc+"15":"transparent",color:curPage>0?t.acc:t.tx3,cursor:curPage>0?"pointer":"default",fontSize:".7rem",fontWeight:700,flexShrink:0}}>
           ← Préc.
         </button>
-        <span style={{fontSize:".65rem",color:t.tx3,fontWeight:600,flexShrink:0}}>
+        <span onClick={e=>{if(!curPg)return;e.stopPropagation();setGotoVal(String(curPg));setGotoOpen(v=>!v);}}
+          style={{fontSize:".65rem",color:t.tx3,fontWeight:600,flexShrink:0,cursor:curPg?"pointer":"default",textDecoration:curPg?"underline":"none",textDecorationStyle:"dotted"}}>
           {curPg ? "Page "+curPg+" · "+(curPage+1)+"/"+total : (curPage+1)+" / "+total}
         </span>
         <button onClick={e=>{e.stopPropagation();setCurPage(p=>Math.min(total-1,p+1));}} disabled={curPage>=total-1}
@@ -2154,6 +2178,19 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize,
         {setPage&&<button onClick={e=>{e.stopPropagation();setPage("reader");}}
           style={{padding:"4px 10px",borderRadius:20,border:"1px solid "+t.acc,background:t.acc+"15",color:t.acc,cursor:"pointer",fontSize:".75rem",fontWeight:700,flexShrink:0}}>⛶</button>}
       </div>
+      {gotoOpen&&(
+        <div onClick={e=>e.stopPropagation()} style={{display:"flex",alignItems:"center",gap:6,padding:"6px 10px",borderBottom:"1px solid "+t.b1,flexShrink:0,background:t.s2}}>
+          <span style={{fontSize:".62rem",color:t.tx3,flexShrink:0}}>Aller à la page</span>
+          <input type="number" min="1" max="604" value={gotoVal} autoFocus
+            onChange={e=>setGotoVal(e.target.value)}
+            onKeyDown={e=>{if(e.key==="Enter")gotoPage(parseInt(gotoVal)||0);if(e.key==="Escape")setGotoOpen(false);}}
+            style={{width:60,padding:"3px 6px",borderRadius:6,border:"1px solid "+t.b1,background:t.navBg,color:t.tx,fontSize:".7rem",textAlign:"center"}}/>
+          <button onClick={()=>gotoPage(parseInt(gotoVal)||0)}
+            style={{padding:"3px 10px",borderRadius:20,border:"none",background:t.acc,color:"#fff",fontSize:".65rem",fontWeight:700,cursor:"pointer"}}>OK</button>
+          <button onClick={()=>setGotoOpen(false)}
+            style={{padding:"3px 10px",borderRadius:20,border:"1px solid "+t.b1,background:"transparent",color:t.tx3,fontSize:".65rem",cursor:"pointer",marginLeft:"auto"}}>Annuler</button>
+        </div>
+      )}
 
       {/* Texte en flux continu */}
       <div style={{flex:1,overflowY:"auto",minWidth:0,width:"100%",boxSizing:"border-box",contain:"layout",padding:"24px 20px 120px",WebkitOverflowScrolling:"touch"}} onClick={e=>e.stopPropagation()}>
@@ -2569,9 +2606,8 @@ const handleReset=async()=>{
     try{
       Object.keys(localStorage).filter(k=>k.startsWith("qv3_")||k.startsWith("qv4_")).forEach(k=>localStorage.removeItem(k));
     }catch{}
-    return()=>clearTimeout(t);
     // Pre-cache Juz 30 sourates en arrière-plan
-    setTimeout(()=>{
+    const t2=setTimeout(()=>{
       const juz30=[78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114];
       juz30.forEach(n=>{
         const cacheKey="qv5_"+n;
@@ -2586,6 +2622,7 @@ const handleReset=async()=>{
           }).catch(()=>{});
       });
     }, 3000); // Délai de 3s pour ne pas impacter le chargement initial
+    return()=>{clearTimeout(t);clearTimeout(t2);};
   },[]);
 
   useEffect(()=>{
