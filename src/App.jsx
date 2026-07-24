@@ -6077,10 +6077,12 @@ return (
                   </button>
                 </div>
                 <div style={{fontSize:".62rem",color:t.tx3,fontStyle:"italic",padding:"2px 0"}}>
-                  {Notification?.permission==="granted"
+                  {(typeof Notification!=="undefined"?Notification.permission:"unsupported")==="granted"
                     ?<span style={{color:t.gr}}>✓ Permission accordée</span>
-                    :Notification?.permission==="denied"
+                    :(typeof Notification!=="undefined"?Notification.permission:"unsupported")==="denied"
                     ?<span style={{color:t.rd}}>✗ Bloqué — activez dans les réglages iPhone</span>
+                    :typeof Notification==="undefined"
+                    ?"Non supporté sur ce navigateur"
                     :"En attente de permission"}
                 </div>
               </div>
