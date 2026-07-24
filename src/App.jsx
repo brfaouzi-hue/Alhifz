@@ -469,8 +469,8 @@ const TJC_DARK={
   mr:"#039BE5",     // Madd permissible (2-4-6h) — bleu moyen
   mo:"#880E4F",     // Madd wajib muttasil (4-5h) — bordeaux/magenta
   ml:"#B71C1C",     // Madd lazim (6h) — rouge foncé comme Mushaf
-  g:"#EF5350",      // Ghunna — vert foncé
-  idg:"#43A047",    // Idgham avec ghunna — vert
+  g:"#43A047",      // Ghunna — vert
+  idg:"#43A047",    // Idgham sans ghunna — vert
   q:"#7B1FA2",      // Qalqala — rouge (comme Mushaf standard)
   ikh:"#FB8C00",    // Ikhfa — jaune-orange
   iql:"#F4511E",    // Iqlab — orange foncé
@@ -483,8 +483,8 @@ const TJC_LIGHT={
   mr:"#01579B",     // Madd permissible — bleu foncé
   mo:"#880E4F",     // Madd wajib — bordeaux
   ml:"#B71C1C",     // Madd lazim — rouge foncé
-  g:"#EF5350",      // Ghunna — vert très foncé
-  idg:"#EF5350",    // Idgham — vert foncé
+  g:"#169200",      // Ghunna — vert
+  idg:"#169200",    // Idgham sans ghunna — vert
   q:"#7B1FA2",      // Qalqala — rouge
   ikh:"#E65100",    // Ikhfa — orange
   iql:"#BF360C",    // Iqlab — orange-rouge
@@ -601,6 +601,7 @@ const TAJWID_CLASS_COLORS={
   "idgham_mutajanisayn": tjc=>tjc.g,
   "idgham_mutaqaribayn": tjc=>tjc.idg,
   "idgham_without_ghunnah": tjc=>tjc.idg,
+  "idgham_wo_ghunnah":   tjc=>tjc.idg, // nom réel renvoyé par l'API qurancdn
   "idgham_shafawi":      tjc=>tjc.g,
   // Qalqala (قلقلة) ── violet
   "qalaqah":             tjc=>tjc.q,
@@ -614,6 +615,7 @@ const TAJWID_CLASS_COLORS={
   // Ham Wasl / Sakt ── gris (affiché mais sans couleur forte)
   "ham_wasl":            ()=>null,
   "silent":              ()=>null,
+  "slnt":                ()=>null, // nom réel renvoyé par l'API qurancdn
   "sakt":                tjc=>tjc.sl,
 };
 
@@ -1850,9 +1852,10 @@ body>*{position:relative;z-index:1;}
 @keyframes sandDrip{0%{transform:translateY(0);opacity:1}100%{transform:translateY(6px);opacity:0}}
 @keyframes hoverLift{from{transform:translateY(0) scale(1)}to{transform:translateY(-3px) scale(1.01)}}
 /* ── Topbar ── */
-.topbar{position:sticky;top:0;z-index:60;background:${t.navBg};border-bottom:1px solid ${t.b1};backdrop-filter:blur(16px);overflow:hidden;}
+.topbar{position:sticky;top:0;z-index:60;background:${t.navBg};border-bottom:1px solid ${t.b1};backdrop-filter:blur(16px);overflow:hidden;padding-top:env(safe-area-inset-top);}
 .tb{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 12px;padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right));gap:8px;}
-.logo{display:flex;align-items:baseline;gap:6px;flex-shrink:0;white-space:nowrap;min-width:0;}
+.logo{display:flex;align-items:baseline;gap:6px;flex-shrink:1;overflow:hidden;white-space:nowrap;min-width:0;}
+.logo-h,.logo-ar{overflow:hidden;text-overflow:ellipsis;}
 .logo-h{font-family:'Amiri',serif;font-size:1.3rem;color:${acc};text-shadow:0 0 20px ${acc}44;white-space:nowrap;}
 .logo-ar{font-family:'Amiri Quran',serif;font-size:1rem;color:${acc2};white-space:nowrap;}
 .logo-sub{font-size:.5rem;color:${t.tx3};letter-spacing:2px;text-transform:uppercase;white-space:nowrap;}
@@ -2068,6 +2071,7 @@ body>*{position:relative;z-index:1;}
   .logo-ar{display:none;}
   .logo-sub{display:none;}
   .logo-h{font-size:1.2rem;}
+  .mp-label{display:none;}
   .wrap{padding-bottom:calc(130px + env(safe-area-inset-bottom));}
 }
 `;}
@@ -4029,7 +4033,7 @@ return (
             </div>
           </div>
           <div className="tb-r">
-            <button className="tbtn" style={{borderColor:t.pu,color:t.pu,fontSize:".6rem"}} onClick={()=>setShowAIPlan(true)}>✦ Mon Parcours</button>
+            <button className="tbtn" style={{borderColor:t.pu,color:t.pu,fontSize:".6rem",flexShrink:0}} onClick={()=>setShowAIPlan(true)}>✦<span className="mp-label"> Mon Parcours</span></button>
             <button className="tbtn" style={{borderColor:timerRunning?t.acc:t.gr,color:timerRunning?t.acc:t.gr,fontSize:".6rem",fontWeight:timerRunning?800:400}} onClick={()=>setTimerOpen(true)}>{timerRunning&&timerLeft?fmtTime(timerLeft):"⏱"}</button>
             <button className="ib" title={tn==="light"?"Passer en mode nuit":"Passer en mode jour"} onClick={()=>setTn(tn==="light"?"emerald":"light")}>{tn==="light"?<Icons.Moon size={14}/>:<Icons.Sun size={14}/>}</button>
 
