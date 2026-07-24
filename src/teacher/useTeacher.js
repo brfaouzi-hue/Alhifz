@@ -1,0 +1,109 @@
+import { useState, useEffect, useCallback } from 'react';
+import { createClient } from '@supabase/supabase-js';
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+export function useRole(userId) {
+  const [role, setRole] = useState(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    if (!userId) { setLoading(false); return; }
+    supabase.from('user_roles').select('role').eq('user_id', userId).single()
+      .then(({ data }) => { setRole(data?.role || 'student'); setLoading(false); });
+  }, [userId]);
+  const setUserRole = useCallback(async (newRole) => {
+    await supabase.from('user_roles').upsert({ user_id: userId, role: newRole }, { onConflict: 'user_id' });
+    setRole(newRole);
+  }, [userId]);
+  return { role, loading, setUserRole };
+}
+
+export function useTeacherClasses(userId) {
+  const [classes, setClasses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const load = useCallback(async () => {
+    if (!userId) return;
+    const { data } = await supabase.from('classes').select('*, class_members(count)').eq('teacher_id', userId).order('created_at', { ascending: false });
+    setClasses(data || []);
+    setLoading(false);
+  }, [userId]);
+  useEffect(() => { load(); }, [load]);
+  const createClass = useCallback(async (name) => {
+    const { data, error } = await supabase.from('classes').insert({ teacher_id: userId, name }).select().single();
+    if (!error) setClasses(prev => [data, ...prev]);
+    return { data, error };
+  }, [userId]);
+  const deleteClass = useCallback(async (classId) => {
+    await supabase.from('classes').delete().eq('id', classId);
+    setClasses(prev => prev.filter(c => c.id !== classId));
+  }, []);
+  return { classes, loading, createClass, deleteClass, reload: load };
+}
+
+export function useClassStudents(classId) {
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    if (!classId) return;
+    supabase.from('class_members').select('student_id, joined_at, user_progress(mem, spaced, settings, updated_at)').eq('class_id', classId)
+      .then(({ data }) => { setStudents(data || []); setLoading(false); });
+  }, [classId]);
+  return { students, loading };
+}
+
+export function useAssignments(classId) {
+  const [assignments, setAssignments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const load = useCallback(async () => {
+    if (!classId) return;
+    const { data } = await supabase.from('assignments').select('*, assignment_progress(student_id, verses_done, completed)').eq('class_id', classId).order('due_date', { ascending: true });
+    setAssignments(data || []);
+    setLoading(false);
+  }, [classId]);
+  useEffect(() => { load(); }, [load]);
+  const createAssignment = useCallback(async (payload) => {
+    const { data, error } = await supabase.from('assignments').insert({ class_id: classId, ...payload }).select().single();
+    if (!error) await load();
+    return { data, error };
+  }, [classId, load]);
+  const deleteAssignment = useCallback(async (id) => {
+    await supabase.from('assignments').delete().eq('id', id);
+    setAssignments(prev => prev.filter(a => a.id !== id));
+  }, []);
+  return { assignments, loading, createAssignment, deleteAssignment };
+}
+
+export function useJoinClass(userId) {
+  const joinByCode = useCallback(async (code) => {
+    const { data: cls, error: findErr } = await supabase.from('classes').select('id, name').eq('invite_code', code.toUpperCase().trim()).single();
+    if (findErr || !cls) return { error: 'Code invalide' };
+    const { error: joinErr } = await supabase.from('class_members').insert({ class_id: cls.id, student_id: userId });
+    if (joinErr?.code === '23505') return { error: 'Tu es deja dans cette classe' };
+    if (joinErr) return { error: joinErr.message };
+    return { data: cls };
+  }, [userId]);
+  return { joinByCode };
+}
+
+export function useStudentClasses(userId) {
+  const [classes, setClasses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    if (!userId) return;
+    supabase.from('class_members').select('joined_at, classes(id, name, invite_code, teacher_id)').eq('student_id', userId)
+      .then(({ data }) => { setClasses((data || []).map(m => m.classes)); setLoading(false); });
+  }, [userId]);
+  return { classes, loading };
+}
+
+export function useStudySession(userId) {
+  const logSession = useCallback(async (surahN, versesCount, durationSec, scoreAvg) => {
+    if (!userId) return;
+    await supabase.from('study_sessions').insert({ user_id: userId, surah_n: surahN, verses_count: versesCount, duration_sec: durationSec, score_avg: scoreAvg || null });
+  }, [userId]);
+  return { logSession };
+}
+
+export { supabase };
