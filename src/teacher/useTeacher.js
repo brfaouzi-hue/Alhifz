@@ -22,7 +22,7 @@ export function useTeacherClasses(userId) {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const load = useCallback(async () => {
-    if (!userId) return;
+    if (!userId) { setLoading(false); return; }
     const { data } = await supabase.from('classes').select('*, class_members(count)').eq('teacher_id', userId).order('created_at', { ascending: false });
     setClasses(data || []);
     setLoading(false);
@@ -44,7 +44,7 @@ export function useClassStudents(classId) {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    if (!classId) return;
+    if (!classId) { setLoading(false); return; }
     supabase.from('class_members').select('student_id, joined_at, user_progress(mem, spaced, settings, updated_at)').eq('class_id', classId)
       .then(({ data }) => { setStudents(data || []); setLoading(false); });
   }, [classId]);
@@ -55,7 +55,7 @@ export function useAssignments(classId) {
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
   const load = useCallback(async () => {
-    if (!classId) return;
+    if (!classId) { setLoading(false); return; }
     const { data } = await supabase.from('assignments').select('*, assignment_progress(student_id, verses_done, completed)').eq('class_id', classId).order('due_date', { ascending: true });
     setAssignments(data || []);
     setLoading(false);
@@ -89,7 +89,7 @@ export function useStudentClasses(userId) {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) { setLoading(false); return; }
     supabase.from('class_members').select('joined_at, classes(id, name, invite_code, teacher_id)').eq('student_id', userId)
       .then(({ data }) => { setClasses((data || []).map(m => m.classes)); setLoading(false); });
   }, [userId]);
