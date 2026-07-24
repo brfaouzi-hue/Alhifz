@@ -283,7 +283,7 @@ const Q = {
 
 // Constants
 const FONTS = [
-  {id:"uthmanic-hafs",name:"Hafs (Tarteel)",css:"Uthmanic Hafs,Amiri Quran,serif",desc:"Police officielle Madina Mushaf — comme Tarteel/Quran.com"},
+  {id:"uthmanic-hafs",name:"Hafs",css:"Uthmanic Hafs,Amiri Quran,serif",desc:"Police officielle du Mushaf de Médine"},
   {id:"amiri-quran",name:"Amiri Quran",css:"Amiri Quran,serif",desc:"Mushaf classique (Naskh)"},
   {id:"amiri",name:"Amiri",css:"Amiri,serif",desc:"Naskhi élégant"},
   {id:"scheherazade",name:"Scheherazade",css:"Scheherazade New,serif",desc:"Naskhi arabe raffiné"},
@@ -472,10 +472,10 @@ const TJC_DARK={
   ml:"#B71C1C",     // Madd lazim (6h) — rouge foncé comme Mushaf
   g:"#43A047",      // Ghunna — vert
   idg:"#43A047",    // Idgham sans ghunna — vert
-  q:"#7B1FA2",      // Qalqala — rouge (comme Mushaf standard)
-  ikh:"#FB8C00",    // Ikhfa — jaune-orange
-  iql:"#F4511E",    // Iqlab — orange foncé
-  ls:"#01579B",     // Lam shamsiyya — bleu foncé
+  q:"#FFA726",      // Qalqala — orange
+  ikh:"#E91E8C",    // Ikhfa — rose/magenta
+  iql:"#26C6DA",    // Iqlab — cyan
+  ls:"#546E7A",     // Lam shamsiyya — lettre assimilée, gris bleu (comme Ham Wasl)
   hw:"#546E7A",     // Ham Wasl — gris bleu
   sl:"#607d8b",     // Silence/Sakt — gris bleu
 };
@@ -486,10 +486,10 @@ const TJC_LIGHT={
   ml:"#B71C1C",     // Madd lazim — rouge foncé
   g:"#169200",      // Ghunna — vert
   idg:"#169200",    // Idgham sans ghunna — vert
-  q:"#7B1FA2",      // Qalqala — rouge
-  ikh:"#E65100",    // Ikhfa — orange
-  iql:"#BF360C",    // Iqlab — orange-rouge
-  ls:"#01579B",     // Lam shamsiyya
+  q:"#E65100",      // Qalqala — orange
+  ikh:"#AD1457",    // Ikhfa — rose/magenta
+  iql:"#00838F",    // Iqlab — cyan foncé
+  ls:"#37474F",     // Lam shamsiyya — lettre assimilée, gris bleu (comme Ham Wasl)
   hw:"#37474F",     // Ham Wasl
   sl:"#263238",
 };
@@ -6696,10 +6696,10 @@ return (
               {id:"donation",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,label:"Don"},
             ].map(item=>(
               <button key={item.id} onClick={()=>{setShowMore(false);setPage(item.id);}}
-                style={{display:"flex",flexDirection:"column",alignItems:"center",gap:5,padding:"10px 14px",borderRadius:14,border:"1px solid "+t.b1,background:page===item.id?t.acc+"22":t.s1,color:page===item.id?t.acc:t.tx2,cursor:"pointer",minWidth:70,flex:"1 1 auto",position:"relative"}}>
+                style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:3,padding:"6px 2px",border:"none",background:"transparent",color:page===item.id?t.acc:t.tx3,fontSize:".58rem",fontWeight:500,cursor:"pointer",transition:"all .25s",minWidth:70,flex:"1 1 auto",position:"relative"}}>
                 {item.icon}
-                <span style={{fontSize:".6rem",fontWeight:600}}>{item.label}</span>
-                {item.badge>0&&<span style={{position:"absolute",top:4,right:4,background:t.rd,color:"#fff",borderRadius:"50%",width:15,height:15,fontSize:".45rem",display:"flex",alignItems:"center",justifyContent:"center"}}>{item.badge}</span>}
+                <span className="bn-lbl">{item.label}</span>
+                {item.badge>0&&<span style={{position:"absolute",top:2,right:14,background:t.rd,color:"#fff",borderRadius:"50%",width:15,height:15,fontSize:".45rem",display:"flex",alignItems:"center",justifyContent:"center"}}>{item.badge}</span>}
               </button>
             ))}
           </div>
