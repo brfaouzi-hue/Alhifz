@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";import { supabase, isSupabaseConfigured } from './supabase'
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";import { createPortal } from "react-dom";import { supabase, isSupabaseConfigured } from './supabase'
 import { useRole } from './teacher/useTeacher.js';
 import TeacherDashboard from './teacher/TeacherDashboard.jsx';
 import JoinClass from './teacher/JoinClass.jsx';
@@ -1915,7 +1915,7 @@ function MushafPage({page,t,tjc,arFont,edition,nightMode=false,fullscreen,onTogg
 
   const SURAH_PAGES=[1,2,50,77,106,128,150,177,187,208,221,235,249,255,262,267,271,274,278,282,287,291,294,296,299,302,304,306,308,311,313,315,317,320,322,325,328,331,334,336,338,340,342,344,346,348,350,351,353,354,355,356,358,359,360,361,362,363,364,365,366,367,367,368,369,369,370,371,371,372,373,373,374,374,375,376,376,377,377,378,378,379,379,380,380,381,381,381,382,382,382,383,383,383,384,384,384,385,385,385,386,386,386,387,387,387,388,388,388,389,389,389,390,390,390,391,391,392,392,392,393,393,393,394,394,394,395,395,395,396,396,396,397,397,397,398,398,398,399,399,399,400,400,400,401,401,401,402,402,402,403,403,403,404,404,404,405,405,405,406,406,406,407,407,407,408,408,408,409,409,409,410,410,410,411,411,411,412,412,412,413,413,413,414,414,414,415,415,415,416,416,416,417,417,417,418,418,418,419,419,420,420,421,421,422,422,423,423,424,425,426,427,428,429,430,431,433,434,435,436,437,438,439,440,441,442,443,444,445,447,449,451,453,455,457,459,461,462,463,464,465,466,467,468,469,470,471,472,473,474,475,476,477,478,479,480,481,482,483,484,485,486,487,488,489,490,491,492,493,494,495,496,497,498,499,500,501,502,503,504,505,506,507,508,509,510,511,512,513,514,515,516,517,518,519,520,521,522,523,524,525,526,527,528,529,530,531,532,533,534,535,536,537,538,539,540,541,542,543,544,545,546,547,548,549,550,551,552,553,554,555,556,557,558,559,560,561,562,563,564,565,566,567,568,569,570,571,572,573,574,575,576,577,578,579,580,581,582,583,584,585,586,587,588,589,590,591,592,593,594,595,596,597,598,599,600,601,602,603,604];
 
-  return (
+  const content = (
     <div style={outer} onTouchStart={onTS} onTouchEnd={onTE}>
       {/* Barre nav propre */}
       <div style={{display:"flex",alignItems:"center",gap:6,padding:"7px 10px",background:"rgba(0,0,0,.7)",flexShrink:0,borderBottom:"1px solid rgba(201,168,76,.15)"}}>
@@ -1942,6 +1942,12 @@ function MushafPage({page,t,tjc,arFont,edition,nightMode=false,fullscreen,onTogg
       <MushafTajweedView page={page||1} fullscreen={fullscreen} nightMode={nightMode} edition={ed}/>
     </div>
   );
+
+  // En plein écran, on sort du conteneur .wrap via un portail direct sur <body> :
+  // .wrap a une animation qui anime transform (pageIn), ce qui crée un containing
+  // block pour tout position:fixed à l'intérieur — sans portail, le "plein écran"
+  // restait coincé dans la boîte de .wrap et la bottom nav restait visible.
+  return fullscreen ? createPortal(content, document.body) : content;
 }
 
 // CSS builder
