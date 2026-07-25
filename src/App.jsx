@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";import { supabase } from './supabase'
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";import { supabase, isSupabaseConfigured } from './supabase'
 import { useRole } from './teacher/useTeacher.js';
 import TeacherDashboard from './teacher/TeacherDashboard.jsx';
 import JoinClass from './teacher/JoinClass.jsx';
@@ -2697,6 +2697,7 @@ useEffect(()=>{
   if(user&&authReady)saveProgress(user.id,mem,favorites,notes,spaced);
 },[mem,favorites,notes,spaced]);
 const handleGoogleLogin=async()=>{
+  if(!isSupabaseConfigured){setAuthError("Connexion indisponible pour le moment (backend non configuré).");return;}
   const{error}=await supabase.auth.signInWithOAuth({
     provider:'google',
     options:{redirectTo:window.location.origin}
@@ -2704,6 +2705,7 @@ const handleGoogleLogin=async()=>{
   if(error)setAuthError(error.message);
 };
 const handleAppleLogin=async()=>{
+  if(!isSupabaseConfigured){setAuthError("Connexion indisponible pour le moment (backend non configuré).");return;}
   const{error}=await supabase.auth.signInWithOAuth({
     provider:'apple',
     options:{redirectTo:window.location.origin}
@@ -2711,19 +2713,24 @@ const handleAppleLogin=async()=>{
   if(error)setAuthError(error.message);
 };
 const handleLogin=async()=>{
+  if(!isSupabaseConfigured){setAuthError("Connexion indisponible pour le moment (backend non configuré).");return false;}
   setAuthLoading(true);setAuthError("");
   const{error}=await supabase.auth.signInWithPassword({email,password});
-  if(error)setAuthError(error.message);
   setAuthLoading(false);
+  if(error){setAuthError(error.message);return false;}
+  return true;
 };
 const handleSignup=async()=>{
+  if(!isSupabaseConfigured){setAuthError("Inscription indisponible pour le moment (backend non configuré).");return false;}
   setAuthLoading(true);setAuthError("");
   const{error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:"https://alhifz.vercel.app"}});
-  if(error)setAuthError(error.message);
-  else setAuthError("Vérifie ton email pour confirmer ton compte ✓");
   setAuthLoading(false);
+  if(error){setAuthError(error.message);return false;}
+  setAuthError("Vérifie ton email pour confirmer ton compte ✓");
+  return false; // on garde la modale ouverte pour que le message reste visible
 };
 const handleReset=async()=>{
+  if(!isSupabaseConfigured){setAuthError("Indisponible pour le moment (backend non configuré).");return;}
   setAuthLoading(true);
   if(!email){setAuthLoading(false);setAuthError("Entre ton email d'abord");return;}setAuthError("");
   const{error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:"https://alhifz.vercel.app"});
@@ -6665,109 +6672,6 @@ return (
 
       {/* Bottom nav */}
 
-      {/* Barre audio fixe en bas */}
-      {selS&&page==="quran"&&(
-        <div style={{position:"fixed",bottom:56,left:0,right:0,zIndex:90,
-          background:t.s1,borderTop:"1px solid "+t.b1,
-          boxShadow:"0 -2px 12px rgba(0,0,0,.08)",padding:"6px 10px",
-          display:"flex",flexDirection:"column",gap:4}}>
-          {/* Ligne 1: Réciteur + Récitation + ▶ Sourate */}
-          <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"nowrap",overflow:"hidden"}}>
-            <span style={{fontSize:".85rem",flexShrink:0}}>🎙️</span>
-            <select value={rec.id} onChange={e=>setRec(RECITERS.find(r=>r.id===e.target.value)||RECITERS[0])}
-              style={{flex:1,minWidth:0,fontSize:".7rem",padding:"4px 6px",borderRadius:8,
-                border:"1px solid "+t.b1,background:t.bg,color:t.tx}}>
-              {RECITERS.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}
-            </select>
-            <button onClick={()=>{if(!verses.length)return;stopListening();setSpeechScore(null);setContinuousMode(false);setContinuousIdx(playing&&verses.findIndex(v=>v.n===playing)>-1?verses.findIndex(v=>v.n===playing):0);setRecitModal(true);}}
-              style={{flexShrink:0,padding:"5px 10px",borderRadius:8,border:"1px solid "+t.acc,
-                background:t.acc+"18",color:t.acc,fontSize:".65rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style={{verticalAlign:"middle"}}><path d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V6zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-2.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg> Réciter
-            </button>
-            <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,playing||sv||1);}}
-              style={{flexShrink:0,padding:"5px 10px",borderRadius:8,border:"none",
-                background:playlistActive&&playlist[0]?.sn===selS.n?"#e53935":t.acc,
-                color:"#fff",fontSize:".65rem",fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>
-              {playlistActive&&playlist[0]?.sn===selS.n?"■ Stop":"▶ Sourate"}
-            </button>
-          </div>
-          {/* Ligne 2: Répét + Vitesse + Signet */}
-          <div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"nowrap",overflowX:"auto"}}>
-            <span style={{fontSize:".58rem",color:t.tx3,flexShrink:0}}>Répét.</span>
-            {[1,3,5,10].map(n=>(
-              <button key={n} onClick={()=>{setLoopCount(n);setLoopInfinite(false);}}
-                style={{padding:"2px 7px",borderRadius:12,border:"1px solid "+(loopCount===n&&!loopInfinite?t.acc:t.b1),
-                  background:loopCount===n&&!loopInfinite?t.acc:"transparent",
-                  color:loopCount===n&&!loopInfinite?"#fff":t.tx3,fontSize:".65rem",cursor:"pointer",flexShrink:0}}>
-                {n}×
-              </button>
-            ))}
-            <button onClick={()=>setLoopInfinite(p=>!p)}
-              style={{padding:"2px 7px",borderRadius:12,border:"1px solid "+(loopInfinite?t.acc:t.b1),
-                background:loopInfinite?t.acc:"transparent",
-                color:loopInfinite?"#fff":t.tx3,fontSize:".65rem",cursor:"pointer",flexShrink:0}}>
-              ∞
-            </button>
-            <span style={{fontSize:".58rem",color:t.tx3,flexShrink:0,marginLeft:4}}>Vitesse</span>
-            {[0.75,1,1.25,1.5].map(s=>(
-              <button key={s} onClick={()=>setPlaybackRate(s)}
-                style={{padding:"2px 7px",borderRadius:12,border:"1px solid "+(playbackRate===s?t.acc:t.b1),
-                  background:playbackRate===s?t.acc:"transparent",
-                  color:playbackRate===s?"#fff":t.tx3,fontSize:".65rem",cursor:"pointer",flexShrink:0}}>
-                {s}×
-              </button>
-            ))}
-            <button onClick={()=>setBookmark(bookmark?.sn===selS.n?null:{sn:selS.n,vn:playing||1})}
-              style={{padding:"2px 8px",borderRadius:12,border:"1px solid "+(bookmark?.sn===selS.n?t.acc:t.b1),
-                background:"transparent",color:bookmark?.sn===selS.n?t.acc:t.tx3,
-                fontSize:".65rem",cursor:"pointer",flexShrink:0,marginLeft:"auto"}}>
-              {bookmark?.sn===selS.n?"🔖":"○ Signet"}
-            </button>
-          </div>
-        </div>
-      )}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
       {/* Mini player flottant */}
       {selS&&page==="quran"&&(<div style={{position:"fixed",bottom:"calc(env(safe-area-inset-bottom,0px) + 68px)",right:16,zIndex:95,width:44,height:44,touchAction:"none"}}>
           {playerOpen?(
@@ -6924,7 +6828,7 @@ return (
       {showAuthModal&&(
         <div style={{position:"fixed",inset:0,zIndex:999,background:"rgba(0,0,0,.75)",backdropFilter:"blur(8px)",display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>setShowAuthModal(false)}>
           <div onClick={e=>e.stopPropagation()} style={{width:"100%",maxWidth:440}}>
-            <AuthScreen authPage={authPage} setAuthPage={setAuthPage} email={email} setEmail={setEmail} password={password} setPassword={setPassword} authLoading={authLoading} authError={authError} onGoogle={handleGoogleLogin} onApple={handleAppleLogin} onLogin={async()=>{await handleLogin();setShowAuthModal(false);}} onSignup={async()=>{await handleSignup();setShowAuthModal(false);}} onReset={handleReset} t={t} acc={t.acc} tn={tn}/>
+            <AuthScreen authPage={authPage} setAuthPage={setAuthPage} email={email} setEmail={setEmail} password={password} setPassword={setPassword} authLoading={authLoading} authError={authError} onGoogle={handleGoogleLogin} onApple={handleAppleLogin} onLogin={async()=>{const ok=await handleLogin();if(ok)setShowAuthModal(false);}} onSignup={async()=>{await handleSignup();}} onReset={handleReset} t={t} acc={t.acc} tn={tn}/>
           </div>
         </div>
       )}

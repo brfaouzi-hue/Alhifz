@@ -41,4 +41,6 @@ if (SUPABASE_URL && SUPABASE_ANON_KEY) {
   console.warn('Al-Hifz: Supabase non configuré, mode offline uniquement');
 }
 
-export { supabase };
+const isSupabaseConfigured = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
+
+export { supabase, isSupabaseConfigured };
