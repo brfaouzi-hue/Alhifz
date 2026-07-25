@@ -2017,14 +2017,24 @@ body>*{position:relative;z-index:1;}
 .bn-lbl{font-size:.52rem;font-weight:500;}
 /* ── Layout ── */
 .wrap{max-width:1200px;margin:0 auto;padding:14px 16px calc(120px + env(safe-area-inset-bottom));padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));width:100%;box-sizing:border-box;overflow-x:hidden;overscroll-behavior-x:none;}
-.two{display:grid;grid-template-columns:min(260px,35%) 1fr;gap:8px;align-items:start;}
+.two{display:block;}
+.nav-hamburger{position:fixed;left:0;top:126px;z-index:150;width:34px;height:46px;border:1px solid ${t.b1};border-left:none;border-radius:0 14px 14px 0;background:${t.cardBg};color:${t.tx2};display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:3px 3px 14px rgba(0,0,0,.14);transition:all .2s;}
+.nav-hamburger:hover{color:${acc};border-color:${acc};transform:translateX(2px);}
+.nav-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(1px);}
+.nav-backdrop.show{opacity:1;pointer-events:auto;}
+.nav-drawer-hd{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid ${t.b1};flex-shrink:0;}
+.nav-drawer-title{font-size:.72rem;font-weight:700;color:${t.tx};text-transform:uppercase;letter-spacing:1px;}
+.nav-close{width:26px;height:26px;border-radius:50%;border:1px solid ${t.b1};background:transparent;color:${t.tx2};display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.8rem;}
+.nav-close:hover{border-color:${t.rd};color:${t.rd};}
+.nav-section-title{font-size:.56rem;text-transform:uppercase;letter-spacing:1.5px;color:${t.tx3};font-weight:700;padding:10px 12px 5px;flex-shrink:0;}
 /* ── Cards — hover effect ── */
 .card{background:${t.cardBg};border:1px solid ${t.b1};border-radius:14px;overflow:hidden;transition:box-shadow .25s,border-color .25s;}
 .card:hover{box-shadow:0 4px 24px ${acc}18;border-color:${acc}44;}
 .ch{padding:10px 14px;border-bottom:1px solid ${t.b1};display:flex;align-items:center;justify-content:space-between;}
 .ct{font-size:.63rem;text-transform:uppercase;letter-spacing:1.5px;color:${t.tx3};font-weight:600;}
 /* ── Left panel ── */
-.lp{display:flex;flex-direction:column;max-height:calc(100vh - 200px);max-height:calc(100dvh - 200px);position:sticky;top:58px;}
+.lp{display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;width:min(300px,84vw);max-height:none;background:${t.cardBg};z-index:201;border-radius:0;border-right:1px solid ${t.b1};transform:translateX(-102%);transition:transform .28s cubic-bezier(.4,0,.2,1);box-shadow:8px 0 30px rgba(0,0,0,.22);padding-top:env(safe-area-inset-top);}
+.lp.open{transform:translateX(0);}
 .ltabs{display:flex;border-bottom:1px solid ${t.b1};}
 .lt{flex:1;padding:9px 4px;border:none;background:transparent;color:${t.tx2};font-size:.68rem;font-weight:500;border-bottom:2px solid transparent;cursor:pointer;transition:all .15s;}
 .lt:hover{color:${t.tx};}.lt.on{color:${acc};border-bottom-color:${acc};}
@@ -2204,8 +2214,7 @@ body>*{position:relative;z-index:1;}
 .empty{text-align:center;padding:36px 14px;color:${t.tx3};font-size:.8rem;}
 .big-ar{font-family:${arFont};font-size:2rem;color:${acc};margin-bottom:8px;}
 @media(max-width:860px){
-  .two{grid-template-columns:1fr;}.rp,.lp{position:static;max-height:none;}.vscroll{max-height:none;}
-  .lp{max-height:220px;overflow-y:auto;}
+  .rp{position:static;max-height:none;}.vscroll{max-height:none;}
   .sg{grid-template-columns:repeat(2,1fr);}.two-h{grid-template-columns:1fr;}
 }
 @media(max-width:480px){
@@ -2469,6 +2478,7 @@ const [authError, setAuthError] = useState("");
   },[page]);
   const [pageTransition,setPageTransition]=useState(false);
   const [ltab,setLtab]=useState("list");
+  const [navOpen,setNavOpen]=useState(false);
   const [selS,setSelS]=useState(null);
   const [selJuz,setSelJuz]=useState(null);
   const [search,setSearch]=useState("");
@@ -3059,7 +3069,7 @@ const handleReset=async()=>{
 
   // FIX 1: doSelect — scroll uniquement sur mobile (<860px) — corrige le "saut" de page
   const doSelect=s=>{
-    setSelS(s);setPlaying(null); if(!versePages[s.n]){fetch(`https://api.qurancdn.com/api/qdc/verses/by_chapter/${s.n}?per_page=300&fields=page_number`).then(r=>r.json()).then(d=>{const m={};(d.verses||[]).forEach(v=>{m[v.verse_number]=v.page_number;});setVersePages(p=>{const nv={...p,[s.n]:m};try{localStorage.setItem("vp",JSON.stringify(nv));}catch{}return nv;});}).catch(()=>{});}loadAudioSegments(s.n,rec?.qurancdn||7).catch(()=>{});
+    setSelS(s);setPlaying(null);setNavOpen(false); if(!versePages[s.n]){fetch(`https://api.qurancdn.com/api/qdc/verses/by_chapter/${s.n}?per_page=300&fields=page_number`).then(r=>r.json()).then(d=>{const m={};(d.verses||[]).forEach(v=>{m[v.verse_number]=v.page_number;});setVersePages(p=>{const nv={...p,[s.n]:m};try{localStorage.setItem("vp",JSON.stringify(nv));}catch{}return nv;});}).catch(()=>{});}loadAudioSegments(s.n,rec?.qurancdn||7).catch(()=>{});
     setMushafPage(SURAH_PAGE[s.n]||1);
     if(audioRef.current){audioRef.current.pause();audioRef.current.src="";}
     // scroll supprimé — causait le saut sur iOS
@@ -4579,7 +4589,34 @@ return (
         {/* CORAN */}
         {page==="quran"&&(
           <div className="two">
-            <div className="lp card">
+            <button className="nav-hamburger" onClick={()=>setNavOpen(true)} title="Sourates & options">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <div className={`nav-backdrop${navOpen?" show":""}`} onClick={()=>setNavOpen(false)}/>
+            <div className={`lp card${navOpen?" open":""}`}>
+              <div className="nav-drawer-hd">
+                <span className="nav-drawer-title">Navigation & options</span>
+                <button className="nav-close" onClick={()=>setNavOpen(false)}>✕</button>
+              </div>
+              {selS&&(
+                <>
+                  <div className="nav-section-title">Options d'affichage — {selS.name}</div>
+                  <div className="vtoolbar" style={{flexWrap:"wrap",overflowX:"visible"}}>
+                    <button className={"tbtn"+(pageMode?" on":"")} onClick={()=>{const v=!pageMode;setPageMode(v);sv("qpagemode",v);}} style={{borderColor:pageMode?t.acc:t.b1,color:pageMode?"#fff":t.tx3}} title="Mode page">Page</button>
+                    <button className={`tbtn ${showTj?"on":""}`} onClick={()=>setShowTj(v=>!v)}>Tajwid</button>
+                    <button className={`tbtn ${reviewMode?"on":""}`} style={reviewMode?{background:t.rd,borderColor:t.rd,color:"#fff"}:{}} onClick={()=>{setReviewMode(v=>!v);setRevealedVerses({});}}>{reviewMode?"Quitter révision":"Révision"}</button>
+                    <button className={`tbtn ${karaokeMode?"on":""}`} style={karaokeMode?{background:"#e91e63",borderColor:"#e91e63",color:"#fff"}:{borderColor:t.b2}} onClick={()=>{setKaraokeMode(v=>!v);setActiveWordIdx(-1);}}>Tilawa</button>
+                    <button className={`tbtn ${hifzMode?"on":""}`} style={hifzMode?{background:t.pu,borderColor:t.pu,color:"#fff"}:{}} onClick={()=>{setHifzMode(v=>!v);setHifzLevel({});setRevealedVerses({});}}>Hifz</button>
+                    <button className="tbtn" onClick={()=>{setImmersive(true);setNavOpen(false);}}>Imm.</button>
+                    <button className={`tbtn ${focusMode?"on":""}`} style={focusMode?{background:"#1a1a1a",borderColor:"#444",color:"#fff"}:{}} onClick={()=>{setFocusMode(v=>!v);setFocusIdx(0);}}>Conc.</button>
+                    <div style={{display:"flex",alignItems:"center",gap:4}}>
+                      <button className="tbtn" onClick={()=>setArabicSize(s=>Math.max(1,s-0.15))}>A-</button>
+                      <button className="tbtn" onClick={()=>setArabicSize(s=>Math.min(3,s+0.15))}>A+</button>
+                    </div>
+                  </div>
+                </>
+              )}
+              <div className="nav-section-title">Parcourir le Coran</div>
               <div className="ltabs">
                 {[["list","Sourates"],["juz","Juz"],["pages-nav","Pages"],["vsearch","Versets"],["themes","Thèmes"]].map(([id,l])=>(
                   <button key={id} className={`lt ${ltab===id?"on":""}`} onClick={()=>setLtab(id)}>{l}</button>
@@ -4607,7 +4644,7 @@ return (
                             color:isCur?t.acc:isRead?t.gr:t.tx3,transition:"all .12s"}}
                           onMouseEnter={e=>{e.currentTarget.style.borderColor=t.acc;e.currentTarget.style.transform="scale(1.1)";}}
                           onMouseLeave={e=>{e.currentTarget.style.borderColor=isCur?t.acc:surahEntry?`${t.acc}55`:isRead?t.gr:t.b1;e.currentTarget.style.transform="";}}
-                          onClick={()=>{setMushafPage(pg);setPage("mushaf");}}>
+                          onClick={()=>{setMushafPage(pg);setPage("mushaf");setNavOpen(false);}}>
                           {pg}
                         </div>
                       );
@@ -4766,7 +4803,7 @@ return (
                 <div className="card empty">
                   <div style={{fontSize:"2.5rem",marginBottom:8}}>📖</div>
                   <div style={{fontFamily:"Amiri,serif",fontSize:"1.4rem",color:t.acc,marginBottom:8}}>اختر سورة</div>
-                  <div style={{fontSize:".75rem",color:t.tx,marginBottom:4,lineHeight:1.6}}>Sélectionne une sourate dans la liste à gauche</div>
+                  <div style={{fontSize:".75rem",color:t.tx,marginBottom:4,lineHeight:1.6}}>Appuie sur <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{verticalAlign:"middle",margin:"0 2px"}}><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg> pour choisir une sourate</div>
                   <div style={{fontSize:".62rem",color:t.tx3,lineHeight:1.5}}>Tu peux lire, mémoriser, écouter et tester ta mémorisation</div>
                   <div style={{marginTop:14,padding:"6px 12px",background:t.acc+"15",borderRadius:8,display:"inline-block"}}>
                     <span style={{fontSize:".6rem",color:t.acc}}>⬤ = versets embarqués · sans internet possible</span>
@@ -4792,23 +4829,6 @@ return (
                       </div>
                     </div>
                     <div className="vbar"><div className="vfill" style={{width:`${sPct(selS)}%`}}/></div>
-                  </div>
-
-                  <div className="vtoolbar">
-                  <button className={"tbtn"+(pageMode?" on":"")} onClick={()=>{const v=!pageMode;setPageMode(v);sv("qpagemode",v);}} style={{borderColor:pageMode?t.acc:t.b1,color:pageMode?"#fff":t.tx3}} title="Mode page">Page</button>
-                    <button className={`tbtn ${showTj?"on":""}`} onClick={()=>setShowTj(v=>!v)}>Tajwid</button>
-                    <button style={{display:"none"}} className={`tbtn ${showTr?"on":""}`} onClick={()=>setShowTr(v=>!v)}>Traduction</button>
-                    <button style={{display:"none"}} className={`tbtn ${showTf?"on":""}`} onClick={()=>setShowTf(v=>!v)}>Tafsir</button>
-
-                    <button className={`tbtn ${reviewMode?"on":""}`} style={reviewMode?{background:t.rd,borderColor:t.rd,color:"#fff"}:{}} onClick={()=>{setReviewMode(v=>!v);setRevealedVerses({});}}>{reviewMode?"Quitter révision":"Révision"}</button>
-                    <button className={`tbtn ${karaokeMode?"on":""}`} style={karaokeMode?{background:"#e91e63",borderColor:"#e91e63",color:"#fff"}:{borderColor:t.b2}} onClick={()=>{setKaraokeMode(v=>!v);setActiveWordIdx(-1);}}>Tilawa</button>
-                    <button className={`tbtn ${hifzMode?"on":""}`} style={hifzMode?{background:t.pu,borderColor:t.pu,color:"#fff"}:{}} onClick={()=>{setHifzMode(v=>!v);setHifzLevel({});setRevealedVerses({});}}>Hifz</button>
-                    <button className="tbtn" onClick={()=>setImmersive(true)}>Imm.</button>
-                    <button className={`tbtn ${focusMode?"on":""}`} style={focusMode?{background:"#1a1a1a",borderColor:"#444",color:"#fff"}:{}} onClick={()=>{setFocusMode(v=>!v);setFocusIdx(0);}}>Conc.</button>
-                    <div style={{display:"flex",alignItems:"center",gap:4,marginLeft:"auto"}}>
-                      <button className="tbtn" onClick={()=>setArabicSize(s=>Math.max(1,s-0.15))}>A-</button>
-                      <button className="tbtn" onClick={()=>setArabicSize(s=>Math.min(3,s+0.15))}>A+</button>
-                    </div>
                   </div>
 
                   {SURAH_INFO[selS.n]&&(<div style={{padding:"10px 14px",background:t.s3,borderBottom:`1px solid ${t.b1}`,fontSize:".7rem",color:t.tx2,lineHeight:1.6}}><div style={{fontWeight:700,color:t.acc,marginBottom:3,fontSize:".65rem",textTransform:"uppercase",letterSpacing:"1px"}}>Vertus & occasions</div><div style={{marginBottom:4}}>{SURAH_INFO[selS.n].virtue}</div><div style={{color:t.gr,fontWeight:600}}>Quand réciter : {SURAH_INFO[selS.n].occasion}</div></div>)}
