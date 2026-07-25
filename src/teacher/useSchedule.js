@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../supabase';
 
-const SLOT_FIELDS = 'id, teacher_id, class_id, session_type, title, description, day_of_week, date, start_time, end_time, duration_min, recurring, max_students, price_cents, level, active, created_at';
+const SLOT_FIELDS = 'id, teacher_id, class_id, student_id, session_type, title, description, day_of_week, date, start_time, end_time, duration_min, recurring, max_students, price_cents, level, active, created_at';
 const BOOKING_FIELDS = 'id, slot_id, student_id, teacher_id, booking_date, start_time, status, student_note, teacher_note, created_at, updated_at';
 const NOTIF_FIELDS = 'id, user_id, type, title, body, data, read, created_at';
 

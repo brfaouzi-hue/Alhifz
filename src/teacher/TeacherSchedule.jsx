@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useTeacherSlots, useTeacherBookings } from './useSchedule.js';
-import { useTeacherClasses, useProfiles } from './useTeacher.js';
+import { useTeacherClasses, useProfiles, useClassStudents } from './useTeacher.js';
 
 const DAYS = [
   { label: 'Lun', dow: 1 }, { label: 'Mar', dow: 2 }, { label: 'Mer', dow: 3 },
@@ -15,7 +15,7 @@ const DURATIONS = [30, 45, 60, 90];
 const DEFAULT_FORM = {
   session_type: 'individual', title: '', description: '', level: '',
   max_students: 4, day_of_week: 1, date: '', start_time: '09:00',
-  duration_min: 45, recurring: true, class_id: '', price_euros: '',
+  duration_min: 45, recurring: true, class_id: '', price_euros: '', student_id: '',
 };
 
 function getMonday(d) {
@@ -65,6 +65,9 @@ export default function TeacherSchedule({ userId, t, acc }) {
   const [actionNoteFor, setActionNoteFor] = useState(null);
   const [actionNote, setActionNote] = useState('');
   const [justActioned, setJustActioned] = useState({});
+  const { students: classRoster } = useClassStudents(form.class_id || null);
+  const rosterNames = useProfiles(classRoster.map(s => s.student_id));
+  const slotAssigneeNames = useProfiles(slots.map(s => s.student_id));
 
   const weekStart = useMemo(() => getMonday(new Date()), []);
   const weekDates = useMemo(() => DAYS.map((_, i) => {
@@ -100,7 +103,7 @@ export default function TeacherSchedule({ userId, t, acc }) {
       level: slot.level || '', max_students: slot.max_students, day_of_week: slot.day_of_week ?? 1,
       date: slot.date || '', start_time: (slot.start_time || '09:00:00').slice(0, 5),
       duration_min: slot.duration_min, recurring: slot.recurring, class_id: slot.class_id || '',
-      price_euros: slot.price_cents ? String(slot.price_cents / 100) : '',
+      price_euros: slot.price_cents ? String(slot.price_cents / 100) : '', student_id: slot.student_id || '',
     });
     setFormError('');
     setDetailCell(null);
@@ -123,6 +126,7 @@ export default function TeacherSchedule({ userId, t, acc }) {
       duration_min: Number(form.duration_min),
       recurring: form.recurring,
       class_id: form.class_id || null,
+      student_id: form.session_type === 'individual' ? (form.student_id || null) : null,
       price_cents: form.price_euros ? Math.round(Number(form.price_euros) * 100) : 0,
     };
     const { error } = formModal.mode === 'edit'
@@ -214,7 +218,7 @@ export default function TeacherSchedule({ userId, t, acc }) {
                     fontSize: '.55rem', textAlign: 'left', overflow: 'hidden', zIndex: 2, lineHeight: 1.25,
                   }}>
                   <div style={{ fontWeight: 700 }}>{style.emoji} {cell.slot.title || (cell.slot.max_students > 1 ? 'Collectif' : 'Individuel')}</div>
-                  <div style={{ opacity: .9 }}>{style.label}</div>
+                  <div style={{ opacity: .9 }}>{style.label === 'Disponible' && cell.slot.student_id ? `Pour ${slotAssigneeNames[cell.slot.student_id] || '…'}` : style.label}</div>
                 </button>
               );
             })}
@@ -425,6 +429,22 @@ export default function TeacherSchedule({ userId, t, acc }) {
                   style={{ width: '100%', padding: '9px 12px', borderRadius: 10, border: '1px solid ' + t.b1, background: t.navBg, color: t.tx, fontSize: '.75rem', boxSizing: 'border-box' }} />
               </div>
             </div>
+
+            {form.session_type === 'individual' && (
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ fontSize: '.62rem', color: t.tx3, marginBottom: 4 }}>Élève précis (optionnel)</div>
+                {!form.class_id ? (
+                  <div style={{ fontSize: '.65rem', color: t.tx3, fontStyle: 'italic', padding: '9px 2px' }}>Choisis une classe ci-dessus pour cibler un élève</div>
+                ) : (
+                  <select value={form.student_id} onChange={e => setForm(p => ({ ...p, student_id: e.target.value }))}
+                    style={{ width: '100%', padding: '9px 6px', borderRadius: 10, border: '1px solid ' + t.b1, background: t.navBg, color: t.tx, fontSize: '.7rem' }}>
+                    <option value="">Ouvert à toute la classe</option>
+                    {classRoster.map(s => <option key={s.student_id} value={s.student_id}>{rosterNames[s.student_id] || s.student_id.slice(0, 8) + '...'}</option>)}
+                  </select>
+                )}
+                {form.student_id && <div style={{ fontSize: '.6rem', color: acc, marginTop: 4 }}>Ce créneau ne sera visible que par {rosterNames[form.student_id] || 'cet élève'}</div>}
+              </div>
+            )}
 
             {formError && <div style={{ color: t.rd, fontSize: '.7rem', marginBottom: 10, textAlign: 'center' }}>{formError}</div>}
 
