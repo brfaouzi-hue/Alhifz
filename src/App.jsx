@@ -1729,6 +1729,11 @@ const TJ_COLORS={
 
 // Colorie le HTML tajweed qurancdn avec des spans inline
 const stripArabicNums=s=>(s||"").replace(/[۰-۹٠-٩]/g,"").replace(/ٲ/g,"ٰ");
+// Les traductions de l'API contiennent des appels de note de bas de page bruts
+// (ex: <sup foot_note=211622>1</sup>) affichés tels quels un peu partout dans
+// l'app (mode test, mode concentration, partage, favoris...) — nettoyé une
+// bonne fois à la source plutôt que sur chaque site d'affichage.
+const cleanFr=s=>(s||"").replace(/<[^>]*>/g,"").replace(/\s+([.,;:!?])/g,"$1").trim();
 const playDing=()=>{try{const ctx=new (window.AudioContext||window.webkitAudioContext)();const osc=ctx.createOscillator();const gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.type="sine";osc.frequency.value=880;gain.gain.setValueAtTime(0.15,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.35);osc.start();osc.stop(ctx.currentTime+0.35);}catch{}};
 
 // Découpe un texte sur plusieurs lignes pour un rendu canvas (pas de wrap natif)
@@ -2887,7 +2892,7 @@ const handleReset=async()=>{
             const ayahs=data?.verses||[];
             if(!ayahs.length)return;
             const localQ=Q[n]||[];
-            const result=ayahs.map((a,i)=>({n:a.verse_number,ar:a.text_uthmani_tajweed||a.text_uthmani||"",fr:a.translations?.[0]?.text||localQ[i]?.fr||"",tf:localQ[i]?.tf||"",pg:a.page_number||localQ[i]?.pg||0}));
+            const result=ayahs.map((a,i)=>({n:a.verse_number,ar:a.text_uthmani_tajweed||a.text_uthmani||"",fr:cleanFr(a.translations?.[0]?.text||localQ[i]?.fr||""),tf:localQ[i]?.tf||"",pg:a.page_number||localQ[i]?.pg||0}));
             try{localStorage.setItem(cacheKey,JSON.stringify(result));}catch{}
           }).catch(()=>{});
       });
@@ -3026,6 +3031,7 @@ const handleReset=async()=>{
 
 
   const [toastMsg,setToastMsg]=useState(null);
+  React.useEffect(()=>{if(!toastMsg)return;const id=setTimeout(()=>setToastMsg(null),2600);return()=>clearTimeout(id);},[toastMsg]);
 
   React.useEffect(()=>{try{if('Notification'in window){if((typeof Notification!=="undefined"?Notification.permission:"denied")==='default')Notification.requestPermission();if((typeof Notification!=="undefined"?Notification.permission:"denied")==='granted'){const k=new Date().toISOString().split('T')[0];if(!(hist[k]||0)){const ms=new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate(),20,0,0)-new Date();if(ms>0&&ms<86400000)setTimeout(()=>typeof Notification!=="undefined"&&new Notification('Al-Hifz',{body:'Pense à mémoriser quelques versets ce soir !',icon:'/icons/icon-192.png'}),ms);}}}}catch(e){}},[ hist]);
   // Notifications push quotidiennes
@@ -3489,7 +3495,7 @@ const handleReset=async()=>{
         // tajweed HTML from API — crucial for correct coloring
         ar:a.text_uthmani_tajweed||a.text_uthmani||"",
         // translation: API > local fallback
-        fr:(a.translations?.[0]?.text||frAyahs[i]?.text||localQ[i]?.fr||""),
+        fr:cleanFr(a.translations?.[0]?.text||frAyahs[i]?.text||localQ[i]?.fr||""),
         tf:localQ[i]?.tf||"",
       }));
       setVerses(result);setLoadState("done");
@@ -3538,7 +3544,7 @@ const handleReset=async()=>{
   };
   const joinCollectiveKhatma=()=>{
     const found=collectiveKhatmas.find(k=>k.code===joinCode.trim().toUpperCase());
-    if(!found){alert("Code introuvable. Vérifie le code avec ton groupe.");return;}
+    if(!found){setToastMsg("Code introuvable. Vérifie le code avec ton groupe.");return;}
     const myName=(user?.email||"Moi").split("@")[0];
     const alreadyIn=found.members.some(m=>m.uid===(user?.id||"local"));
     if(!alreadyIn){
@@ -3669,7 +3675,7 @@ const handleReset=async()=>{
         try{
           const r=await fetch(`https://api.qurancdn.com/api/qdc/verses/by_chapter/${filterSurah}?language=fr&words=false&per_page=286&fields=text_uthmani,verse_number,translations`);
           const d=await r.json();
-          vs=(d.verses||[]).map(v=>({n:v.verse_number,ar:v.text_uthmani||"",fr:v.translations?.[0]?.text||""}));
+          vs=(d.verses||[]).map(v=>({n:v.verse_number,ar:v.text_uthmani||"",fr:cleanFr(v.translations?.[0]?.text||"")}));
           if(!Q[filterSurah]) Q[filterSurah]=vs;
         }catch{}
       }
@@ -3701,7 +3707,7 @@ const handleReset=async()=>{
 
   // Notifications
   const requestNotifications=async()=>{
-    if(!("Notification" in window)){alert("Notifications non supportées sur ce navigateur.");return;}
+    if(!("Notification" in window)){setToastMsg("Notifications non supportées sur ce navigateur.");return;}
     const perm=await Notification.requestPermission();
     if(perm==="granted"){
       setNotifEnabled(true);sv("qnotif",true);
@@ -3878,7 +3884,7 @@ const handleReset=async()=>{
     }
   };
 
-  const startTest=(s,vs)=>{const memVerses=vs.filter(v=>!!(mem[String(s.n)]||{})[String(v.n)]);if(memVerses.length<2){alert("Il faut au moins 2 versets mémorisés pour ce test.");return;}const shuffled=[...memVerses].sort(()=>Math.random()-.5);setTestSurah(s);setTestVerses(shuffled);setTestIdx(0);setTestRevealed(false);setTestScore({correct:0,wrong:0,total:0});setTestDone(false);setTestMode(true);};
+  const startTest=(s,vs)=>{const memVerses=vs.filter(v=>!!(mem[String(s.n)]||{})[String(v.n)]);if(memVerses.length<2){setToastMsg("Il faut au moins 2 versets mémorisés pour ce test.");return;}const shuffled=[...memVerses].sort(()=>Math.random()-.5);setTestSurah(s);setTestVerses(shuffled);setTestIdx(0);setTestRevealed(false);setTestScore({correct:0,wrong:0,total:0});setTestDone(false);setTestMode(true);};
 
   const histKeys=Object.keys(hist).sort().slice(-14);
   const histVals=histKeys.map(k=>hist[k]||0);
@@ -4046,12 +4052,12 @@ return (
                 <div style={{height:4,background:t.b1,borderRadius:99,overflow:"hidden"}}><div style={{height:"100%",background:t.acc,borderRadius:99,width:`${(testIdx/testVerses.length)*100}%`,transition:"width .3s"}}/></div>
                 <div style={{background:t.s2,borderRadius:14,padding:16,border:`1px solid ${t.b1}`}}>
                   <div style={{fontSize:".62rem",color:t.tx3,marginBottom:8,textTransform:"uppercase",letterSpacing:"1px"}}>Complète — {testSurah?.name} v.{testVerses[testIdx]?.n}</div>
-                  <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.6rem",direction:"rtl",textAlign:"right",lineHeight:2.2,color:t.acc}}>{(testVerses[testIdx]?.ar||"").split(" ").slice(0,3).join(" ")}…</div>
+                  <div style={{fontFamily:arFont||"Amiri Quran,serif",fontSize:"1.6rem",direction:"rtl",textAlign:"right",lineHeight:2.2,color:t.acc}}>{stripTags(testVerses[testIdx]?.ar||"").split(" ").slice(0,3).join(" ")}…</div>
                   <div style={{fontSize:".68rem",color:t.tx3,marginTop:6,fontStyle:"italic"}}>{testVerses[testIdx]?.fr?.split(" ").slice(0,6).join(" ")}…</div>
                 </div>
                 {testRevealed&&(<div style={{background:t.s3,borderRadius:14,padding:16,border:`2px solid ${t.acc}44`}}>
                   <div style={{fontSize:".6rem",color:t.acc,marginBottom:8,textTransform:"uppercase"}}>Verset complet</div>
-                  <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.6rem",direction:"rtl",textAlign:"right",lineHeight:2.2,color:t.tx}}>{(testVerses[testIdx]?.ar||"")} ﴿{testVerses[testIdx]?.n}﴾</div>
+                  <div style={{fontFamily:arFont||"Amiri Quran,serif",fontSize:"1.6rem",direction:"rtl",textAlign:"right",lineHeight:2.2,color:t.tx}}><TajwidSpan text={testVerses[testIdx]?.ar||""} enabled={showTj} tjc={tjc}/> ﴿{testVerses[testIdx]?.n}﴾</div>
                   <div style={{fontSize:".75rem",color:t.tx2,marginTop:8,fontStyle:"italic"}}>{testVerses[testIdx]?.fr}</div>
                 </div>)}
                 {!testRevealed
@@ -5835,7 +5841,7 @@ return (
                       <>
                         <div style={{background:t.s2,borderRadius:12,padding:"16px",border:`1px solid ${t.b1}`}}>
                           <div style={{fontSize:".6rem",color:t.tx3,marginBottom:8,textTransform:"uppercase",letterSpacing:1}}>Verset {quizQ.n}</div>
-                          <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.6rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx}}>{quizQ.ar}</div>
+                          <div style={{fontFamily:arFont||"Amiri Quran,serif",fontSize:"1.6rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx}}><TajwidSpan text={quizQ.ar||""} enabled={showTj} tjc={tjc}/></div>
                           {quizAnswer&&quizQ.fr&&<div style={{fontSize:".72rem",color:t.tx2,marginTop:8,fontStyle:"italic"}}>{quizQ.fr}</div>}
                         </div>
                         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
@@ -5882,7 +5888,7 @@ return (
                         ):(
                           <div style={{display:"flex",flexDirection:"column",gap:8}}>
                             <div style={{background:t.s2,borderRadius:12,padding:"16px",border:"1px solid "+t.acc+"44"}}>
-                              <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.4rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.acc}}>{quizQ.ar}</div>
+                              <div style={{fontFamily:arFont||"Amiri Quran,serif",fontSize:"1.4rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.acc}}><TajwidSpan text={quizQ.ar||""} enabled={showTj} tjc={tjc}/></div>
                               {quizQ.fr&&<div style={{fontSize:".72rem",color:t.tx2,marginTop:8,fontStyle:"italic"}}>{quizQ.fr}</div>}
                             </div>
                             <div style={{display:"flex",gap:8}}>
@@ -5928,7 +5934,7 @@ return (
                           </div>
                           {quizShowWrong?.q?.n===w.q.n&&(
                             <div style={{marginTop:8,paddingTop:8,borderTop:"1px solid "+t.rd+"20"}}>
-                              <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.1rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx,marginBottom:4}}>{w.q.ar}</div>
+                              <div style={{fontFamily:arFont||"Amiri Quran,serif",fontSize:"1.1rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx,marginBottom:4}}><TajwidSpan text={w.q.ar||""} enabled={showTj} tjc={tjc}/></div>
                               {w.q.fr&&<div style={{fontSize:".68rem",color:t.tx2,fontStyle:"italic"}}>{w.q.fr}</div>}
                             </div>
                           )}
@@ -6534,7 +6540,7 @@ return (
                 <div><div className="set-lbl">Importer une sauvegarde</div><div className="set-sub">Restaurer depuis un fichier</div></div>
                 <label className="tbtn" style={{borderColor:t.bl,color:t.bl,cursor:"pointer"}}>
                   Importer
-                  <input type="file" accept=".json" style={{display:"none"}} onChange={e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.mem)setMem(d.mem);if(d.settings)setSettings(d.settings);if(d.hist)setHist(d.hist);if(d.badges)setBadges(d.badges);if(d.favorites)setFavorites(d.favorites);if(d.notes)setNotes(d.notes);if(d.khatmas)setKhatmas(d.khatmas);if(d.spaced)setSpaced(d.spaced);alert("Import réussi !");}catch{alert("Fichier invalide");}};r.readAsText(f);}}/>
+                  <input type="file" accept=".json" style={{display:"none"}} onChange={e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.mem)setMem(d.mem);if(d.settings)setSettings(d.settings);if(d.hist)setHist(d.hist);if(d.badges)setBadges(d.badges);if(d.favorites)setFavorites(d.favorites);if(d.notes)setNotes(d.notes);if(d.khatmas)setKhatmas(d.khatmas);if(d.spaced)setSpaced(d.spaced);setToastMsg("Import réussi !");}catch{setToastMsg("Fichier invalide");}};r.readAsText(f);}}/>
                 </label>
               </div>
               <div className="set-row" style={{borderBottom:"none"}}>
