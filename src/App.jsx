@@ -473,13 +473,13 @@ const TJC_DARK={
   mr:"#039BE5",     // Madd permissible (2-4-6h) — bleu moyen
   mo:"#880E4F",     // Madd wajib muttasil (4-5h) — bordeaux/magenta
   ml:"#B71C1C",     // Madd lazim (6h) — rouge foncé comme Mushaf
-  g:"#43A047",      // Ghunna — vert
-  idg:"#43A047",    // Idgham sans ghunna — vert
+  g:"#43A047",      // Ghunna (avec résonance nasale) — vert
+  idg:"#00897B",    // Idgham sans ghunna — teal, distinct du vert plein
   q:"#FFA726",      // Qalqala — orange
   ikh:"#E91E8C",    // Ikhfa — rose/magenta
   iql:"#26C6DA",    // Iqlab — cyan
-  ls:"#546E7A",     // Lam shamsiyya — lettre assimilée, gris bleu (comme Ham Wasl)
-  hw:"#546E7A",     // Ham Wasl — gris bleu
+  ls:"#78909C",     // Lam shamsiyya — lettre assimilée, gris bleu clair
+  hw:"#8D6E63",     // Hamzat al-wasl / lettres muettes — gris chaud discret
   sl:"#607d8b",     // Silence/Sakt — gris bleu
 };
 const TJC_LIGHT={
@@ -487,13 +487,13 @@ const TJC_LIGHT={
   mr:"#01579B",     // Madd permissible — bleu foncé
   mo:"#880E4F",     // Madd wajib — bordeaux
   ml:"#B71C1C",     // Madd lazim — rouge foncé
-  g:"#169200",      // Ghunna — vert
-  idg:"#169200",    // Idgham sans ghunna — vert
+  g:"#169200",      // Ghunna (avec résonance nasale) — vert
+  idg:"#00695C",    // Idgham sans ghunna — teal foncé, distinct du vert plein
   q:"#E65100",      // Qalqala — orange
   ikh:"#AD1457",    // Ikhfa — rose/magenta
   iql:"#00838F",    // Iqlab — cyan foncé
-  ls:"#37474F",     // Lam shamsiyya — lettre assimilée, gris bleu (comme Ham Wasl)
-  hw:"#37474F",     // Ham Wasl
+  ls:"#607D8B",     // Lam shamsiyya — lettre assimilée, gris bleu
+  hw:"#795548",     // Hamzat al-wasl / lettres muettes — gris chaud discret
   sl:"#263238",
 };
 
@@ -598,15 +598,17 @@ const TAJWID_CLASS_COLORS={
   "madda_necessary":     tjc=>tjc.ml,  // Madd lazim (6h obligatoire)
   "madda_obligatory":    tjc=>tjc.mo,  // Madd wajib muttasil (4-5h)
   "madda_wajib":         tjc=>tjc.mo,
-  // Ghunna / Idgham (غنة، إدغام) ── vert
+  // Ghunna / Idgham (غنة، إدغام) ── vert = avec ghunna (résonance nasale),
+  // teal = sans ghunna (fusion sans résonance) — deux règles distinctes, donc
+  // deux couleurs distinctes (auparavant confondues sous la même teinte).
   "ghunnah":             tjc=>tjc.g,
   "idgham_with_ghunnah": tjc=>tjc.g,
   "idgham_ghunnah":      tjc=>tjc.g,
-  "idgham_mutajanisayn": tjc=>tjc.g,
-  "idgham_mutaqaribayn": tjc=>tjc.idg,
+  "idgham_shafawi":      tjc=>tjc.g,  // meem sakina + meem → toujours avec ghunna
+  "idgham_mutajanisayn": tjc=>tjc.idg, // fusion de lettres de même mekhraj — sans ghunna
+  "idgham_mutaqaribayn": tjc=>tjc.idg, // fusion de lettres de mekhraj proche — sans ghunna
   "idgham_without_ghunnah": tjc=>tjc.idg,
   "idgham_wo_ghunnah":   tjc=>tjc.idg, // nom réel renvoyé par l'API qurancdn
-  "idgham_shafawi":      tjc=>tjc.g,
   // Qalqala (قلقلة) ── violet
   "qalaqah":             tjc=>tjc.q,
   // Ikhfa / Iqlab (إخفاء، إقلاب) ── orange / rouge
@@ -614,12 +616,15 @@ const TAJWID_CLASS_COLORS={
   "ikhafa_shafawi":      tjc=>tjc.ikh,
   "ikhafa_with_ghunnah": tjc=>tjc.ikh,
   "iqlab":               tjc=>tjc.iql,
-  // Lam shamsiyya (لام شمسية) ── bleu clair
+  // Lam shamsiyya (لام شمسية) ── bleu-gris (lettre assimilée, non prononcée)
   "laam_shamsiyah":      tjc=>tjc.ls,
-  // Ham Wasl / Sakt ── gris (affiché mais sans couleur forte)
-  "ham_wasl":            ()=>null,
-  "silent":              ()=>null,
-  "slnt":                ()=>null, // nom réel renvoyé par l'API qurancdn
+  // Hamzat al-wasl / lettres muettes / sakt ── gris neutre : un vrai Mushaf
+  // tajwid les distingue visuellement du texte normal (non prononcées ou
+  // prononcées seulement en début de lecture) au lieu de les laisser en
+  // encre pleine comme du texte ordinaire.
+  "ham_wasl":            tjc=>tjc.hw,
+  "silent":              tjc=>tjc.hw,
+  "slnt":                tjc=>tjc.hw, // nom réel renvoyé par l'API qurancdn
   "sakt":                tjc=>tjc.sl,
 };
 
@@ -2267,19 +2272,16 @@ function SurahPageDivider({sn,t,arFont}){
   );
 }
 
-// AyahMarker — rosette de fin de verset façon Mushaf (cercle + 8 pointes), avec
-// chiffre arabo-indien centré, plutôt qu'un badge rond plat de type "UI moderne".
+// AyahMarker — marqueur de fin de verset : anneau fin (double liseré, comme les
+// éditions Mushaf imprimées) avec le chiffre arabo-indien centré. Volontairement
+// sobre (pas de rayons/dents type roue dentée) pour rester discret et élégant,
+// dans l'esprit Quran.com/Tarteel plutôt qu'un pictogramme chargé.
 function AyahMarker({n, color, faded, onClick}) {
   const c=encodeURIComponent(color);
-  const spokes=Array.from({length:8}).map((_,i)=>{
-    const a=i*Math.PI/4;
-    const x1=20+16*Math.cos(a),y1=20+16*Math.sin(a),x2=20+20*Math.cos(a),y2=20+20*Math.sin(a);
-    return `%3Cline x1='${x1.toFixed(1)}' y1='${y1.toFixed(1)}' x2='${x2.toFixed(1)}' y2='${y2.toFixed(1)}'/%3E`;
-  }).join('');
-  const bg=`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='${c}' stroke-width='1.3'%3E%3Ccircle cx='20' cy='20' r='15.5'/%3E${spokes}%3C/g%3E%3C/svg%3E")`;
+  const bg=`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='18' fill='none' stroke='${c}' stroke-width='1.5'/%3E%3Ccircle cx='20' cy='20' r='14.2' fill='none' stroke='${c}' stroke-width='.75' opacity='.5'/%3E%3C/svg%3E")`;
   return (
-    <span onClick={onClick} style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"1.3em",height:"1.3em",backgroundImage:bg,backgroundSize:"100% 100%",backgroundRepeat:"no-repeat",verticalAlign:"middle",margin:"0 2px",opacity:faded?0.5:1,flexShrink:0,cursor:onClick?"pointer":undefined,WebkitTapHighlightColor:"transparent"}}>
-      <span style={{fontSize:".44em",fontWeight:700,fontFamily:"Amiri Quran,Amiri,serif",color,lineHeight:1}}>{toArNum(n)}</span>
+    <span onClick={onClick} style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"1.25em",height:"1.25em",backgroundImage:bg,backgroundSize:"100% 100%",backgroundRepeat:"no-repeat",verticalAlign:"middle",margin:"0 2px",opacity:faded?0.5:1,flexShrink:0,cursor:onClick?"pointer":undefined,WebkitTapHighlightColor:"transparent"}}>
+      <span style={{fontSize:".4em",fontWeight:700,fontFamily:"Amiri Quran,Amiri,serif",color,lineHeight:1}}>{toArNum(n)}</span>
     </span>
   );
 }
@@ -5109,8 +5111,8 @@ return (
                   {showTj&&(<div className="tj-legend">
                     {[
                       [tjc.m,"Madd naturel"],[tjc.mr,"Madd permissible"],[tjc.mo,"Madd wajib"],
-                      [tjc.ml,"Madd lazim"],[tjc.g,"Ghunna/Idgham"],[tjc.q,"Qalqala"],
-                      [tjc.ikh,"Ikhfa"],[tjc.iql,"Iqlab"],[tjc.ls,"Lam shamsiyya"],
+                      [tjc.ml,"Madd lazim"],[tjc.g,"Ghunna"],[tjc.idg,"Idgham sans ghunna"],[tjc.q,"Qalqala"],
+                      [tjc.ikh,"Ikhfa"],[tjc.iql,"Iqlab"],[tjc.ls,"Lam shamsiyya"],[tjc.hw,"Lettres muettes"],
                     ].map(([c,l])=>(<div key={l} className="tj-item"><div className="tj-dot" style={{background:c}}/><span style={{color:t.tx2,fontSize:".58rem"}}>{l}</span></div>))}
                   </div>)}
 

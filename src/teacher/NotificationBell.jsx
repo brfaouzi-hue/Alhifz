@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNotifications } from './useSchedule.js';
 
 const TYPE_ICON = {
@@ -26,12 +27,29 @@ function timeAgo(dateStr) {
 export default function NotificationBell({ userId, t, setPage }) {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications(userId);
   const [open, setOpen] = useState(false);
-  const rootRef = useRef(null);
+  const [pos, setPos] = useState(null);
+  const btnRef = useRef(null);
+  const panelRef = useRef(null);
+
+  // Le bouton vit dans le topbar, qui a un backdrop-filter — celui-ci crée un
+  // nouveau "containing block" pour les descendants en position:fixed (norme
+  // CSS Filter Effects), donc un panneau fixed imbriqué là-dedans se retrouve
+  // positionné/rogné par rapport au topbar (52px de haut, overflow:hidden) au
+  // lieu du viewport. Sur iPhone ça rend le panneau invisible au tap sur la
+  // cloche. Fix : on sort le panneau du DOM du topbar via un portail vers
+  // document.body, positionné à la main sous le bouton.
+  const openPanel = () => {
+    const r = btnRef.current?.getBoundingClientRect();
+    if (r) setPos({ top: r.bottom + 8, right: Math.max(12, window.innerWidth - r.right) });
+    setOpen(true);
+  };
 
   useEffect(() => {
     if (!open) return;
     const onClickOutside = (e) => {
-      if (rootRef.current && !rootRef.current.contains(e.target)) setOpen(false);
+      if (btnRef.current?.contains(e.target)) return;
+      if (panelRef.current?.contains(e.target)) return;
+      setOpen(false);
     };
     document.addEventListener('mousedown', onClickOutside);
     document.addEventListener('touchstart', onClickOutside);
@@ -48,8 +66,8 @@ export default function NotificationBell({ userId, t, setPage }) {
   };
 
   return (
-    <div ref={rootRef} style={{ position: 'relative' }}>
-      <button onClick={() => setOpen(p => !p)} title="Notifications"
+    <div style={{ position: 'relative' }}>
+      <button ref={btnRef} onClick={() => (open ? setOpen(false) : openPanel())} title="Notifications"
         style={{ width: 30, height: 30, borderRadius: '50%', border: '1px solid ' + t.b1, background: open ? t.acc + '18' : 'transparent', color: open ? t.acc : t.tx2, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', flexShrink: 0 }}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
         {unreadCount > 0 && (
@@ -59,8 +77,8 @@ export default function NotificationBell({ userId, t, setPage }) {
         )}
       </button>
 
-      {open && (
-        <div style={{ position: 'fixed', top: 56, right: 12, left: 12, maxWidth: 380, marginLeft: 'auto', zIndex: 999, background: t.s1, border: '1px solid ' + t.b1, borderRadius: 16, boxShadow: '0 8px 30px rgba(0,0,0,.2)', maxHeight: '70vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {open && pos && createPortal(
+        <div ref={panelRef} style={{ position: 'fixed', top: pos.top, right: pos.right, left: 12, maxWidth: 380, marginLeft: 'auto', zIndex: 9999, background: t.s1, border: '1px solid ' + t.b1, borderRadius: 16, boxShadow: '0 8px 30px rgba(0,0,0,.2)', maxHeight: '70vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid ' + t.b1, flexShrink: 0 }}>
             <span style={{ fontWeight: 700, fontSize: '.85rem', color: t.tx }}>Notifications</span>
             {unreadCount > 0 && (
@@ -86,7 +104,8 @@ export default function NotificationBell({ userId, t, setPage }) {
               </button>
             ))}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
