@@ -1444,6 +1444,24 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
 
   const stripAr=s=>(s||"").replace(/<[^>]*>/g,"").replace(/[\u064B-\u065F\u0670]/g,"").replace(/[أإآٱ]/g,"ا").trim();
 
+  const retryCountRef=React.useRef(0);
+  React.useEffect(()=>{retryCountRef.current=0;},[idx]);
+
+  // Score < 70% : repete automatiquement le meme verset, jusqu'a 3 tentatives au total
+  const handleAttemptResult=React.useCallback((v,s)=>{
+    if(sm2Update&&v) sm2Update(selS.n,v.n,s.pct>=90?5:s.pct>=70?4:3);
+    if(s.pct>=70){
+      if(chainRef.current) setTimeout(nextVerse,700);
+    } else if(retryCountRef.current<2){
+      retryCountRef.current+=1;
+      setTimeout(()=>{
+        setSpeechScore(null);setSpeechResult("");
+        startListening(v.ar||"",v.n,(s2)=>handleAttemptResult(v,s2));
+      },900);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[sm2Update,selS,startListening,setSpeechScore,setSpeechResult]);
+
   const nextVerse=React.useCallback(()=>{
     const n=idxRef.current+1;
     if(n<versesRef.current.length){
@@ -1452,14 +1470,11 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
       if(chainRef.current){
         setTimeout(()=>{
           const v=versesRef.current[n];
-          if(v&&chainRef.current) startListening(v.ar||"",v.n,(s)=>{
-            if(sm2Update&&v) sm2Update(selS.n,v.n,s.pct>=90?5:s.pct>=70?4:3);
-            if(chainRef.current&&s.pct>=70) setTimeout(nextVerse,700);
-          });
+          if(v&&chainRef.current) startListening(v.ar||"",v.n,(s)=>handleAttemptResult(v,s));
         },400);
       }
     } else {setTimeout(onClose,800);}
-  },[startListening,onClose,setSpeechScore,setSpeechResult,sm2Update,selS]);
+  },[startListening,onClose,setSpeechScore,setSpeechResult,handleAttemptResult]);
 
   const goTo=React.useCallback((vi)=>{
     stopListening();setSpeechScore(null);setSpeechResult("");
@@ -1467,18 +1482,14 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
     if(chainRef.current){
       setTimeout(()=>{
         const v=versesRef.current[vi];
-        if(v) startListening(v.ar||"",v.n,(s)=>{
-          if(sm2Update&&v) sm2Update(selS.n,v.n,s.pct>=90?5:s.pct>=70?4:3);
-          if(chainRef.current&&s.pct>=70) setTimeout(nextVerse,700);
-        });
+        if(v) startListening(v.ar||"",v.n,(s)=>handleAttemptResult(v,s));
       },300);
     }
-  },[startListening,stopListening,nextVerse,setSpeechScore,setSpeechResult,sm2Update,selS]);
+  },[startListening,stopListening,setSpeechScore,setSpeechResult,handleAttemptResult]);
 
   const onDone=React.useCallback((score)=>{
-    if(sm2Update&&curV) sm2Update(selS.n,curV.n,score.pct>=90?5:score.pct>=70?4:3);
-    if(chainRef.current&&score.pct>=70) setTimeout(nextVerse,700);
-  },[nextVerse,curV,sm2Update,selS]);
+    if(curV) handleAttemptResult(curV,score);
+  },[curV,handleAttemptResult]);
 
   const handleMic=React.useCallback(()=>{
     if(isListening){stopListening();}
@@ -1601,6 +1612,7 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
                   {renderWords(stripTags(v?.ar||""),isCur,vAr)}
                   <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"1.3em",height:"1.3em",borderRadius:"50%",border:`1px solid ${isCur?acc:isDone?t.gr:t.b2}`,fontSize:".5em",fontWeight:600,color:isCur?acc:isDone?t.gr:t.tx3,background:isDone?t.gr+"22":"transparent",marginRight:4,verticalAlign:"middle"}}>{v.n}</span>
                 </div>
+                {v?.fr&&<div style={{direction:"ltr",textAlign:"left",fontSize:".68rem",color:t.tx3,fontStyle:"italic",lineHeight:1.5,marginTop:4}}>{stripTags(v.fr)}</div>}
                 {isDone&&<div style={{fontSize:".58rem",color:t.gr,marginTop:2,display:"flex",alignItems:"center",gap:3}}>
                   <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>Récité
                 </div>}
@@ -1704,6 +1716,92 @@ const TJ_COLORS={
 
 // Colorie le HTML tajweed qurancdn avec des spans inline
 const stripArabicNums=s=>(s||"").replace(/[۰-۹٠-٩]/g,"");
+const playDing=()=>{try{const ctx=new (window.AudioContext||window.webkitAudioContext)();const osc=ctx.createOscillator();const gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.type="sine";osc.frequency.value=880;gain.gain.setValueAtTime(0.15,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.35);osc.start();osc.stop(ctx.currentTime+0.35);}catch{}};
+
+// Découpe un texte sur plusieurs lignes pour un rendu canvas (pas de wrap natif)
+function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight) {
+  const words = (text || "").split(/\s+/).filter(Boolean);
+  let line = "";
+  const lines = [];
+  for (const word of words) {
+    const test = line ? line + " " + word : word;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = test;
+    }
+  }
+  if (line) lines.push(line);
+  const startY = y - ((lines.length - 1) * lineHeight) / 2;
+  lines.forEach((l, i) => ctx.fillText(l, x, startY + i * lineHeight));
+  return lines.length * lineHeight;
+}
+
+// Génère une carte PNG (verset arabe + traduction + branding) et ouvre le partage natif
+async function shareVerseAsImage({ arText, frText, surahName, verseN }) {
+  try {
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+  } catch {}
+  const W = 1080, H = 1350;
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d");
+
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, "#0d2818");
+  grad.addColorStop(1, "#1a3d26");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.strokeStyle = "rgba(201,168,76,.45)";
+  ctx.lineWidth = 3;
+  ctx.strokeRect(36, 36, W - 72, H - 72);
+  ctx.strokeStyle = "rgba(201,168,76,.2)";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(48, 48, W - 96, H - 96);
+
+  ctx.textAlign = "center";
+  ctx.direction = "rtl";
+  ctx.fillStyle = "#f5e9c8";
+  ctx.font = '58px "Uthmanic Hafs","Amiri Quran",serif';
+  const arHeight = wrapCanvasText(ctx, arText, W / 2, H / 2 - 60, W - 180, 90);
+
+  ctx.direction = "ltr";
+  ctx.font = "italic 32px sans-serif";
+  ctx.fillStyle = "#c9d6cc";
+  wrapCanvasText(ctx, frText, W / 2, H / 2 - 60 + arHeight / 2 + 90, W - 220, 44);
+
+  ctx.font = "bold 30px sans-serif";
+  ctx.fillStyle = "#c9a84c";
+  ctx.fillText(`${surahName} \u00b7 v.${verseN}`, W / 2, H - 150);
+
+  ctx.font = "26px 'Amiri Quran',serif";
+  ctx.fillStyle = "rgba(245,233,200,.65)";
+  ctx.fillText("Al-Hifz \u2014 le m\u00e9morisateur", W / 2, H - 90);
+
+  return new Promise((resolve) => {
+    canvas.toBlob(async (blob) => {
+      if (!blob) { resolve(false); return; }
+      const file = new File([blob], `alhifz-${surahName}-${verseN}.png`, { type: "image/png" });
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: "Verset du Coran", text: `${surahName} \u00b7 v.${verseN}` });
+          resolve(true);
+          return;
+        } catch { /* utilisateur a annulé ou API a échoué — on retombe sur le téléchargement */ }
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `alhifz-${surahName}-${verseN}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+      resolve(true);
+    }, "image/png");
+  });
+}
 const stripTags=s=>{let r="";let inTag=false;for(const c of(s||"")){if(c==="<")inTag=true;else if(c===">")inTag=false;else if(!inTag)r+=c;}return r;};
 
 function colorTajweed(html){
@@ -2463,6 +2561,7 @@ const partialPlayRef=useRef(null); // {stopAt: ratio 0-1}
   const touchStartX=useRef(null);
   const touchStartY=useRef(null);
   const [readHistory,setReadHistory]=useState(()=>ld("qreadhist",[]));
+  const [resumeTarget,setResumeTarget]=useState(null); // {sn,vn} — verset à scroller une fois chargé
   const [verseSearch,setVerseSearch]=useState("");
   const [verseSearchResults,setVerseSearchResults]=useState([]);
   const [verseSearchLoading,setVerseSearchLoading]=useState(false);
@@ -2950,6 +3049,20 @@ const handleReset=async()=>{
     if(audioRef.current){audioRef.current.pause();audioRef.current.src="";}
     // scroll supprimé — causait le saut sur iOS
   };
+  const resumeToVerse=(s,vn)=>{
+    setResumeTarget({sn:s.n,vn});
+    doSelect(s);
+    setPage("quran");
+  };
+  React.useEffect(()=>{
+    if(!resumeTarget||loadState!=="done"||!selS||selS.n!==resumeTarget.sn)return;
+    const sn=resumeTarget.sn,vn=resumeTarget.vn;
+    setResumeTarget(null);
+    setTimeout(()=>{
+      const el=document.getElementById(`v-${sn}-${vn}`);
+      if(el){el.scrollIntoView({block:"center",behavior:"smooth"});el.style.transition="background .3s";const prevBg=el.style.background;el.style.background=`${t.acc}22`;setTimeout(()=>{el.style.background=prevBg;},1600);}
+    },350);
+  },[resumeTarget,loadState,selS]);
   const handleTouchStart=useCallback(e=>{touchStartX.current=e.touches[0].clientX;touchStartY.current=e.touches[0].clientY;},[]);
   const handleTouchEnd=useCallback(e=>{
     if(!touchStartX.current||!selS)return;
@@ -3582,6 +3695,7 @@ const handleReset=async()=>{
           spokenWords:transcript.split(/\s+/),
         };
         setSpeechScore(score);
+        if(score.pct>=70)playDing();
         if(onDone) onDone(score);
       }
     };
@@ -3897,7 +4011,7 @@ return (
             </div>
           </div>
         )}
-        {verseCtxMenu&&(<div onClick={()=>setVerseCtxMenu(null)} style={{position:"fixed",inset:0,zIndex:999,background:"rgba(0,0,0,.5)"}}><div onClick={e=>e.stopPropagation()} style={{position:"fixed",bottom:0,left:0,right:0,background:t.s1,borderRadius:"20px 20px 0 0",boxShadow:"0 -4px 30px rgba(0,0,0,.15)",paddingBottom:"max(16px,env(safe-area-inset-bottom))",maxHeight:"70vh",overflowY:"auto"}}><div style={{width:36,height:4,borderRadius:2,background:t.b1,margin:"12px auto 0"}}/><div style={{padding:"12px 20px 14px",borderBottom:"1px solid "+t.b1}}><div style={{fontSize:".6rem",color:t.acc,fontWeight:700,marginBottom:4,textTransform:"uppercase"}}>{(SURAHS||[]).find(s=>s.n===verseCtxMenu.sn)?.name||"Sourate"} {verseCtxMenu.sn}:{verseCtxMenu.vn}</div><div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.2rem",color:t.tx,direction:"rtl",lineHeight:2,textAlign:"right"}}>{stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,""))}</div>{verseCtxMenu.fr&&<div style={{fontSize:".72rem",color:t.tx3,fontStyle:"italic",marginTop:4}}>{(verseCtxMenu.fr||"").replace(/<[^>]*>/g,"").slice(0,100)}</div>}</div><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",padding:"8px 0",borderBottom:"1px solid "+t.b1}}>{[{icon:"▶",label:"Ecouter",active:false,color:t.acc,fn:()=>{doPlay(verseCtxMenu.vn);setVerseCtxMenu(null);}},{icon:"✓",label:isMem(verseCtxMenu.sn,verseCtxMenu.vn)?"Memorise":"Memoriser",active:isMem(verseCtxMenu.sn,verseCtxMenu.vn),color:t.gr,fn:()=>{toggleV(verseCtxMenu.sn,verseCtxMenu.vn,"");setVerseCtxMenu(null);}},{icon:"❤",label:isFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn))?"Retire":"Favori",active:isFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn)),color:t.rd,fn:()=>{toggleFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn));setVerseCtxMenu(null);}},{icon:"🔖",label:"Signet",active:bookmark?.sn===verseCtxMenu.sn&&bookmark?.vn===verseCtxMenu.vn,color:t.acc,fn:()=>{setBookmark(b=>b?.sn===verseCtxMenu.sn&&b?.vn===verseCtxMenu.vn?null:{sn:verseCtxMenu.sn,vn:verseCtxMenu.vn});setVerseCtxMenu(null);}}].map(a=>(<button key={a.label} onClick={a.fn} style={{padding:"10px 4px 6px",background:"transparent",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:4}}><div style={{width:40,height:40,borderRadius:"50%",border:"2px solid "+(a.active?a.color:t.b1),background:a.active?a.color+"15":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.1rem",color:a.active?a.color:t.tx3}}>{a.icon}</div><span style={{fontSize:".55rem",color:a.active?a.color:t.tx3,fontWeight:a.active?700:400}}>{a.label}</span></button>))}</div>{[{icon:"📖",label:"Tafsir",sub:"Commentaire du verset",active:showTf,fn:()=>{setShowTf(p=>!p);setVerseCtxMenu(null);}},{icon:"🌍",label:"Traduction",sub:"Sens en français",active:showTr,fn:()=>{setShowTr(p=>!p);setVerseCtxMenu(null);}},{icon:"Aa",label:"Mot a mot",sub:"Sens de chaque mot (anglais)",fn:()=>{if(wbwVerseRef)wbwVerseRef.current={sn:verseCtxMenu.sn,vn:verseCtxMenu.vn};setWbwOpen&&setWbwOpen(true);setVerseCtxMenu(null);}},{icon:"✂",label:"Lecture partielle",sub:"Lire une partie",fn:()=>{const words=stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,"")).trim().split(/\s+/).filter(Boolean);setPartialVerse({sn:verseCtxMenu.sn,vn:verseCtxMenu.vn,words,from:0,to:words.length-1});setVerseCtxMenu(null);}},{icon:"📋",label:"Copier",sub:null,fn:()=>{try{navigator.clipboard?.writeText(stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,"")));}catch(e){}setToastMsg("Copie!");setVerseCtxMenu(null);}},{icon:"⇗",label:"Partager",sub:null,fn:()=>{const artx=stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,""));const frtx=(verseCtxMenu.fr||"").replace(/<[^>]*>/g,"");try{navigator.share&&navigator.share({title:"Verset",text:artx+(frtx?" "+frtx:"")+" ("+verseCtxMenu.sn+":"+verseCtxMenu.vn+")"});}catch(e){navigator.clipboard&&navigator.clipboard.writeText(artx);setToastMsg("Copie!");}setVerseCtxMenu(null);}}].map(a=>(<button key={a.label} onClick={a.fn} style={{display:"flex",alignItems:"center",gap:14,width:"100%",padding:"13px 20px",background:"transparent",border:"none",borderTop:"1px solid "+t.b1,color:t.tx,cursor:"pointer",textAlign:"left"}}><div style={{width:36,height:36,borderRadius:12,background:t.b1,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1rem",flexShrink:0}}>{a.icon}</div><div style={{flex:1}}><div style={{fontSize:".85rem",fontWeight:600}}>{a.label}</div>{a.sub&&<div style={{fontSize:".68rem",color:t.tx3,marginTop:1}}>{a.sub}</div>}</div><div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>{a.active!==undefined&&(<div style={{width:20,height:20,borderRadius:"50%",background:a.active?t.acc:"transparent",border:"2px solid "+(a.active?t.acc:t.b1),transition:"all .2s"}}/>)}<span style={{color:t.tx3}}>›</span></div></button>))}<button onClick={()=>setVerseCtxMenu(null)} style={{width:"100%",padding:"14px",background:"transparent",border:"none",borderTop:"2px solid "+t.b1,color:t.tx3,fontSize:".85rem",cursor:"pointer",fontWeight:600}}>Annuler</button></div></div>)}
+        {verseCtxMenu&&(<div onClick={()=>setVerseCtxMenu(null)} style={{position:"fixed",inset:0,zIndex:999,background:"rgba(0,0,0,.5)"}}><div onClick={e=>e.stopPropagation()} style={{position:"fixed",bottom:0,left:0,right:0,background:t.s1,borderRadius:"20px 20px 0 0",boxShadow:"0 -4px 30px rgba(0,0,0,.15)",paddingBottom:"max(16px,env(safe-area-inset-bottom))",maxHeight:"70vh",overflowY:"auto"}}><div style={{width:36,height:4,borderRadius:2,background:t.b1,margin:"12px auto 0"}}/><div style={{padding:"12px 20px 14px",borderBottom:"1px solid "+t.b1}}><div style={{fontSize:".6rem",color:t.acc,fontWeight:700,marginBottom:4,textTransform:"uppercase"}}>{(SURAHS||[]).find(s=>s.n===verseCtxMenu.sn)?.name||"Sourate"} {verseCtxMenu.sn}:{verseCtxMenu.vn}</div><div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.2rem",color:t.tx,direction:"rtl",lineHeight:2,textAlign:"right"}}>{stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,""))}</div>{verseCtxMenu.fr&&<div style={{fontSize:".72rem",color:t.tx3,fontStyle:"italic",marginTop:4}}>{(verseCtxMenu.fr||"").replace(/<[^>]*>/g,"").slice(0,100)}</div>}</div><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",padding:"8px 0",borderBottom:"1px solid "+t.b1}}>{[{icon:"▶",label:"Ecouter",active:false,color:t.acc,fn:()=>{doPlay(verseCtxMenu.vn);setVerseCtxMenu(null);}},{icon:"✓",label:isMem(verseCtxMenu.sn,verseCtxMenu.vn)?"Memorise":"Memoriser",active:isMem(verseCtxMenu.sn,verseCtxMenu.vn),color:t.gr,fn:()=>{toggleV(verseCtxMenu.sn,verseCtxMenu.vn,"");setVerseCtxMenu(null);}},{icon:"❤",label:isFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn))?"Retire":"Favori",active:isFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn)),color:t.rd,fn:()=>{toggleFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn));setVerseCtxMenu(null);}},{icon:"🔖",label:"Signet",active:bookmark?.sn===verseCtxMenu.sn&&bookmark?.vn===verseCtxMenu.vn,color:t.acc,fn:()=>{setBookmark(b=>b?.sn===verseCtxMenu.sn&&b?.vn===verseCtxMenu.vn?null:{sn:verseCtxMenu.sn,vn:verseCtxMenu.vn});setVerseCtxMenu(null);}}].map(a=>(<button key={a.label} onClick={a.fn} style={{padding:"10px 4px 6px",background:"transparent",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:4}}><div style={{width:40,height:40,borderRadius:"50%",border:"2px solid "+(a.active?a.color:t.b1),background:a.active?a.color+"15":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.1rem",color:a.active?a.color:t.tx3}}>{a.icon}</div><span style={{fontSize:".55rem",color:a.active?a.color:t.tx3,fontWeight:a.active?700:400}}>{a.label}</span></button>))}</div>{[{icon:"📖",label:"Tafsir",sub:"Commentaire du verset",active:showTf,fn:()=>{setShowTf(p=>!p);setVerseCtxMenu(null);}},{icon:"🌍",label:"Traduction",sub:"Sens en français",active:showTr,fn:()=>{setShowTr(p=>!p);setVerseCtxMenu(null);}},{icon:"Aa",label:"Mot a mot",sub:"Sens de chaque mot (anglais)",fn:()=>{if(wbwVerseRef)wbwVerseRef.current={sn:verseCtxMenu.sn,vn:verseCtxMenu.vn};setWbwOpen&&setWbwOpen(true);setVerseCtxMenu(null);}},{icon:"✂",label:"Lecture partielle",sub:"Lire une partie",fn:()=>{const words=stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,"")).trim().split(/\s+/).filter(Boolean);setPartialVerse({sn:verseCtxMenu.sn,vn:verseCtxMenu.vn,words,from:0,to:words.length-1});setVerseCtxMenu(null);}},{icon:"📋",label:"Copier",sub:null,fn:()=>{try{navigator.clipboard?.writeText(stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,"")));}catch(e){}setToastMsg("Copie!");setVerseCtxMenu(null);}},{icon:"⇗",label:"Partager en image",sub:"Carte PNG pour WhatsApp",fn:()=>{const artx=stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,""));const frtx=(verseCtxMenu.fr||"").replace(/<[^>]*>/g,"");const surahName=(SURAHS||[]).find(s=>s.n===verseCtxMenu.sn)?.name||"Coran";shareVerseAsImage({arText:artx,frText:frtx,surahName,verseN:verseCtxMenu.vn});setVerseCtxMenu(null);}}].map(a=>(<button key={a.label} onClick={a.fn} style={{display:"flex",alignItems:"center",gap:14,width:"100%",padding:"13px 20px",background:"transparent",border:"none",borderTop:"1px solid "+t.b1,color:t.tx,cursor:"pointer",textAlign:"left"}}><div style={{width:36,height:36,borderRadius:12,background:t.b1,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1rem",flexShrink:0}}>{a.icon}</div><div style={{flex:1}}><div style={{fontSize:".85rem",fontWeight:600}}>{a.label}</div>{a.sub&&<div style={{fontSize:".68rem",color:t.tx3,marginTop:1}}>{a.sub}</div>}</div><div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>{a.active!==undefined&&(<div style={{width:20,height:20,borderRadius:"50%",background:a.active?t.acc:"transparent",border:"2px solid "+(a.active?t.acc:t.b1),transition:"all .2s"}}/>)}<span style={{color:t.tx3}}>›</span></div></button>))}<button onClick={()=>setVerseCtxMenu(null)} style={{width:"100%",padding:"14px",background:"transparent",border:"none",borderTop:"2px solid "+t.b1,color:t.tx3,fontSize:".85rem",cursor:"pointer",fontWeight:600}}>Annuler</button></div></div>)}
 
       {/* Modal Lecture partielle */}
       {partialVerse&&(
@@ -4378,19 +4492,17 @@ return (
               const last=readHistory[0];
               const s=SURAHS.find(x=>x.n===last.sn);
               return s?(
-                <div className="card" onClick={()=>{doSelect(s);setPage("quran");}} style={{cursor:"pointer"}} onMouseEnter={e=>{e.currentTarget.style.borderColor=t.acc;e.currentTarget.style.transform="translateY(-1px)";}} onMouseLeave={e=>{e.currentTarget.style.borderColor=t.b1;e.currentTarget.style.transform="";}}>
-                  <div style={{padding:"12px 14px",display:"flex",alignItems:"center",gap:12}}>
-                    <div style={{width:40,height:40,borderRadius:10,background:`${t.acc}12`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.acc} strokeWidth="1.6" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-                    </div>
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:".6rem",color:t.tx3,marginBottom:2}}>Reprendre là où tu t'es arrêté</div>
-                      <div style={{fontSize:".82rem",fontWeight:700,color:t.tx,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{s.name}</div>
-                      <div style={{fontFamily:"Amiri,serif",fontSize:".8rem",color:t.tx3,direction:"rtl",textAlign:"right"}}>v.{last.vn} · {s.ar}</div>
-                    </div>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.acc} strokeWidth="2" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                <button onClick={()=>resumeToVerse(s,last.vn)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,padding:"16px 18px",marginBottom:14,borderRadius:16,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${t.gr},${t.gr}cc)`,boxShadow:`0 6px 20px ${t.gr}44`,transition:"transform .15s"}}
+                  onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"} onMouseLeave={e=>e.currentTarget.style.transform=""}>
+                  <div style={{width:46,height:46,borderRadius:12,background:"rgba(255,255,255,.18)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   </div>
-                </div>
+                  <div style={{flex:1,minWidth:0,textAlign:"left"}}>
+                    <div style={{fontSize:".62rem",color:"rgba(255,255,255,.85)",marginBottom:2,fontWeight:600,textTransform:"uppercase",letterSpacing:"1px"}}>Reprendre</div>
+                    <div style={{fontSize:"1rem",fontWeight:800,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{s.name} — v.{last.vn}</div>
+                  </div>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
               ):null;
             })()}
 
@@ -6554,7 +6666,7 @@ return (
       {/* Bottom nav */}
 
       {/* Barre audio fixe en bas */}
-      {selS&&page==="coran"&&(
+      {selS&&page==="quran"&&(
         <div style={{position:"fixed",bottom:56,left:0,right:0,zIndex:90,
           background:t.s1,borderTop:"1px solid "+t.b1,
           boxShadow:"0 -2px 12px rgba(0,0,0,.08)",padding:"6px 10px",
