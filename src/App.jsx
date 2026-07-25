@@ -2811,9 +2811,13 @@ const handleLogin=async()=>{
 const handleSignup=async()=>{
   if(!isSupabaseConfigured){setAuthError("Inscription indisponible pour le moment (backend non configuré).");return false;}
   setAuthLoading(true);setAuthError("");
-  const{error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:"https://alhifz.vercel.app"}});
+  const{data,error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:"https://alhifz.vercel.app"}});
   setAuthLoading(false);
   if(error){setAuthError(error.message);return false;}
+  // Si la confirmation email est désactivée côté Supabase, signUp() renvoie directement
+  // une session (compte auto-confirmé) — on connecte l'utilisateur tout de suite au lieu
+  // de lui demander de vérifier un email qui ne sera jamais nécessaire.
+  if(data?.session){setUser(data.session.user);return true;}
   setAuthError("Vérifie ton email pour confirmer ton compte ✓");
   return false; // on garde la modale ouverte pour que le message reste visible
 };
