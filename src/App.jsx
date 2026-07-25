@@ -1389,22 +1389,38 @@ function TutorialModal({t,acc,tn,page,setPage,onClose}){
       </div>
     </div>
   );
-class AppErrorBoundary extends React.Component {
+}
+
+export class AppErrorBoundary extends React.Component {
   constructor(props){super(props);this.state={hasError:false,error:null};}
   static getDerivedStateFromError(e){return{hasError:true,error:e};}
   componentDidCatch(e,info){console.error("AlHifz crash:",e,info);}
   render(){
     if(this.state.hasError){
-      return React.createElement("div",{style:{padding:20,textAlign:"center",fontFamily:"sans-serif"}},
+      return React.createElement("div",{style:{padding:20,textAlign:"center",fontFamily:"sans-serif",minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}},
         React.createElement("div",{style:{fontSize:"2rem",marginBottom:12}},"⚠️"),
         React.createElement("div",{style:{fontWeight:700,marginBottom:8}},"Erreur de chargement"),
-        React.createElement("div",{style:{fontSize:".8rem",color:"#666",marginBottom:16}},this.state.error?.message||"Erreur inconnue"),
+        React.createElement("div",{style:{fontSize:".8rem",color:"#666",marginBottom:16,maxWidth:320}},this.state.error?.message||"Erreur inconnue"),
         React.createElement("button",{onClick:()=>window.location.reload(),style:{padding:"8px 20px",background:"#2d7a4f",color:"#fff",border:"none",borderRadius:8,cursor:"pointer"}},"Recharger l'app")
       );
     }
     return this.props.children;
   }
 }
+
+function LoginRequiredScreen({t,acc,label,onLogin}){
+  return (
+    <div style={{padding:"60px 24px",textAlign:"center",display:"flex",flexDirection:"column",alignItems:"center",gap:14}}>
+      <div style={{fontSize:"2.4rem"}}>🔒</div>
+      <div style={{fontWeight:700,fontSize:"1rem",color:t.tx}}>Connexion requise</div>
+      <div style={{fontSize:".78rem",color:t.tx3,maxWidth:280,lineHeight:1.6}}>
+        {label} nécessite un compte pour synchroniser tes données. Connecte-toi ou crée un compte pour continuer.
+      </div>
+      <button onClick={onLogin} style={{marginTop:8,padding:"10px 28px",borderRadius:12,border:"none",background:acc,color:"#fff",cursor:"pointer",fontWeight:700,fontSize:".85rem"}}>
+        Se connecter
+      </button>
+    </div>
+  );
 }
 
 function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx,continuousMode:initChain,setContinuousMode,speechListening,speechVerseTarget,speechCountdown,speechScore,speechResult,showTj,tjc,mem,startListening,stopListening,setSpeechScore,setSpeechResult,countdownRef,setSpeechCountdown,doPlay,sm2Update,onClose}){
@@ -3177,8 +3193,11 @@ const handleReset=async()=>{
     };
     audio.addEventListener("ended",handleEnded);
     return()=>audio.removeEventListener("ended",handleEnded);
-  // dépendances minimales pour éviter les ré-attachements inutiles
-  },[loopCount,loopCurrent,loopInfinite,rec]);
+  // authReady est nécessaire : tant qu'il est false, App renders null (pas de <audio> dans
+  // le DOM) donc ce useEffect s'exécute avec audioRef.current===null et sort immédiatement ;
+  // sans authReady en dépendance, il ne se relance jamais une fois l'élément monté, et
+  // handleEnded (l'avancée automatique du verset suivant) ne se branche donc jamais.
+  },[loopCount,loopCurrent,loopInfinite,rec,authReady]);
 
   // Chargement versets — TOUJOURS depuis l'API pour avoir le tajweed HTML correct
   // Q[s.n] utilisé uniquement comme fallback traduction hors ligne
@@ -6042,8 +6061,8 @@ return (
         )}
 
         {/* SETTINGS */}
-        {page==="teacher"&&(<TeacherDashboard user={user} t={t} acc={t.acc}/>)}
-      {page==="join-class"&&(<JoinClass user={user} t={t} acc={t.acc} onJoined={()=>setPage("home")}/>)}
+        {page==="teacher"&&(user?<TeacherDashboard user={user} t={t} acc={t.acc}/>:<LoginRequiredScreen t={t} acc={t.acc} label="L'espace Enseignant" onLogin={()=>setShowAuthModal(true)}/>)}
+      {page==="join-class"&&(user?<JoinClass user={user} t={t} acc={t.acc} onJoined={()=>setPage("home")}/>:<LoginRequiredScreen t={t} acc={t.acc} label="Rejoindre une classe" onLogin={()=>setShowAuthModal(true)}/>)}
       {page==="donation"&&(
         <div style={{padding:"20px 16px",maxWidth:480,margin:"0 auto"}}>
           <div style={{textAlign:"center",marginBottom:24}}>
