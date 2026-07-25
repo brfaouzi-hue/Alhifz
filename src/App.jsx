@@ -5048,11 +5048,12 @@ return (
                                 onTouchEnd={()=>clearTimeout(longPressTimer.current)}
                                 onTouchMove={()=>clearTimeout(longPressTimer.current)}
                                 onMouseDown={()=>{longPressTimer.current=setTimeout(()=>setVerseCtxMenu({vn:v.n,sn:selS?.n,ar:v.ar,fr:v.fr}),500);}}
-                                onMouseUp={()=>clearTimeout(longPressTimer.current)} onClick={()=>{if(!isActive)doPlay(v.n);}}
+                                onMouseUp={()=>clearTimeout(longPressTimer.current)}
+                                onClick={()=>{if(reviewMode&&!revealedVerses[v.n]){setRevealedVerses(p=>({...p,[v.n]:true}));return;}if(!isActive)doPlay(v.n);}}
                                 style={{display:"inline",color:isMem?t.gr:isPl?t.acc:isDue?t.rd:t.tx,background:isActive?t.acc+"15":"transparent",borderRadius:4,cursor:"pointer",WebkitUserSelect:"none",userSelect:"none"}}
                               >
                                 {reviewMode&&!revealedVerses[v.n]
-                                  ?<span style={{background:t.b1,borderRadius:6,padding:"2px 8px",fontSize:".7rem",color:t.tx3,cursor:"pointer"}} onClick={()=>setRevealedVerses(p=>({...p,[v.n]:true}))}>▓▓▓▓▓</span>
+                                  ?<span style={{background:t.b1,borderRadius:6,padding:"2px 8px",fontSize:".7rem",color:t.tx3,cursor:"pointer"}}>▓▓▓▓▓</span>
                                   :hifzMode&&(hifzLevel[v.n]||0)>0
                                     ?<HifzVerseText ar={v.ar} level={hifzLevel[v.n]||0} tjc={tjc} showTj={showTj} vmark={v.n} onRevealWord={()=>setHifzLevel(p=>({...p,[v.n]:Math.max(0,(p[v.n]||0)-1)}))}/>
                                     :<TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/>
