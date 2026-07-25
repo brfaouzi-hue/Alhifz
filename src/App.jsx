@@ -2783,7 +2783,12 @@ useEffect(()=>{
     clearTimeout(safety);
   }).catch(()=>{setAuthReady(true);clearTimeout(safety);});
   const{data:{subscription}}=supabase.auth.onAuthStateChange((_,session)=>{
-    setUser(session?.user??null);
+    const u=session?.user??null;
+    setUser(u);
+    // Sans ça, une connexion interactive (login/signup) ne chargeait jamais la
+    // progression cloud — seul un rechargement de page (getSession() ci-dessus,
+    // qui restaure une session déjà persistée) le faisait.
+    if(u)loadProgress(u.id);
   });
   return ()=>{subscription.unsubscribe();clearTimeout(safety);};
 
