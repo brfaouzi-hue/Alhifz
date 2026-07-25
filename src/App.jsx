@@ -2401,7 +2401,10 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
         <div style={{direction:"rtl",textAlign:"justify",width:"100%",boxSizing:"border-box",overflowWrap:"break-word",wordBreak:"break-word",wordSpacing:"0.15em",WebkitTextAlignLast:"right",textAlignLast:"right",lineHeight:3.2,fontFamily:arFont||"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.6)+"rem",maxWidth:"100%",color:t.tx}}>
           {fullPage.map((v,vi)=>{
             const prevSn=vi>0?fullPage[vi-1].sn:null;
-            const showDivider=(vi===0&&v.n===1)||(vi>0&&v.sn!==prevSn);
+            // Pas de bannière pour la toute première ligne de la sourate déjà sélectionnée
+            // (son nom est déjà affiché en haut de l'écran) — seulement pour les vraies
+            // transitions vers une sourate voisine (avant/après) sur une page partagée.
+            const showDivider=vi>0&&v.sn!==prevSn;
             if(!v.own){
               return (
                 <React.Fragment key={`f-${v.sn}-${v.n}`}>
@@ -4884,6 +4887,7 @@ return (
                 </div>
               ):(
                 <div className="card">
+                  {!pageMode&&(<>
                   <div className="vhd">
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10}}>
                       <div>
@@ -4905,6 +4909,7 @@ return (
                   </div>
 
                   {SURAH_INFO[selS.n]&&(<div style={{padding:"10px 14px",background:t.s3,borderBottom:`1px solid ${t.b1}`,fontSize:".7rem",color:t.tx2,lineHeight:1.6}}><div style={{fontWeight:700,color:t.acc,marginBottom:3,fontSize:".65rem",textTransform:"uppercase",letterSpacing:"1px"}}>Vertus & occasions</div><div style={{marginBottom:4}}>{SURAH_INFO[selS.n].virtue}</div><div style={{color:t.gr,fontWeight:600}}>Quand réciter : {SURAH_INFO[selS.n].occasion}</div></div>)}
+                  </>)}
 
                   {reviewMode&&(<div style={{padding:"8px 14px",background:`${t.rd}22`,borderBottom:`1px solid ${t.rd}44`,display:"flex",alignItems:"center",gap:8}}><div style={{fontSize:".72rem",color:t.rd,fontWeight:600,flex:1}}>Mode révision — appuie pour révéler</div><button className="tbtn" style={{borderColor:t.rd,color:t.rd}} onClick={()=>setRevealedVerses({})}>Tout masquer</button></div>)}
                   {hifzMode&&(<div style={{padding:"8px 14px",background:`${t.pu}18`,borderBottom:`1px solid ${t.pu}44`,display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
