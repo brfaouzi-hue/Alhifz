@@ -59,6 +59,7 @@ export function useTeacherSlots(userId) {
     const { data, error } = await supabase.from('availability_slots').insert({
       teacher_id: userId,
       class_id: payload.class_id || null,
+      student_id: payload.student_id || null,
       session_type: sessionType,
       title: payload.title?.trim() || null,
       description: payload.description?.trim() || null,

@@ -85,8 +85,22 @@ export function useClassStudents(classId) {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     if (!classId) { setLoading(false); return; }
-    supabase.from('class_members').select('student_id, joined_at, user_progress(mem, spaced, settings, updated_at)').eq('class_id', classId)
-      .then(({ data }) => { setStudents(data || []); setLoading(false); });
+    setLoading(true);
+    // class_members et user_progress référencent tous les deux auth.users mais pas
+    // l'un l'autre — pas de relation directe pour un embed PostgREST, donc deux
+    // requêtes fusionnées côté client au lieu d'un join impossible.
+    supabase.from('class_members').select('student_id, joined_at').eq('class_id', classId)
+      .then(async ({ data: members }) => {
+        const list = members || [];
+        if (!list.length) { setStudents([]); setLoading(false); return; }
+        const { data: progress } = await supabase.from('user_progress')
+          .select('user_id, mem, spaced, updated_at')
+          .in('user_id', list.map(m => m.student_id));
+        const progressMap = {};
+        (progress || []).forEach(p => { progressMap[p.user_id] = p; });
+        setStudents(list.map(m => ({ ...m, user_progress: progressMap[m.student_id] || null })));
+        setLoading(false);
+      });
   }, [classId]);
   return { students, loading };
 }
