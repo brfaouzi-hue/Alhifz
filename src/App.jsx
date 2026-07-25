@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";import { createPortal } from "react-dom";import { supabase, isSupabaseConfigured } from './supabase'
-import { useRole, useMyProfile } from './teacher/useTeacher.js';
+import { useRole, useMyProfile, useTeacherClasses } from './teacher/useTeacher.js';
 import TeacherDashboard from './teacher/TeacherDashboard.jsx';
 import JoinClass from './teacher/JoinClass.jsx';
 import NotificationBell from './teacher/NotificationBell.jsx';
@@ -2538,6 +2538,8 @@ const [authError, setAuthError] = useState("");
  const [page,setPage]=useState("home");
   const {role,setUserRole} = useRole(user?.id);
   const [roleSaving,setRoleSaving]=useState(false);
+  const {classes:myTeacherClasses} = useTeacherClasses(user?.id);
+  const [scheduleView,setScheduleView]=useState(null); // null = auto (suit `role`), sinon override manuel "teacher"|"student"
   const {displayName,updateDisplayName}=useMyProfile(user?.id);
   const [nameEdit,setNameEdit]=useState("");
   const [nameSaving,setNameSaving]=useState(false);
@@ -6293,9 +6295,27 @@ return (
         )}
 
         {/* SETTINGS */}
-        {page==="teacher"&&(user?<TeacherDashboard user={user} t={t} acc={t.acc}/>:<LoginRequiredScreen t={t} acc={t.acc} label="L'espace Enseignant" onLogin={()=>setShowAuthModal(true)}/>)}
+        {page==="teacher"&&(user?<TeacherDashboard user={user} t={t} acc={t.acc} setPage={setPage}/>:<LoginRequiredScreen t={t} acc={t.acc} label="L'espace Enseignant" onLogin={()=>setShowAuthModal(true)}/>)}
       {page==="join-class"&&(user?<JoinClass user={user} t={t} acc={t.acc} setPage={setPage} onJoined={()=>setPage("home")}/>:<LoginRequiredScreen t={t} acc={t.acc} label="Rejoindre une classe" onLogin={()=>setShowAuthModal(true)}/>)}
-      {page==="schedule"&&(user?(role==="teacher"?<TeacherSchedule userId={user?.id} t={t} acc={t.acc}/>:<StudentSchedule userId={user?.id} t={t} acc={t.acc}/>):<LoginRequiredScreen t={t} acc={t.acc} label="Le planning" onLogin={()=>setShowAuthModal(true)}/>)}
+      {page==="schedule"&&(user?(()=>{
+        const effectiveView=scheduleView||(role==="teacher"?"teacher":"student");
+        const canSwitch=myTeacherClasses.length>0;
+        return (
+          <div>
+            {canSwitch&&(
+              <div style={{display:"flex",gap:6,padding:"10px 14px 0"}}>
+                {[["teacher","Vue Prof"],["student","Vue Élève"]].map(([id,label])=>(
+                  <button key={id} onClick={()=>setScheduleView(id)}
+                    style={{flex:1,padding:"8px 0",borderRadius:10,border:`1.5px solid ${effectiveView===id?t.acc:t.b1}`,background:effectiveView===id?`${t.acc}18`:"transparent",color:effectiveView===id?t.acc:t.tx2,fontSize:".72rem",fontWeight:700,cursor:"pointer",transition:"all .15s"}}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+            {effectiveView==="teacher"?<TeacherSchedule userId={user?.id} t={t} acc={t.acc}/>:<StudentSchedule userId={user?.id} t={t} acc={t.acc}/>}
+          </div>
+        );
+      })():<LoginRequiredScreen t={t} acc={t.acc} label="Le planning" onLogin={()=>setShowAuthModal(true)}/>)}
       {page==="donation"&&(
         <div style={{padding:"20px 16px",maxWidth:480,margin:"0 auto"}}>
           <div style={{textAlign:"center",marginBottom:24}}>

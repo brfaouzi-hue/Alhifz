@@ -252,7 +252,7 @@ function ClassPanel({ cls, t, acc, onClose }) {
   );
 }
 
-export default function TeacherDashboard({ user, t, acc }) {
+export default function TeacherDashboard({ user, t, acc, setPage }) {
   const { classes, loading, createClass, deleteClass } = useTeacherClasses(user?.id);
   const [newName, setNewName] = useState('');
   const [creating, setCreating] = useState(false);
@@ -278,9 +278,17 @@ export default function TeacherDashboard({ user, t, acc }) {
 
   return (
     <div style={{ padding: 20 }}>
-      <div style={{ marginBottom: 20 }}>
-        <h2 style={{ fontFamily: 'Amiri,serif', fontSize: '1.3rem', color: acc, margin: '0 0 4px' }}>Mes classes</h2>
-        <p style={{ fontSize: '.72rem', color: t.tx3, margin: 0 }}>Suis la progression de tes élèves</p>
+      <div style={{ marginBottom: 20, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
+        <div>
+          <h2 style={{ fontFamily: 'Amiri,serif', fontSize: '1.3rem', color: acc, margin: '0 0 4px' }}>Mes classes</h2>
+          <p style={{ fontSize: '.72rem', color: t.tx3, margin: 0 }}>Suis la progression de tes élèves</p>
+        </div>
+        {setPage && classes.length > 0 && (
+          <button onClick={() => setPage('schedule')} style={{ flexShrink: 0, padding: '8px 14px', borderRadius: 10, border: `1.5px solid ${acc}`, background: `${acc}12`, color: acc, fontWeight: 700, fontSize: '.7rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Planning
+          </button>
+        )}
       </div>
 
       {loading
