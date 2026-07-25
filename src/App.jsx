@@ -2536,7 +2536,8 @@ const [password, setPassword] = useState("");
 const [authLoading, setAuthLoading] = useState(false);
 const [authError, setAuthError] = useState("");
  const [page,setPage]=useState("home");
-  const {role} = useRole(user?.id);
+  const {role,setUserRole} = useRole(user?.id);
+  const [roleSaving,setRoleSaving]=useState(false);
   const {displayName,updateDisplayName}=useMyProfile(user?.id);
   const [nameEdit,setNameEdit]=useState("");
   const [nameSaving,setNameSaving]=useState(false);
@@ -6357,6 +6358,16 @@ return (
                   <button disabled={nameSaving||!nameEdit.trim()||nameEdit.trim()===displayName} onClick={async()=>{setNameSaving(true);const{error}=await updateDisplayName(nameEdit);setNameSaving(false);setToastMsg(error?"Erreur — réessaie":"Nom mis à jour ✓");}}
                     style={{padding:"0 16px",borderRadius:10,border:"none",background:(nameEdit.trim()&&nameEdit.trim()!==displayName)?t.acc:t.b1,color:(nameEdit.trim()&&nameEdit.trim()!==displayName)?"#fff":t.tx3,fontWeight:700,fontSize:".75rem",cursor:(nameEdit.trim()&&nameEdit.trim()!==displayName)?"pointer":"default",flexShrink:0}}>
                     {nameSaving?"…":"Sauver"}
+                  </button>
+                </div>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",marginBottom:14,background:t.s2,borderRadius:10,border:`1px solid ${t.b1}`}}>
+                  <div>
+                    <div style={{fontSize:".78rem",color:t.tx,fontWeight:600}}>Mode enseignant</div>
+                    <div style={{fontSize:".6rem",color:t.tx3,marginTop:1}}>Crée des classes et gère un planning de créneaux</div>
+                  </div>
+                  <button disabled={roleSaving} onClick={async()=>{setRoleSaving(true);const nextRole=role==="teacher"?"student":"teacher";const{error}=await setUserRole(nextRole);setRoleSaving(false);setToastMsg(error?"Erreur — réessaie":nextRole==="teacher"?"Mode enseignant activé ✓":"Repassé élève");}}
+                    style={{padding:"6px 16px",borderRadius:20,border:`1.5px solid ${role==="teacher"?t.acc:t.b2}`,background:role==="teacher"?`${t.acc}18`:t.s3,color:role==="teacher"?t.acc:t.tx2,fontSize:".7rem",cursor:"pointer",fontWeight:700,transition:"all .2s",flexShrink:0}}>
+                    {roleSaving?"…":role==="teacher"?"Activé":"Activer"}
                   </button>
                 </div>
                 <button onClick={()=>supabase.auth.signOut()} style={{width:"100%",padding:"13px",background:"transparent",border:`1px solid ${t.rd}55`,borderRadius:12,color:t.rd,fontWeight:700,fontSize:".82rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,transition:"background .2s"}} onMouseEnter={e=>e.currentTarget.style.background=`${t.rd}0a`} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>

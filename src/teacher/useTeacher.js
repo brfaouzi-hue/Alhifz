@@ -51,8 +51,9 @@ export function useRole(userId) {
       .then(({ data }) => { setRole(data?.role || 'student'); setLoading(false); });
   }, [userId]);
   const setUserRole = useCallback(async (newRole) => {
-    await supabase.from('user_roles').upsert({ user_id: userId, role: newRole }, { onConflict: 'user_id' });
-    setRole(newRole);
+    const { error } = await supabase.from('user_roles').upsert({ user_id: userId, role: newRole }, { onConflict: 'user_id' });
+    if (!error) setRole(newRole);
+    return { error: error?.message };
   }, [userId]);
   return { role, loading, setUserRole };
 }
