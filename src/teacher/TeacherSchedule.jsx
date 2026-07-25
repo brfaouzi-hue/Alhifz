@@ -16,7 +16,7 @@ const DURATIONS = [30, 45, 60, 90];
 const DEFAULT_FORM = {
   session_type: 'individual', title: '', description: '', level: '',
   max_students: 4, day_of_week: 1, date: '', start_time: '09:00',
-  duration_min: 45, recurring: true, class_id: '', price_euros: '', student_id: '',
+  duration_min: 45, recurring: true, class_id: '', price_euros: '', student_id: '', meeting_link: '',
 };
 
 function getMonday(d) {
@@ -111,6 +111,7 @@ export default function TeacherSchedule({ userId, t, acc }) {
       date: slot.date || '', start_time: (slot.start_time || '09:00:00').slice(0, 5),
       duration_min: slot.duration_min, recurring: slot.recurring, class_id: slot.class_id || '',
       price_euros: slot.price_cents ? String(slot.price_cents / 100) : '', student_id: slot.student_id || '',
+      meeting_link: slot.meeting_link || '',
     });
     setFormError('');
     setDetailCell(null);
@@ -135,6 +136,7 @@ export default function TeacherSchedule({ userId, t, acc }) {
       class_id: form.class_id || null,
       student_id: form.session_type === 'individual' ? (form.student_id || null) : null,
       price_cents: form.price_euros ? Math.round(Number(form.price_euros) * 100) : 0,
+      meeting_link: form.meeting_link.trim() || null,
     };
     const { error } = formModal.mode === 'edit'
       ? await updateSlot(formModal.slot.id, payload)
@@ -171,6 +173,7 @@ export default function TeacherSchedule({ userId, t, acc }) {
       uid: `slot-${s.id}`,
       title: s.title || (s.max_students > 1 ? 'Cours collectif Al-Hifz' : 'Cours individuel Al-Hifz'),
       description: s.description || '',
+      location: s.meeting_link || '',
       dateStr: s.recurring ? undefined : s.date,
       recurringDow: s.recurring ? s.day_of_week : undefined,
       startTime: s.start_time,
@@ -323,9 +326,15 @@ export default function TeacherSchedule({ userId, t, acc }) {
             <h2 style={{ fontFamily: 'Amiri,serif', color: acc, marginBottom: 4 }}>
               {detailCell.slot.title || (detailCell.slot.max_students > 1 ? 'Cours collectif' : 'Cours individuel')}
             </h2>
-            <p style={{ fontSize: '.72rem', color: t.tx3, marginBottom: 14 }}>
+            <p style={{ fontSize: '.72rem', color: t.tx3, marginBottom: detailCell.slot.meeting_link ? 8 : 14 }}>
               {fmtDateFR(detailCell.date)} · {(detailCell.slot.start_time || '').slice(0, 5)} · {detailCell.slot.duration_min} min
             </p>
+            {detailCell.slot.meeting_link && (
+              <a href={detailCell.slot.meeting_link} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 12px', borderRadius: 10, background: acc + '12', border: '1px solid ' + acc + '40', color: acc, fontSize: '.72rem', fontWeight: 700, marginBottom: 14, textDecoration: 'none' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 10l4.55-2.27A1 1 0 0 1 21 8.6v6.8a1 1 0 0 1-1.45.9L15 14"/><rect x="1" y="6" width="14" height="12" rx="2"/></svg>
+                Lien de visio
+              </a>
+            )}
             {(() => {
               // recalculé à partir de `bookings` (au lieu du instantané pris à l'ouverture
               // de la modale) pour que la modale reste à jour après un accepter/refuser
@@ -490,6 +499,13 @@ export default function TeacherSchedule({ userId, t, acc }) {
                 {form.student_id && <div style={{ fontSize: '.6rem', color: acc, marginTop: 4 }}>Ce créneau ne sera visible que par {rosterNames[form.student_id] || 'cet élève'}</div>}
               </div>
             )}
+
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: '.62rem', color: t.tx3, marginBottom: 4 }}>Lien de visio (optionnel)</div>
+              <input type="url" value={form.meeting_link} onChange={e => setForm(p => ({ ...p, meeting_link: e.target.value }))} placeholder="https://meet.google.com/xxx-xxxx-xxx"
+                style={{ width: '100%', padding: '9px 12px', borderRadius: 10, border: '1px solid ' + t.b1, background: t.navBg, color: t.tx, fontSize: '.72rem', boxSizing: 'border-box' }} />
+              <div style={{ fontSize: '.58rem', color: t.tx3, marginTop: 4 }}>Colle ton lien Google Meet, Zoom ou autre — visible par l'élève dès que sa réservation est confirmée</div>
+            </div>
 
             {formError && <div style={{ color: t.rd, fontSize: '.7rem', marginBottom: 10, textAlign: 'center' }}>{formError}</div>}
 

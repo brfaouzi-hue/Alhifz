@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../supabase';
 
-const SLOT_FIELDS = 'id, teacher_id, class_id, student_id, session_type, title, description, day_of_week, date, start_time, end_time, duration_min, recurring, max_students, price_cents, level, active, created_at';
+const SLOT_FIELDS = 'id, teacher_id, class_id, student_id, session_type, title, description, day_of_week, date, start_time, end_time, duration_min, recurring, max_students, price_cents, level, active, created_at, meeting_link';
 const BOOKING_FIELDS = 'id, slot_id, student_id, teacher_id, booking_date, start_time, status, student_note, teacher_note, created_at, updated_at';
 const NOTIF_FIELDS = 'id, user_id, type, title, body, data, read, created_at';
 
@@ -72,6 +72,7 @@ export function useTeacherSlots(userId) {
       max_students: maxStudents,
       price_cents: payload.price_cents || 0,
       level: payload.level || null,
+      meeting_link: payload.meeting_link?.trim() || null,
     }).select(SLOT_FIELDS).single();
     if (!error) setSlots(prev => [...prev, { ...data, booked_count: 0, available_spots: data.max_students }]);
     return { data, error };
@@ -108,7 +109,7 @@ export function useTeacherBookings(userId) {
   const load = useCallback(async () => {
     if (!userId) { setLoading(false); return; }
     const { data } = await supabase.from('bookings')
-      .select(`${BOOKING_FIELDS}, availability_slots(title, session_type, duration_min, max_students, level)`)
+      .select(`${BOOKING_FIELDS}, availability_slots(title, session_type, duration_min, max_students, level, meeting_link)`)
       .eq('teacher_id', userId)
       .order('booking_date', { ascending: true })
       .order('start_time', { ascending: true });
@@ -190,7 +191,7 @@ export function useStudentBookings(userId) {
   const load = useCallback(async () => {
     if (!userId) { setLoading(false); return; }
     const { data } = await supabase.from('bookings')
-      .select(`${BOOKING_FIELDS}, availability_slots(title, session_type, duration_min, max_students, level)`)
+      .select(`${BOOKING_FIELDS}, availability_slots(title, session_type, duration_min, max_students, level, meeting_link)`)
       .eq('student_id', userId)
       .order('booking_date', { ascending: true });
     setBookings(data || []);

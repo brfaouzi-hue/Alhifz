@@ -43,6 +43,7 @@ export function buildICS(events) {
     if (ev.recurringDow != null) lines.push(`RRULE:FREQ=WEEKLY;BYDAY=${DOW_ICS[ev.recurringDow]}`);
     lines.push(`SUMMARY:${escapeICS(ev.title)}`);
     if (ev.description) lines.push(`DESCRIPTION:${escapeICS(ev.description)}`);
+    if (ev.location) lines.push(`LOCATION:${escapeICS(ev.location)}`);
     lines.push('END:VEVENT');
   });
   lines.push('END:VCALENDAR');

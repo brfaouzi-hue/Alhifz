@@ -139,6 +139,7 @@ export default function StudentSchedule({ userId, t, acc }) {
       uid: `booking-${b.id}`,
       title: b.availability_slots?.title || 'Cours de Coran',
       description: 'Cours Al-Hifz' + (b.teacher_note ? ' — ' + b.teacher_note : ''),
+      location: b.availability_slots?.meeting_link || '',
       dateStr: b.booking_date,
       startTime: b.start_time,
       durationMin: b.availability_slots?.duration_min || 45,
@@ -227,25 +228,34 @@ export default function StudentSchedule({ userId, t, acc }) {
         )}
         {upcoming.map(b => {
           const canCancel = hoursUntil(b.booking_date, b.start_time) > 24;
+          const canJoin = b.status === 'confirmed' && b.availability_slots?.meeting_link;
           return (
-            <div key={b.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 12, background: t.s1, border: '1px solid ' + t.b1, marginBottom: 8 }}>
-              <div style={{
-                width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
-                background: b.status === 'confirmed' ? t.gr : '#fb8c00',
-              }} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: '.75rem', fontWeight: 700, color: t.tx }}>
-                  {b.availability_slots?.title || (b.availability_slots?.session_type === 'group' ? 'Cours collectif' : 'Cours individuel')}
+            <div key={b.id} style={{ padding: '10px 12px', borderRadius: 12, background: t.s1, border: '1px solid ' + t.b1, marginBottom: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{
+                  width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+                  background: b.status === 'confirmed' ? t.gr : '#fb8c00',
+                }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '.75rem', fontWeight: 700, color: t.tx }}>
+                    {b.availability_slots?.title || (b.availability_slots?.session_type === 'group' ? 'Cours collectif' : 'Cours individuel')}
+                  </div>
+                  <div style={{ fontSize: '.64rem', color: t.tx3 }}>{fmtDateFR(b.booking_date)} · {(b.start_time || '').slice(0, 5)}</div>
                 </div>
-                <div style={{ fontSize: '.64rem', color: t.tx3 }}>{fmtDateFR(b.booking_date)} · {(b.start_time || '').slice(0, 5)}</div>
+                <span style={{ fontSize: '.6rem', fontWeight: 700, color: b.status === 'confirmed' ? t.gr : '#fb8c00' }}>
+                  {b.status === 'confirmed' ? 'Confirmé' : 'En attente'}
+                </span>
+                {canCancel && (
+                  <button onClick={() => cancelBooking(b.id)} style={{ background: 'none', border: '1px solid ' + t.rd, color: t.rd, borderRadius: 20, padding: '4px 10px', fontSize: '.62rem', fontWeight: 700, cursor: 'pointer' }}>
+                    Annuler
+                  </button>
+                )}
               </div>
-              <span style={{ fontSize: '.6rem', fontWeight: 700, color: b.status === 'confirmed' ? t.gr : '#fb8c00' }}>
-                {b.status === 'confirmed' ? 'Confirmé' : 'En attente'}
-              </span>
-              {canCancel && (
-                <button onClick={() => cancelBooking(b.id)} style={{ background: 'none', border: '1px solid ' + t.rd, color: t.rd, borderRadius: 20, padding: '4px 10px', fontSize: '.62rem', fontWeight: 700, cursor: 'pointer' }}>
-                  Annuler
-                </button>
+              {canJoin && (
+                <a href={b.availability_slots.meeting_link} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 8, padding: '8px 0', borderRadius: 10, background: acc + '12', border: '1px solid ' + acc + '40', color: acc, fontSize: '.68rem', fontWeight: 700, textDecoration: 'none' }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 10l4.55-2.27A1 1 0 0 1 21 8.6v6.8a1 1 0 0 1-1.45.9L15 14"/><rect x="1" y="6" width="14" height="12" rx="2"/></svg>
+                  Rejoindre le cours
+                </a>
               )}
             </div>
           );
