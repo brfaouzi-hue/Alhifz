@@ -2378,18 +2378,86 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
     }
   },[curPage,fitScale,fullPage.length,arabicSize]);
 
-  const handlePgTouchStart=e=>{e.stopPropagation();pgTouchX.current=e.touches[0].clientX;pgTouchY.current=e.touches[0].clientY;};
+  // ── Effet de tournage de page (façon Tarteel / livre physique) ──
+  // Pendant le drag, la page suit le doigt (rotation 3D autour de la charnière) ;
+  // au relâcher, soit on complète l'animation (bascule + nouveau contenu + retour
+  // à plat), soit on "spring back" à plat si le geste n'a pas dépassé le seuil.
+  const FLIP_DRAG_MAX=62, FLIP_COMMIT_DEG=94;
+  const dragActive=React.useRef(false);
+  const [turning,setTurning]=React.useState(null); // 'next' | 'prev' pendant l'anim de bascule
+
+  const springBack=()=>{
+    const el=pageContainerRef.current; if(!el)return;
+    el.style.transition="transform .18s ease-out, box-shadow .18s ease-out";
+    el.style.transform="rotateY(0deg)"; el.style.boxShadow="none";
+    const done=()=>{el.style.transition="";el.removeEventListener("transitionend",done);};
+    el.addEventListener("transitionend",done,{once:true});
+  };
+
+  const commitFlip=dir=>{
+    const el=pageContainerRef.current; if(!el)return;
+    const hinge=dir==="next"?"left center":"right center";
+    const outDeg=dir==="next"?FLIP_COMMIT_DEG:-FLIP_COMMIT_DEG;
+    const shadowOut=dir==="next"?"-22px 0 44px -10px rgba(0,0,0,.5)":"22px 0 44px -10px rgba(0,0,0,.5)";
+    setTurning(dir);
+    el.style.transformOrigin=hinge;
+    el.style.transition="transform .22s cubic-bezier(.4,0,.7,1), box-shadow .22s ease";
+    el.style.transform=`rotateY(${outDeg}deg)`;
+    el.style.boxShadow=shadowOut;
+    const onOut=()=>{
+      el.removeEventListener("transitionend",onOut);
+      setCurPage(p=>dir==="next"?Math.min(total-1,p+1):Math.max(0,p-1));
+      setSelVerse(null);
+      el.style.transition="none";
+      el.style.transform=`rotateY(${-outDeg}deg)`;
+      el.style.boxShadow=dir==="next"?"18px 0 40px -12px rgba(0,0,0,.4)":"-18px 0 40px -12px rgba(0,0,0,.4)";
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        el.style.transition="transform .22s cubic-bezier(.3,0,.6,1), box-shadow .22s ease";
+        el.style.transform="rotateY(0deg)";
+        el.style.boxShadow="none";
+        const onIn=()=>{el.style.transition="";setTurning(null);el.removeEventListener("transitionend",onIn);};
+        el.addEventListener("transitionend",onIn,{once:true});
+      }));
+    };
+    el.addEventListener("transitionend",onOut,{once:true});
+  };
+
+  const handlePgTouchStart=e=>{
+    e.stopPropagation();
+    if(turning)return;
+    pgTouchX.current=e.touches[0].clientX;pgTouchY.current=e.touches[0].clientY;
+    dragActive.current=true;
+    const el=pageContainerRef.current;
+    if(el)el.style.transition="none";
+  };
+  const handlePgTouchMove=e=>{
+    if(!dragActive.current||pgTouchX.current==null||turning)return;
+    const dx=e.touches[0].clientX-pgTouchX.current;
+    const dy=Math.abs(e.touches[0].clientY-pgTouchY.current);
+    if(dy>60)return;
+    const el=pageContainerRef.current; if(!el)return;
+    const width=el.clientWidth||320;
+    const atStart=dx>0&&curPage<=0, atEnd=dx<0&&curPage>=total-1;
+    if(atStart||atEnd)return;
+    const deg=Math.max(-FLIP_DRAG_MAX,Math.min(FLIP_DRAG_MAX,-(dx/width)*FLIP_DRAG_MAX*1.6));
+    const shadowAmt=Math.min(.4,Math.abs(deg)/FLIP_DRAG_MAX*.4);
+    el.style.transformOrigin=dx<0?"left center":"right center";
+    el.style.transform=`rotateY(${deg}deg)`;
+    el.style.boxShadow=`${dx<0?"-":""}${Math.min(24,Math.abs(deg)/FLIP_DRAG_MAX*24)}px 0 30px -14px rgba(0,0,0,${shadowAmt})`;
+  };
   const handlePgTouchEnd=e=>{
     e.stopPropagation();
+    dragActive.current=false;
     if(pgTouchX.current==null)return;
-    const dx=pgTouchX.current-e.changedTouches[0].clientX;
+    const dx=e.changedTouches[0].clientX-pgTouchX.current;
     const dy=Math.abs(pgTouchY.current-e.changedTouches[0].clientY);
-    if(Math.abs(dx)>60&&dy<50){
-      if(dx>0)setCurPage(p=>Math.min(total-1,p+1)); // swipe gauche → page suivante
-      else setCurPage(p=>Math.max(0,p-1)); // swipe droite → page précédente
-      setSelVerse(null);
-    }
     pgTouchX.current=null;
+    if(turning)return;
+    if(Math.abs(dx)>60&&dy<50){
+      const dir=dx<0?"next":"prev";
+      if((dir==="next"&&curPage>=total-1)||(dir==="prev"&&curPage<=0)){springBack();return;}
+      commitFlip(dir);
+    } else springBack();
   };
   const gotoPage=(pgNum)=>{
     const idx=pages.findIndex(p=>p.pg===pgNum);
@@ -2412,7 +2480,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
   // Normalisation pour comparaison arabe
 
   return (
-    <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0,background:"#ffffff",backgroundImage:'url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2760%27%20height%3D%2760%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%2523c8a87a%27%20stroke-width%3D%270.4%27%20opacity%3D%270.18%27%3E%3Cpath%20d%3D%27M30%200%20L60%2030%20L30%2060%20L0%2030%20Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2720%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2712%27/%3E%3Cpath%20d%3D%27M10%2010%20Q30%200%2050%2010%20Q60%2030%2050%2050%20Q30%2060%2010%2050%20Q0%2030%2010%2010Z%27/%3E%3Cpath%20d%3D%27M30%208%20L52%2030%20L30%2052%20L8%2030Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%276%27/%3E%3Cline%20x1%3D%2730%27%20y1%3D%270%27%20x2%3D%2730%27%20y2%3D%2760%27/%3E%3Cline%20x1%3D%270%27%20y1%3D%2730%27%20x2%3D%2760%27%20y2%3D%2730%27/%3E%3C/g%3E%3C/svg%3E")',backgroundSize:"60px 60px",borderRadius:6,overflow:"hidden"}} onClick={()=>setSelVerse(null)} onTouchStart={handlePgTouchStart} onTouchEnd={handlePgTouchEnd}>
+    <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0,background:"#ffffff",backgroundImage:'url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2760%27%20height%3D%2760%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%2523c8a87a%27%20stroke-width%3D%270.4%27%20opacity%3D%270.18%27%3E%3Cpath%20d%3D%27M30%200%20L60%2030%20L30%2060%20L0%2030%20Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2720%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2712%27/%3E%3Cpath%20d%3D%27M10%2010%20Q30%200%2050%2010%20Q60%2030%2050%2050%20Q30%2060%2010%2050%20Q0%2030%2010%2010Z%27/%3E%3Cpath%20d%3D%27M30%208%20L52%2030%20L30%2052%20L8%2030Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%276%27/%3E%3Cline%20x1%3D%2730%27%20y1%3D%270%27%20x2%3D%2730%27%20y2%3D%2760%27/%3E%3Cline%20x1%3D%270%27%20y1%3D%2730%27%20x2%3D%2760%27%20y2%3D%2730%27/%3E%3C/g%3E%3C/svg%3E")',backgroundSize:"60px 60px",borderRadius:6,overflow:"hidden"}} onClick={()=>setSelVerse(null)} onTouchStart={handlePgTouchStart} onTouchMove={handlePgTouchMove} onTouchEnd={handlePgTouchEnd}>
       {/* Navigation */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"5px 10px",borderBottom:"1px solid "+t.b1,flexShrink:0,gap:6}}>
         <button onClick={e=>{e.stopPropagation();setCurPage(p=>Math.max(0,p-1));}} disabled={curPage===0}
@@ -2444,8 +2512,10 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
         </div>
       )}
 
-      {/* Texte en flux continu */}
-      <div ref={pageContainerRef} style={{flex:"1 1 0%",minHeight:0,overflowY:"auto",minWidth:0,width:"100%",boxSizing:"border-box",contain:"layout",padding:"24px 20px",WebkitOverflowScrolling:"touch",display:"flex",flexDirection:"column",justifyContent:fitScale>1.03?"center":"flex-start"}} onClick={e=>e.stopPropagation()}>
+      {/* Texte en flux continu — le wrapper porte la perspective 3D, pageContainerRef
+          porte la rotation (tournage de page) sans perturber le calcul de fitScale */}
+      <div style={{flex:"1 1 0%",minHeight:0,position:"relative",overflow:"hidden",perspective:1400}}>
+      <div ref={pageContainerRef} style={{height:"100%",overflowY:"auto",minWidth:0,width:"100%",boxSizing:"border-box",contain:"layout",padding:"24px 20px",WebkitOverflowScrolling:"touch",display:"flex",flexDirection:"column",justifyContent:fitScale>1.03?"center":"flex-start",backfaceVisibility:"hidden",willChange:"transform",background:"#fff"}} onClick={e=>e.stopPropagation()}>
         {/* Le papier de la page reste toujours blanc/ivoire, quel que soit le thème
             de l'app — l'encre du texte doit donc rester foncée fixe (#1c1208),
             pas t.tx (clair en thème sombre → texte invisible sur papier clair). */}
@@ -2535,6 +2605,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
             );
           })}
         </div>
+      </div>
       </div>
     </div>
   );
