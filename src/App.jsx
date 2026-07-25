@@ -790,7 +790,12 @@ function WbwModal({sn,vn,t}){
 }
 function TajwidSpan({text,enabled,tjc}) {
   const raw=text||"";
-  const clean=raw.replace(/\[[a-z]+\](.*?)\[\/[a-z]+\]/g,"$1").replace(/[﴿﴾۰-۹٠-٩]/g,"").replace(/\s+[١٢٣٤٥٦٧٨٩٠]+\s*$/,"");
+  // U+0672 (alef à hamza ondulée) est utilisé par l'API à la place du dagger-alif
+  // standard U+0670 pour le petit alif suscrit — la police Uthmanic Hafs (testé sur
+  // ses versions v09/v20/v22) ne sait pas le positionner correctement après une
+  // voyelle et affiche un rond noir plein à la place. U+0670 est visuellement
+  // identique et se rend correctement.
+  const clean=raw.replace(/ٲ/g,"ٰ").replace(/\[[a-z]+\](.*?)\[\/[a-z]+\]/g,"$1").replace(/[﴿﴾۰-۹٠-٩]/g,"").replace(/\s+[١٢٣٤٥٦٧٨٩٠]+\s*$/,"");
   if(!enabled) return <bdi style={{direction:"rtl"}}>{clean.replace(/<[^>]*>/g,"").replace(/[۰-۹٠-٩]/g,"")}</bdi>;
   if(!clean.includes("<tajweed")) return <bdi style={{direction:"rtl",letterSpacing:0}}>{clean.replace(/<[^>]*>/g,"").replace(/[۰-۹٠-٩]/g,"")}</bdi>;
   // Remplacer les balises tajweed par des spans colorés
@@ -1723,7 +1728,7 @@ const TJ_COLORS={
 };
 
 // Colorie le HTML tajweed qurancdn avec des spans inline
-const stripArabicNums=s=>(s||"").replace(/[۰-۹٠-٩]/g,"");
+const stripArabicNums=s=>(s||"").replace(/[۰-۹٠-٩]/g,"").replace(/ٲ/g,"ٰ");
 const playDing=()=>{try{const ctx=new (window.AudioContext||window.webkitAudioContext)();const osc=ctx.createOscillator();const gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.type="sine";osc.frequency.value=880;gain.gain.setValueAtTime(0.15,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.35);osc.start();osc.stop(ctx.currentTime+0.35);}catch{}};
 
 // Découpe un texte sur plusieurs lignes pour un rendu canvas (pas de wrap natif)
@@ -1810,7 +1815,7 @@ async function shareVerseAsImage({ arText, frText, surahName, verseN }) {
     }, "image/png");
   });
 }
-const stripTags=s=>{let r="";let inTag=false;for(const c of(s||"")){if(c==="<")inTag=true;else if(c===">")inTag=false;else if(!inTag)r+=c;}return r;};
+const stripTags=s=>{let r="";let inTag=false;for(const c of(s||"")){if(c==="<")inTag=true;else if(c===">")inTag=false;else if(!inTag)r+=c;}return r.replace(/ٲ/g,"ٰ");};
 
 function colorTajweed(html){
   if(!html) return "";
@@ -4413,30 +4418,6 @@ return (
 
             {/* ── Bloc Al-Hifz exact ── */}
 
-            {/* Widget objectif quotidien */}
-            {settings&&(()=>{
-              const todayKey=today();
-              const todayV=hist[todayKey]||0;
-              const goal_=(settings?.dailyGoal||settings?.goal||5);
-              const pct_=Math.min(100,Math.round(todayV/goal_*100));
-              const done=pct_>=100;
-              return(
-                <div style={{background:done?"linear-gradient(135deg,"+t.gr+"18,"+t.gr+"08)":"linear-gradient(135deg,"+t.s2+","+t.s3+")",borderRadius:14,padding:"12px 16px",border:"1px solid "+(done?t.gr+"40":t.b1),display:"flex",alignItems:"center",gap:12}}>
-                  <div style={{width:44,height:44,borderRadius:"50%",background:done?t.gr+"20":t.acc+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.4rem",flexShrink:0}}>
-                    {done?"✦":"📖"}
-                  </div>
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:5}}>
-                      <span style={{fontSize:".72rem",fontWeight:700,color:done?t.gr:t.tx}}>{done?"Objectif atteint ! بارك الله فيك":"Objectif du jour"}</span>
-                      <span style={{fontSize:".7rem",fontWeight:800,color:done?t.gr:t.acc}}>{todayV}/{goal_}</span>
-                    </div>
-                    <div style={{height:5,background:t.b1,borderRadius:99,overflow:"hidden"}}>
-                      <div style={{height:"100%",width:pct_+"%",background:done?"linear-gradient(90deg,"+t.gr+","+t.gr+"aa)":"linear-gradient(90deg,"+t.acc+","+t.acc+"aa)",borderRadius:99,transition:"width .5s ease"}}/>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
             <div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,borderRadius:16,border:`1px solid ${t.b1}`,position:"relative",overflow:"hidden"}}>
               {/* Décoration bordure haut */}
               <svg style={{position:"absolute",top:0,left:0,width:"100%",height:12,display:"block"}} preserveAspectRatio="none" viewBox="0 0 800 12">
@@ -6335,19 +6316,16 @@ return (
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:12}}>
             {[
-              {label:"🤲 Petit soutien",amount:"2€",desc:"Un café"},
-              {label:"📖 Soutien régulier",amount:"5€",desc:"Une session de mémorisation"},
-              {label:"🌟 Grand soutien",amount:"10€",desc:"Une semaine de développement"},
-              {label:"💎 Mécène",amount:"Autre",desc:"Montant libre"},
+              {label:"🤲 Petit soutien",amount:"2€"},
+              {label:"📖 Soutien régulier",amount:"5€"},
+              {label:"🌟 Grand soutien",amount:"10€"},
+              {label:"💎 Mécène",amount:"Autre"},
             ].map(opt=>(
               <button key={opt.amount}
                 style={{padding:"14px 18px",borderRadius:14,border:"1px solid "+t.b1,
                   background:t.s1,cursor:"pointer",display:"flex",alignItems:"center",
                   justifyContent:"space-between",textAlign:"left"}}>
-                <div>
-                  <div style={{fontSize:".82rem",fontWeight:700,color:t.tx,marginBottom:2}}>{opt.label}</div>
-                  <div style={{fontSize:".68rem",color:t.tx3}}>{opt.desc}</div>
-                </div>
+                <div style={{fontSize:".82rem",fontWeight:700,color:t.tx}}>{opt.label}</div>
                 <span style={{fontSize:"1rem",fontWeight:700,color:t.acc}}>{opt.amount}</span>
               </button>
             ))}
@@ -6801,7 +6779,7 @@ return (
       )}
 
       {playing!==null&&selS&&!focusMode&&!immersive&&(
-        <div style={{position:"fixed",bottom:"calc(70px + env(safe-area-inset-bottom))",left:12,right:12,zIndex:55,background:t.navBg,border:`1px solid ${t.acc}44`,borderRadius:14,padding:"9px 14px",display:"flex",alignItems:"center",gap:10,boxShadow:`0 -2px 20px rgba(0,0,0,.25)`,backdropFilter:"blur(12px)"}}>
+        <div style={{position:"fixed",bottom:"calc(70px + env(safe-area-inset-bottom))",left:12,right:68,zIndex:55,background:t.navBg,border:`1px solid ${t.acc}44`,borderRadius:14,padding:"9px 14px",display:"flex",alignItems:"center",gap:10,boxShadow:`0 -2px 20px rgba(0,0,0,.25)`,backdropFilter:"blur(12px)"}}>
           <div style={{width:32,height:32,borderRadius:8,background:`${t.acc}15`,border:`1px solid ${t.acc}33`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
             <span style={{fontFamily:"Amiri,serif",fontSize:".7rem",color:t.acc}}>{selS.n}</span>
           </div>

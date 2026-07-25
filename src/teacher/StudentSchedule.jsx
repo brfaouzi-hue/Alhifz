@@ -39,6 +39,7 @@ export default function StudentSchedule({ userId, t, acc }) {
   const { bookings, loading: bookingsLoading, createBooking, cancelBooking } = useStudentBookings(userId);
 
   const [weekOffset, setWeekOffset] = useState(0);
+  const [selectedDay, setSelectedDay] = useState(() => (new Date().getDay() + 6) % 7); // 0=Lun ... 6=Dim
   const [occupancy, setOccupancy] = useState({});
   const [bookModal, setBookModal] = useState(null); // {slot, date}
   const [note, setNote] = useState('');
@@ -168,58 +169,53 @@ export default function StudentSchedule({ userId, t, acc }) {
         </div>
       </div>
 
-      <div style={{ padding: 12, overflowX: 'auto' }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '46px repeat(7, minmax(84px, 1fr))',
-          gridTemplateRows: `28px repeat(${ROW_COUNT}, 22px)`,
-          minWidth: 680, position: 'relative', border: '1px solid ' + t.b1, borderRadius: 10, overflow: 'hidden',
-        }}>
-          <div style={{ gridColumn: 1, gridRow: 1, background: t.s2 }} />
-          {DAYS.map((day, i) => (
-            <div key={day.label} style={{
-              gridColumn: i + 2, gridRow: 1, background: t.s2, borderLeft: '1px solid ' + t.b1,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              fontSize: '.6rem', fontWeight: 700, color: t.tx2,
+      <div style={{ display: 'flex', gap: 6, padding: '4px 16px 14px', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        {DAYS.map((day, i) => {
+          const dateStr = weekDates[i];
+          const dayCells = cells.filter(c => c.colIdx === i);
+          const isToday = fmtDateISO(new Date()) === dateStr;
+          const sel = selectedDay === i;
+          return (
+            <button key={day.label} onClick={() => setSelectedDay(i)} style={{
+              flex: '1 0 auto', minWidth: 46, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+              padding: '8px 4px', borderRadius: 12, cursor: 'pointer', position: 'relative',
+              border: '1.5px solid ' + (sel ? acc : t.b1), background: sel ? acc : t.s1,
             }}>
-              {day.label}
-              <span style={{ fontSize: '.52rem', color: t.tx3, fontWeight: 400 }}>{new Date(weekDates[i] + 'T00:00:00').getDate()}</span>
-            </div>
-          ))}
-          {Array.from({ length: (HOUR_END - HOUR_START) }, (_, i) => HOUR_START + i).map((h, i) => (
-            <div key={h} style={{
-              gridColumn: 1, gridRow: `${i * 2 + 2} / span 2`, borderTop: '1px solid ' + t.b1,
-              fontSize: '.52rem', color: t.tx3, padding: '2px 3px', background: t.navBg,
-            }}>{h}h</div>
-          ))}
-          {Array.from({ length: ROW_COUNT }, (_, i) => (
-            <div key={i} style={{ gridColumn: '2 / -1', gridRow: i + 2, borderTop: '1px solid ' + (t.b1 + '55') }} />
-          ))}
-          {DAYS.map((_, i) => (
-            <div key={i} style={{ gridColumn: i + 2, gridRow: `2 / ${ROW_COUNT + 2}`, borderLeft: '1px solid ' + t.b1 }} />
-          ))}
+              <span style={{ fontSize: '.6rem', fontWeight: 700, color: sel ? '#fff' : t.tx2 }}>{day.label}</span>
+              <span style={{ fontSize: '.82rem', fontWeight: 800, color: sel ? '#fff' : (isToday ? acc : t.tx) }}>{new Date(dateStr + 'T00:00:00').getDate()}</span>
+              {dayCells.length > 0 && <div style={{ width: 4, height: 4, borderRadius: '50%', background: sel ? '#fff' : acc, position: 'absolute', bottom: 5 }} />}
+            </button>
+          );
+        })}
+      </div>
 
-          {cells.map(cell => {
+      <div style={{ padding: '0 16px' }}>
+        {(() => {
+          const dayCells = cells.filter(c => c.colIdx === selectedDay).sort((a, b) => a.slot.start_time.localeCompare(b.slot.start_time));
+          if (dayCells.length === 0) {
+            return <div style={{ textAlign: 'center', color: t.tx3, padding: '30px 10px', fontSize: '.78rem', background: t.s1, borderRadius: 14, border: '1px solid ' + t.b1 }}>Aucun créneau ce jour-là</div>;
+          }
+          return dayCells.map(cell => {
             const style = classifyCell(cell);
-            const rowStart = timeToRow(cell.slot.start_time);
-            const span = Math.max(1, Math.round(cell.slot.duration_min / STEP_MIN));
+            const disabled = style.emoji === '⚫' && !myBookingFor(cell.slot.id, cell.date);
+            const already = myBookingFor(cell.slot.id, cell.date);
             return (
-              <button key={cell.slot.id + cell.date} onClick={() => openBooking(cell)}
+              <button key={cell.slot.id + cell.date} onClick={() => openBooking(cell)} disabled={disabled || !!already}
                 style={{
-                  gridColumn: cell.colIdx + 2, gridRow: `${rowStart} / span ${span}`,
-                  margin: '1px 2px', borderRadius: 6, border: `1px solid ${style.border}`,
-                  background: style.bg + 'dd', color: '#fff', cursor: 'pointer', padding: '2px 4px',
-                  fontSize: '.55rem', textAlign: 'left', overflow: 'hidden', zIndex: 2, lineHeight: 1.25,
+                  width: '100%', display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left',
+                  padding: '12px 14px', borderRadius: 14, marginBottom: 8, border: '1px solid ' + t.b1,
+                  background: t.s1, cursor: (disabled || already) ? 'default' : 'pointer',
                 }}>
-                <div style={{ fontWeight: 700 }}>{style.emoji} {cell.slot.title || (cell.slot.max_students > 1 ? 'Collectif' : 'Individuel')}</div>
-                <div style={{ opacity: .9 }}>{style.label}</div>
+                <div style={{ width: 3, alignSelf: 'stretch', borderRadius: 2, background: style.bg, flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '.8rem', fontWeight: 700, color: t.tx }}>{(cell.slot.start_time || '').slice(0, 5)} · {cell.slot.title || (cell.slot.max_students > 1 ? 'Cours collectif' : 'Cours individuel')}</div>
+                  <div style={{ fontSize: '.66rem', color: t.tx3, marginTop: 2 }}>{cell.slot.duration_min} min{cell.slot.level && ` · ${LEVEL_LABELS[cell.slot.level] || cell.slot.level}`}</div>
+                </div>
+                <span style={{ fontSize: '.6rem', fontWeight: 700, color: style.bg, background: style.bg + '18', padding: '4px 9px', borderRadius: 20, flexShrink: 0, whiteSpace: 'nowrap' }}>{style.emoji} {style.label}</span>
               </button>
             );
-          })}
-        </div>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 10, fontSize: '.6rem', color: t.tx3 }}>
-          <span>🔵 Disponible</span><span>🟣 Collectif dispo</span><span>🟠 Ma demande</span><span>🟢 Confirmé</span><span>⚫ Complet</span>
-        </div>
+          });
+        })()}
       </div>
 
       <div style={{ padding: '8px 16px' }}>
