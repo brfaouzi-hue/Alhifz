@@ -2699,16 +2699,20 @@ const saveProgress=useCallback(async(uid,newMem,newFavs,newNotes,newSpaced)=>{
 },[bookmark,tn,rec,arabicSize]);
 
 useEffect(()=>{
+  // Si getSession() reste bloqué (réseau capricieux, token corrompu) on ne doit
+  // jamais laisser l'app entière en chargement infini — timeout de secours.
+  const safety=setTimeout(()=>setAuthReady(true),4000);
   supabase.auth.getSession().then(({data:{session}})=>{
     const u=session?.user??null;
     setUser(u);
     if(u)loadProgress(u.id);
     setAuthReady(true);
-  });
+    clearTimeout(safety);
+  }).catch(()=>{setAuthReady(true);clearTimeout(safety);});
   const{data:{subscription}}=supabase.auth.onAuthStateChange((_,session)=>{
     setUser(session?.user??null);
   });
-  return ()=>subscription.unsubscribe();
+  return ()=>{subscription.unsubscribe();clearTimeout(safety);};
 
 },[]);
 useEffect(()=>{
@@ -3329,8 +3333,14 @@ const handleReset=async()=>{
         setAudioPct(0);
       }
     };
+    // Si la piste échoue (404, réseau) en mode playlist, on ne reste pas bloqué : on saute au verset suivant
+    const handleError=()=>{
+      if(!playlistActiveRef.current)return;
+      handleEnded();
+    };
     audio.addEventListener("ended",handleEnded);
-    return()=>audio.removeEventListener("ended",handleEnded);
+    audio.addEventListener("error",handleError);
+    return()=>{audio.removeEventListener("ended",handleEnded);audio.removeEventListener("error",handleError);};
   // authReady est nécessaire : tant qu'il est false, App renders null (pas de <audio> dans
   // le DOM) donc ce useEffect s'exécute avec audioRef.current===null et sort immédiatement ;
   // sans authReady en dépendance, il ne se relance jamais une fois l'élément monté, et
@@ -6502,7 +6512,7 @@ return (
               <div style={{fontSize:".62rem",color:t.tx3}}>Juz {selS.juz} · {selS.v} versets · Mode immersif</div>
             </div>
             <div style={{display:"flex",gap:8}}>
-              <button className="tbtn" onClick={()=>{if(verses.length>0)startPlaylist(selS.n,verses,playing||sv||1);}}>{playlistActive&&playlist[0]?.sn===selS.n?"■ Stop":"▶ Tout"}</button>
+              <button className="tbtn" onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,playing||sv||1);}}>{playlistActive&&playlist[0]?.sn===selS.n?"■ Stop":"▶ Tout"}</button>
               <button className="tbtn" onClick={()=>setImmersive(false)}>✕ Fermer</button>
             </div>
           </div>
