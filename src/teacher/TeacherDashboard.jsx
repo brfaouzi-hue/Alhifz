@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useTeacherClasses, useClassStudents, useAssignments } from './useTeacher.js';
+import { useTeacherClasses, useClassStudents, useAssignments, useProfiles } from './useTeacher.js';
 
 const SURAHS = ["Al-Fatiha","Al-Baqara","Al-Imran","An-Nisa","Al-Maida","Al-Anam","Al-Araf","Al-Anfal","At-Tawba","Yunus","Hud","Yusuf","Ar-Rad","Ibrahim","Al-Hijr","An-Nahl","Al-Isra","Al-Kahf","Maryam","Ta-Ha","Al-Anbiya","Al-Hajj","Al-Muminun","An-Nur","Al-Furqan","Ash-Shuara","An-Naml","Al-Qasas","Al-Ankabut","Ar-Rum","Luqman","As-Sajda","Al-Ahzab","Saba","Fatir","Ya-Sin","As-Saffat","Sad","Az-Zumar","Ghafir","Fussilat","Ash-Shura","Az-Zukhruf","Ad-Dukhan","Al-Jathiya","Al-Ahqaf","Muhammad","Al-Fath","Al-Hujurat","Qaf","Adh-Dhariyat","At-Tur","An-Najm","Al-Qamar","Ar-Rahman","Al-Waqia","Al-Hadid","Al-Mujadila","Al-Hashr","Al-Mumtahana","As-Saf","Al-Jumua","Al-Munafiqun","At-Taghabun","At-Talaq","At-Tahrim","Al-Mulk","Al-Qalam","Al-Haqqa","Al-Maarij","Nuh","Al-Jinn","Al-Muzzammil","Al-Muddaththir","Al-Qiyama","Al-Insan","Al-Mursalat","An-Naba","An-Naziat","Abasa","At-Takwir","Al-Infitar","Al-Mutaffifin","Al-Inshiqaq","Al-Buruj","At-Tariq","Al-Ala","Al-Ghashiya","Al-Fajr","Al-Balad","Ash-Shams","Al-Layl","Ad-Duha","Ash-Sharh","At-Tin","Al-Alaq","Al-Qadr","Al-Bayyina","Az-Zalzala","Al-Adiyat","Al-Qaria","At-Takathur","Al-Asr","Al-Humaza","Al-Fil","Quraysh","Al-Maun","Al-Kawthar","Al-Kafirun","An-Nasr","Al-Masad","Al-Ikhlas","Al-Falaq","An-Nas"];
 
@@ -15,7 +15,7 @@ function daysSince(dateStr) {
   return Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
 }
 
-function StudentRow({ student, t, onClick }) {
+function StudentRow({ student, t, onClick, name }) {
   const prog = student.user_progress;
   const mem = prog?.mem || {};
   const total = countMem(mem);
@@ -40,7 +40,7 @@ function StudentRow({ student, t, onClick }) {
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: '.8rem', fontWeight: 600, color: t.tx, marginBottom: 2 }}>
-          {student.student_id.slice(0, 8)}...
+          {name || student.student_id.slice(0, 8) + '...'}
         </div>
         <div style={{ fontSize: '.65rem', color: t.tx3 }}>
           {total} versets · {surahs} sourates
@@ -60,6 +60,7 @@ function StudentRow({ student, t, onClick }) {
 function ClassPanel({ cls, t, acc, onClose }) {
   const { students, loading } = useClassStudents(cls.id);
   const { assignments, createAssignment, deleteAssignment } = useAssignments(cls.id);
+  const studentNames = useProfiles(students.map(s => s.student_id));
   const [tab, setTab] = useState('students');
   const [newAssign, setNewAssign] = useState(false);
   const [form, setForm] = useState({ title: '', surah_n: 1, verse_from: 1, verse_to: 7, due_date: '' });
@@ -88,7 +89,7 @@ function ClassPanel({ cls, t, acc, onClose }) {
           Retour
         </button>
         <div style={{ marginBottom: 20 }}>
-          <div style={{ fontWeight: 700, fontSize: '1rem', color: t.tx, marginBottom: 4 }}>{selectedStudent.student_id.slice(0, 8)}...</div>
+          <div style={{ fontWeight: 700, fontSize: '1rem', color: t.tx, marginBottom: 4 }}>{studentNames[selectedStudent.student_id] || selectedStudent.student_id.slice(0, 8) + '...'}</div>
           <div style={{ fontSize: '.72rem', color: t.tx3 }}>Rejoint le {new Date(selectedStudent.joined_at).toLocaleDateString('fr-FR')}</div>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
@@ -167,7 +168,7 @@ function ClassPanel({ cls, t, acc, onClose }) {
                   <span style={{ color: acc, fontWeight: 700 }}>Partage le code {cls.invite_code}</span>
                 </div>
               : students.map(s => (
-                  <StudentRow key={s.student_id} student={s} t={t} onClick={() => setSelectedStudent(s)} />
+                  <StudentRow key={s.student_id} student={s} t={t} name={studentNames[s.student_id]} onClick={() => setSelectedStudent(s)} />
                 ))
         )}
 

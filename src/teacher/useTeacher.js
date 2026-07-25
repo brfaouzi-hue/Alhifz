@@ -3,6 +3,45 @@ import { useState, useEffect, useCallback } from 'react';
 
 import { supabase } from '../supabase';
 
+// Récupère le display_name de plusieurs utilisateurs en une requête (ex: noms des
+// élèves d'une classe, ou nom du prof d'une classe). Retourne un cache {id: name}
+// qui s'enrichit au fil des appels sans jamais perdre ce qui a déjà été chargé.
+export function useProfiles(ids) {
+  const [profiles, setProfiles] = useState({});
+  const key = (ids || []).filter(Boolean).slice().sort().join(',');
+  useEffect(() => {
+    const uniq = [...new Set((ids || []).filter(Boolean))];
+    if (!uniq.length) return;
+    supabase.from('profiles').select('id, display_name').in('id', uniq)
+      .then(({ data }) => {
+        setProfiles(prev => {
+          const next = { ...prev };
+          (data || []).forEach(p => { next[p.id] = p.display_name; });
+          return next;
+        });
+      });
+  }, [key]);
+  return profiles;
+}
+
+export function useMyProfile(userId) {
+  const [displayName, setDisplayName] = useState('');
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    if (!userId) { setLoading(false); return; }
+    supabase.from('profiles').select('display_name').eq('id', userId).single()
+      .then(({ data }) => { setDisplayName(data?.display_name || ''); setLoading(false); });
+  }, [userId]);
+  const updateDisplayName = useCallback(async (name) => {
+    const clean = (name || '').trim();
+    if (!clean) return { error: 'Nom vide' };
+    const { error } = await supabase.from('profiles').upsert({ id: userId, display_name: clean }, { onConflict: 'id' });
+    if (!error) setDisplayName(clean);
+    return { error: error?.message };
+  }, [userId]);
+  return { displayName, loading, updateDisplayName };
+}
+
 export function useRole(userId) {
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);

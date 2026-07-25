@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";import { createPortal } from "react-dom";import { supabase, isSupabaseConfigured } from './supabase'
-import { useRole } from './teacher/useTeacher.js';
+import { useRole, useMyProfile } from './teacher/useTeacher.js';
 import TeacherDashboard from './teacher/TeacherDashboard.jsx';
 import JoinClass from './teacher/JoinClass.jsx';
 import NotificationBell from './teacher/NotificationBell.jsx';
@@ -2537,6 +2537,10 @@ const [authLoading, setAuthLoading] = useState(false);
 const [authError, setAuthError] = useState("");
  const [page,setPage]=useState("home");
   const {role} = useRole(user?.id);
+  const {displayName,updateDisplayName}=useMyProfile(user?.id);
+  const [nameEdit,setNameEdit]=useState("");
+  const [nameSaving,setNameSaving]=useState(false);
+  useEffect(()=>{setNameEdit(displayName);},[displayName]);
   useEffect(()=>{
     // Bloquer le scroll du body sur mushaf pour éviter le saut iOS
     // body overflow supprimé - casse position:fixed sur iOS Safari
@@ -6289,7 +6293,7 @@ return (
 
         {/* SETTINGS */}
         {page==="teacher"&&(user?<TeacherDashboard user={user} t={t} acc={t.acc}/>:<LoginRequiredScreen t={t} acc={t.acc} label="L'espace Enseignant" onLogin={()=>setShowAuthModal(true)}/>)}
-      {page==="join-class"&&(user?<JoinClass user={user} t={t} acc={t.acc} onJoined={()=>setPage("home")}/>:<LoginRequiredScreen t={t} acc={t.acc} label="Rejoindre une classe" onLogin={()=>setShowAuthModal(true)}/>)}
+      {page==="join-class"&&(user?<JoinClass user={user} t={t} acc={t.acc} setPage={setPage} onJoined={()=>setPage("home")}/>:<LoginRequiredScreen t={t} acc={t.acc} label="Rejoindre une classe" onLogin={()=>setShowAuthModal(true)}/>)}
       {page==="schedule"&&(user?(role==="teacher"?<TeacherSchedule userId={user?.id} t={t} acc={t.acc}/>:<StudentSchedule userId={user?.id} t={t} acc={t.acc}/>):<LoginRequiredScreen t={t} acc={t.acc} label="Le planning" onLogin={()=>setShowAuthModal(true)}/>)}
       {page==="donation"&&(
         <div style={{padding:"20px 16px",maxWidth:480,margin:"0 auto"}}>
@@ -6346,6 +6350,15 @@ return (
                   </div>
                 </div>
                 <div style={{fontSize:".82rem",color:t.acc,fontWeight:600,marginBottom:14,padding:"10px 14px",background:`${t.acc}10`,borderRadius:10,border:`1px solid ${t.acc}25`}}>{user?.email}</div>
+                <div style={{fontSize:".68rem",color:t.tx3,marginBottom:6}}>Nom affiché <span style={{color:t.tx3,opacity:.7}}>(visible par tes élèves/prof)</span></div>
+                <div style={{display:"flex",gap:8,marginBottom:14}}>
+                  <input value={nameEdit} onChange={e=>setNameEdit(e.target.value)} placeholder="Ton nom" maxLength={40}
+                    style={{flex:1,padding:"10px 14px",borderRadius:10,border:`1px solid ${t.b1}`,background:t.inputBg,color:t.tx,fontSize:".8rem",outline:"none",minWidth:0}}/>
+                  <button disabled={nameSaving||!nameEdit.trim()||nameEdit.trim()===displayName} onClick={async()=>{setNameSaving(true);const{error}=await updateDisplayName(nameEdit);setNameSaving(false);setToastMsg(error?"Erreur — réessaie":"Nom mis à jour ✓");}}
+                    style={{padding:"0 16px",borderRadius:10,border:"none",background:(nameEdit.trim()&&nameEdit.trim()!==displayName)?t.acc:t.b1,color:(nameEdit.trim()&&nameEdit.trim()!==displayName)?"#fff":t.tx3,fontWeight:700,fontSize:".75rem",cursor:(nameEdit.trim()&&nameEdit.trim()!==displayName)?"pointer":"default",flexShrink:0}}>
+                    {nameSaving?"…":"Sauver"}
+                  </button>
+                </div>
                 <button onClick={()=>supabase.auth.signOut()} style={{width:"100%",padding:"13px",background:"transparent",border:`1px solid ${t.rd}55`,borderRadius:12,color:t.rd,fontWeight:700,fontSize:".82rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,transition:"background .2s"}} onMouseEnter={e=>e.currentTarget.style.background=`${t.rd}0a`} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                   Se déconnecter
@@ -6938,7 +6951,7 @@ return (
       {showAuthModal&&(
         <div style={{position:"fixed",inset:0,zIndex:999,background:"rgba(0,0,0,.75)",backdropFilter:"blur(8px)",display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>setShowAuthModal(false)}>
           <div onClick={e=>e.stopPropagation()} style={{width:"100%",maxWidth:440}}>
-            <AuthScreen authPage={authPage} setAuthPage={setAuthPage} email={email} setEmail={setEmail} password={password} setPassword={setPassword} authLoading={authLoading} authError={authError} onGoogle={handleGoogleLogin} onApple={handleAppleLogin} onLogin={async()=>{const ok=await handleLogin();if(ok)setShowAuthModal(false);}} onSignup={async()=>{await handleSignup();}} onReset={handleReset} t={t} acc={t.acc} tn={tn}/>
+            <AuthScreen authPage={authPage} setAuthPage={setAuthPage} email={email} setEmail={setEmail} password={password} setPassword={setPassword} authLoading={authLoading} authError={authError} onGoogle={handleGoogleLogin} onApple={handleAppleLogin} onLogin={async()=>{const ok=await handleLogin();if(ok)setShowAuthModal(false);}} onSignup={async()=>{const ok=await handleSignup();if(ok)setShowAuthModal(false);}} onReset={handleReset} t={t} acc={t.acc} tn={tn}/>
           </div>
         </div>
       )}

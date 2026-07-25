@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useTeacherSlots, useTeacherBookings } from './useSchedule.js';
-import { useTeacherClasses } from './useTeacher.js';
+import { useTeacherClasses, useProfiles } from './useTeacher.js';
 
 const DAYS = [
   { label: 'Lun', dow: 1 }, { label: 'Mar', dow: 2 }, { label: 'Mer', dow: 3 },
@@ -54,6 +54,7 @@ export default function TeacherSchedule({ userId, t, acc }) {
   const { slots, loading: slotsLoading, createSlot, updateSlot, deleteSlot } = useTeacherSlots(userId);
   const { bookings, pending, loading: bookingsLoading, confirmBooking, cancelBooking } = useTeacherBookings(userId);
   const { classes } = useTeacherClasses(userId);
+  const studentNames = useProfiles(bookings.map(b => b.student_id));
 
   const [tab, setTab] = useState('planning');
   const [formModal, setFormModal] = useState(null); // null | {mode:'create'} | {mode:'edit', slot}
@@ -240,10 +241,13 @@ export default function TeacherSchedule({ userId, t, acc }) {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div style={{ width: 34, height: 34, borderRadius: '50%', background: acc + '22', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.75rem', fontWeight: 700, color: acc, flexShrink: 0 }}>
-                    {b.student_id.slice(0, 2).toUpperCase()}
+                    {(studentNames[b.student_id] || b.student_id).slice(0, 2).toUpperCase()}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: '.78rem', fontWeight: 700, color: t.tx }}>
+                      {studentNames[b.student_id] || '…'}
+                    </div>
+                    <div style={{ fontSize: '.68rem', color: t.tx2 }}>
                       {b.availability_slots?.title || (b.availability_slots?.session_type === 'group' ? 'Cours collectif' : 'Cours individuel')}
                     </div>
                     <div style={{ fontSize: '.65rem', color: t.tx3 }}>{fmtDateFR(b.booking_date)} · {(b.start_time || '').slice(0, 5)}</div>
@@ -298,9 +302,9 @@ export default function TeacherSchedule({ userId, t, acc }) {
             {detailCell.dayBookings.map(b => (
               <div key={b.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 10, background: t.s2, marginBottom: 6 }}>
                 <div style={{ width: 26, height: 26, borderRadius: '50%', background: acc + '22', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.62rem', fontWeight: 700, color: acc, flexShrink: 0 }}>
-                  {b.student_id.slice(0, 2).toUpperCase()}
+                  {(studentNames[b.student_id] || b.student_id).slice(0, 2).toUpperCase()}
                 </div>
-                <span style={{ flex: 1, fontSize: '.7rem', color: t.tx }}>{b.student_id.slice(0, 8)}...</span>
+                <span style={{ flex: 1, fontSize: '.7rem', color: t.tx }}>{studentNames[b.student_id] || '…'}</span>
                 <span style={{
                   fontSize: '.6rem', fontWeight: 700, padding: '2px 8px', borderRadius: 20,
                   color: b.status === 'confirmed' ? t.gr : b.status === 'pending' ? '#fb8c00' : t.tx3,

@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { useJoinClass, useStudentClasses } from './useTeacher.js';
+import { useJoinClass, useStudentClasses, useProfiles } from './useTeacher.js';
 
-export default function JoinClass({ user, t, acc, onJoined }) {
+export default function JoinClass({ user, t, acc, onJoined, setPage }) {
   const { joinByCode } = useJoinClass(user?.id);
   const { classes, loading } = useStudentClasses(user?.id);
+  const teacherProfiles = useProfiles(classes.map(c => c?.teacher_id));
   const [code, setCode] = useState('');
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState('');
@@ -63,13 +64,17 @@ export default function JoinClass({ user, t, acc, onJoined }) {
             Mes classes
           </div>
           {classes.map(cls => cls && (
-            <div key={cls.id} style={{ padding: '12px 14px', borderRadius: 12, background: t.s1, border: '1px solid ' + t.b1, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button key={cls.id} onClick={() => setPage && setPage('schedule')}
+              style={{ width: '100%', textAlign: 'left', padding: '12px 14px', borderRadius: 12, background: t.s1, border: '1px solid ' + t.b1, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', transition: 'border-color .15s' }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = acc} onMouseLeave={e => e.currentTarget.style.borderColor = t.b1}>
               <div style={{ width: 34, height: 34, borderRadius: 10, background: acc + '22', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.9rem', flexShrink: 0 }}>🕌</div>
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 600, fontSize: '.8rem', color: t.tx }}>{cls.name}</div>
-                <div style={{ fontSize: '.6rem', color: t.tx3 }}>Code : <span style={{ fontFamily: 'monospace', fontWeight: 700, color: acc }}>{cls.invite_code}</span></div>
+                <div style={{ fontSize: '.62rem', color: t.tx2, marginTop: 1 }}>Prof : {teacherProfiles[cls.teacher_id] || '…'}</div>
+                <div style={{ fontSize: '.6rem', color: t.tx3, marginTop: 1 }}>Code : <span style={{ fontFamily: 'monospace', fontWeight: 700, color: acc }}>{cls.invite_code}</span></div>
               </div>
-            </div>
+              <div style={{ fontSize: '.62rem', color: acc, fontWeight: 700, flexShrink: 0, textAlign: 'right', lineHeight: 1.3 }}>Voir les<br/>créneaux →</div>
+            </button>
           ))}
         </div>
       )}
