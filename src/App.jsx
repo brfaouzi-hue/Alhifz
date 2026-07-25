@@ -1729,6 +1729,9 @@ const TJ_COLORS={
 
 // Colorie le HTML tajweed qurancdn avec des spans inline
 const stripArabicNums=s=>(s||"").replace(/[۰-۹٠-٩]/g,"").replace(/ٲ/g,"ٰ");
+// Numéros de versets en chiffres arabo-indiens (٠-٩), comme dans un vrai Mushaf
+const AR_DIGITS=["٠","١","٢","٣","٤","٥","٦","٧","٨","٩"];
+const toArNum=n=>String(n).split("").map(d=>AR_DIGITS[+d]??d).join("");
 // Les traductions de l'API contiennent des appels de note de bas de page bruts
 // (ex: <sup foot_note=211622>1</sup>) affichés tels quels un peu partout dans
 // l'app (mode test, mode concentration, partage, favoris...) — nettoyé une
@@ -2248,16 +2251,36 @@ body>*{position:relative;z-index:1;}
 function SurahPageDivider({sn,t,arFont}){
   const s=SURAHS.find(x=>x.n===sn);
   if(!s)return null;
+  // Le fond de la page Mushaf est toujours blanc/ivoire quel que soit le thème
+  // de l'app — on utilise donc une encre foncée fixe plutôt que t.tx/t.tx3 (clairs
+  // en thème sombre), sinon le texte devient illisible sur le papier clair.
   return (
     <div style={{direction:"ltr",textAlign:"center",margin:"16px 0"}}>
       <div style={{display:"inline-flex",alignItems:"center",gap:8,fontFamily:"Amiri,serif",fontSize:"1.05rem",color:t.acc,background:t.acc+"10",border:"1px solid "+t.acc+"30",borderRadius:10,padding:"6px 16px"}}>
         <span>سورة {s.ar}</span>
-        <span style={{fontSize:".58rem",color:t.tx3,fontFamily:"system-ui,sans-serif"}}>· {s.name}</span>
+        <span style={{fontSize:".58rem",color:"#8a7358",fontFamily:"system-ui,sans-serif"}}>· {s.name}</span>
       </div>
       {s.n!==1&&s.n!==9&&(
-        <div style={{fontFamily:arFont||"Amiri Quran,serif",fontSize:"1.3rem",color:t.tx,marginTop:8,direction:"rtl"}}>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+        <div style={{fontFamily:arFont||"Amiri Quran,serif",fontSize:"1.3rem",color:"#1c1208",marginTop:8,direction:"rtl"}}>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
       )}
     </div>
+  );
+}
+
+// AyahMarker — rosette de fin de verset façon Mushaf (cercle + 8 pointes), avec
+// chiffre arabo-indien centré, plutôt qu'un badge rond plat de type "UI moderne".
+function AyahMarker({n, color, faded, onClick}) {
+  const c=encodeURIComponent(color);
+  const spokes=Array.from({length:8}).map((_,i)=>{
+    const a=i*Math.PI/4;
+    const x1=20+16*Math.cos(a),y1=20+16*Math.sin(a),x2=20+20*Math.cos(a),y2=20+20*Math.sin(a);
+    return `%3Cline x1='${x1.toFixed(1)}' y1='${y1.toFixed(1)}' x2='${x2.toFixed(1)}' y2='${y2.toFixed(1)}'/%3E`;
+  }).join('');
+  const bg=`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='${c}' stroke-width='1.3'%3E%3Ccircle cx='20' cy='20' r='15.5'/%3E${spokes}%3C/g%3E%3C/svg%3E")`;
+  return (
+    <span onClick={onClick} style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"1.3em",height:"1.3em",backgroundImage:bg,backgroundSize:"100% 100%",backgroundRepeat:"no-repeat",verticalAlign:"middle",margin:"0 2px",opacity:faded?0.5:1,flexShrink:0,cursor:onClick?"pointer":undefined,WebkitTapHighlightColor:"transparent"}}>
+      <span style={{fontSize:".44em",fontWeight:700,fontFamily:"Amiri Quran,Amiri,serif",color,lineHeight:1}}>{toArNum(n)}</span>
+    </span>
   );
 }
 
@@ -2423,7 +2446,10 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
 
       {/* Texte en flux continu */}
       <div ref={pageContainerRef} style={{flex:"1 1 0%",minHeight:0,overflowY:"auto",minWidth:0,width:"100%",boxSizing:"border-box",contain:"layout",padding:"24px 20px",WebkitOverflowScrolling:"touch",display:"flex",flexDirection:"column",justifyContent:fitScale>1.03?"center":"flex-start"}} onClick={e=>e.stopPropagation()}>
-        <div ref={pageTextRef} style={{direction:"rtl",textAlign:"justify",width:"100%",boxSizing:"border-box",overflowWrap:"break-word",wordBreak:"break-word",wordSpacing:"0.15em",WebkitTextAlignLast:"right",textAlignLast:"right",lineHeight:3.2,fontFamily:arFont||"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.6)*fitScale+"rem",maxWidth:"100%",color:t.tx,transition:"font-size .2s ease"}}>
+        {/* Le papier de la page reste toujours blanc/ivoire, quel que soit le thème
+            de l'app — l'encre du texte doit donc rester foncée fixe (#1c1208),
+            pas t.tx (clair en thème sombre → texte invisible sur papier clair). */}
+        <div ref={pageTextRef} style={{direction:"rtl",textAlign:"justify",width:"100%",boxSizing:"border-box",overflowWrap:"break-word",wordBreak:"break-word",wordSpacing:"0.1em",WebkitTextAlignLast:"right",textAlignLast:"right",lineHeight:2.3,fontFamily:arFont||"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.6)*fitScale+"rem",maxWidth:"100%",color:"#1c1208",transition:"font-size .2s ease"}}>
           {fullPage.map((v,vi)=>{
             const prevSn=vi>0?fullPage[vi-1].sn:null;
             // Pas de bannière pour la toute première ligne de la sourate déjà sélectionnée
@@ -2434,9 +2460,9 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
               return (
                 <React.Fragment key={`f-${v.sn}-${v.n}`}>
                   {showDivider&&<SurahPageDivider sn={v.sn} t={t} arFont={arFont}/>}
-                  <span style={{opacity:.5}}>
+                  <span style={{opacity:.5,color:"#1c1208"}}>
                     <TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/>
-                    <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"1.3em",height:"1.3em",borderRadius:"50%",background:t.tx3+"30",color:t.tx3,fontSize:".48rem",fontWeight:800,margin:"0 3px",verticalAlign:"middle",fontFamily:"sans-serif",flexShrink:0}}>{v.n}</span>
+                    <AyahMarker n={v.n} color="#8a7358" faded/>
                   </span>
                 </React.Fragment>
               );
@@ -2461,10 +2487,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
                     : <TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/>
                   }
                 </span>
-                <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"1.3em",height:"1.3em",borderRadius:"50%",background:isMem?t.gr:isPlay?t.acc:t.acc+"40",color:"#fff",fontSize:".48rem",fontWeight:800,margin:"0 3px",verticalAlign:"middle",fontFamily:"sans-serif",cursor:"pointer",WebkitTapHighlightColor:"transparent",flexShrink:0}}
-                  onClick={e=>{e.stopPropagation();handleTap(v);}}>
-                  {v.n}
-                </span>
+                <AyahMarker n={v.n} color={isMem?t.gr:isPlay?t.acc:t.acc} onClick={e=>{e.stopPropagation();handleTap(v);}}/>
                 {showTr&&v.fr&&<div style={{display:"block",direction:"ltr",textAlign:"left",fontSize:".68rem",color:t.tx3,fontStyle:"italic",lineHeight:1.5,margin:"2px 0 6px",fontFamily:"sans-serif"}}>{v.fr.replace(/<[^>]*>/g,"")}</div>}
                   {showTf&&(()=>{const k=`${selS?.n}_${v.n}`;if(!tafsirData[k]&&loadTafsir)loadTafsir(selS?.n,v.n);return tafsirData[k]?<div style={{display:"block",direction:"ltr",textAlign:"left",fontSize:".72rem",color:"#5d4037",background:"#fff8e1",borderRadius:6,padding:"6px 8px",marginTop:4,fontFamily:"sans-serif",lineHeight:1.6,borderLeft:"3px solid #f9a825"}}><span style={{fontWeight:700,fontSize:".6rem",color:"#f9a825",display:"block",marginBottom:2}}>📖 Tafsir</span>{tafsirData[k]}</div>:null;})()}
 
