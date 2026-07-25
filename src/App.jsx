@@ -2,6 +2,9 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import { useRole } from './teacher/useTeacher.js';
 import TeacherDashboard from './teacher/TeacherDashboard.jsx';
 import JoinClass from './teacher/JoinClass.jsx';
+import NotificationBell from './teacher/NotificationBell.jsx';
+import TeacherSchedule from './teacher/TeacherSchedule.jsx';
+import StudentSchedule from './teacher/StudentSchedule.jsx';
 
 const SURAHS = [
   {n:1,name:"Al-Fatiha",ar:"الفاتحة",v:7,juz:1,type:"Mecquoise"},
@@ -4218,7 +4221,7 @@ return (
             <button className="tbtn" style={{borderColor:t.pu,color:t.pu,fontSize:".6rem",flexShrink:0}} onClick={()=>setShowAIPlan(true)}>✦<span className="mp-label"> Mon Parcours</span></button>
             <button className="tbtn" style={{borderColor:timerRunning?t.acc:t.gr,color:timerRunning?t.acc:t.gr,fontSize:".6rem",fontWeight:timerRunning?800:400}} onClick={()=>setTimerOpen(true)}>{timerRunning&&timerLeft?fmtTime(timerLeft):"⏱"}</button>
             <button className="ib" title={tn==="light"?"Passer en mode nuit":"Passer en mode jour"} onClick={()=>setTn(tn==="light"?"emerald":"light")}>{tn==="light"?<Icons.Moon size={14}/>:<Icons.Sun size={14}/>}</button>
-
+            {user&&<NotificationBell userId={user?.id} t={t} setPage={setPage}/>}
 
 
 
@@ -6182,6 +6185,7 @@ return (
         {/* SETTINGS */}
         {page==="teacher"&&(user?<TeacherDashboard user={user} t={t} acc={t.acc}/>:<LoginRequiredScreen t={t} acc={t.acc} label="L'espace Enseignant" onLogin={()=>setShowAuthModal(true)}/>)}
       {page==="join-class"&&(user?<JoinClass user={user} t={t} acc={t.acc} onJoined={()=>setPage("home")}/>:<LoginRequiredScreen t={t} acc={t.acc} label="Rejoindre une classe" onLogin={()=>setShowAuthModal(true)}/>)}
+      {page==="schedule"&&(user?(role==="teacher"?<TeacherSchedule userId={user?.id} t={t} acc={t.acc}/>:<StudentSchedule userId={user?.id} t={t} acc={t.acc}/>):<LoginRequiredScreen t={t} acc={t.acc} label="Le planning" onLogin={()=>setShowAuthModal(true)}/>)}
       {page==="donation"&&(
         <div style={{padding:"20px 16px",maxWidth:480,margin:"0 auto"}}>
           <div style={{textAlign:"center",marginBottom:24}}>
@@ -6773,6 +6777,7 @@ return (
               {id:"settings",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,label:"Réglages"},
               {id:"join-class",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>,label:"Ma classe"},
               {id:"teacher",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,label:"Enseignant"},
+              {id:"schedule",icon:<span style={{fontSize:"22px",lineHeight:1}}>📅</span>,label:"Planning"},
               {id:"donation",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,label:"Don"},
             ].map(item=>(
               <button key={item.id} onClick={()=>{setShowMore(false);setPage(item.id);}}
