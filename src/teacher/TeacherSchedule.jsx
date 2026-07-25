@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useTeacherSlots, useTeacherBookings } from './useSchedule.js';
 import { useTeacherClasses, useProfiles, useClassStudents } from './useTeacher.js';
+import { buildICS, downloadICS } from './ics.js';
 
 const DAYS = [
   { label: 'Lun', dow: 1 }, { label: 'Mar', dow: 2 }, { label: 'Mer', dow: 3 },
@@ -159,11 +160,24 @@ export default function TeacherSchedule({ userId, t, acc }) {
 
   const loading = slotsLoading || bookingsLoading;
 
+  const exportICS = () => {
+    const events = slots.filter(s => s.active !== false).map(s => ({
+      uid: `slot-${s.id}`,
+      title: s.title || (s.max_students > 1 ? 'Cours collectif Al-Hifz' : 'Cours individuel Al-Hifz'),
+      description: s.description || '',
+      dateStr: s.recurring ? undefined : s.date,
+      recurringDow: s.recurring ? s.day_of_week : undefined,
+      startTime: s.start_time,
+      durationMin: s.duration_min,
+    }));
+    downloadICS('mon-planning-al-hifz.ics', buildICS(events));
+  };
+
   return loading ? (
     <div style={{ textAlign: 'center', padding: 40, color: t.tx3 }}>Chargement...</div>
   ) : (
     <div style={{ position: 'relative', minHeight: '100%' }}>
-      <div style={{ display: 'flex', borderBottom: '1px solid ' + t.b1, padding: '0 16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid ' + t.b1, padding: '0 16px' }}>
         {[['planning', 'Planning'], ['demandes', `Demandes${pending.length ? ` (${pending.length})` : ''}`]].map(([id, label]) => (
           <button key={id} onClick={() => setTab(id)} style={{
             flex: 1, padding: '12px 0', background: 'none', border: 'none', cursor: 'pointer',
@@ -171,6 +185,12 @@ export default function TeacherSchedule({ userId, t, acc }) {
             borderBottom: tab === id ? `2px solid ${acc}` : '2px solid transparent',
           }}>{label}</button>
         ))}
+        {slots.length > 0 && (
+          <button onClick={exportICS} title="Exporter vers Calendrier (iPhone, Google, Outlook...)" style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 10px', marginLeft: 8, borderRadius: 10, border: '1px solid ' + t.b1, background: 'transparent', color: t.tx2, fontSize: '.65rem', fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Exporter
+          </button>
+        )}
       </div>
 
       {tab === 'planning' && (
@@ -297,25 +317,41 @@ export default function TeacherSchedule({ userId, t, acc }) {
             <p style={{ fontSize: '.72rem', color: t.tx3, marginBottom: 14 }}>
               {fmtDateFR(detailCell.date)} · {(detailCell.slot.start_time || '').slice(0, 5)} · {detailCell.slot.duration_min} min
             </p>
-            <div style={{ fontSize: '.68rem', color: t.tx3, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 8 }}>
-              Élèves inscrits ({detailCell.dayBookings.length})
-            </div>
-            {detailCell.dayBookings.length === 0 && (
-              <div style={{ fontSize: '.75rem', color: t.tx3, marginBottom: 14 }}>Personne inscrit pour l&apos;instant</div>
-            )}
-            {detailCell.dayBookings.map(b => (
+            {(() => {
+              // recalculé à partir de `bookings` (au lieu du instantané pris à l'ouverture
+              // de la modale) pour que la modale reste à jour après un accepter/refuser
+              const liveDayBookings = bookings.filter(b => b.slot_id === detailCell.slot.id && b.booking_date === detailCell.date && b.status !== 'cancelled');
+              return (
+                <>
+                  <div style={{ fontSize: '.68rem', color: t.tx3, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 8 }}>
+                    Élèves inscrits ({liveDayBookings.length})
+                  </div>
+                  {liveDayBookings.length === 0 && (
+                    <div style={{ fontSize: '.75rem', color: t.tx3, marginBottom: 14 }}>Personne inscrit pour l&apos;instant</div>
+                  )}
+                  {liveDayBookings.map(b => (
               <div key={b.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 10, background: t.s2, marginBottom: 6 }}>
                 <div style={{ width: 26, height: 26, borderRadius: '50%', background: acc + '22', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.62rem', fontWeight: 700, color: acc, flexShrink: 0 }}>
                   {(studentNames[b.student_id] || b.student_id).slice(0, 2).toUpperCase()}
                 </div>
                 <span style={{ flex: 1, fontSize: '.7rem', color: t.tx }}>{studentNames[b.student_id] || '…'}</span>
-                <span style={{
-                  fontSize: '.6rem', fontWeight: 700, padding: '2px 8px', borderRadius: 20,
-                  color: b.status === 'confirmed' ? t.gr : b.status === 'pending' ? '#fb8c00' : t.tx3,
-                  background: (b.status === 'confirmed' ? t.gr : b.status === 'pending' ? '#fb8c00' : t.tx3) + '18',
-                }}>{b.status === 'confirmed' ? 'Confirmé' : b.status === 'pending' ? 'En attente' : b.status}</span>
+                {b.status === 'pending' ? (
+                  <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                    <button onClick={() => handleAccept(b)} title="Accepter" style={{ width: 26, height: 26, borderRadius: '50%', border: 'none', background: t.gr, color: '#fff', fontWeight: 700, fontSize: '.7rem', cursor: 'pointer' }}>✓</button>
+                    <button onClick={() => handleRefuse(b)} title="Refuser" style={{ width: 26, height: 26, borderRadius: '50%', border: '1px solid ' + t.rd, background: 'transparent', color: t.rd, fontWeight: 700, fontSize: '.7rem', cursor: 'pointer' }}>✗</button>
+                  </div>
+                ) : (
+                  <span style={{
+                    fontSize: '.6rem', fontWeight: 700, padding: '2px 8px', borderRadius: 20,
+                    color: b.status === 'confirmed' ? t.gr : t.tx3,
+                    background: (b.status === 'confirmed' ? t.gr : t.tx3) + '18',
+                  }}>{b.status === 'confirmed' ? 'Confirmé' : b.status}</span>
+                )}
               </div>
-            ))}
+                  ))}
+                </>
+              );
+            })()}
             <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
               <button className="tbtn" style={{ flex: 1 }} onClick={() => openEdit(detailCell.slot)}>Modifier</button>
               <button className="tbtn" style={{ flex: 1, borderColor: t.rd, color: t.rd }} onClick={() => handleCancelSlot(detailCell.slot.id)}>Annuler le créneau</button>

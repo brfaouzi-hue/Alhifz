@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useStudentSlots, useStudentBookings } from './useSchedule.js';
+import { buildICS, downloadICS } from './ics.js';
 
 const DAYS = [
   { label: 'Lun', dow: 1 }, { label: 'Mar', dow: 2 }, { label: 'Mer', dow: 3 },
@@ -132,12 +133,32 @@ export default function StudentSchedule({ userId, t, acc }) {
   const modalKey = bookModal ? `${bookModal.slot.id}_${bookModal.date}` : null;
   const modalOccCount = modalKey ? (occupancy[modalKey] || []).length : 0;
 
+  const exportICS = () => {
+    const events = upcoming.filter(b => b.status === 'confirmed').map(b => ({
+      uid: `booking-${b.id}`,
+      title: b.availability_slots?.title || 'Cours de Coran',
+      description: 'Cours Al-Hifz' + (b.teacher_note ? ' — ' + b.teacher_note : ''),
+      dateStr: b.booking_date,
+      startTime: b.start_time,
+      durationMin: b.availability_slots?.duration_min || 45,
+    }));
+    downloadICS('mon-planning-al-hifz.ics', buildICS(events));
+  };
+
   return loading ? (
     <div style={{ textAlign: 'center', padding: 40, color: t.tx3 }}>Chargement...</div>
   ) : (
     <div style={{ padding: '0 0 20px' }}>
       <div style={{ padding: '16px 16px 8px' }}>
-        <h2 style={{ fontFamily: 'Amiri,serif', fontSize: '1.15rem', color: acc, margin: '0 0 10px' }}>Planning de mes cours</h2>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <h2 style={{ fontFamily: 'Amiri,serif', fontSize: '1.15rem', color: acc, margin: 0 }}>Planning de mes cours</h2>
+          {upcoming.some(b => b.status === 'confirmed') && (
+            <button onClick={exportICS} title="Exporter vers Calendrier (iPhone, Google, Outlook...)" style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 10px', borderRadius: 10, border: '1px solid ' + t.b1, background: 'transparent', color: t.tx2, fontSize: '.65rem', fontWeight: 700, cursor: 'pointer' }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Exporter
+            </button>
+          )}
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <button onClick={() => setWeekOffset(p => p - 1)} style={{ background: 'none', border: '1px solid ' + t.b1, borderRadius: 10, padding: '6px 12px', color: t.tx2, cursor: 'pointer' }}>←</button>
           <span style={{ fontSize: '.75rem', color: t.tx2, fontWeight: 600 }}>
