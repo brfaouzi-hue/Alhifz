@@ -829,7 +829,7 @@ const ONBOARD_SLIDES=[
     ),
     title:"بِسْمِ اللَّهِ",
     sub:"Bienvenue dans Al-Hifz",
-    desc:"Le mémorisateur de Coran le plus complet. Mémorise, révcite, révise — tout en un.",
+    desc:"Le mémorisateur de Coran le plus complet. Mémorise, récite, révise — tout en un.",
     color:"#16a34a",
   },
   {
@@ -845,7 +845,7 @@ const ONBOARD_SLIDES=[
     ),
     title:"Mémorise verset par verset",
     sub:"Progression intelligente",
-    desc:"Marque les versets mémorisés, suis ta progression par sourate et juz. La révision espacée (SM2) t'aide à ne rien oublier.",
+    desc:"Marque les versets mémorisés, suis ta progression par sourate et par juz. La révision espacée t'aide à ne rien oublier.",
     color:"#2563eb",
   },
   {
@@ -874,7 +874,7 @@ const ONBOARD_SLIDES=[
     ),
     title:"Mushaf & Tajweed",
     sub:"Lecture page par page",
-    desc:"Lis le Mushaf page par page, active le tajweed coloré, swipe pour naviguer. Lance une khatma pour lire le Coran complet.",
+    desc:"Lis le Mushaf page par page, active le tajweed coloré, glisse pour naviguer. Lance une khatma pour lire le Coran complet.",
     color:"#7c3aed",
   },
 ];
@@ -951,7 +951,7 @@ const TUTORIAL_SECTIONS=[
       },
       {
         title:"Marque un verset mémorisé",
-        desc:"Appuie longuement sur le verset. Un menu apparaît avec les actions. Tape + Mémoriser. Le verset devient vert avec une coche ✓.",
+        desc:"Appuie longuement sur le verset. Un menu apparaît avec les actions. Tape sur ✓ Mémoriser. Le verset devient vert avec une coche ✓.",
         mock:{
           lines:[
             {type:"verse",ar:"بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",n:1,mem:false},
@@ -975,13 +975,13 @@ const TUTORIAL_SECTIONS=[
       },
       {
         title:"Révision espacée",
-        desc:"L'onglet Révision affiche les versets à revoir aujourd'hui. Le système calcule automatiquement les intervalles — plus tu récites bien, plus l'intervalle s'allonge.",
+        desc:"L'onglet Révision affiche les versets à revoir aujourd'hui. Le système calcule automatiquement les intervalles — mieux tu récites, plus l'intervalle s'allonge.",
         mock:{
           lines:[
-            {type:"header",text:"Révision · 5 versets dus",sub:"Système SM2"},
+            {type:"header",text:"Révision · 5 versets dus",sub:"Révision intelligente"},
             {type:"verse",ar:"مَٰلِكِ يَوْمِ ٱلدِّينِ",n:4,mem:true,due:true},
             {type:"verse",ar:"إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",n:5,mem:true,due:true},
-            {type:"tip",text:"Révise chaque jour pour ancrer définitivement"},
+            {type:"tip",text:"Révise chaque jour pour ancrer durablement tes versets"},
           ]
         }
       },
@@ -992,7 +992,7 @@ const TUTORIAL_SECTIONS=[
     steps:[
       {
         title:"Lance la récitation",
-        desc:"Dans une sourate, appuie sur le bouton 🎤 Récitation en haut à droite. Un écran plein écran s'ouvre avec le premier verset.",
+        desc:"Dans une sourate, appuie sur le bouton 🎤 Récitation en haut à droite. L'écran de récitation s'ouvre en plein écran, avec le premier verset.",
         mock:{
           lines:[
             {type:"header",text:"Al-Fatiha · Récitation",sub:"7 versets"},
@@ -1004,7 +1004,7 @@ const TUTORIAL_SECTIONS=[
       },
       {
         title:"Récite à voix haute",
-        desc:"Appuie sur le bouton micro. Il passe en rouge et écoute. Récite le verset clairement. Le micro s'arrête seul à la fin.",
+        desc:"Appuie sur le bouton micro : il devient rouge et l'app se met à l'écoute. Récite le verset clairement — le micro s'arrête automatiquement à la fin.",
         mock:{
           lines:[
             {type:"verse",ar:"بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",n:1,mem:false},
@@ -1022,7 +1022,7 @@ const TUTORIAL_SECTIONS=[
             {type:"score",pct:85,correct:6,wrong:1},
             {type:"verse-colored",words:[{w:"بِسْمِ",ok:true},{w:"ٱللَّهِ",ok:true},{w:"ٱلرَّحْمَٰنِ",ok:false},{w:"ٱلرَّحِيمِ",ok:true}]},
             {type:"said",text:"بِسمِ اللهِ الرحمَن الرحيم"},
-            {type:"tip",text:"Score ≥ 70% en mode Enchaîné → verset suivant automatique"},
+            {type:"tip",text:"En mode Enchaîné, un score ≥ 70% passe automatiquement au verset suivant"},
           ]
         }
       },
@@ -1075,12 +1075,12 @@ const TUTORIAL_SECTIONS=[
     steps:[
       {
         title:"Lire page par page",
-        desc:"L'onglet Mushaf affiche les pages du Coran en haute résolution depuis notre serveur. Swipe gauche/droite pour tourner les pages.",
+        desc:"L'onglet Mushaf affiche les pages du Coran en haute résolution. Glisse vers la gauche ou la droite pour tourner les pages.",
         mock:{
           lines:[
             {type:"mushaf-nav",page:1,total:604},
             {type:"mushaf-page",text:"Image haute résolution du Mushaf"},
-            {type:"tip",text:"Swipe gauche → page suivante · Swipe droite → page précédente"},
+            {type:"tip",text:"Glisse à gauche → page suivante · Glisse à droite → page précédente"},
           ]
         }
       },
@@ -1112,7 +1112,7 @@ const TUTORIAL_SECTIONS=[
     steps:[
       {
         title:"Lance une Khatma",
-        desc:"Dans l'onglet Khatma, choisis la durée (30, 60 ou 90 jours) et démarre. L'app calcule combien de pages lire chaque jour.",
+        desc:"Dans l'onglet Khatma, choisis un rythme (quotidien, hebdomadaire, mensuel, Ramadan ou personnalisé) et démarre. L'app calcule combien de pages lire chaque jour.",
         mock:{
           lines:[
             {type:"header",text:"Khatma · 30 jours",sub:"20 pages / jour"},
@@ -2731,6 +2731,7 @@ const [authError, setAuthError] = useState("");
   // changement réel de sourate, écrasant la page conservée en plein écran.
   useEffect(()=>{setQuranCurPage(0);},[selS?.n]);
   const [selJuz,setSelJuz]=useState(null);
+  const [selHizb,setSelHizb]=useState(null);
   const [search,setSearch]=useState("");
   const [showTr,setShowTr]=useState(false);
   const [showTj,setShowTj]=useState(false);
@@ -3108,6 +3109,27 @@ const handleReset=async()=>{
   const sMem=s=>Object.keys(mem[String(s.n)]||{}).length;
   const sPct=s=>Math.round(sMem(s)/s.v*100);
   const juzPct=j=>{const ss=SURAHS.filter(s=>s.juz===j);const tot=ss.reduce((a,s)=>a+s.v,0),don=ss.reduce((a,s)=>a+sMem(s),0);return tot>0?Math.round(don/tot*100):0;};
+  // Hizb — pas de données de limites précises par verset dans l'app ; chaque
+  // Juz est simplement scindé en 2 par sourate (arrondi à la sourate la plus
+  // proche, comme le fait déjà le système Juz lui-même). Si une seule sourate
+  // démarre dans le juz (elle le déborde largement), elle représente ses deux
+  // hizb à la fois plutôt que de laisser le second vide.
+  const hizbSurahs=h=>{
+    const j=Math.ceil(h/2);
+    let juzSurahs=SURAHS.filter(s=>s.juz===j).sort((a,b)=>a.n-b.n);
+    if(juzSurahs.length===0){
+      // Aucune sourate ne "démarre" dans ce juz (il est entièrement traversé
+      // par une sourate commencée dans un juz précédent, ex. Al-Baqara qui
+      // couvre juz 1 à 3) — on rattache le hizb à cette sourate englobante.
+      const covering=SURAHS.filter(s=>s.juz<=j).sort((a,b)=>b.juz-a.juz||b.n-a.n)[0];
+      juzSurahs=covering?[covering]:[];
+    }
+    if(juzSurahs.length<=1)return juzSurahs;
+    const mid=Math.ceil(juzSurahs.length/2);
+    return h%2===1?juzSurahs.slice(0,mid):juzSurahs.slice(mid);
+  };
+  const hizbPct=h=>{const ss=hizbSurahs(h);const tot=ss.reduce((a,s)=>a+s.v,0),don=ss.reduce((a,s)=>a+sMem(s),0);return tot>0?Math.round(don/tot*100):0;};
+  const hizbList=Array.from({length:60},(_,i)=>i+1);
 
   const addToHistory=(sn,vn)=>{
     const entry={sn,vn,ts:Date.now(),surah:SURAHS.find(s=>s.n===sn)?.name||""};
@@ -3391,6 +3413,26 @@ const handleReset=async()=>{
   });
   };
   const toggleAll=s=>{const k=String(s.n),done=sMem(s)===s.v;setMem(p=>{if(done){const n={...p};delete n[k];return n;}const a={};for(let i=1;i<=s.v;i++)a[String(i)]=true;return{...p,[k]:a};});};
+  // Marquer/démarquer d'un coup toutes les sourates d'un groupe (Juz/Hizb) —
+  // appui long sur une cellule Juz/Hizb dans la navigation.
+  const toggleGroupMemorized=(group,label)=>{
+    if(!group.length)return;
+    const allDone=group.every(s=>sMem(s)===s.v);
+    setMem(p=>{
+      const n={...p};
+      group.forEach(s=>{
+        const k=String(s.n);
+        if(allDone)delete n[k];
+        else{const a={};for(let i=1;i<=s.v;i++)a[String(i)]=true;n[k]=a;}
+      });
+      return n;
+    });
+    setToastMsg(allDone?`${label} démarqué`:`${label} marqué comme mémorisé ✓`);
+  };
+  const groupLpTimer=useRef(null);
+  const groupLpFired=useRef(false);
+  const startGroupLp=(group,label)=>{clearTimeout(groupLpTimer.current);groupLpTimer.current=setTimeout(()=>{groupLpFired.current=true;toggleGroupMemorized(group,label);},550);};
+  const endGroupLp=()=>clearTimeout(groupLpTimer.current);
 
   const doPlay=vn=>{
     if(!selS||!audioRef.current)return;
@@ -4820,7 +4862,7 @@ return (
               )}
               <div className="nav-section-title">Parcourir le Coran</div>
               <div className="ltabs">
-                {[["list","Sourates"],["juz","Juz"],["pages-nav","Pages"],["vsearch","Versets"],["themes","Thèmes"]].map(([id,l])=>(
+                {[["list","Sourates"],["juz","Juz"],["hizb","Hizb"],["pages-nav","Pages"],["vsearch","Versets"],["themes","Thèmes"]].map(([id,l])=>(
                   <button key={id} className={`lt ${ltab===id?"on":""}`} onClick={()=>setLtab(id)}>{l}</button>
                 ))}
               </div>
@@ -4977,9 +5019,13 @@ return (
               )}
               {ltab==="juz"&&(
                 <>
+                  <div style={{padding:"4px 10px 0",fontSize:".56rem",color:t.tx3}}>Appui long sur un juz : marquer/démarquer comme mémorisé</div>
                   <div className="jg">
-                    {juzList.map(j=>{const p=juzPct(j);return(
-                      <div key={j} className={`jc ${selJuz===j?"sel":""}`} onClick={()=>{setSelJuz(j===selJuz?null:j);const firstS=SURAHS.find(s=>s.juz===j);if(firstS&&j!==selJuz)doSelect(firstS);}}>
+                    {juzList.map(j=>{const p=juzPct(j);const group=SURAHS.filter(s=>s.juz===j);return(
+                      <div key={j} className={`jc ${selJuz===j?"sel":""}`}
+                        onClick={()=>{if(groupLpFired.current){groupLpFired.current=false;return;}setSelJuz(j===selJuz?null:j);const firstS=group[0];if(firstS&&j!==selJuz)doSelect(firstS);}}
+                        onMouseDown={()=>startGroupLp(group,`Juz ${j}`)} onMouseUp={endGroupLp} onMouseLeave={endGroupLp}
+                        onTouchStart={()=>startGroupLp(group,`Juz ${j}`)} onTouchEnd={endGroupLp}>
                         <div className="jl">Juz</div><div className="jn">{j}</div>
                         <div className="jb"><div className="jf" style={{width:`${p}%`}}/></div>
                         <div style={{fontSize:".56rem",color:p===100?t.gr:p>0?t.acc:t.tx3,marginTop:2}}>{p}%</div>
@@ -4988,6 +5034,32 @@ return (
                   </div>
                   {selJuz&&(<div className="slist" style={{borderTop:`1px solid ${t.b1}`}}>
                     {SURAHS.filter(s=>s.juz===selJuz).map(s=>(
+                      <div key={s.n} className={`srow ${selS?.n===s.n?"sel":""}`} onClick={()=>doSelect(s)}>
+                        <div className={`snum ${sPct(s)===100?"done":""}`} onClick={e=>{e.stopPropagation();toggleAll(s);}}>{sPct(s)===100?<Icons.Check size={10} color={t.gr}/>:s.n}</div>
+                        <div style={{flex:1}}><div className="sname">{s.name}</div><div className="smeta">{s.v}v{!!Q[s.n]&&<span style={{color:t.gr,marginLeft:4}}>⬤</span>}</div></div>
+                        <div className="sar">{s.ar}</div>
+                      </div>
+                    ))}
+                  </div>)}
+                </>
+              )}
+              {ltab==="hizb"&&(
+                <>
+                  <div style={{padding:"4px 10px 0",fontSize:".56rem",color:t.tx3}}>Appui long sur un hizb : marquer/démarquer comme mémorisé</div>
+                  <div className="jg">
+                    {hizbList.map(h=>{const p=hizbPct(h);const group=hizbSurahs(h);return(
+                      <div key={h} className={`jc ${selHizb===h?"sel":""}`}
+                        onClick={()=>{if(groupLpFired.current){groupLpFired.current=false;return;}setSelHizb(h===selHizb?null:h);const firstS=group[0];if(firstS&&h!==selHizb)doSelect(firstS);}}
+                        onMouseDown={()=>startGroupLp(group,`Hizb ${h}`)} onMouseUp={endGroupLp} onMouseLeave={endGroupLp}
+                        onTouchStart={()=>startGroupLp(group,`Hizb ${h}`)} onTouchEnd={endGroupLp}>
+                        <div className="jl">Hizb</div><div className="jn">{h}</div>
+                        <div className="jb"><div className="jf" style={{width:`${p}%`}}/></div>
+                        <div style={{fontSize:".56rem",color:p===100?t.gr:p>0?t.acc:t.tx3,marginTop:2}}>{p}%</div>
+                      </div>
+                    );})}
+                  </div>
+                  {selHizb&&(<div className="slist" style={{borderTop:`1px solid ${t.b1}`}}>
+                    {hizbSurahs(selHizb).map(s=>(
                       <div key={s.n} className={`srow ${selS?.n===s.n?"sel":""}`} onClick={()=>doSelect(s)}>
                         <div className={`snum ${sPct(s)===100?"done":""}`} onClick={e=>{e.stopPropagation();toggleAll(s);}}>{sPct(s)===100?<Icons.Check size={10} color={t.gr}/>:s.n}</div>
                         <div style={{flex:1}}><div className="sname">{s.name}</div><div className="smeta">{s.v}v{!!Q[s.n]&&<span style={{color:t.gr,marginLeft:4}}>⬤</span>}</div></div>
