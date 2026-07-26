@@ -628,6 +628,24 @@ const TAJWID_CLASS_COLORS={
   "sakt":                tjc=>tjc.sl,
 };
 
+// KaraokeVerseText — mode Tilawa : surlignage transparent qui suit la
+// récitation mot par mot (pour se retrouver si on fait une pause), synchronisé
+// sur activeWordIdx (RAF basé sur les timestamps précis de l'API quand
+// disponibles). Retombe sur un rendu TajwidSpan classique si les mots ne sont
+// pas encore chargés.
+function KaraokeVerseText({ar, words, activeIdx, tjc, showTj, t}){
+  if(!words||!words.length) return <TajwidSpan text={ar} enabled={showTj} tjc={tjc}/>;
+  return (
+    <bdi style={{direction:"rtl",letterSpacing:0}}>
+      {words.map((w,wi)=>(
+        <span key={wi} style={{display:"inline-block",background:wi===activeIdx?t.acc+"30":"transparent",borderRadius:5,padding:"1px 3px",transition:"background .12s"}}>
+          <TajwidSpan text={w.text} enabled={showTj} tjc={tjc}/>{" "}
+        </span>
+      ))}
+    </bdi>
+  );
+}
+
 // HifzVerseText — affiche le verset en mode Hifz
 // Les derniers mots (selon level 1-5) sont masqués, les visibles gardent TajwidSpan
 function HifzVerseText({ar, level, tjc, showTj, vmark, onRevealWord}) {
@@ -2322,6 +2340,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
                         toggleV, toggleFav, isFav, doPlay, sv,
                         onLongPress, setPage, wbwVerseRef, setWbwOpen, partialPlayRef, showTf, tafsirData, loadTafsir, doPlayPartial, setVerseCtxMenu, versePages, verseJuzHizb,
                         reviewMode, revealedVerses, setRevealedVerses,
+                        karaokeMode, activeWordIdx, wordTimings, startPlaylist,
                         immersive, chromeVisible, onToggleChrome, curPage:curPageProp, setCurPage:setCurPageProp}) {
   // ── Récitation in-page ──
 
@@ -2548,15 +2567,11 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
     setGotoOpen(false);
   };
 
+  // Un tap ne fait plus jouer l'audio directement (uniquement sélectionner/
+  // désélectionner) — la lecture se fait via le bouton ▶ de la barre d'actions
+  // ou via le menu qui apparaît à l'appui long, jamais sur un simple tap.
   const handleTap = (v) => {
-    if(selVerse?.n === v.n) {
-      // 2e tap = lecture audio
-      doPlay(v.n);
-      setSelVerse(null);
-    } else {
-      // 1er tap = sélectionne
-      setSelVerse(v);
-    }
+    setSelVerse(prev => prev?.n === v.n ? null : v);
   };
 
 
@@ -2582,6 +2597,8 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
           style={{padding:"4px 12px",borderRadius:20,border:"1px solid "+(curPage<total-1?t.acc:t.b1),background:curPage<total-1?t.acc+"15":"transparent",color:curPage<total-1?t.acc:t.tx3,cursor:curPage<total-1?"pointer":"default",fontSize:".7rem",fontWeight:700,flexShrink:0}}>
           Suiv. →
         </button>
+        {startPlaylist&&cur.length>0&&<button onClick={e=>{e.stopPropagation();startPlaylist(selS.n,cur,cur[0]?.n);}}
+          title="Réciter toute la page" style={{padding:"4px 10px",borderRadius:20,border:"1px solid "+t.gr,background:t.gr+"15",color:t.gr,cursor:"pointer",fontSize:".75rem",fontWeight:700,flexShrink:0}}>▶ Page</button>}
         {setPage&&<button onClick={e=>{e.stopPropagation();setPage("reader");}}
           style={{padding:"4px 10px",borderRadius:20,border:"1px solid "+t.acc,background:t.acc+"15",color:t.acc,cursor:"pointer",fontSize:".75rem",fontWeight:700,flexShrink:0}}>⛶</button>}
       </div>
@@ -2665,6 +2682,8 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
                                       ?<span style={{background:t.b1,borderRadius:6,padding:"2px 10px",fontSize:".65em",color:t.tx3,fontFamily:"sans-serif"}}>▓▓▓▓▓</span>
                                       :hifzMode
                                       ? <HifzVerseText ar={v.ar} level={hifzLevel[v.n]||0} tjc={tjc} showTj={showTj} vmark={v.n}/>
+                                      : karaokeMode&&isPlay
+                                        ? <KaraokeVerseText ar={v.ar} words={wordTimings?.[selS?.n+"_"+v.n]} activeIdx={activeWordIdx} tjc={tjc} showTj={showTj} t={t}/>
                     : <TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/>
                   }
                 </span>
@@ -3274,9 +3293,10 @@ const handleSetNewPassword=async(newPass)=>{
       loadWordTimings(selS.n,playing).then(words=>{
         const audio=audioRef.current;
         if(words.length&&audio){
+          const segs=(audioSegments[selS.n]||{})[playing];
           // Attendre que la durée soit connue
-          const onMeta=()=>{ startKaraokeLoop(words,audio.duration,(audioSegments[selS.n]||{})[playing]); };
-          if(audio.duration) startKaraokeLoop(words,audio.duration);
+          const onMeta=()=>{ startKaraokeLoop(words,audio.duration,segs); };
+          if(audio.duration) startKaraokeLoop(words,audio.duration,segs);
           else{ audio.addEventListener("loadedmetadata",onMeta,{once:true}); }
         }
       });
@@ -3658,15 +3678,25 @@ const handleSetNewPassword=async(newPass)=>{
     }catch{return {};}
   };
 
-  // RAF loop pour le highlight Tilawa (basé sur currentTime)
-  const startKaraokeLoop=useCallback((words,duration)=>{
+  // RAF loop pour le highlight Tilawa (basé sur currentTime) — utilise les
+  // timestamps précis par mot (audioSegments, [word_position 1-based, ts_from_ms,
+  // ts_to_ms]) quand disponibles ; sinon repli sur une estimation grossière
+  // (durée totale / nombre de mots).
+  const startKaraokeLoop=useCallback((words,duration,segments)=>{
     if(karaokeRaf.current) cancelAnimationFrame(karaokeRaf.current);
     if(!words.length||!duration) return;
     const wordsPerSec=words.length/duration;
     const tick=()=>{
       const audio=audioRef.current;
       if(!audio||audio.paused){karaokeRaf.current=null;return;}
-      const idx=Math.min(Math.floor(audio.currentTime*wordsPerSec),words.length-1);
+      let idx;
+      if(segments&&segments.length){
+        const tms=audio.currentTime*1000;
+        const seg=segments.find(s=>tms>=s[1]&&tms<s[2])||[...segments].filter(s=>tms>=s[1]).pop();
+        idx=seg?Math.min(seg[0]-1,words.length-1):0;
+      } else {
+        idx=Math.min(Math.floor(audio.currentTime*wordsPerSec),words.length-1);
+      }
       setActiveWordIdx(idx);
       karaokeRaf.current=requestAnimationFrame(tick);
     };
@@ -5290,7 +5320,7 @@ return (
                     {loadState==="error"&&(<div style={{textAlign:"center",padding:"24px",fontSize:".78rem"}}><div style={{fontSize:"1.5rem",marginBottom:10}}>🔌</div><div style={{color:t.rd,fontWeight:700,marginBottom:6}}>Connexion requise</div><div style={{color:t.tx3,marginBottom:14,lineHeight:1.5}}>Les versets de cette sourate sont chargés depuis internet.<br/>Vérifie ta connexion et réessaie.</div><button onClick={()=>{setLoadState("idle");setTimeout(()=>setSelS(s=>({...s})),100);}} style={{padding:"8px 20px",background:t.acc,border:"none",borderRadius:10,color:"#fff",fontWeight:700,cursor:"pointer",fontSize:".75rem"}}>🔄 Réessayer</button>{Q[selS?.n]?.length>0&&<div style={{marginTop:12,fontSize:".65rem",color:t.tx3}}>ou <button onClick={()=>{setVerses(Q[selS.n]);setLoadState("done");}} style={{background:"none",border:"none",color:t.acc,cursor:"pointer",fontWeight:700}}>utiliser les données embarquées</button></div>}</div>)}
                     {loadState==="done"&&(
                       <div className="vscroll-inner" style={pageMode?{direction:"ltr",textAlign:"left",padding:0,display:"flex",flexDirection:"column",height:"100%",minHeight:0,overflow:"hidden"}:{}}>
-                        {pageMode?(<QuranPageView tn={tn} verses={verses} selS={selS} t={t} tjc={tjc} showTj={showTj} showTr={showTr} arabicSize={arabicSize} arFont={arFont} mem={mem} hifzMode={hifzMode} hifzLevel={hifzLevel} playing={playing} toggleV={toggleV} toggleFav={toggleFav} isFav={isFav} doPlay={doPlay} sv={sv} setPage={setPage} wbwVerseRef={wbwVerseRef} setWbwOpen={setWbwOpen} partialPlayRef={partialPlayRef} showTf={showTf} tafsirData={tafsirData} loadTafsir={loadTafsir} doPlayPartial={doPlayPartial} setVerseCtxMenu={setVerseCtxMenu} versePages={versePages} verseJuzHizb={verseJuzHizb} reviewMode={reviewMode} revealedVerses={revealedVerses} setRevealedVerses={setRevealedVerses} curPage={quranCurPage} setCurPage={setQuranCurPage}/>):(<>
+                        {pageMode?(<QuranPageView tn={tn} verses={verses} selS={selS} t={t} tjc={tjc} showTj={showTj} showTr={showTr} arabicSize={arabicSize} arFont={arFont} mem={mem} hifzMode={hifzMode} hifzLevel={hifzLevel} playing={playing} toggleV={toggleV} toggleFav={toggleFav} isFav={isFav} doPlay={doPlay} sv={sv} setPage={setPage} wbwVerseRef={wbwVerseRef} setWbwOpen={setWbwOpen} partialPlayRef={partialPlayRef} showTf={showTf} tafsirData={tafsirData} loadTafsir={loadTafsir} doPlayPartial={doPlayPartial} setVerseCtxMenu={setVerseCtxMenu} versePages={versePages} verseJuzHizb={verseJuzHizb} reviewMode={reviewMode} revealedVerses={revealedVerses} setRevealedVerses={setRevealedVerses} karaokeMode={karaokeMode} activeWordIdx={activeWordIdx} wordTimings={wordTimings} startPlaylist={startPlaylist} curPage={quranCurPage} setCurPage={setQuranCurPage}/>):(<>
                         {selS.n!==1&&selS.n!==9&&(
                           <div style={{display:"block",textAlign:"center",padding:"8px 0 14px",fontSize:"1.4rem",color:t.acc,direction:"rtl"}}>
                             بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ
@@ -5311,14 +5341,16 @@ return (
                                 onTouchMove={()=>clearTimeout(longPressTimer.current)}
                                 onMouseDown={()=>{longPressTimer.current=setTimeout(()=>setVerseCtxMenu({vn:v.n,sn:selS?.n,ar:v.ar,fr:v.fr}),500);}}
                                 onMouseUp={()=>clearTimeout(longPressTimer.current)}
-                                onClick={()=>{if(reviewMode&&!revealedVerses[v.n]){setRevealedVerses(p=>({...p,[v.n]:true}));return;}if(!isActive)doPlay(v.n);}}
+                                onClick={()=>{if(reviewMode&&!revealedVerses[v.n]){setRevealedVerses(p=>({...p,[v.n]:true}));return;}}}
                                 style={{display:"inline",color:isMem?t.gr:isPl?t.acc:isDue?t.rd:t.tx,background:isActive?t.acc+"15":"transparent",borderRadius:4,cursor:"pointer",WebkitUserSelect:"none",userSelect:"none"}}
                               >
                                 {reviewMode&&!revealedVerses[v.n]
                                   ?<span style={{background:t.b1,borderRadius:6,padding:"2px 8px",fontSize:".7rem",color:t.tx3,cursor:"pointer"}}>▓▓▓▓▓</span>
                                   :hifzMode&&(hifzLevel[v.n]||0)>0
                                     ?<HifzVerseText ar={v.ar} level={hifzLevel[v.n]||0} tjc={tjc} showTj={showTj} vmark={v.n} onRevealWord={()=>setHifzLevel(p=>({...p,[v.n]:Math.max(0,(p[v.n]||0)-1)}))}/>
-                                    :<TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/>
+                                    :karaokeMode&&isPl
+                                      ?<KaraokeVerseText ar={v.ar} words={wordTimings[selS?.n+"_"+v.n]} activeIdx={activeWordIdx} tjc={tjc} showTj={showTj} t={t}/>
+                                      :<TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/>
                                 }
                                 {" "}
                                 <AyahMarker n={v.n} color={isMem?t.gr:t.acc} mem={isMem}/>
@@ -5401,6 +5433,7 @@ return (
                 showTf={showTf} tafsirData={tafsirData} loadTafsir={loadTafsir} doPlayPartial={doPlayPartial}
                 setVerseCtxMenu={setVerseCtxMenu} versePages={versePages} verseJuzHizb={verseJuzHizb}
                 reviewMode={reviewMode} revealedVerses={revealedVerses} setRevealedVerses={setRevealedVerses}
+                karaokeMode={karaokeMode} activeWordIdx={activeWordIdx} wordTimings={wordTimings} startPlaylist={startPlaylist}
                 curPage={quranCurPage} setCurPage={setQuranCurPage}
                 immersive chromeVisible={readerChromeVisible} onToggleChrome={()=>setReaderChromeVisible(v=>!v)}
                 onLongPress={(v)=>setVerseMenu(v)}/>
@@ -5456,7 +5489,7 @@ return (
                 </div>
                 <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
                   <span style={{fontSize:".6rem",color:t.tx3,alignSelf:"center",marginRight:4}}>Vitesse</span>
-                  {[0.75,1,1.25,1.5].map(s=>(
+                  {[0.5,0.75,1,1.25,1.5].map(s=>(
                     <button key={s} onClick={()=>setPlaybackRate(s)}
                       style={{padding:"3px 8px",borderRadius:20,border:"1px solid "+(playbackRate===s?t.acc:t.b1),background:playbackRate===s?t.acc+"18":"transparent",color:playbackRate===s?t.acc:t.tx3,fontSize:".65rem",cursor:"pointer"}}>
                       {s}×
@@ -7136,7 +7169,7 @@ return (
               <div style={{display:"flex",flexDirection:"column",gap:4}}>
                 <span style={{fontSize:".55rem",color:t.tx3,textTransform:"uppercase",letterSpacing:".5px"}}>Vitesse</span>
                 <div style={{display:"flex",gap:3}}>
-                  {[0.75,1,1.25,1.5].map(s=>(
+                  {[0.5,0.75,1,1.25,1.5].map(s=>(
                     <button key={s} onClick={()=>setPlaybackRate(s)}
                       style={{flex:1,padding:"3px 0",borderRadius:10,fontSize:".6rem",cursor:"pointer",
                         border:"1px solid "+(playbackRate===s?t.acc:t.b1),
@@ -7185,13 +7218,12 @@ return (
           ):(
             <button onClick={()=>setPlayerOpen(true)}
               style={{width:44,height:44,borderRadius:"50%",border:"none",touchAction:"manipulation",
-                background:playing!==null?t.acc:t.s1,
-                boxShadow:"0 3px 14px rgba(0,0,0,.2)",
-                outline:"1px solid "+(playing!==null?t.acc:t.b1),
-                color:playing!==null?"#fff":t.acc,
+                background:t.gr,
+                boxShadow:playing!==null?`0 4px 18px ${t.gr}88`:"0 3px 14px rgba(0,0,0,.25)",
+                color:"#fff",
                 fontSize:"1.1rem",cursor:"pointer",
                 display:"flex",alignItems:"center",justifyContent:"center"}}>
-              {playing!==null?"▶":"▶"}
+              ▶
             </button>
           )}
         </div>
