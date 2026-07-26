@@ -2257,16 +2257,20 @@ function SurahPageDivider({sn,t,arFont}){
   const s=SURAHS.find(x=>x.n===sn);
   if(!s)return null;
   // Le fond de la page Mushaf est toujours blanc/ivoire quel que soit le thème
-  // de l'app — on utilise donc une encre foncée fixe plutôt que t.tx/t.tx3 (clairs
-  // en thème sombre), sinon le texte devient illisible sur le papier clair.
+  // de l'app — on utilise donc une encre foncée fixe (encre + or discret) plutôt
+  // que les couleurs du thème (claires en thème sombre, sinon illisibles ici).
+  // Bandeau façon Mushaf imprimé : nom de la sourate entre deux longs traits,
+  // dans une calligraphie propre au Coran (Amiri), plutôt qu'un badge/pilule
+  // "UI moderne".
   return (
-    <div style={{direction:"ltr",textAlign:"center",margin:"16px 0"}}>
-      <div style={{display:"inline-flex",alignItems:"center",gap:8,fontFamily:"Amiri,serif",fontSize:"1.05rem",color:t.acc,background:t.acc+"10",border:"1px solid "+t.acc+"30",borderRadius:10,padding:"6px 16px"}}>
-        <span>سورة {s.ar}</span>
-        <span style={{fontSize:".58rem",color:"#8a7358",fontFamily:"system-ui,sans-serif"}}>· {s.name}</span>
+    <div style={{direction:"ltr",textAlign:"center",margin:"22px 0"}}>
+      <div style={{display:"flex",alignItems:"center",gap:16}}>
+        <div style={{flex:1,height:1,background:"linear-gradient(90deg,transparent,#8a7358aa)"}}/>
+        <span style={{fontFamily:"Amiri,serif",fontWeight:700,fontSize:"1.55rem",color:"#8a7358",direction:"rtl",whiteSpace:"nowrap",letterSpacing:".5px"}}>سُورَةُ {s.ar}</span>
+        <div style={{flex:1,height:1,background:"linear-gradient(90deg,#8a7358aa,transparent)"}}/>
       </div>
       {s.n!==1&&s.n!==9&&(
-        <div style={{fontFamily:arFont||"Amiri Quran,serif",fontSize:"1.3rem",color:"#1c1208",marginTop:8,direction:"rtl"}}>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+        <div style={{fontFamily:arFont||"Amiri Quran,serif",fontSize:"1.3rem",color:"#1c1208",marginTop:12,direction:"rtl"}}>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
       )}
     </div>
   );
@@ -2290,6 +2294,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
                         mem, hifzMode, hifzLevel, playing,
                         toggleV, toggleFav, isFav, doPlay, sv,
                         onLongPress, setPage, wbwVerseRef, setWbwOpen, partialPlayRef, showTf, tafsirData, loadTafsir, doPlayPartial, setVerseCtxMenu, versePages, verseJuzHizb,
+                        reviewMode, revealedVerses, setRevealedVerses,
                         immersive, chromeVisible, onToggleChrome, curPage:curPageProp, setCurPage:setCurPageProp}) {
   // ── Récitation in-page ──
 
@@ -2566,6 +2571,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
             style={{padding:"3px 10px",borderRadius:20,border:"1px solid "+t.b1,background:"transparent",color:t.tx3,fontSize:".65rem",cursor:"pointer",marginLeft:"auto"}}>Annuler</button>
         </div>
       )}
+      {reviewMode&&(<div style={{padding:"8px 14px",background:`${t.rd}22`,borderBottom:`1px solid ${t.rd}44`,display:"flex",alignItems:"center",gap:8,flexShrink:0}} onClick={e=>e.stopPropagation()}><div style={{fontSize:".72rem",color:t.rd,fontWeight:600,flex:1}}>Mode révision — appuie pour révéler</div><button className="tbtn" style={{borderColor:t.rd,color:t.rd}} onClick={()=>setRevealedVerses?.({})}>Tout masquer</button></div>)}
       </>)}
       {immersive&&curPg&&(
         <span onClick={e=>{e.stopPropagation();onToggleChrome&&onToggleChrome();}}
@@ -2619,7 +2625,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
             return (
               <React.Fragment key={v.n}>
                 {showDivider&&<SurahPageDivider sn={v.sn} t={t} arFont={arFont}/>}
-                <span onClick={e=>{e.stopPropagation();handleTap(v);}} onContextMenu={e=>{e.preventDefault();e.stopPropagation();setVerseCtxMenu({vn:v.n,sn:selS?.n,ar:v.ar,fr:v.fr});}} onTouchStart={e=>{_lpTimer.current=setTimeout(()=>setVerseCtxMenu({vn:v.n,sn:selS?.n,ar:v.ar,fr:v.fr}),500);}} onTouchEnd={()=>clearTimeout(_lpTimer.current)} onTouchMove={()=>clearTimeout(_lpTimer.current)}
+                <span onClick={e=>{e.stopPropagation();if(reviewMode&&!revealedVerses?.[v.n]){setRevealedVerses?.(p=>({...p,[v.n]:true}));return;}handleTap(v);}} onContextMenu={e=>{e.preventDefault();e.stopPropagation();setVerseCtxMenu({vn:v.n,sn:selS?.n,ar:v.ar,fr:v.fr});}} onTouchStart={e=>{_lpTimer.current=setTimeout(()=>setVerseCtxMenu({vn:v.n,sn:selS?.n,ar:v.ar,fr:v.fr}),500);}} onTouchEnd={()=>clearTimeout(_lpTimer.current)} onTouchMove={()=>clearTimeout(_lpTimer.current)}
                   style={{
                     color: isPlay?t.acc:isMem?t.gr:"inherit",
                     background: isSel?t.acc+"08":isPlay?t.acc+"15":"transparent",
@@ -2628,7 +2634,9 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
                     WebkitTapHighlightColor:"transparent",
                     transition:"background .15s",
                   }}>
-                                      {hifzMode
+                                      {reviewMode&&!revealedVerses?.[v.n]
+                                      ?<span style={{background:t.b1,borderRadius:6,padding:"2px 10px",fontSize:".65em",color:t.tx3,fontFamily:"sans-serif"}}>▓▓▓▓▓</span>
+                                      :hifzMode
                                       ? <HifzVerseText ar={v.ar} level={hifzLevel[v.n]||0} tjc={tjc} showTj={showTj} vmark={v.n}/>
                     : <TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/>
                   }
@@ -3509,10 +3517,14 @@ const handleReset=async()=>{
       const onCanPlay=()=>{
         let startT=0,endT=audio.duration||30;
         if(segs.length){
-          const ss=segs.find(s=>s[0]>=startW);
-          const es=[...segs].filter(s=>s[0]<=endW).pop();
+          // segs = [word_position, ts_from_ms, ts_to_ms] — word_position est en
+          // base 1 (API qurancdn) alors que startW/endW viennent d'un index de
+          // tableau JS en base 0 (d'où le +1) ; ts_to_ms est déjà un timestamp
+          // absolu de fin, PAS une durée à additionner à ts_from_ms.
+          const ss=segs.find(s=>s[0]>=startW+1);
+          const es=[...segs].filter(s=>s[0]<=endW+1).pop();
           if(ss) startT=ss[1]/1000;
-          if(es) endT=(es[1]+es[2])/1000;
+          if(es) endT=es[2]/1000;
         } else {
           const dur=audio.duration||30;
           startT=dur*(startW/totalWords);
@@ -5232,7 +5244,7 @@ return (
                     {loadState==="error"&&(<div style={{textAlign:"center",padding:"24px",fontSize:".78rem"}}><div style={{fontSize:"1.5rem",marginBottom:10}}>🔌</div><div style={{color:t.rd,fontWeight:700,marginBottom:6}}>Connexion requise</div><div style={{color:t.tx3,marginBottom:14,lineHeight:1.5}}>Les versets de cette sourate sont chargés depuis internet.<br/>Vérifie ta connexion et réessaie.</div><button onClick={()=>{setLoadState("idle");setTimeout(()=>setSelS(s=>({...s})),100);}} style={{padding:"8px 20px",background:t.acc,border:"none",borderRadius:10,color:"#fff",fontWeight:700,cursor:"pointer",fontSize:".75rem"}}>🔄 Réessayer</button>{Q[selS?.n]?.length>0&&<div style={{marginTop:12,fontSize:".65rem",color:t.tx3}}>ou <button onClick={()=>{setVerses(Q[selS.n]);setLoadState("done");}} style={{background:"none",border:"none",color:t.acc,cursor:"pointer",fontWeight:700}}>utiliser les données embarquées</button></div>}</div>)}
                     {loadState==="done"&&(
                       <div className="vscroll-inner" style={pageMode?{direction:"ltr",textAlign:"left",padding:0,display:"flex",flexDirection:"column",height:"100%",minHeight:0,overflow:"hidden"}:{}}>
-                        {pageMode?(<QuranPageView tn={tn} verses={verses} selS={selS} t={t} tjc={tjc} showTj={showTj} showTr={showTr} arabicSize={arabicSize} arFont={arFont} mem={mem} hifzMode={hifzMode} hifzLevel={hifzLevel} playing={playing} toggleV={toggleV} toggleFav={toggleFav} isFav={isFav} doPlay={doPlay} sv={sv} setPage={setPage} wbwVerseRef={wbwVerseRef} setWbwOpen={setWbwOpen} partialPlayRef={partialPlayRef} showTf={showTf} tafsirData={tafsirData} loadTafsir={loadTafsir} doPlayPartial={doPlayPartial} setVerseCtxMenu={setVerseCtxMenu} versePages={versePages} verseJuzHizb={verseJuzHizb} curPage={quranCurPage} setCurPage={setQuranCurPage}/>):(<>
+                        {pageMode?(<QuranPageView tn={tn} verses={verses} selS={selS} t={t} tjc={tjc} showTj={showTj} showTr={showTr} arabicSize={arabicSize} arFont={arFont} mem={mem} hifzMode={hifzMode} hifzLevel={hifzLevel} playing={playing} toggleV={toggleV} toggleFav={toggleFav} isFav={isFav} doPlay={doPlay} sv={sv} setPage={setPage} wbwVerseRef={wbwVerseRef} setWbwOpen={setWbwOpen} partialPlayRef={partialPlayRef} showTf={showTf} tafsirData={tafsirData} loadTafsir={loadTafsir} doPlayPartial={doPlayPartial} setVerseCtxMenu={setVerseCtxMenu} versePages={versePages} verseJuzHizb={verseJuzHizb} reviewMode={reviewMode} revealedVerses={revealedVerses} setRevealedVerses={setRevealedVerses} curPage={quranCurPage} setCurPage={setQuranCurPage}/>):(<>
                         {selS.n!==1&&selS.n!==9&&(
                           <div style={{display:"block",textAlign:"center",padding:"8px 0 14px",fontSize:"1.4rem",color:t.acc,direction:"rtl"}}>
                             بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ
@@ -5342,6 +5354,7 @@ return (
                 wbwVerseRef={wbwVerseRef} setWbwOpen={setWbwOpen} partialPlayRef={partialPlayRef}
                 showTf={showTf} tafsirData={tafsirData} loadTafsir={loadTafsir} doPlayPartial={doPlayPartial}
                 setVerseCtxMenu={setVerseCtxMenu} versePages={versePages} verseJuzHizb={verseJuzHizb}
+                reviewMode={reviewMode} revealedVerses={revealedVerses} setRevealedVerses={setRevealedVerses}
                 curPage={quranCurPage} setCurPage={setQuranCurPage}
                 immersive chromeVisible={readerChromeVisible} onToggleChrome={()=>setReaderChromeVisible(v=>!v)}
                 onLongPress={(v)=>setVerseMenu(v)}/>
@@ -6494,7 +6507,7 @@ return (
                 <div>
                   {spacedDue.slice(0,10).map((key,i)=>{const[sn,vn]=key.split("_").map(Number);const s=SURAHS.find(x=>x.n===sn);const v=Q[sn]?.[vn-1];return(
                     <div key={i} style={{padding:"10px 14px",borderBottom:`1px solid ${t.b1}`,display:"flex",alignItems:"center",gap:8,transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=t.s2} onMouseLeave={e=>e.currentTarget.style.background=""}>
-                      <div style={{flex:1}}><span style={{fontSize:".72rem",fontWeight:600,color:t.acc}}>{s?.name}</span><span style={{fontSize:".65rem",color:t.tx3,marginLeft:6}}>v.{vn}</span>{v&&<div style={{fontFamily:"Amiri Quran,serif",fontSize:".9rem",direction:"rtl",textAlign:"right",color:t.tx,marginTop:4}}>{v.ar}</div>}</div>
+                      <div style={{flex:1}}><span style={{fontSize:".72rem",fontWeight:600,color:t.acc}}>{s?.name}</span><span style={{fontSize:".65rem",color:t.tx3,marginLeft:6}}>v.{vn}</span>{v&&<div style={{fontFamily:"Amiri Quran,serif",fontSize:".9rem",direction:"rtl",textAlign:"right",color:t.tx,marginTop:4}}><TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/></div>}</div>
                       <button className="vbtn" style={{borderColor:t.gr,color:t.gr,flexShrink:0}} onClick={()=>{markSpaced(sn,vn);}}>✓ Révisé</button>
                     </div>
                   );})}
