@@ -4812,7 +4812,7 @@ return (
 
             {/* ── Bloc Al-Hifz exact ── */}
 
-            <div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,borderRadius:16,border:`1px solid ${t.b1}`,position:"relative",overflow:"hidden"}}>
+            <div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,borderRadius:16,border:`1px solid ${t.b1}`,position:"relative",overflow:"hidden",boxShadow:`0 1px 0 rgba(255,255,255,.07) inset, 0 10px 24px -10px ${acc}40, 0 24px 48px -18px rgba(0,0,0,.35)`}}>
               {/* Décoration bordure haut */}
               <svg style={{position:"absolute",top:0,left:0,width:"100%",height:12,display:"block"}} preserveAspectRatio="none" viewBox="0 0 800 12">
                 <defs><linearGradient id="bord2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="transparent"/><stop offset=".15" stopColor={acc}/><stop offset=".5" stopColor={acc3}/><stop offset=".85" stopColor={acc}/><stop offset="1" stopColor="transparent"/></linearGradient></defs>
@@ -4833,18 +4833,20 @@ return (
 
                 {/* Ring + KPIs */}
                 <div style={{display:"flex",gap:14,alignItems:"stretch"}}>
-                  {/* Circular progress */}
+                  {/* Circular progress — médaillon 3D (fond en dôme + reflet verre) */}
                   <div style={{flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
-                    <div style={{position:"relative",width:88,height:88}}>
-                      <svg width="88" height="88" viewBox="0 0 88 88">
+                    <div style={{position:"relative",width:88,height:88,filter:`drop-shadow(0 6px 14px ${acc}45)`}}>
+                      <div style={{position:"absolute",inset:5,borderRadius:"50%",background:`radial-gradient(circle at 32% 26%, ${t.s1}, ${t.s3} 65%, ${t.b1} 100%)`,boxShadow:"inset 0 3px 6px rgba(0,0,0,.28), inset 0 -2px 4px rgba(255,255,255,.06)"}}/>
+                      <svg width="88" height="88" viewBox="0 0 88 88" style={{position:"relative"}}>
                         <defs><linearGradient id="cg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor={acc}/><stop offset="1" stopColor={acc3}/></linearGradient><filter id="glow2h"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
                         <circle cx="44" cy="44" r="42" fill="none" stroke={acc} strokeWidth=".4" opacity=".2" strokeDasharray="3,4"/>
                         <circle cx="44" cy="44" r="35" fill="none" stroke={t.b1} strokeWidth="7"/>
                         <circle cx="44" cy="44" r="35" fill="none" stroke="url(#cg2)" strokeWidth="7" strokeDasharray={`${2*Math.PI*35*pct/100} ${2*Math.PI*35*(1-pct/100)}`} strokeLinecap="round" transform="rotate(-90 44 44)" filter="url(#glow2h)" style={{transition:"stroke-dasharray 1.2s cubic-bezier(.4,0,.2,1)"}}/>
                         <g transform="translate(44,44)" opacity=".15">{[0,60,120,180,240,300].map(a=>(<line key={a} x1="0" y1="-12" x2="0" y2="-7" stroke={acc} strokeWidth=".8" transform={`rotate(${a})`}/>))}</g>
                       </svg>
+                      <div style={{position:"absolute",top:6,left:16,width:34,height:16,borderRadius:"50%",background:"linear-gradient(180deg,rgba(255,255,255,.4),transparent)",transform:"rotate(-18deg)",filter:"blur(1.5px)",pointerEvents:"none"}}/>
                       <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
-                        <div style={{fontSize:"1.55rem",fontWeight:800,color:acc,lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{pct}<span style={{fontSize:".65rem",fontWeight:600}}>%</span></div>
+                        <div style={{fontSize:"1.55rem",fontWeight:800,color:acc,lineHeight:1,fontVariantNumeric:"tabular-nums",textShadow:`0 1px 2px ${acc}33`}}>{pct}<span style={{fontSize:".65rem",fontWeight:600}}>%</span></div>
                         <div style={{fontSize:".46rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px"}}>mémorisé</div>
                       </div>
                     </div>
@@ -4863,6 +4865,7 @@ return (
                       </div>
                       <div style={{position:"relative",height:11,background:t.b1,borderRadius:99,overflow:"hidden",boxShadow:"inset 0 2px 6px rgba(0,0,0,.15)"}}>
                         <div style={{height:"100%",width:`${pct}%`,borderRadius:99,background:`linear-gradient(90deg,${acc},${acc2},${acc3})`,boxShadow:`0 0 10px ${acc}99`,transition:"width 1.2s cubic-bezier(.4,0,.2,1)",position:"relative",minWidth:pct>0?"12px":"0"}}>
+                          <div style={{position:"absolute",top:1,left:1,right:1,height:"45%",background:"linear-gradient(180deg,rgba(255,255,255,.45),transparent)",borderRadius:"99px 99px 0 0",pointerEvents:"none"}}/>
                           <div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent)",backgroundSize:"200% 100%",animation:"shimmer 2.5s infinite",borderRadius:99}}/>
                         </div>
                         {pct>2&&<div style={{position:"absolute",top:"50%",transform:"translateY(-50%)",left:`calc(${pct}% - 6px)`,width:11,height:11,borderRadius:"50%",background:"#fff",boxShadow:`0 0 6px ${acc}`,opacity:.9}}/>}
@@ -4875,19 +4878,19 @@ return (
                     </div>
                     {/* 4 KPIs */}
                     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"5px 6px"}}>
-                      <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:t.s3,borderRadius:7}}>
+                      <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:`linear-gradient(150deg,${t.s3},${t.s2})`,borderRadius:9,boxShadow:"2px 2px 5px rgba(0,0,0,.12), -1px -1px 2px rgba(255,255,255,.05), inset 0 1px 0 rgba(255,255,255,.04)",border:`1px solid ${t.b1}80`}}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.bl} strokeWidth="1.5" strokeLinecap="round" opacity=".8"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-5 0v-15A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 8A2.5 2.5 0 0 1 17 10.5v9a2.5 2.5 0 0 1-5 0v-9A2.5 2.5 0 0 1 14.5 8Z"/></svg>
                         <div><div style={{fontSize:".8rem",fontWeight:700,color:t.bl,lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{vpd}<span style={{fontSize:".52rem",fontWeight:500}}> v/j</span></div><div style={{fontSize:".44rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Rythme</div></div>
                       </div>
-                      <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:t.s3,borderRadius:7}}>
+                      <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:`linear-gradient(150deg,${t.s3},${t.s2})`,borderRadius:9,boxShadow:"2px 2px 5px rgba(0,0,0,.12), -1px -1px 2px rgba(255,255,255,.05), inset 0 1px 0 rgba(255,255,255,.04)",border:`1px solid ${t.b1}80`}}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round" opacity=".8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
                         <div><div style={{fontSize:".8rem",fontWeight:700,color:daysLeft<=0?t.gr:"#f97316",lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{daysLeft>0?(daysLeft>365?`~${(daysLeft/365).toFixed(1)}a`:`${daysLeft}j`):"Fini!"}</div><div style={{fontSize:".44rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Avant fin</div></div>
                       </div>
-                      <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:t.s3,borderRadius:7}}>
+                      <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:`linear-gradient(150deg,${t.s3},${t.s2})`,borderRadius:9,boxShadow:"2px 2px 5px rgba(0,0,0,.12), -1px -1px 2px rgba(255,255,255,.05), inset 0 1px 0 rgba(255,255,255,.04)",border:`1px solid ${t.b1}80`}}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.gr} strokeWidth="1.5" strokeLinecap="round" opacity=".8"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
                         <div><div style={{fontSize:".8rem",fontWeight:700,color:t.gr,lineHeight:1}}>{SURAHS.filter(s=>sPct(s)===100).length}</div><div style={{fontSize:".44rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Sourates</div></div>
                       </div>
-                      <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:t.s3,borderRadius:7}}>
+                      <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:`linear-gradient(150deg,${t.s3},${t.s2})`,borderRadius:9,boxShadow:"2px 2px 5px rgba(0,0,0,.12), -1px -1px 2px rgba(255,255,255,.05), inset 0 1px 0 rgba(255,255,255,.04)",border:`1px solid ${t.b1}80`}}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.tx2} strokeWidth="1.5" strokeLinecap="round" opacity=".8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill={t.tx2}/></svg>
                         <div><div style={{fontSize:".8rem",fontWeight:700,color:t.tx2,lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{remaining.toLocaleString()}</div><div style={{fontSize:".44rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Restants</div></div>
                       </div>
