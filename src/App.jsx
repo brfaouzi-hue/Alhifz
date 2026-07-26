@@ -2289,7 +2289,7 @@ function AyahMarker({n, color, faded, mem, onClick}) {
 function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, arFont,
                         mem, hifzMode, hifzLevel, playing,
                         toggleV, toggleFav, isFav, doPlay, sv,
-                        onLongPress, setPage, wbwVerseRef, setWbwOpen, partialPlayRef, showTf, tafsirData, loadTafsir, doPlayPartial, setVerseCtxMenu, versePages,
+                        onLongPress, setPage, wbwVerseRef, setWbwOpen, partialPlayRef, showTf, tafsirData, loadTafsir, doPlayPartial, setVerseCtxMenu, versePages, verseJuzHizb,
                         immersive, chromeVisible, onToggleChrome, curPage:curPageProp, setCurPage:setCurPageProp}) {
   // ── Récitation in-page ──
 
@@ -2365,6 +2365,23 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
     ...cur.map(v=>({...v,sn:selS?.n,own:true})),
     ...(pageFill.after||[]),
   ],[pageFill,cur,selS?.n]);
+
+  // Sourate / Juz / Hizb de la page affichée — comme l'en-tête d'une vraie
+  // page de Mushaf. Juz/hizb viennent de l'API (verseJuzHizb, précis au
+  // verset près) ; à défaut (verset de sourate voisine jamais visitée), on
+  // retombe sur le juz déclaré de la sourate (approximatif, sans le hizb).
+  const pageInfo=React.useMemo(()=>{
+    const firstV=fullPage[0];
+    if(!firstV)return{name:selS?.name||"",ar:selS?.ar||"",juz:selS?.juz??null,hizb:null};
+    const surahObj=SURAHS.find(x=>x.n===firstV.sn);
+    const jh=verseJuzHizb?.[firstV.sn]?.[firstV.n];
+    return{
+      name:surahObj?.name||selS?.name||"",
+      ar:surahObj?.ar||selS?.ar||"",
+      juz:jh?.j??surahObj?.juz??null,
+      hizb:jh?.h??null,
+    };
+  },[fullPage,verseJuzHizb,selS]);
 
   // Une vraie page de Mushaf a un nombre de lignes fixe (15) et le texte est
   // toujours composé pour remplir exactement la page — nos pages courtes (peu de
@@ -2556,6 +2573,20 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
           {curPg}
         </span>
       )}
+      {/* En-tête permanent façon Mushaf imprimé : nom de la sourate à gauche,
+          Juz · Hizb à droite — toujours visible, même chrome masqué. */}
+      {immersive&&pageInfo.name&&(
+        <span onClick={e=>{e.stopPropagation();onToggleChrome&&onToggleChrome();}}
+          style={{position:"absolute",top:8,left:10,zIndex:5,fontSize:".56rem",color:"#8a7358",background:"rgba(255,255,255,.85)",padding:"2px 8px",borderRadius:20,fontWeight:600,cursor:"pointer",boxShadow:"0 1px 6px rgba(0,0,0,.08)",maxWidth:"38%",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+          {pageInfo.name}
+        </span>
+      )}
+      {immersive&&pageInfo.juz&&(
+        <span onClick={e=>{e.stopPropagation();onToggleChrome&&onToggleChrome();}}
+          style={{position:"absolute",top:8,right:10,zIndex:5,fontSize:".56rem",color:"#8a7358",background:"rgba(255,255,255,.85)",padding:"2px 8px",borderRadius:20,fontWeight:600,cursor:"pointer",boxShadow:"0 1px 6px rgba(0,0,0,.08)",whiteSpace:"nowrap"}}>
+          Juz {pageInfo.juz}{pageInfo.hizb?` · Hizb ${pageInfo.hizb}`:""}
+        </span>
+      )}
 
       {/* Texte en flux continu — le wrapper porte la perspective 3D, pageContainerRef
           porte la rotation (tournage de page) sans perturber le calcul de fitScale */}
@@ -2564,7 +2595,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
         {/* Le papier de la page reste toujours blanc/ivoire, quel que soit le thème
             de l'app — l'encre du texte doit donc rester foncée fixe (#1c1208),
             pas t.tx (clair en thème sombre → texte invisible sur papier clair). */}
-        <div ref={pageTextRef} style={{direction:"rtl",textAlign:"justify",width:"100%",boxSizing:"border-box",overflowWrap:"break-word",wordBreak:"break-word",wordSpacing:"0.1em",WebkitTextAlignLast:"right",textAlignLast:"right",lineHeight:2.3,fontFamily:arFont||"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.6)*fitScale+"rem",maxWidth:"100%",color:"#1c1208",transition:immersive?"none":"font-size .2s ease"}}>
+        <div ref={pageTextRef} style={{direction:"rtl",textAlign:"justify",width:"100%",boxSizing:"border-box",overflowWrap:"break-word",wordBreak:"break-word",wordSpacing:"0.1em",WebkitTextAlignLast:"justify",textAlignLast:"justify",lineHeight:2.3,fontFamily:arFont||"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.6)*fitScale+"rem",maxWidth:"100%",color:"#1c1208",transition:immersive?"none":"font-size .2s ease"}}>
           {fullPage.map((v,vi)=>{
             const prevSn=vi>0?fullPage[vi-1].sn:null;
             // Pas de bannière pour la toute première ligne de la sourate déjà sélectionnée
@@ -3239,6 +3270,7 @@ const handleReset=async()=>{
     return()=>clearTimeout(t);
   },[]);
   const [versePages,setVersePages]=useState(()=>{try{return JSON.parse(localStorage.getItem("vp")||"{}");}catch{return {};}}); // {sn: {vn: pageNum}}
+  const [verseJuzHizb,setVerseJuzHizb]=useState(()=>{try{return JSON.parse(localStorage.getItem("vjh")||"{}");}catch{return {};}}); // {sn: {vn: {j,h}}} — juz/hizb officiels (API), pour l'en-tête de page en mode plein écran
   const [playerOpen,setPlayerOpen]=useState(false);
   const [showMore,setShowMore]=useState(false);
   const [firstLaunch,setFirstLaunch]=useState(()=>!localStorage.getItem("alhifz_launched"));
@@ -3364,7 +3396,7 @@ const handleReset=async()=>{
 
   // FIX 1: doSelect — scroll uniquement sur mobile (<860px) — corrige le "saut" de page
   const doSelect=s=>{
-    setSelS(s);setPlaying(null);setNavOpen(false); if(!versePages[s.n]){fetch(`https://api.qurancdn.com/api/qdc/verses/by_chapter/${s.n}?per_page=300&fields=page_number`).then(r=>r.json()).then(d=>{const m={};(d.verses||[]).forEach(v=>{m[v.verse_number]=v.page_number;});setVersePages(p=>{const nv={...p,[s.n]:m};try{localStorage.setItem("vp",JSON.stringify(nv));}catch{}return nv;});}).catch(()=>{});}loadAudioSegments(s.n,rec?.qurancdn||7).catch(()=>{});
+    setSelS(s);setPlaying(null);setNavOpen(false); if(!versePages[s.n]){fetch(`https://api.qurancdn.com/api/qdc/verses/by_chapter/${s.n}?per_page=300&fields=page_number,juz_number,hizb_number`).then(r=>r.json()).then(d=>{const m={},jh={};(d.verses||[]).forEach(v=>{m[v.verse_number]=v.page_number;jh[v.verse_number]={j:v.juz_number,h:v.hizb_number};});setVersePages(p=>{const nv={...p,[s.n]:m};try{localStorage.setItem("vp",JSON.stringify(nv));}catch{}return nv;});setVerseJuzHizb(p=>{const nv={...p,[s.n]:jh};try{localStorage.setItem("vjh",JSON.stringify(nv));}catch{}return nv;});}).catch(()=>{});}loadAudioSegments(s.n,rec?.qurancdn||7).catch(()=>{});
     setMushafPage(SURAH_PAGE[s.n]||1);
     if(audioRef.current){audioRef.current.pause();audioRef.current.src="";}
     // scroll supprimé — causait le saut sur iOS
@@ -5200,7 +5232,7 @@ return (
                     {loadState==="error"&&(<div style={{textAlign:"center",padding:"24px",fontSize:".78rem"}}><div style={{fontSize:"1.5rem",marginBottom:10}}>🔌</div><div style={{color:t.rd,fontWeight:700,marginBottom:6}}>Connexion requise</div><div style={{color:t.tx3,marginBottom:14,lineHeight:1.5}}>Les versets de cette sourate sont chargés depuis internet.<br/>Vérifie ta connexion et réessaie.</div><button onClick={()=>{setLoadState("idle");setTimeout(()=>setSelS(s=>({...s})),100);}} style={{padding:"8px 20px",background:t.acc,border:"none",borderRadius:10,color:"#fff",fontWeight:700,cursor:"pointer",fontSize:".75rem"}}>🔄 Réessayer</button>{Q[selS?.n]?.length>0&&<div style={{marginTop:12,fontSize:".65rem",color:t.tx3}}>ou <button onClick={()=>{setVerses(Q[selS.n]);setLoadState("done");}} style={{background:"none",border:"none",color:t.acc,cursor:"pointer",fontWeight:700}}>utiliser les données embarquées</button></div>}</div>)}
                     {loadState==="done"&&(
                       <div className="vscroll-inner" style={pageMode?{direction:"ltr",textAlign:"left",padding:0,display:"flex",flexDirection:"column",height:"100%",minHeight:0,overflow:"hidden"}:{}}>
-                        {pageMode?(<QuranPageView tn={tn} verses={verses} selS={selS} t={t} tjc={tjc} showTj={showTj} showTr={showTr} arabicSize={arabicSize} arFont={arFont} mem={mem} hifzMode={hifzMode} hifzLevel={hifzLevel} playing={playing} toggleV={toggleV} toggleFav={toggleFav} isFav={isFav} doPlay={doPlay} sv={sv} setPage={setPage} wbwVerseRef={wbwVerseRef} setWbwOpen={setWbwOpen} partialPlayRef={partialPlayRef} showTf={showTf} tafsirData={tafsirData} loadTafsir={loadTafsir} doPlayPartial={doPlayPartial} setVerseCtxMenu={setVerseCtxMenu} versePages={versePages} curPage={quranCurPage} setCurPage={setQuranCurPage}/>):(<>
+                        {pageMode?(<QuranPageView tn={tn} verses={verses} selS={selS} t={t} tjc={tjc} showTj={showTj} showTr={showTr} arabicSize={arabicSize} arFont={arFont} mem={mem} hifzMode={hifzMode} hifzLevel={hifzLevel} playing={playing} toggleV={toggleV} toggleFav={toggleFav} isFav={isFav} doPlay={doPlay} sv={sv} setPage={setPage} wbwVerseRef={wbwVerseRef} setWbwOpen={setWbwOpen} partialPlayRef={partialPlayRef} showTf={showTf} tafsirData={tafsirData} loadTafsir={loadTafsir} doPlayPartial={doPlayPartial} setVerseCtxMenu={setVerseCtxMenu} versePages={versePages} verseJuzHizb={verseJuzHizb} curPage={quranCurPage} setCurPage={setQuranCurPage}/>):(<>
                         {selS.n!==1&&selS.n!==9&&(
                           <div style={{display:"block",textAlign:"center",padding:"8px 0 14px",fontSize:"1.4rem",color:t.acc,direction:"rtl"}}>
                             بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ
@@ -5309,7 +5341,7 @@ return (
                 isFav={isFav} doPlay={doPlay} sv={sv}
                 wbwVerseRef={wbwVerseRef} setWbwOpen={setWbwOpen} partialPlayRef={partialPlayRef}
                 showTf={showTf} tafsirData={tafsirData} loadTafsir={loadTafsir} doPlayPartial={doPlayPartial}
-                setVerseCtxMenu={setVerseCtxMenu} versePages={versePages}
+                setVerseCtxMenu={setVerseCtxMenu} versePages={versePages} verseJuzHizb={verseJuzHizb}
                 curPage={quranCurPage} setCurPage={setQuranCurPage}
                 immersive chromeVisible={readerChromeVisible} onToggleChrome={()=>setReaderChromeVisible(v=>!v)}
                 onLongPress={(v)=>setVerseMenu(v)}/>
