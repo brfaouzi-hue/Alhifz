@@ -667,7 +667,7 @@ function HifzVerseText({ar, level, tjc, showTj, vmark, onRevealWord}) {
         // Mot visible — on reconstruis avec TajwidSpan si le tajweed était dans ar
         return <span key={i} style={{display:"inline"}}><TajwidSpan text={w} enabled={showTj} tjc={tjc}/>{" "}</span>;
       })}
-      <span style={{fontFamily:"Amiri,serif",fontSize:".72rem",color:"#c9a84c",margin:"0 4px",verticalAlign:"middle"}}>﴿{vmark}﴾</span>
+      <AyahMarker n={vmark} color="#c9a84c"/>
     </bdi>
   );
 }
@@ -2272,16 +2272,16 @@ function SurahPageDivider({sn,t,arFont}){
   );
 }
 
-// AyahMarker — marqueur de fin de verset : anneau fin (double liseré, comme les
-// éditions Mushaf imprimées) avec le chiffre arabo-indien centré. Volontairement
-// sobre (pas de rayons/dents type roue dentée) pour rester discret et élégant,
-// dans l'esprit Quran.com/Tarteel plutôt qu'un pictogramme chargé.
-function AyahMarker({n, color, faded, onClick}) {
+// AyahMarker — marqueur de fin de verset unique et cohérent dans toute l'app
+// (mode page, liste, hifz, test, quiz, mode immersif…) : anneau avec un léger
+// fond teinté et un double liseré, chiffre arabo-indien centré — dans l'esprit
+// Tarteel/Quran.com plutôt qu'un pictogramme chargé type roue dentée.
+function AyahMarker({n, color, faded, mem, onClick}) {
   const c=encodeURIComponent(color);
-  const bg=`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='18' fill='none' stroke='${c}' stroke-width='1.5'/%3E%3Ccircle cx='20' cy='20' r='14.2' fill='none' stroke='${c}' stroke-width='.75' opacity='.5'/%3E%3C/svg%3E")`;
+  const bg=`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='18' fill='${c}1f' stroke='${c}' stroke-width='1.6'/%3E%3Ccircle cx='20' cy='20' r='13.6' fill='none' stroke='${c}' stroke-width='.6' opacity='.45'/%3E%3C/svg%3E")`;
   return (
-    <span onClick={onClick} style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"1.25em",height:"1.25em",backgroundImage:bg,backgroundSize:"100% 100%",backgroundRepeat:"no-repeat",verticalAlign:"middle",margin:"0 2px",opacity:faded?0.5:1,flexShrink:0,cursor:onClick?"pointer":undefined,WebkitTapHighlightColor:"transparent"}}>
-      <span style={{fontSize:".4em",fontWeight:700,fontFamily:"Amiri Quran,Amiri,serif",color,lineHeight:1}}>{toArNum(n)}</span>
+    <span onClick={onClick} style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"1.3em",height:"1.3em",backgroundImage:bg,backgroundSize:"100% 100%",backgroundRepeat:"no-repeat",verticalAlign:"middle",margin:"0 2px",opacity:faded?0.5:1,flexShrink:0,cursor:onClick?"pointer":undefined,WebkitTapHighlightColor:"transparent"}}>
+      <span style={{fontSize:mem?".38em":".42em",fontWeight:700,fontFamily:"Amiri Quran,Amiri,serif",color,lineHeight:1}}>{mem?"✓":toArNum(n)}</span>
     </span>
   );
 }
@@ -4251,7 +4251,7 @@ return (
                 </div>
                 {testRevealed&&(<div style={{background:t.s3,borderRadius:14,padding:16,border:`2px solid ${t.acc}44`}}>
                   <div style={{fontSize:".6rem",color:t.acc,marginBottom:8,textTransform:"uppercase"}}>Verset complet</div>
-                  <div style={{fontFamily:arFont||"Amiri Quran,serif",fontSize:"1.6rem",direction:"rtl",textAlign:"right",lineHeight:2.2,color:t.tx}}><TajwidSpan text={testVerses[testIdx]?.ar||""} enabled={showTj} tjc={tjc}/> ﴿{testVerses[testIdx]?.n}﴾</div>
+                  <div style={{fontFamily:arFont||"Amiri Quran,serif",fontSize:"1.6rem",direction:"rtl",textAlign:"right",lineHeight:2.2,color:t.tx}}><TajwidSpan text={testVerses[testIdx]?.ar||""} enabled={showTj} tjc={tjc}/> <AyahMarker n={testVerses[testIdx]?.n} color={t.acc}/></div>
                   <div style={{fontSize:".75rem",color:t.tx2,marginTop:8,fontStyle:"italic"}}>{testVerses[testIdx]?.fr}</div>
                 </div>)}
                 {!testRevealed
@@ -5231,9 +5231,7 @@ return (
                                     :<TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/>
                                 }
                                 {" "}
-                                <span style={{fontFamily:"Amiri,serif",fontSize:".58em",color:isMem?t.gr:t.acc,verticalAlign:"middle"}}>
-                                  {isMem?"﴿✓﴾":"﴿"+v.n+"﴾"}
-                                </span>
+                                <AyahMarker n={v.n} color={isMem?t.gr:t.acc} mem={isMem}/>
                                 {" "}
                               </span>
                               {showTr&&v.fr&&(
@@ -6832,7 +6830,7 @@ return (
                 <div key={v.n} className="immersive-verse" id={`iv-${selS.n}-${v.n}`}>
                   <div className="immersive-ar" style={{fontSize:`${arabicSize*1.2}rem`}}>
                     <TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/>
-                    <span style={{color:t.acc,fontFamily:"Amiri,serif",fontSize:".75rem",marginRight:6}}> ﴿{v.n}﴾</span>
+                    <AyahMarker n={v.n} color={isMem?t.gr:t.acc} mem={isMem}/>
                   </div>
                   {showTr&&v.fr&&(<div className="immersive-fr">{v.fr}</div>)}
                   {showTf&&v.tf&&(<div style={{background:`${t.pu}10`,borderRadius:10,padding:"10px 14px",marginTop:8,fontSize:".72rem",color:t.tx2,fontStyle:"italic",textAlign:"center",lineHeight:1.7}}>{v.tf}</div>)}
