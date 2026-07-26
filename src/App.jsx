@@ -3913,7 +3913,6 @@ const handleReset=async()=>{
   const [recitModal,setRecitModal]=useState(false);
   const [activeVerseActions,setActiveVerseActions]=useState(null);
   const longPressTimer=useRef(null);
-  const [hadithDismissed,setHadithDismissed]=useState(()=>ld("qhadith_dis_"+new Date().toISOString().slice(0,10),false));
   const countdownRef=useRef(null);
 
   // Compare deux mots arabes en ignorant les diacritiques
@@ -4786,58 +4785,6 @@ return (
               ):null;
             })()}
 
-            {/* Hadith / Citation du jour */}
-            {/* Hadith du jour */}
-            {!hadithDismissed&&(()=>{
-              const hadiths=[
-                {ar:"خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ",fr:"Le meilleur d'entre vous est celui qui apprend le Coran et l'enseigne.",src:"Al-Bukhari"},
-                {ar:"مَثَلُ الَّذِي يَقْرَأُ الْقُرْآنَ وَهُوَ حَافِظٌ لَهُ مَعَ السَّفَرَةِ الْكِرَامِ الْبَرَرَةِ",fr:"Celui qui récite le Coran en le connaissant par cœur sera avec les nobles et pieux scribes.",src:"Al-Bukhari & Muslim"},
-                {ar:"إِنَّ الَّذِي لَيْسَ فِي جَوْفِهِ شَيْءٌ مِنَ الْقُرْآنِ كَالْبَيْتِ الْخَرِبِ",fr:"Celui qui n'a rien du Coran dans son cœur est comme une maison en ruine.",src:"At-Tirmidhi"},
-                {ar:"اقْرَءُوا الْقُرْآنَ فَإِنَّهُ يَأْتِي يَوْمَ الْقِيَامَةِ شَفِيعًا لأَصْحَابِهِ",fr:"Récitez le Coran car il sera un intercesseur pour ses compagnons le Jour du Jugement.",src:"Muslim"},
-                {ar:"أَهْلُ الْقُرْآنِ هُمْ أَهْلُ اللَّهِ وَخَاصَّتُهُ",fr:"Les gens du Coran sont les gens d'Allah et Ses élus.",src:"An-Nasa'i"},
-              ];
-              const h=hadiths[new Date().getDate()%hadiths.length];
-              return(
-                <div style={{padding:"14px 16px",background:`linear-gradient(135deg,${t.acc}08,${t.acc}04)`,borderRadius:14,border:`1px solid ${t.acc}20`,position:"relative"}}>
-                  <button onClick={()=>{setHadithDismissed(true);sv("qhadith_dis_"+today(),true);}} style={{position:"absolute",top:10,right:10,background:"none",border:"none",cursor:"pointer",color:t.tx3,fontSize:".8rem",lineHeight:1,padding:4}}>✕</button>
-                  <div style={{fontSize:".54rem",color:t.acc,textTransform:"uppercase",letterSpacing:"2px",fontWeight:700,marginBottom:8}}>Hadith du jour</div>
-                  <div style={{fontFamily:"Amiri,serif",fontSize:"1.05rem",direction:"rtl",textAlign:"right",lineHeight:1.8,color:t.tx,marginBottom:8}}>{h.ar}</div>
-                  <div style={{fontSize:".68rem",color:t.tx2,fontStyle:"italic",lineHeight:1.5,marginBottom:6}}>{h.fr}</div>
-                  <div style={{fontSize:".56rem",color:t.tx3}}>— {h.src}</div>
-                </div>
-              );
-            })()}
-
-            {/* Prochain objectif */}
-            {(()=>{
-              const nextS=SURAHS.find(s=>sPct(s)>0&&sPct(s)<100);
-              const firstUnstarted=SURAHS.find(s=>sPct(s)===0);
-              const target=nextS||firstUnstarted;
-              if(!target) return null;
-              const pctV=sPct(target);
-              return(
-                <div className="card" onClick={()=>{doSelect(target);setPage("quran");}} style={{cursor:"pointer"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";}} onMouseLeave={e=>{e.currentTarget.style.transform="";}}>
-                  <div style={{padding:"12px 14px"}}>
-                    <div style={{fontSize:".58rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1.5px",marginBottom:8}}>
-                      {nextS?"En cours de mémorisation":"Prochaine sourate"}
-                    </div>
-                    <div style={{display:"flex",alignItems:"center",gap:12}}>
-                      <div style={{width:40,height:40,borderRadius:10,background:`${t.gr}12`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:".75rem",fontWeight:800,color:t.gr,border:`1px solid ${t.gr}30`,flexShrink:0}}>{target.n}</div>
-                      <div style={{flex:1,minWidth:0}}>
-                        <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
-                          <span style={{fontSize:".8rem",fontWeight:700,color:t.tx}}>{target.name}</span>
-                          <span style={{fontFamily:"Amiri,serif",fontSize:".85rem",color:t.tx3}}>{target.ar}</span>
-                        </div>
-                        <div style={{height:5,background:t.b1,borderRadius:99,overflow:"hidden"}}>
-                          <div style={{height:"100%",width:`${pctV}%`,background:`linear-gradient(90deg,${t.gr},${t.acc})`,borderRadius:99,transition:"width .6s"}}/>
-                        </div>
-                        <div style={{fontSize:".58rem",color:t.tx3,marginTop:3}}>{sMem(target)}{"/"}{target.v} versets · {target.v-sMem(target)} restants</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
           </div>
         )}
 
