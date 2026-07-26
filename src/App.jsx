@@ -1966,15 +1966,59 @@ function MushafPage({page,t,tjc,arFont,edition,nightMode=false,fullscreen,onTogg
   const ed=edition||MUSHAF_EDITIONS[0];
   const touchStart=useRef(null);
   const touchStartY=useRef(null);
+  const dragging=useRef(false);
+  const imgWrapRef=useRef(null);
   const AC="#c9a84c";
 
-  const onTS=e=>{touchStart.current=e.touches[0].clientX;touchStartY.current=e.touches[0].clientY;};
+  // Swipe amélioré : suit le doigt en direct (translateX), seuil abaissé
+  // (120px → 60px, bien plus réactif) et petite animation de glissement au
+  // relâcher au lieu d'un cut instantané. touchAction:"pan-y" sur le
+  // conteneur laisse le navigateur gérer le scroll vertical nativement tout
+  // en libérant immédiatement le geste horizontal pour ce handler — sans ça,
+  // Safari iOS peut hésiter/absorber le début du geste et le swipe paraît mou.
+  const onTS=e=>{
+    touchStart.current=e.touches[0].clientX;touchStartY.current=e.touches[0].clientY;
+    dragging.current=true;
+    if(imgWrapRef.current)imgWrapRef.current.style.transition="none";
+  };
+  const onTM=e=>{
+    if(!dragging.current||touchStart.current==null)return;
+    const dx=e.touches[0].clientX-touchStart.current;
+    const dy=Math.abs(e.touches[0].clientY-(touchStartY.current||0));
+    if(dy>60)return;
+    const el=imgWrapRef.current;
+    if(!el)return;
+    el.style.transform=`translateX(${dx}px)`;
+    el.style.opacity=String(Math.max(.4,1-Math.abs(dx)/500));
+  };
   const onTE=e=>{
-    if(!touchStart.current)return;
+    dragging.current=false;
+    if(touchStart.current==null)return;
     const dx=e.changedTouches[0].clientX-touchStart.current;
     const dy=Math.abs(e.changedTouches[0].clientY-(touchStartY.current||0));
-    if(Math.abs(dx)>120&&dy<60){dx<0?onNext?.():onPrev?.();}
     touchStart.current=null;touchStartY.current=null;
+    const el=imgWrapRef.current;
+    if(!el)return;
+    if(Math.abs(dx)>60&&dy<60){
+      const isNext=dx<0;
+      el.style.transition="transform .16s ease-in, opacity .16s ease-in";
+      el.style.transform=`translateX(${isNext?-60:60}px)`;
+      el.style.opacity="0";
+      setTimeout(()=>{
+        isNext?onNext?.():onPrev?.();
+        el.style.transition="none";
+        el.style.transform=`translateX(${isNext?60:-60}px)`;
+        requestAnimationFrame(()=>requestAnimationFrame(()=>{
+          el.style.transition="transform .2s ease-out, opacity .2s ease-out";
+          el.style.transform="translateX(0)";
+          el.style.opacity="1";
+        }));
+      },160);
+    } else {
+      el.style.transition="transform .2s ease-out, opacity .2s ease-out";
+      el.style.transform="translateX(0)";
+      el.style.opacity="1";
+    }
   };
 
   const outer=fullscreen
@@ -1984,7 +2028,7 @@ function MushafPage({page,t,tjc,arFont,edition,nightMode=false,fullscreen,onTogg
   const SURAH_PAGES=[1,2,50,77,106,128,150,177,187,208,221,235,249,255,262,267,271,274,278,282,287,291,294,296,299,302,304,306,308,311,313,315,317,320,322,325,328,331,334,336,338,340,342,344,346,348,350,351,353,354,355,356,358,359,360,361,362,363,364,365,366,367,367,368,369,369,370,371,371,372,373,373,374,374,375,376,376,377,377,378,378,379,379,380,380,381,381,381,382,382,382,383,383,383,384,384,384,385,385,385,386,386,386,387,387,387,388,388,388,389,389,389,390,390,390,391,391,392,392,392,393,393,393,394,394,394,395,395,395,396,396,396,397,397,397,398,398,398,399,399,399,400,400,400,401,401,401,402,402,402,403,403,403,404,404,404,405,405,405,406,406,406,407,407,407,408,408,408,409,409,409,410,410,410,411,411,411,412,412,412,413,413,413,414,414,414,415,415,415,416,416,416,417,417,417,418,418,418,419,419,420,420,421,421,422,422,423,423,424,425,426,427,428,429,430,431,433,434,435,436,437,438,439,440,441,442,443,444,445,447,449,451,453,455,457,459,461,462,463,464,465,466,467,468,469,470,471,472,473,474,475,476,477,478,479,480,481,482,483,484,485,486,487,488,489,490,491,492,493,494,495,496,497,498,499,500,501,502,503,504,505,506,507,508,509,510,511,512,513,514,515,516,517,518,519,520,521,522,523,524,525,526,527,528,529,530,531,532,533,534,535,536,537,538,539,540,541,542,543,544,545,546,547,548,549,550,551,552,553,554,555,556,557,558,559,560,561,562,563,564,565,566,567,568,569,570,571,572,573,574,575,576,577,578,579,580,581,582,583,584,585,586,587,588,589,590,591,592,593,594,595,596,597,598,599,600,601,602,603,604];
 
   const content = (
-    <div style={outer} onTouchStart={onTS} onTouchEnd={onTE}>
+    <div style={outer} onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={onTE}>
       {/* Barre nav propre */}
       <div style={{display:"flex",alignItems:"center",gap:6,padding:"7px 10px",background:"rgba(0,0,0,.7)",flexShrink:0,borderBottom:"1px solid rgba(201,168,76,.15)"}}>
         <button onClick={onPrev} style={{background:"rgba(201,168,76,.12)",border:"1px solid rgba(201,168,76,.22)",color:AC,padding:"5px 12px",borderRadius:8,cursor:"pointer",fontWeight:700,fontSize:".85rem"}}>◄</button>
@@ -2007,7 +2051,9 @@ function MushafPage({page,t,tjc,arFont,edition,nightMode=false,fullscreen,onTogg
       </div>
 
       {/* Image Mushaf */}
-      <MushafTajweedView page={page||1} fullscreen={fullscreen} nightMode={nightMode} edition={ed}/>
+      <div ref={imgWrapRef} style={{flex:1,minHeight:0,display:"flex",flexDirection:"column",overflow:"hidden",touchAction:"pan-y",willChange:"transform"}}>
+        <MushafTajweedView page={page||1} fullscreen={fullscreen} nightMode={nightMode} edition={ed}/>
+      </div>
     </div>
   );
 
@@ -2315,7 +2361,12 @@ function SurahPageDivider({sn,t,arFont}){
         <div style={{flex:1,height:1,background:"linear-gradient(90deg,#8a7358aa,transparent)"}}/>
       </div>
       {s.n!==1&&s.n!==9&&(
-        <div style={{fontFamily:arFont||"Amiri Quran,serif",fontSize:"1.3rem",color:"#1c1208",marginTop:12,direction:"rtl"}}>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+        // Alif wasla (ٱ) et non alif standard (ا) : c'est l'encodage réel du
+        // Coran (Uthmani) pour "الله/الرحمن/الرحيم" ici — utiliser l'alif du
+        // clavier standard fait que la police Amiri Quran (calée sur les
+        // ligatures coraniques) espace/dessine mal ces mots par rapport au
+        // reste du texte, qui lui vient de l'API avec le bon codepoint.
+        <div style={{fontFamily:arFont||"Amiri Quran,serif",fontSize:"1.3rem",color:"#1c1208",marginTop:12,direction:"rtl",letterSpacing:0}}>بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ</div>
       )}
     </div>
   );
@@ -6801,7 +6852,7 @@ return (
               <div className="font-grid">
                 {FONTS.map(f=>(
                   <div key={f.id} className={`font-card ${fontId===f.id?"sel":""}`} onClick={()=>setFontId(f.id)}>
-                    <div className="font-preview" style={{fontFamily:f.css}}>بِسْمِ اللَّهِ</div>
+                    <div className="font-preview" style={{fontFamily:f.css}}>بِسْمِ ٱللَّهِ</div>
                     <div className="font-name">{f.name}</div>
                     <div className="font-desc">{f.desc}</div>
                   </div>
@@ -7123,6 +7174,11 @@ return (
                 <div style={{height:"100%",width:`${audioPct}%`,background:t.acc,borderRadius:99,transition:"width .3s linear"}}/>
               </div>
               <span style={{fontSize:".55rem",color:t.tx3,flexShrink:0}}>{rec.name?.split(" ")[0]}</span>
+              <button onClick={()=>setPlaybackRate(r=>{const rs=[0.5,0.75,1,1.25,1.5];return rs[(rs.indexOf(r)+1)%rs.length];})}
+                title="Vitesse de lecture"
+                style={{flexShrink:0,padding:"1px 6px",borderRadius:99,border:`1px solid ${t.b2}`,background:playbackRate!==1?t.acc+"18":"transparent",color:playbackRate!==1?t.acc:t.tx3,fontSize:".55rem",fontWeight:700,cursor:"pointer"}}>
+                {playbackRate}×
+              </button>
             </div>
           </div>
           <div style={{display:"flex",gap:6,alignItems:"center",flexShrink:0}}>
