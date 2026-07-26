@@ -2246,8 +2246,8 @@ body>*{position:relative;z-index:1;}
 .d-pct{font-size:1.75rem;font-weight:700;color:${acc};}.d-lbl{font-size:.58rem;color:${t.tx3};text-transform:uppercase;letter-spacing:1px;}
 .bc{display:flex;align-items:flex-end;gap:3px;height:100px;}
 .bcol{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;}
-.bfw{flex:1;width:100%;display:flex;flex-direction:column;justify-content:flex-end;}
-.bfi{background:linear-gradient(180deg,${acc2},${acc});border-radius:3px 3px 0 0;min-height:2px;transition:height .4s;}
+.bfw{height:84px;width:100%;display:flex;flex-direction:column;justify-content:flex-end;flex-shrink:0;}
+.bfi{background:linear-gradient(180deg,${acc2},${acc});border-radius:3px 3px 0 0;min-height:2px;width:100%;transition:height .4s;}
 .bfi:hover{filter:brightness(1.2);}
 .blbl{font-size:.48rem;color:${t.tx3};}.bval{font-size:.48rem;color:${acc};}
 .trow{display:flex;align-items:center;gap:8px;padding:5px 0;transition:background .15s,transform .15s;border-radius:6px;}
@@ -2796,7 +2796,12 @@ export default function App() {
   const [tn,setTn]=useState(()=>ld("qtheme2","light")); // qtheme2 = new key with new themes
   React.useEffect(()=>{const mq=window.matchMedia("(prefers-color-scheme: dark)");const apply=()=>{if(!localStorage.getItem("qtheme2")){setTn(mq.matches?"dark":"light");}};apply();mq.addEventListener("change",apply);return()=>mq.removeEventListener("change",apply);},[]);
   const t=THEMES[tn]||THEMES.dark;
-  const tjc=(tn==="light")?TJC_LIGHT:TJC_DARK; // dark for all dark-bg themes
+  // Palette tajwid choisie selon la LUMINOSITÉ réelle du fond du thème, pas
+  // seulement le thème littéralement nommé "light" — le thème "mushaf" a lui
+  // aussi un fond ivoire clair (bg:#faf8f3) mais tombait dans le cas
+  // "dark-bg" par défaut : les couleurs tajwid (calées pour un fond sombre)
+  // manquaient alors de contraste sur son papier clair.
+  const tjc=(tn==="light"||tn==="mushaf")?TJC_LIGHT:TJC_DARK;
   const [fontId,setFontId]=useState(()=>ld("qfont","uthmanic-hafs"));
   const arFont=(FONTS.find(f=>f.id===fontId)||FONTS[0]).css;
   const [mem,setMem]=useState(()=>ld("qmem6",{}));
@@ -2911,6 +2916,10 @@ const [authError, setAuthError] = useState("");
   const [kPreset,setKPreset]=useState(null);
   const [kCustomDays,setKCustomDays]=useState("30");
   const [kName,setKName]=useState("Ma Khatma");
+  // Mode de lecture préféré pour la Khatma — image du Mushaf (par page) ou
+  // texte du Coran (QuranPageView, mode page) ; mémorisé pour la prochaine fois.
+  const [khatmaReadMode,setKhatmaReadMode]=useState(()=>ld("qkhatma_readmode","mushaf"));
+  const [pendingTextPage,setPendingTextPage]=useState(null);
   // Khatma collective
   const [collectiveKhatmas,setCollectiveKhatmas]=useState(()=>ld("qcolkhatmas",[]));
   const [showCollective,setShowCollective]=useState(false);
@@ -3949,6 +3958,39 @@ const handleSetNewPassword=async(newPass)=>{
       setActiveKhatma(updated);
     }
   };
+  // Équivalent de goToPage mais pour le mode texte (QuranPageView) : sélectionne
+  // la sourate qui contient cette page du Mushaf, active le mode page, et
+  // mémorise la page cible — le useEffect ci-dessous termine le saut une fois
+  // que versePages (mapping verset→page, chargé à la sélection) est disponible.
+  const goToPageInTextMode=pageNum=>{
+    let targetSn=1;
+    for(const s of SURAHS){ if((SURAH_PAGE[s.n]||1)<=pageNum) targetSn=s.n; else break; }
+    const s=SURAHS.find(x=>x.n===targetSn);
+    if(!s)return;
+    if(!pageMode){setPageMode(true);sv("qpagemode",true);}
+    setPendingTextPage(pageNum);
+    doSelect(s);
+    setPage("quran");
+  };
+  React.useEffect(()=>{
+    if(pendingTextPage==null||!selS)return;
+    const pageMap=versePages[selS.n];
+    if(!pageMap)return; // pas encore chargé — on retente au prochain changement de versePages
+    const pageList=[...new Set(Object.values(pageMap))].sort((a,b)=>a-b);
+    const idx=pageList.indexOf(pendingTextPage);
+    if(idx>=0)setQuranCurPage(idx);
+    setPendingTextPage(null);
+  },[versePages,selS,pendingTextPage]);
+  // Numéro de page Mushaf réel actuellement affiché en mode texte (pour que
+  // "Journée lue" enregistre la bonne page quand on lit via le mode Coran
+  // plutôt que via l'onglet Mushaf).
+  const currentTextPage=React.useMemo(()=>{
+    if(!selS)return null;
+    const pageMap=versePages[selS.n];
+    if(!pageMap)return null;
+    const pageList=[...new Set(Object.values(pageMap))].sort((a,b)=>a-b);
+    return pageList[quranCurPage]??null;
+  },[selS,versePages,quranCurPage]);
   const toggleFav=(sn,vn,ar,fr,surah)=>{const key=`${sn}_${vn}`;setFavorites(p=>p.find(f=>f.key===key)?p.filter(f=>f.key!==key):[...p,{key,sn,vn,ar,fr,surah}]);};
   const isMem=(sn,vn)=>!!(mem[String(sn)]?.[String(vn)]);
   const isFav=(sn,vn)=>favorites.some(f=>f.key===`${sn}_${vn}`);
@@ -4614,7 +4656,7 @@ return (
       {shareVerse&&(<div className="overlay" onClick={()=>setShareVerse(null)}><div className="modal" onClick={e=>e.stopPropagation()}><h2 style={{fontFamily:"Amiri,serif",color:acc,marginBottom:4}}>{shareVerse.surahAr}</h2><p style={{fontSize:".68rem",color:t.tx3,marginBottom:14}}>{shareVerse.surah} · verset {shareVerse.vn}</p><div style={{background:`linear-gradient(135deg,${t.s2},${t.s3})`,border:`2px solid ${acc}`,borderRadius:14,padding:"20px 18px",marginBottom:14,textAlign:"center"}}><div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.5rem",direction:"rtl",lineHeight:2.2,color:t.tx,marginBottom:10}}>{shareVerse.ar}</div><div style={{fontSize:".75rem",color:t.tx2,fontStyle:"italic",lineHeight:1.6}}>{shareVerse.fr}</div><div style={{marginTop:10,fontSize:".6rem",color:t.tx3}}>— {shareVerse.surah} ({shareVerse.sn}:{shareVerse.vn}) · Al-Hifz</div></div><button className="mbtn" onClick={()=>{const txt=`${shareVerse.ar}\n\n${shareVerse.fr}\n\n— ${shareVerse.surah} (${shareVerse.sn}:${shareVerse.vn})`;navigator.clipboard?.writeText(txt).catch(()=>{});setShareVerse(null);}}>Copier le verset</button></div></div>)}
 
       {/* Weekly report */}
-      {showWeeklyReport&&(<div className="overlay" onClick={()=>setShowWeeklyReport(false)}><div className="modal" onClick={e=>e.stopPropagation()}><h2 style={{marginBottom:4}}>Rapport hebdomadaire</h2><p style={{marginBottom:16}}>{weeklyReport.totalWeek} versets · {weeklyReport.activeDays}/7 jours actifs</p><div style={{display:"flex",alignItems:"flex-end",gap:6,height:80,marginBottom:12}}>{weeklyReport.days.map((d,i)=>{const maxG=Math.max(...weeklyReport.days.map(x=>x.gained),1);const isToday=d.date===today();return(<div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}><div style={{fontSize:".52rem",color:acc}}>{d.gained||""}</div><div style={{width:"100%",height:60,display:"flex",alignItems:"flex-end"}}><div style={{width:"100%",height:`${Math.max(Math.round(d.gained/maxG*100),4)}%`,background:isToday?acc:`${acc}66`,borderRadius:"3px 3px 0 0",minHeight:3}}/></div><div style={{fontSize:".52rem",color:isToday?acc:t.tx3,fontWeight:isToday?700:400}}>{d.label}</div></div>);})}</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>{[{v:weeklyReport.totalWeek,l:"Versets",c:acc},{v:weeklyReport.activeDays,l:"Jours actifs",c:t.gr},{v:weeklyReport.best?.gained||0,l:"Meilleur jour",c:t.bl}].map((k,i)=>(<div key={i} style={{background:t.s2,borderRadius:10,padding:"10px",textAlign:"center"}}><div style={{fontSize:"1.4rem",fontWeight:700,color:k.c}}>{k.v}</div><div style={{fontSize:".58rem",color:t.tx3}}>{k.l}</div></div>))}</div><div style={{textAlign:"center",color:weeklyReport.totalWeek>0?t.gr:t.tx3,fontSize:".75rem",marginBottom:14,fontWeight:600}}>{weeklyReport.activeDays>=5?"Excellente semaine ! 🌟":weeklyReport.activeDays>=3?"Bonne progression, continue !":"Essaie de mémoriser chaque jour."}</div><button className="mbtn" onClick={()=>setShowWeeklyReport(false)}>Fermer</button></div></div>)}
+      {showWeeklyReport&&(<div className="overlay" onClick={()=>setShowWeeklyReport(false)}><div className="modal" onClick={e=>e.stopPropagation()}><h2 style={{marginBottom:4}}>Rapport hebdomadaire</h2><p style={{marginBottom:16}}>{weeklyReport.totalWeek} versets · {weeklyReport.activeDays}/7 jours actifs</p><div style={{display:"flex",alignItems:"flex-end",gap:6,marginBottom:12}}>{weeklyReport.days.map((d,i)=>{const maxG=Math.max(...weeklyReport.days.map(x=>x.gained),1);const isToday=d.date===today();return(<div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}><div style={{fontSize:".52rem",color:acc}}>{d.gained||""}</div><div style={{width:"100%",height:60,display:"flex",alignItems:"flex-end"}}><div style={{width:"100%",height:`${Math.max(Math.round(d.gained/maxG*100),4)}%`,background:isToday?acc:`${acc}66`,borderRadius:"3px 3px 0 0",minHeight:3}}/></div><div style={{fontSize:".52rem",color:isToday?acc:t.tx3,fontWeight:isToday?700:400}}>{d.label}</div></div>);})}</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>{[{v:weeklyReport.totalWeek,l:"Versets",c:acc},{v:weeklyReport.activeDays,l:"Jours actifs",c:t.gr},{v:weeklyReport.best?.gained||0,l:"Meilleur jour",c:t.bl}].map((k,i)=>(<div key={i} style={{background:t.s2,borderRadius:10,padding:"10px",textAlign:"center"}}><div style={{fontSize:"1.4rem",fontWeight:700,color:k.c}}>{k.v}</div><div style={{fontSize:".58rem",color:t.tx3}}>{k.l}</div></div>))}</div><div style={{textAlign:"center",color:weeklyReport.totalWeek>0?t.gr:t.tx3,fontSize:".75rem",marginBottom:14,fontWeight:600}}>{weeklyReport.activeDays>=5?"Excellente semaine ! 🌟":weeklyReport.activeDays>=3?"Bonne progression, continue !":"Essaie de mémoriser chaque jour."}</div><button className="mbtn" onClick={()=>setShowWeeklyReport(false)}>Fermer</button></div></div>)}
 
       {/* Offline banner */}
       {isOffline&&(
@@ -5767,7 +5809,7 @@ return (
             <div className="card">
               <div className="ch"><span className="ct">Activité de mémorisation</span><span style={{fontSize:".62rem",color:t.tx3}}>14 derniers jours</span></div>
               <div style={{padding:"10px 14px"}}>
-                <div style={{display:"flex",gap:3,alignItems:"flex-end",height:60}}>
+                <div style={{display:"flex",gap:3,alignItems:"flex-end"}}>
                   {Object.keys(hist).sort().slice(-14).map((d,i)=>{
                     const prev=i>0?hist[Object.keys(hist).sort().slice(-14)[i-1]]:0;
                     const gain=Math.max(0,(hist[d]||0)-prev);
@@ -5777,7 +5819,9 @@ return (
                     return (
                       <div key={d} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
                         {gain>0&&<span style={{fontSize:".48rem",color:t.acc,fontWeight:700}}>+{gain}</span>}
-                        <div style={{width:"100%",height:`${Math.max(Math.round(gain/maxG2*50),3)}px`,background:isToday?t.acc:`${t.acc}66`,borderRadius:"3px 3px 0 0",transition:"height .3s"}}/>
+                        <div style={{width:"100%",height:50,display:"flex",alignItems:"flex-end"}}>
+                          <div style={{width:"100%",height:`${Math.max(Math.round(gain/maxG2*100),6)}%`,background:isToday?t.acc:`${t.acc}66`,borderRadius:"3px 3px 0 0",transition:"height .3s"}}/>
+                        </div>
                         <span style={{fontSize:".48rem",color:isToday?t.acc:t.tx3,fontWeight:isToday?700:400}}>{lbl}</span>
                       </div>
                     );
@@ -5789,13 +5833,15 @@ return (
              <div className="card">
                <div className="ch"><span className="ct">Progression par Juz</span></div>
                <div style={{padding:"10px 14px"}}>
-                 <div style={{display:"flex",alignItems:"flex-end",gap:3,height:56,overflowX:"auto"}}>
+                 <div style={{display:"flex",alignItems:"flex-end",gap:3,overflowX:"auto"}}>
                    {Array.from({length:30},function(_,k){
                      var jn=k+1;
                      var done=Object.entries(mem||{}).reduce(function(s,e){var sn=Number(e[0]);var sr=SURAHS&&SURAHS.find(function(x){return x.n===sn;});if(sr&&sr.juz===jn)s+=Object.keys(e[1]||{}).length;return s;},0);
                      var pct=Math.min(100,Math.round(done/208*100));
                      return(<div key={jn} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2,flex:1,minWidth:8}}>
-                       <div style={{width:"100%",height:Math.max(2,Math.round(pct/100*48))+"px",borderRadius:"3px 3px 0 0",background:pct>0?t.acc:t.b1,transition:"height .3s"}}/>
+                       <div style={{width:"100%",height:48,display:"flex",alignItems:"flex-end"}}>
+                         <div style={{width:"100%",height:Math.max(4,pct)+"%",borderRadius:"3px 3px 0 0",background:pct>0?t.acc:t.b1,transition:"height .3s"}}/>
+                       </div>
                        <span style={{fontSize:".4rem",color:t.tx3}}>{jn}</span>
                      </div>);
                    })}
@@ -5931,23 +5977,33 @@ return (
                     <div className="khs"><div style={{fontSize:"1.4rem"}}>🔥</div><div className="khs-v">{khatmaStreak(activeKhatma)}j</div><div className="khs-l">Série ◈</div></div>
                     <div className="khs"><div className="khs-v" style={{color:t.rd}}>{Math.max(0,activeKhatma.totalDays-Object.values(activeKhatma.log).filter(Boolean).length)}</div><div className="khs-l">Restants</div></div>
                   </div>
+                  {/* Choix du mode de lecture — Mushaf (image) ou Coran (texte) */}
+                  <div style={{marginTop:12,display:"flex",gap:6,justifyContent:"center"}}>
+                    {[["mushaf","🖼️ Mushaf"],["text","📄 Texte"]].map(([id,label])=>(
+                      <button key={id} onClick={()=>{setKhatmaReadMode(id);sv("qkhatma_readmode",id);}}
+                        style={{padding:"3px 12px",borderRadius:20,border:`1px solid ${khatmaReadMode===id?t.acc:t.b1}`,background:khatmaReadMode===id?`${t.acc}18`:"transparent",color:khatmaReadMode===id?t.acc:t.tx3,fontSize:".62rem",fontWeight:khatmaReadMode===id?700:400,cursor:"pointer",transition:"all .15s"}}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
                   {/* Bouton Lire maintenant */}
-                  <div style={{marginTop:14,display:"flex",gap:8}}>
+                  <div style={{marginTop:8,display:"flex",gap:8}}>
                     <button onClick={()=>{
                       // Reprendre à la dernière page lue ou calculer la page du jour
                       const doneCount=Object.values(activeKhatma.log).filter(Boolean).length;
                       const pagesPerDay=Math.ceil(604/activeKhatma.totalDays);
                       const lastPage=activeKhatma.lastPage||Math.min(604,doneCount*pagesPerDay+1);
-                      setMushafPage(lastPage);
-                      setPage("mushaf");
+                      if(khatmaReadMode==="text"){goToPageInTextMode(lastPage);}
+                      else{setMushafPage(lastPage);setPage("mushaf");}
                     }} style={{flex:1,padding:"10px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:10,color:"#000",fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>
                       📖 Lire maintenant {activeKhatma.lastPage?`(p.${activeKhatma.lastPage})`:""}
                     </button>
                     <button onClick={()=>{
-                      const updated={...activeKhatma,log:{...activeKhatma.log,[today()]:true},lastPage:(mushafPage||1)};
+                      const readPage=khatmaReadMode==="text"?(currentTextPage||mushafPage||1):(mushafPage||1);
+                      const updated={...activeKhatma,log:{...activeKhatma.log,[today()]:true},lastPage:readPage};
                       setKhatmas(p=>p.map(x=>x.id===activeKhatma.id?updated:x));
                       setActiveKhatma(updated);
-                      togglePage(mushafPage||1);
+                      togglePage(readPage);
                     }} style={{padding:"10px 14px",background:`${t.gr}18`,border:`1px solid ${t.gr}44`,borderRadius:10,color:t.gr,fontWeight:700,fontSize:".8rem",cursor:"pointer"}}>
                       👍 Journée lue
                     </button>
@@ -6315,14 +6371,16 @@ return (
               return(
                 <div style={{padding:"14px 16px",marginBottom:8}}>
                   <div style={{fontSize:".62rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginBottom:10}}>7 derniers jours</div>
-                  <div style={{display:"flex",alignItems:"flex-end",gap:6,height:60}}>
+                  <div style={{display:"flex",alignItems:"flex-end",gap:6}}>
                     {days7.map((d,i)=>(
                       <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
                         <span style={{fontSize:".52rem",color:d.count>0?t.acc:t.tx3,fontWeight:d.isToday?700:400}}>{d.count||""}</span>
-                        <div style={{width:"100%",borderRadius:"4px 4px 0 0",
-                          background:d.isToday?t.acc:d.count>0?t.gr:t.b1,
-                          height:Math.max(3,Math.round((d.count/maxV)*44))+"px",
-                          transition:"height .3s"}}/>
+                        <div style={{width:"100%",height:44,display:"flex",alignItems:"flex-end"}}>
+                          <div style={{width:"100%",borderRadius:"4px 4px 0 0",
+                            background:d.isToday?t.acc:d.count>0?t.gr:t.b1,
+                            height:Math.max(7,Math.round((d.count/maxV)*100))+"%",
+                            transition:"height .3s"}}/>
+                        </div>
                         <span style={{fontSize:".55rem",color:d.isToday?t.acc:t.tx3,fontWeight:d.isToday?700:400}}>{d.label}</span>
                       </div>
                     ))}
@@ -6419,15 +6477,17 @@ return (
                     <span style={{fontSize:".68rem",fontWeight:700,color:trend>=0?t.gr:t.rd}}>{trend>=0?"+":""}{trend}% vs semaine passée</span>
                   </div>
                   <div style={{padding:"10px 14px"}}>
-                    <div style={{display:"flex",gap:6,alignItems:"flex-end",height:100}}>
+                    <div style={{display:"flex",gap:6,alignItems:"flex-end"}}>
                       {weekData.map((w,i)=>{
-                        const h=Math.max(4,Math.round((w.total/maxW)*90));
+                        const hPct=Math.max(4,Math.round((w.total/maxW)*100));
                         const isLast=i===weekData.length-1;
                         return(
                           <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
                             <span style={{fontSize:".48rem",color:t.tx3,fontWeight:isLast?700:400}}>{w.total}</span>
-                            <div style={{width:"100%",height:h,borderRadius:"4px 4px 0 0",background:isLast?t.acc:`${t.acc}44`,transition:"height .6s ease",position:"relative"}}>
-                              {isLast&&<div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,rgba(255,255,255,.2),transparent)",borderRadius:"4px 4px 0 0"}}/>}
+                            <div style={{width:"100%",height:90,display:"flex",alignItems:"flex-end"}}>
+                              <div style={{width:"100%",height:`${hPct}%`,borderRadius:"4px 4px 0 0",background:isLast?t.acc:`${t.acc}44`,transition:"height .6s ease",position:"relative"}}>
+                                {isLast&&<div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,rgba(255,255,255,.2),transparent)",borderRadius:"4px 4px 0 0"}}/>}
+                              </div>
                             </div>
                             <span style={{fontSize:".42rem",color:t.tx3,textAlign:"center",lineHeight:1.2}}>{w.label}</span>
                           </div>
@@ -6577,23 +6637,23 @@ return (
               <div style={{padding:"12px 14px"}}>
                 {chartView==="daily"&&(
                   <div>
-                    <div style={{display:"flex",alignItems:"flex-end",gap:4,height:100,marginBottom:6}}>
-                      {gains.map((g,i)=>{const lbl=new Date(histKeys[i]).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric"});const isToday=histKeys[i]===today();return(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:`${Math.max(Math.round(g/maxG*100),4)}px`,background:isToday?`linear-gradient(180deg,${t.acc2},${t.acc})`:`linear-gradient(180deg,${t.acc}88,${t.acc}44)`}}/></div><div className="blbl" style={{color:isToday?t.acc:t.tx3}}>{lbl}</div>{g>0&&<div className="bval">+{g}</div>}</div>);})}</div>
+                    <div style={{display:"flex",alignItems:"flex-end",gap:4,marginBottom:6}}>
+                      {gains.map((g,i)=>{const lbl=new Date(histKeys[i]).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric"});const isToday=histKeys[i]===today();return(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:`${Math.max(Math.round(g/maxG*100),4)}%`,background:isToday?`linear-gradient(180deg,${t.acc2},${t.acc})`:`linear-gradient(180deg,${t.acc}88,${t.acc}44)`}}/></div><div className="blbl" style={{color:isToday?t.acc:t.tx3}}>{lbl}</div>{g>0&&<div className="bval">+{g}</div>}</div>);})}</div>
                     <div style={{textAlign:"center",fontSize:".65rem",color:t.tx3}}>Versets mémorisés par jour (14 derniers jours)</div>
                   </div>
                 )}
                 {chartView==="weekly"&&(
                   <div>
-                    <div style={{display:"flex",alignItems:"flex-end",gap:4,height:100,marginBottom:6}}>
-                      {weeklyData.map((w,i)=>(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:`${Math.max(Math.round(w.v/maxWeek*100),4)}px`,background:`linear-gradient(180deg,${t.acc2},${t.acc})`}}/></div><div className="blbl">{w.label}</div>{w.v>0&&<div className="bval">+{w.v}</div>}</div>))}
+                    <div style={{display:"flex",alignItems:"flex-end",gap:4,marginBottom:6}}>
+                      {weeklyData.map((w,i)=>(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:`${Math.max(Math.round(w.v/maxWeek*100),4)}%`,background:`linear-gradient(180deg,${t.acc2},${t.acc})`}}/></div><div className="blbl">{w.label}</div>{w.v>0&&<div className="bval">+{w.v}</div>}</div>))}
                     </div>
                     <div style={{textAlign:"center",fontSize:".65rem",color:t.tx3}}>Versets mémorisés par semaine</div>
                   </div>
                 )}
                 {chartView==="monthly"&&(
                   <div>
-                    <div style={{display:"flex",alignItems:"flex-end",gap:4,height:100,marginBottom:6}}>
-                      {monthlyData.map((m,i)=>(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:`${Math.max(Math.round(m.v/maxMonth*100),4)}px`,background:`linear-gradient(180deg,${t.acc2},${t.acc})`}}/></div><div className="blbl">{m.label}</div>{m.v>0&&<div className="bval">+{m.v}</div>}</div>))}
+                    <div style={{display:"flex",alignItems:"flex-end",gap:4,marginBottom:6}}>
+                      {monthlyData.map((m,i)=>(<div key={i} className="bcol"><div className="bfw"><div className="bfi" style={{height:`${Math.max(Math.round(m.v/maxMonth*100),4)}%`,background:`linear-gradient(180deg,${t.acc2},${t.acc})`}}/></div><div className="blbl">{m.label}</div>{m.v>0&&<div className="bval">+{m.v}</div>}</div>))}
                     </div>
                     <div style={{textAlign:"center",fontSize:".65rem",color:t.tx3}}>Versets mémorisés par mois</div>
                   </div>
