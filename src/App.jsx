@@ -2289,7 +2289,8 @@ function AyahMarker({n, color, faded, onClick}) {
 function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, arFont,
                         mem, hifzMode, hifzLevel, playing,
                         toggleV, toggleFav, isFav, doPlay, sv,
-                        onLongPress, setPage, wbwVerseRef, setWbwOpen, partialPlayRef, showTf, tafsirData, loadTafsir, doPlayPartial, setVerseCtxMenu, versePages}) {
+                        onLongPress, setPage, wbwVerseRef, setWbwOpen, partialPlayRef, showTf, tafsirData, loadTafsir, doPlayPartial, setVerseCtxMenu, versePages,
+                        immersive, chromeVisible, onToggleChrome, curPage:curPageProp, setCurPage:setCurPageProp}) {
   // ── Récitation in-page ──
 
 
@@ -2299,7 +2300,12 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
 
 
   const _lpTimer=React.useRef(null);
-  const [curPage, setCurPage] = React.useState(0);
+  // curPage est levé au niveau App (partagé entre le mode carte et le mode
+  // plein écran, qui montent chacun leur propre instance) — repli sur un state
+  // local si jamais aucun contrôle externe n'est fourni.
+  const [curPageLocal, setCurPageLocal] = React.useState(0);
+  const curPage = curPageProp!==undefined?curPageProp:curPageLocal;
+  const setCurPage = setCurPageProp||setCurPageLocal;
   const [selVerse, setSelVerse] = React.useState(null); // verset sélectionné
   const [partialV, setPartialV] = React.useState(null);
   const [gotoOpen, setGotoOpen] = React.useState(false);
@@ -2321,7 +2327,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
     return chunks;
   }, [verses, versePages]);
 
-  React.useEffect(()=>{setCurPage(0);setSelVerse(null);setFillCache({});},[selS?.n]);
+  React.useEffect(()=>{if(curPageProp===undefined)setCurPage(0);setSelVerse(null);setFillCache({});},[selS?.n]);
 
   // guard moved below hooks
   const curEntry = pages[Math.min(curPage,pages.length-1)];
@@ -2368,17 +2374,43 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
   const pageContainerRef=React.useRef(null);
   const pageTextRef=React.useRef(null);
   const [fitScale,setFitScale]=React.useState(1);
-  React.useLayoutEffect(()=>{setFitScale(1);},[curPage,arabicSize]);
+  const fitAttempts=React.useRef(0);
+  const fitBounds=React.useRef({lo:0.4,hi:3.6});
+  React.useLayoutEffect(()=>{setFitScale(1);fitAttempts.current=0;fitBounds.current={lo:0.4,hi:3.6};},[curPage,arabicSize,immersive]);
   React.useLayoutEffect(()=>{
     const container=pageContainerRef.current,textEl=pageTextRef.current;
     if(!container||!textEl)return;
     const availH=container.clientHeight-48,neededH=textEl.scrollHeight; // 48 = padding vertical du conteneur (24+24)
     if(!availH||!neededH)return;
-    if(neededH<availH*0.88){
-      const target=Math.min(1.9,(availH*0.94)/neededH);
-      if(target-fitScale>0.03)setFitScale(target);
+    if(!immersive){
+      // Mode carte intégré : on agrandit seulement si le texte tient largement
+      // (jamais de scroll requis dans ce mode, donc pas besoin de rétrécir).
+      if(neededH<availH*0.88){
+        const target=Math.min(1.9,(availH*0.94)/neededH);
+        if(target-fitScale>0.03)setFitScale(target);
+      }
+      return;
     }
-  },[curPage,fitScale,fullPage.length,arabicSize]);
+    // Mode plein écran : une vraie page de Mushaf n'a jamais besoin de défiler —
+    // on vise un ajustement exact (agrandir OU rétrécir) pour que le texte
+    // remplisse le cadre pile, sans blanc en bas ni coupure. La hauteur du texte
+    // n'est PAS linéaire avec l'échelle (un agrandissement peut faire déborder
+    // un mot sur une ligne de plus, changeant la hauteur par paliers) — un pas
+    // "proportionnel" unique divergeait donc facilement. On procède par
+    // dichotomie sur [lo,hi] (fits ? lo=scale : hi=scale), qui converge de façon
+    // fiable quel que soit le profil de la fonction tant qu'elle est monotone.
+    if(fitAttempts.current>=11)return;
+    const b=fitBounds.current;
+    const fits=neededH<=availH*0.97;
+    if(fits)b.lo=fitScale; else b.hi=fitScale;
+    if(b.hi-b.lo<0.02){
+      if(Math.abs(fitScale-b.lo)>0.01){fitAttempts.current=999;setFitScale(b.lo);}
+      return;
+    }
+    const mid=(b.lo+b.hi)/2;
+    fitAttempts.current++;
+    setFitScale(mid);
+  },[curPage,fitScale,fullPage.length,arabicSize,immersive,chromeVisible]);
 
   // ── Effet de tournage de page (façon Tarteel / livre physique) ──
   // Pendant le drag, la page suit le doigt (rotation 3D autour de la charnière) ;
@@ -2482,8 +2514,12 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
   // Normalisation pour comparaison arabe
 
   return (
-    <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0,background:"#ffffff",backgroundImage:'url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2760%27%20height%3D%2760%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%2523c8a87a%27%20stroke-width%3D%270.4%27%20opacity%3D%270.18%27%3E%3Cpath%20d%3D%27M30%200%20L60%2030%20L30%2060%20L0%2030%20Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2720%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2712%27/%3E%3Cpath%20d%3D%27M10%2010%20Q30%200%2050%2010%20Q60%2030%2050%2050%20Q30%2060%2010%2050%20Q0%2030%2010%2010Z%27/%3E%3Cpath%20d%3D%27M30%208%20L52%2030%20L30%2052%20L8%2030Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%276%27/%3E%3Cline%20x1%3D%2730%27%20y1%3D%270%27%20x2%3D%2730%27%20y2%3D%2760%27/%3E%3Cline%20x1%3D%270%27%20y1%3D%2730%27%20x2%3D%2760%27%20y2%3D%2730%27/%3E%3C/g%3E%3C/svg%3E")',backgroundSize:"60px 60px",borderRadius:6,overflow:"hidden"}} onClick={()=>setSelVerse(null)} onTouchStart={handlePgTouchStart} onTouchMove={handlePgTouchMove} onTouchEnd={handlePgTouchEnd}>
-      {/* Navigation */}
+    <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0,background:"#ffffff",backgroundImage:'url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2760%27%20height%3D%2760%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%2523c8a87a%27%20stroke-width%3D%270.4%27%20opacity%3D%270.18%27%3E%3Cpath%20d%3D%27M30%200%20L60%2030%20L30%2060%20L0%2030%20Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2720%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2712%27/%3E%3Cpath%20d%3D%27M10%2010%20Q30%200%2050%2010%20Q60%2030%2050%2050%20Q30%2060%2010%2050%20Q0%2030%2010%2010Z%27/%3E%3Cpath%20d%3D%27M30%208%20L52%2030%20L30%2052%20L8%2030Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%276%27/%3E%3Cline%20x1%3D%2730%27%20y1%3D%270%27%20x2%3D%2730%27%20y2%3D%2760%27/%3E%3Cline%20x1%3D%270%27%20y1%3D%2730%27%20x2%3D%2760%27%20y2%3D%2730%27/%3E%3C/g%3E%3C/svg%3E")',backgroundSize:"60px 60px",borderRadius:immersive?0:6,overflow:"hidden",position:"relative"}} onClick={()=>setSelVerse(null)} onTouchStart={handlePgTouchStart} onTouchMove={handlePgTouchMove} onTouchEnd={handlePgTouchEnd}>
+      {/* Navigation — masquée en plein écran (immersive) : le header flottant du
+          lecteur (App.jsx) fait déjà office de chrome, et le swipe gère le
+          changement de page, donc pas de doublon ici (qui se superposerait au
+          header). Seul un petit numéro de page reste visible en permanence. */}
+      {!immersive&&(<>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"5px 10px",borderBottom:"1px solid "+t.b1,flexShrink:0,gap:6}}>
         <button onClick={e=>{e.stopPropagation();setCurPage(p=>Math.max(0,p-1));}} disabled={curPage===0}
           style={{padding:"4px 12px",borderRadius:20,border:"1px solid "+(curPage>0?t.acc:t.b1),background:curPage>0?t.acc+"15":"transparent",color:curPage>0?t.acc:t.tx3,cursor:curPage>0?"pointer":"default",fontSize:".7rem",fontWeight:700,flexShrink:0}}>
@@ -2513,15 +2549,22 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
             style={{padding:"3px 10px",borderRadius:20,border:"1px solid "+t.b1,background:"transparent",color:t.tx3,fontSize:".65rem",cursor:"pointer",marginLeft:"auto"}}>Annuler</button>
         </div>
       )}
+      </>)}
+      {immersive&&curPg&&(
+        <span onClick={e=>{e.stopPropagation();onToggleChrome&&onToggleChrome();}}
+          style={{position:"absolute",bottom:8,right:10,zIndex:5,fontSize:".6rem",color:"#8a7358",background:"rgba(255,255,255,.85)",padding:"2px 8px",borderRadius:20,fontWeight:600,cursor:"pointer",boxShadow:"0 1px 6px rgba(0,0,0,.08)"}}>
+          {curPg}
+        </span>
+      )}
 
       {/* Texte en flux continu — le wrapper porte la perspective 3D, pageContainerRef
           porte la rotation (tournage de page) sans perturber le calcul de fitScale */}
       <div style={{flex:"1 1 0%",minHeight:0,position:"relative",overflow:"hidden",perspective:1400}}>
-      <div ref={pageContainerRef} style={{height:"100%",overflowY:"auto",minWidth:0,width:"100%",boxSizing:"border-box",contain:"layout",padding:"24px 20px",WebkitOverflowScrolling:"touch",display:"flex",flexDirection:"column",justifyContent:fitScale>1.03?"center":"flex-start",backfaceVisibility:"hidden",willChange:"transform",background:"#fff"}} onClick={e=>e.stopPropagation()}>
+      <div ref={pageContainerRef} style={{height:"100%",overflowY:"auto",minWidth:0,width:"100%",boxSizing:"border-box",contain:"layout",padding:"24px 20px",WebkitOverflowScrolling:"touch",display:"flex",flexDirection:"column",justifyContent:fitScale>1.03?"center":"flex-start",backfaceVisibility:"hidden",willChange:"transform",background:"#fff"}} onClick={e=>{e.stopPropagation();if(immersive&&onToggleChrome)onToggleChrome();}}>
         {/* Le papier de la page reste toujours blanc/ivoire, quel que soit le thème
             de l'app — l'encre du texte doit donc rester foncée fixe (#1c1208),
             pas t.tx (clair en thème sombre → texte invisible sur papier clair). */}
-        <div ref={pageTextRef} style={{direction:"rtl",textAlign:"justify",width:"100%",boxSizing:"border-box",overflowWrap:"break-word",wordBreak:"break-word",wordSpacing:"0.1em",WebkitTextAlignLast:"right",textAlignLast:"right",lineHeight:2.3,fontFamily:arFont||"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.6)*fitScale+"rem",maxWidth:"100%",color:"#1c1208",transition:"font-size .2s ease"}}>
+        <div ref={pageTextRef} style={{direction:"rtl",textAlign:"justify",width:"100%",boxSizing:"border-box",overflowWrap:"break-word",wordBreak:"break-word",wordSpacing:"0.1em",WebkitTextAlignLast:"right",textAlignLast:"right",lineHeight:2.3,fontFamily:arFont||"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.6)*fitScale+"rem",maxWidth:"100%",color:"#1c1208",transition:immersive?"none":"font-size .2s ease"}}>
           {fullPage.map((v,vi)=>{
             const prevSn=vi>0?fullPage[vi-1].sn:null;
             // Pas de bannière pour la toute première ligne de la sourate déjà sélectionnée
@@ -2682,11 +2725,25 @@ const [authError, setAuthError] = useState("");
   const [ltab,setLtab]=useState("list");
   const [navOpen,setNavOpen]=useState(false);
   const [selS,setSelS]=useState(null);
+  // Reset de la page du mode page Coran au niveau App (persiste au montage/
+  // démontage de QuranPageView) — un effet interne au composant se
+  // redéclencherait à chaque montage (carte ↔ plein écran) même sans
+  // changement réel de sourate, écrasant la page conservée en plein écran.
+  useEffect(()=>{setQuranCurPage(0);},[selS?.n]);
   const [selJuz,setSelJuz]=useState(null);
   const [search,setSearch]=useState("");
   const [showTr,setShowTr]=useState(false);
   const [showTj,setShowTj]=useState(false);
   const [showReaderSettings,setShowReaderSettings]=useState(false);
+  const [readerChromeVisible,setReaderChromeVisible]=useState(true);
+  // Levé au niveau App (au lieu d'un state interne à QuranPageView) car le mode
+  // page (carte) et le mode plein écran (reader) montent chacun leur propre
+  // instance de QuranPageView — sans ça, ouvrir le plein écran perdait la page
+  // en cours et repartait de la page 1.
+  const [quranCurPage,setQuranCurPage]=useState(0);
+  // En plein écran (mode page immersif) l'interface (header, barre de page) reste
+  // masquée par défaut pour laisser toute la place à la page — un tap la ré-affiche.
+  useEffect(()=>{if(page==="reader")setReaderChromeVisible(false);},[page]);
   const [verseMenu,setVerseMenu]=useState(null);
   const [pageMode,setPageMode]=useState(()=>ld('qpagemode',false));
   const [showTf,setShowTf]=useState(false);
@@ -5124,7 +5181,7 @@ return (
                     {loadState==="error"&&(<div style={{textAlign:"center",padding:"24px",fontSize:".78rem"}}><div style={{fontSize:"1.5rem",marginBottom:10}}>🔌</div><div style={{color:t.rd,fontWeight:700,marginBottom:6}}>Connexion requise</div><div style={{color:t.tx3,marginBottom:14,lineHeight:1.5}}>Les versets de cette sourate sont chargés depuis internet.<br/>Vérifie ta connexion et réessaie.</div><button onClick={()=>{setLoadState("idle");setTimeout(()=>setSelS(s=>({...s})),100);}} style={{padding:"8px 20px",background:t.acc,border:"none",borderRadius:10,color:"#fff",fontWeight:700,cursor:"pointer",fontSize:".75rem"}}>🔄 Réessayer</button>{Q[selS?.n]?.length>0&&<div style={{marginTop:12,fontSize:".65rem",color:t.tx3}}>ou <button onClick={()=>{setVerses(Q[selS.n]);setLoadState("done");}} style={{background:"none",border:"none",color:t.acc,cursor:"pointer",fontWeight:700}}>utiliser les données embarquées</button></div>}</div>)}
                     {loadState==="done"&&(
                       <div className="vscroll-inner" style={pageMode?{direction:"ltr",textAlign:"left",padding:0,display:"flex",flexDirection:"column",height:"100%",minHeight:0,overflow:"hidden"}:{}}>
-                        {pageMode?(<QuranPageView tn={tn} verses={verses} selS={selS} t={t} tjc={tjc} showTj={showTj} showTr={showTr} arabicSize={arabicSize} arFont={arFont} mem={mem} hifzMode={hifzMode} hifzLevel={hifzLevel} playing={playing} toggleV={toggleV} toggleFav={toggleFav} isFav={isFav} doPlay={doPlay} sv={sv} setPage={setPage} wbwVerseRef={wbwVerseRef} setWbwOpen={setWbwOpen} partialPlayRef={partialPlayRef} showTf={showTf} tafsirData={tafsirData} loadTafsir={loadTafsir} doPlayPartial={doPlayPartial} setVerseCtxMenu={setVerseCtxMenu} versePages={versePages}/>):(<>
+                        {pageMode?(<QuranPageView tn={tn} verses={verses} selS={selS} t={t} tjc={tjc} showTj={showTj} showTr={showTr} arabicSize={arabicSize} arFont={arFont} mem={mem} hifzMode={hifzMode} hifzLevel={hifzLevel} playing={playing} toggleV={toggleV} toggleFav={toggleFav} isFav={isFav} doPlay={doPlay} sv={sv} setPage={setPage} wbwVerseRef={wbwVerseRef} setWbwOpen={setWbwOpen} partialPlayRef={partialPlayRef} showTf={showTf} tafsirData={tafsirData} loadTafsir={loadTafsir} doPlayPartial={doPlayPartial} setVerseCtxMenu={setVerseCtxMenu} versePages={versePages} curPage={quranCurPage} setCurPage={setQuranCurPage}/>):(<>
                         {selS.n!==1&&selS.n!==9&&(
                           <div style={{display:"block",textAlign:"center",padding:"8px 0 14px",fontSize:"1.4rem",color:t.acc,direction:"rtl"}}>
                             بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ
@@ -5221,10 +5278,31 @@ return (
         )}
 
         {page==="reader"&&selS&&(
-          <div style={{position:"fixed",inset:0,zIndex:100,background:t.bg,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+          <div style={{position:"fixed",inset:0,zIndex:100,background:t.bg,overflow:"hidden"}}>
 
-            {/* ── HEADER ── */}
-            <div style={{display:"flex",alignItems:"center",gap:8,padding:"10px 12px",borderBottom:"1px solid "+t.b1,background:t.navBg,backdropFilter:"blur(16px)",flexShrink:0,paddingTop:"max(10px,env(safe-area-inset-top))"}}>
+            {/* ── CONTENU — plein écran, sous le chrome (header/nav flottants) ── */}
+            <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column"}}>
+            {loadState==="loading"&&<div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",color:t.tx3,flexDirection:"column",gap:10}}><div style={{width:28,height:28,border:"3px solid "+t.acc,borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite"}}/><span style={{fontSize:".75rem"}}>Chargement...</span></div>}
+            {loadState==="error"&&<div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:12,padding:20}}><div style={{color:t.rd,fontWeight:700}}>Connexion requise</div><button onClick={()=>{setLoadState("idle");setSelS(s=>({...s}));}} style={{padding:"8px 20px",background:t.acc,border:"none",borderRadius:10,color:"#fff",cursor:"pointer",fontSize:".8rem"}}>Réessayer</button></div>}
+            {loadState==="done"&&verses.length>0&&(
+              <QuranPageView verses={verses} selS={selS} t={t} tjc={tjc} tn={tn}
+                showTj={showTj} showTr={showTr} arabicSize={arabicSize} arFont={arFont}
+                mem={mem} hifzMode={hifzMode} hifzLevel={hifzLevel}
+                playing={playing} toggleV={toggleV} toggleFav={toggleFav}
+                isFav={isFav} doPlay={doPlay} sv={sv}
+                wbwVerseRef={wbwVerseRef} setWbwOpen={setWbwOpen} partialPlayRef={partialPlayRef}
+                showTf={showTf} tafsirData={tafsirData} loadTafsir={loadTafsir} doPlayPartial={doPlayPartial}
+                setVerseCtxMenu={setVerseCtxMenu} versePages={versePages}
+                curPage={quranCurPage} setCurPage={setQuranCurPage}
+                immersive chromeVisible={readerChromeVisible} onToggleChrome={()=>setReaderChromeVisible(v=>!v)}
+                onLongPress={(v)=>setVerseMenu(v)}/>
+            )}
+            </div>
+
+            {/* ── HEADER + barre réglages — chrome flottant, masqué par défaut,
+                 un tap sur la page l'affiche/le masque (onToggleChrome ci-dessus) ── */}
+            <div style={{position:"absolute",top:0,left:0,right:0,zIndex:20,transform:readerChromeVisible?"translateY(0)":"translateY(-100%)",transition:"transform .25s ease",pointerEvents:readerChromeVisible?"auto":"none"}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,padding:"10px 12px",borderBottom:"1px solid "+t.b1,background:t.navBg,backdropFilter:"blur(16px)",boxShadow:"0 4px 20px rgba(0,0,0,.15)",flexShrink:0,paddingTop:"max(10px,env(safe-area-inset-top))"}}>
               <button onClick={()=>{setPage("quran");setPlaying(null);if(audioRef.current){audioRef.current.pause();audioRef.current.src="";}}}
                 style={{width:34,height:34,borderRadius:"50%",border:"1px solid "+t.b1,background:"transparent",color:t.tx,cursor:"pointer",fontSize:"1rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                 ←
@@ -5301,21 +5379,7 @@ return (
                 </div>
               </div>
             )}
-
-            {/* ── CONTENU ── */}
-            {loadState==="loading"&&<div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",color:t.tx3,flexDirection:"column",gap:10}}><div style={{width:28,height:28,border:"3px solid "+t.acc,borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite"}}/><span style={{fontSize:".75rem"}}>Chargement...</span></div>}
-            {loadState==="error"&&<div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:12,padding:20}}><div style={{color:t.rd,fontWeight:700}}>Connexion requise</div><button onClick={()=>{setLoadState("idle");setSelS(s=>({...s}));}} style={{padding:"8px 20px",background:t.acc,border:"none",borderRadius:10,color:"#fff",cursor:"pointer",fontSize:".8rem"}}>Réessayer</button></div>}
-            {loadState==="done"&&verses.length>0&&(
-              <QuranPageView verses={verses} selS={selS} t={t} tjc={tjc} tn={tn}
-                showTj={showTj} showTr={showTr} arabicSize={arabicSize} arFont={arFont}
-                mem={mem} hifzMode={hifzMode} hifzLevel={hifzLevel}
-                playing={playing} toggleV={toggleV} toggleFav={toggleFav}
-                isFav={isFav} doPlay={doPlay} sv={sv}
-                wbwVerseRef={wbwVerseRef} setWbwOpen={setWbwOpen} partialPlayRef={partialPlayRef}
-                showTf={showTf} tafsirData={tafsirData} loadTafsir={loadTafsir} doPlayPartial={doPlayPartial}
-                setVerseCtxMenu={setVerseCtxMenu} versePages={versePages}
-                onLongPress={(v)=>setVerseMenu(v)}/>
-            )}
+            </div>
 
             {/* ── MENU CONTEXTUEL VERSET (appui long) ── */}
             {verseMenu&&(
