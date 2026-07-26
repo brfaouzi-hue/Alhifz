@@ -673,8 +673,11 @@ function HifzVerseText({ar, level, tjc, showTj, vmark, onRevealWord}) {
 }
 
 // TajwidSpan — rend le HTML tajweed de l'API qurancdn avec les couleurs du Mushaf standard
-function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,authLoading,authError,onGoogle,onApple,onLogin,onSignup,onReset}){
+function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,authLoading,authError,onGoogle,onApple,onLogin,onSignup,onReset,onSetNewPassword}){
   const [oauthNotice,setOauthNotice]=useState(false);
+  const [newPass,setNewPass]=useState("");
+  const [newPass2,setNewPass2]=useState("");
+  const isRecovery=authPage==="recovery";
   return (
     <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"linear-gradient(135deg,#0a0f0a 0%,#0d1a0f 50%,#0a0f0a 100%)",padding:20,position:"relative",overflow:"hidden"}}>
       <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",opacity:.04,fontSize:"clamp(8rem,20vw,18rem)",fontFamily:"Amiri Quran,serif",color:"#4ade80",pointerEvents:"none",userSelect:"none",direction:"rtl"}}>بسم الله</div>
@@ -684,22 +687,32 @@ function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,au
           <div style={{fontSize:"1.5rem",fontWeight:800,color:"#fff",letterSpacing:1}}>Al-Hifz</div>
           <div style={{fontSize:".72rem",color:"rgba(74,222,128,.6)",marginTop:4,letterSpacing:2,textTransform:"uppercase"}}>Mémorisation du Coran</div>
         </div>
+        {isRecovery ? (
+          <>
+            <div style={{color:"rgba(255,255,255,.7)",fontSize:".8rem",marginBottom:18,textAlign:"center",lineHeight:1.6}}>Choisis un nouveau mot de passe pour ton compte.</div>
+            <input value={newPass} onChange={e=>setNewPass(e.target.value)} placeholder="Nouveau mot de passe" type="password" autoFocus style={{width:"100%",padding:"13px 16px",background:"rgba(255,255,255,.06)",border:"1px solid rgba(74,222,128,.2)",borderRadius:12,color:"#fff",fontSize:".85rem",marginBottom:12,boxSizing:"border-box",outline:"none"}}/>
+            <input value={newPass2} onChange={e=>setNewPass2(e.target.value)} placeholder="Confirme le mot de passe" type="password" style={{width:"100%",padding:"13px 16px",background:"rgba(255,255,255,.06)",border:"1px solid rgba(74,222,128,.2)",borderRadius:12,color:"#fff",fontSize:".85rem",marginBottom:20,boxSizing:"border-box",outline:"none"}}/>
+            {authError&&<div style={{color:authError.includes("✓")?"#4ade80":"#ef4444",fontSize:".75rem",marginBottom:12,textAlign:"center",padding:"8px",background:authError.includes("✓")?"rgba(74,222,128,.1)":"rgba(239,68,68,.1)",borderRadius:8}}>{authError}</div>}
+            {newPass&&newPass2&&newPass!==newPass2&&<div style={{color:"#f59e0b",fontSize:".72rem",marginBottom:12,textAlign:"center"}}>Les deux mots de passe ne correspondent pas.</div>}
+            <button onClick={()=>{if(newPass===newPass2)onSetNewPassword(newPass);}} disabled={authLoading||!newPass||newPass!==newPass2} style={{width:"100%",padding:"14px",background:"linear-gradient(135deg,#4ade80,#22c55e)",border:"none",borderRadius:12,color:"#000",fontWeight:800,fontSize:".95rem",cursor:"pointer",boxShadow:"0 4px 20px rgba(74,222,128,.3)",opacity:(!newPass||newPass!==newPass2)?.6:1}}>
+              {authLoading?"...":"Enregistrer le nouveau mot de passe →"}
+            </button>
+          </>
+        ) : (<>
         <div style={{display:"flex",marginBottom:20,borderRadius:12,overflow:"hidden",background:"rgba(255,255,255,.05)",padding:3,gap:3}}>
           <button onClick={()=>setAuthPage("login")} style={{flex:1,padding:"10px",background:authPage==="login"?"#4ade80":"transparent",color:authPage==="login"?"#000":"rgba(255,255,255,.5)",border:"none",cursor:"pointer",fontWeight:700,fontSize:".8rem",borderRadius:10,transition:"all .2s"}}>Connexion</button>
           <button onClick={()=>setAuthPage("signup")} style={{flex:1,padding:"10px",background:authPage==="signup"?"#4ade80":"transparent",color:authPage==="signup"?"#000":"rgba(255,255,255,.5)",border:"none",cursor:"pointer",fontWeight:700,fontSize:".8rem",borderRadius:10,transition:"all .2s"}}>Inscription</button>
         </div>
-        {/* Connexion sociale — désactivée tant que les providers Google/Apple ne sont pas configurés côté Supabase */}
-        <button onClick={()=>setOauthNotice(true)} style={{width:"100%",padding:"12px",marginBottom:10,borderRadius:12,border:"1px solid rgba(255,255,255,.1)",background:"rgba(255,255,255,.03)",color:"rgba(255,255,255,.45)",fontSize:".85rem",fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:10,position:"relative"}}>
-          <svg width="18" height="18" viewBox="0 0 24 24" style={{opacity:.5}}><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        <button onClick={onGoogle} style={{width:"100%",padding:"12px",marginBottom:10,borderRadius:12,border:"1px solid rgba(255,255,255,.15)",background:"rgba(255,255,255,.06)",color:"rgba(255,255,255,.9)",fontSize:".85rem",fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:10,position:"relative"}}>
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
           Continuer avec Google
-          <span style={{fontSize:".55rem",fontWeight:700,color:"rgba(255,255,255,.4)",border:"1px solid rgba(255,255,255,.15)",borderRadius:20,padding:"2px 7px",marginLeft:4}}>Bientôt</span>
         </button>
         <button onClick={()=>setOauthNotice(true)} style={{width:"100%",padding:"12px",marginBottom:10,borderRadius:12,border:"1px solid rgba(255,255,255,.1)",background:"rgba(255,255,255,.03)",color:"rgba(255,255,255,.45)",fontSize:".85rem",fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:10,position:"relative"}}>
           <svg width="18" height="18" viewBox="0 0 814 1000" fill="rgba(255,255,255,.5)"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-37.3-155.2-107C46.9 726 0 622.7 0 524.3 0 348.8 108.6 236 236.1 236c62.1 0 113.6 40.8 150.8 40.8 35.7 0 92.2-43.1 162.6-43.1 25.8 0 108.2 2.6 160.7 101.9zm-161.9-171.5c30.9-35.7 53.8-85.1 53.8-134.5 0-6.8-.6-13.7-1.9-19.5C622.6 14.9 553.8 55.2 514.1 99c-29.2 32-55.8 81.4-55.8 130.3 0 7.4 1.3 14.8 1.9 17.1 3.2.6 8.4 1.3 13.6 1.3 44.4 0 108.9-38.3 152.4-96.3z"/></svg>
           Continuer avec Apple
           <span style={{fontSize:".55rem",fontWeight:700,color:"rgba(255,255,255,.4)",border:"1px solid rgba(255,255,255,.15)",borderRadius:20,padding:"2px 7px",marginLeft:4}}>Bientôt</span>
         </button>
-        {oauthNotice&&<div style={{color:"rgba(255,255,255,.6)",fontSize:".68rem",marginBottom:12,textAlign:"center",padding:"8px 10px",background:"rgba(255,255,255,.05)",borderRadius:8,lineHeight:1.5}}>La connexion Google/Apple arrive bientôt — utilise ton email pour l'instant 👇</div>}
+        {oauthNotice&&<div style={{color:"rgba(255,255,255,.6)",fontSize:".68rem",marginBottom:12,textAlign:"center",padding:"8px 10px",background:"rgba(255,255,255,.05)",borderRadius:8,lineHeight:1.5}}>La connexion Apple arrive bientôt — utilise Google ou ton email pour l'instant 👇</div>}
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
           <div style={{flex:1,height:1,background:"rgba(255,255,255,.1)"}}/>
           <span style={{fontSize:".7rem",color:"rgba(255,255,255,.4)"}}>ou par email</span>
@@ -715,6 +728,7 @@ function AuthScreen({authPage,setAuthPage,email,setEmail,password,setPassword,au
     Mot de passe oublié ?
   </button>
 )}
+        </>)}
       </div>
     </div>
   );
@@ -1742,6 +1756,19 @@ const toArNum=n=>String(n).split("").map(d=>AR_DIGITS[+d]??d).join("");
 // l'app (mode test, mode concentration, partage, favoris...) — nettoyé une
 // bonne fois à la source plutôt que sur chaque site d'affichage.
 const cleanFr=s=>(s||"").replace(/<[^>]*>/g,"").replace(/\s+([.,;:!?])/g,"$1").trim();
+// Supabase renvoie ses messages d'erreur d'auth en anglais — traduits ici pour
+// les cas les plus courants plutôt que de les afficher bruts à l'utilisateur.
+const AUTH_ERR_FR={
+  "Invalid login credentials":"Email ou mot de passe incorrect.",
+  "User already registered":"Un compte existe déjà avec cet email.",
+  "Email not confirmed":"Confirme d'abord ton email (vérifie ta boîte mail).",
+  "Password should be at least 6 characters":"Le mot de passe doit contenir au moins 6 caractères.",
+  "Unable to validate email address: invalid format":"Format d'email invalide.",
+  "New password should be different from the old password.":"Le nouveau mot de passe doit être différent de l'ancien.",
+  "Auth session missing!":"Session expirée — redemande un lien de réinitialisation.",
+  "For security purposes, you can only request this after 60 seconds.":"Pour ta sécurité, réessaie dans une minute.",
+};
+const trAuthErr=msg=>AUTH_ERR_FR[msg]||msg;
 const playDing=()=>{try{const ctx=new (window.AudioContext||window.webkitAudioContext)();const osc=ctx.createOscillator();const gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.type="sine";osc.frequency.value=880;gain.gain.setValueAtTime(0.15,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.35);osc.start();osc.stop(ctx.currentTime+0.35);}catch{}};
 
 // Découpe un texte sur plusieurs lignes pour un rendu canvas (pas de wrap natif)
@@ -3008,13 +3035,18 @@ useEffect(()=>{
     setAuthReady(true);
     clearTimeout(safety);
   }).catch(()=>{setAuthReady(true);clearTimeout(safety);});
-  const{data:{subscription}}=supabase.auth.onAuthStateChange((_,session)=>{
+  const{data:{subscription}}=supabase.auth.onAuthStateChange((event,session)=>{
     const u=session?.user??null;
     setUser(u);
     // Sans ça, une connexion interactive (login/signup) ne chargeait jamais la
     // progression cloud — seul un rechargement de page (getSession() ci-dessus,
     // qui restaure une session déjà persistée) le faisait.
     if(u)loadProgress(u.id);
+    // Lien "mot de passe oublié" cliqué : Supabase établit une session de
+    // récupération et déclenche cet événement, mais rien n'invitait ensuite
+    // l'utilisateur à choisir un nouveau mot de passe — il se retrouvait juste
+    // connecté sans comprendre pourquoi. On force l'écran dédié.
+    if(event==="PASSWORD_RECOVERY"){setAuthPage("recovery");setShowAuthModal(true);}
   });
   return ()=>{subscription.unsubscribe();clearTimeout(safety);};
 
@@ -3028,7 +3060,7 @@ const handleGoogleLogin=async()=>{
     provider:'google',
     options:{redirectTo:window.location.origin}
   });
-  if(error)setAuthError(error.message);
+  if(error)setAuthError(trAuthErr(error.message));
 };
 const handleAppleLogin=async()=>{
   if(!isSupabaseConfigured){setAuthError("Connexion indisponible pour le moment (backend non configuré).");return;}
@@ -3036,14 +3068,14 @@ const handleAppleLogin=async()=>{
     provider:'apple',
     options:{redirectTo:window.location.origin}
   });
-  if(error)setAuthError(error.message);
+  if(error)setAuthError(trAuthErr(error.message));
 };
 const handleLogin=async()=>{
   if(!isSupabaseConfigured){setAuthError("Connexion indisponible pour le moment (backend non configuré).");return false;}
   setAuthLoading(true);setAuthError("");
   const{error}=await supabase.auth.signInWithPassword({email,password});
   setAuthLoading(false);
-  if(error){setAuthError(error.message);return false;}
+  if(error){setAuthError(trAuthErr(error.message));return false;}
   return true;
 };
 const handleSignup=async()=>{
@@ -3051,7 +3083,7 @@ const handleSignup=async()=>{
   setAuthLoading(true);setAuthError("");
   const{data,error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:"https://alhifz.vercel.app"}});
   setAuthLoading(false);
-  if(error){setAuthError(error.message);return false;}
+  if(error){setAuthError(trAuthErr(error.message));return false;}
   // Si la confirmation email est désactivée côté Supabase, signUp() renvoie directement
   // une session (compte auto-confirmé) — on connecte l'utilisateur tout de suite au lieu
   // de lui demander de vérifier un email qui ne sera jamais nécessaire.
@@ -3064,9 +3096,23 @@ const handleReset=async()=>{
   setAuthLoading(true);
   if(!email){setAuthLoading(false);setAuthError("Entre ton email d'abord");return;}setAuthError("");
   const{error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:"https://alhifz.vercel.app"});
-  if(error)setAuthError(error.message);
+  if(error)setAuthError(trAuthErr(error.message));
   else setAuthError("Email envoyé ! Vérifie ta boîte mail ✓");
   setAuthLoading(false);
+};
+// Suite du clic sur le lien "mot de passe oublié" reçu par email — Supabase a
+// déjà établi une session de récupération (cf. l'évènement PASSWORD_RECOVERY
+// plus haut) ; il ne reste qu'à enregistrer le nouveau mot de passe dessus.
+const handleSetNewPassword=async(newPass)=>{
+  if(!isSupabaseConfigured){setAuthError("Indisponible pour le moment (backend non configuré).");return false;}
+  if(!newPass||newPass.length<6){setAuthError("Le mot de passe doit contenir au moins 6 caractères.");return false;}
+  setAuthLoading(true);setAuthError("");
+  const{error}=await supabase.auth.updateUser({password:newPass});
+  setAuthLoading(false);
+  if(error){setAuthError(trAuthErr(error.message));return false;}
+  setAuthError("Mot de passe mis à jour ✓");
+  setAuthPage("login");
+  return true;
 };
   useEffect(()=>{
     const t=setTimeout(()=>setSplash(false),2200);
@@ -7219,7 +7265,7 @@ return (
       {showAuthModal&&(
         <div style={{position:"fixed",inset:0,zIndex:999,background:"rgba(0,0,0,.75)",backdropFilter:"blur(8px)",display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>setShowAuthModal(false)}>
           <div onClick={e=>e.stopPropagation()} style={{width:"100%",maxWidth:440}}>
-            <AuthScreen authPage={authPage} setAuthPage={setAuthPage} email={email} setEmail={setEmail} password={password} setPassword={setPassword} authLoading={authLoading} authError={authError} onGoogle={handleGoogleLogin} onApple={handleAppleLogin} onLogin={async()=>{const ok=await handleLogin();if(ok)setShowAuthModal(false);}} onSignup={async()=>{const ok=await handleSignup();if(ok)setShowAuthModal(false);}} onReset={handleReset} t={t} acc={t.acc} tn={tn}/>
+            <AuthScreen authPage={authPage} setAuthPage={setAuthPage} email={email} setEmail={setEmail} password={password} setPassword={setPassword} authLoading={authLoading} authError={authError} onGoogle={handleGoogleLogin} onApple={handleAppleLogin} onLogin={async()=>{const ok=await handleLogin();if(ok)setShowAuthModal(false);}} onSignup={async()=>{const ok=await handleSignup();if(ok)setShowAuthModal(false);}} onReset={handleReset} onSetNewPassword={async(np)=>{const ok=await handleSetNewPassword(np);if(ok)setTimeout(()=>setShowAuthModal(false),1200);}} t={t} acc={t.acc} tn={tn}/>
           </div>
         </div>
       )}

@@ -26,6 +26,8 @@ if (SUPABASE_URL && SUPABASE_ANON_KEY) {
     signInWithPassword: noop,
     signUp: noop,
     resetPasswordForEmail: noop,
+    updateUser: noop,
+    signInWithOAuth: noop,
     signOut: noop,
   };
   supabase = {
