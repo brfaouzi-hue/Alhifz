@@ -154,14 +154,22 @@ export default function StudentSchedule({ userId, t, acc, myProgram, liveGoal, o
   ) : (
     <div style={{ padding: '0 0 20px' }}>
       <div style={{ padding: '16px 16px 8px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, gap: 8, flexWrap: 'wrap' }}>
           <h2 style={{ fontFamily: 'Amiri,serif', fontSize: '1.15rem', color: acc, margin: 0 }}>Planning de mes cours</h2>
-          {upcoming.some(b => b.status === 'confirmed') && (
-            <button onClick={exportICS} title="Exporter vers Calendrier (iPhone, Google, Outlook...)" style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 10px', borderRadius: 10, border: '1px solid ' + t.b1, background: 'transparent', color: t.tx2, fontSize: '.65rem', fontWeight: 700, cursor: 'pointer' }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Exporter
+          <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+            {/* Accès direct en haut, en plus du "+ Ajouter" par jour plus bas —
+                pour créer/relancer le programme sans avoir à chercher le bon
+                jour dans le calendrier. */}
+            <button onClick={onCreateProgram} title="Créer ou régénérer mon programme de révision" style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 10px', borderRadius: 10, border: 'none', background: `linear-gradient(135deg,${acc},${acc}cc)`, color: '#fff', fontSize: '.65rem', fontWeight: 700, cursor: 'pointer' }}>
+              ✦ Mon Parcours
             </button>
-          )}
+            {upcoming.some(b => b.status === 'confirmed') && (
+              <button onClick={exportICS} title="Exporter vers Calendrier (iPhone, Google, Outlook...)" style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 10px', borderRadius: 10, border: '1px solid ' + t.b1, background: 'transparent', color: t.tx2, fontSize: '.65rem', fontWeight: 700, cursor: 'pointer' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Exporter
+              </button>
+            )}
+          </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <button onClick={() => setWeekOffset(p => p - 1)} style={{ background: 'none', border: '1px solid ' + t.b1, borderRadius: 10, padding: '6px 12px', color: t.tx2, cursor: 'pointer' }}>←</button>
