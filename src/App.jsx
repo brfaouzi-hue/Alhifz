@@ -2009,14 +2009,17 @@ function MushafPage({page,t,tjc,arFont,edition,nightMode=false,fullscreen,onTogg
     const el=imgWrapRef.current;
     if(!el)return;
     if(Math.abs(dx)>60&&dy<60){
-      const isNext=dx<0;
+      // Un vrai Mushaf se feuillette dans le sens de l'arabe : la page
+      // suivante est révélée en glissant la page actuelle vers la DROITE
+      // (l'inverse d'un livre LTR), donc swipe à droite = page suivante.
+      const isNext=dx>0;
       el.style.transition="transform .16s ease-in, opacity .16s ease-in";
-      el.style.transform=`translateX(${isNext?-60:60}px)`;
+      el.style.transform=`translateX(${isNext?60:-60}px)`;
       el.style.opacity="0";
       setTimeout(()=>{
         isNext?onNext?.():onPrev?.();
         el.style.transition="none";
-        el.style.transform=`translateX(${isNext?60:-60}px)`;
+        el.style.transform=`translateX(${isNext?-60:60}px)`;
         requestAnimationFrame(()=>requestAnimationFrame(()=>{
           el.style.transition="transform .2s ease-out, opacity .2s ease-out";
           el.style.transform="translateX(0)";
@@ -2549,10 +2552,13 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
   };
 
   const commitFlip=dir=>{
+    // Un vrai Mushaf se feuillette dans le sens de l'arabe : la page suivante
+    // se révèle en pivotant depuis la DROITE (l'inverse d'un livre LTR), donc
+    // le sens "next"/"prev" ici est inversé par rapport à un lecteur latin.
     const el=pageContainerRef.current; if(!el)return;
-    const hinge=dir==="next"?"left center":"right center";
-    const outDeg=dir==="next"?FLIP_COMMIT_DEG:-FLIP_COMMIT_DEG;
-    const shadowOut=dir==="next"?"-22px 0 44px -10px rgba(0,0,0,.5)":"22px 0 44px -10px rgba(0,0,0,.5)";
+    const hinge=dir==="next"?"right center":"left center";
+    const outDeg=dir==="next"?-FLIP_COMMIT_DEG:FLIP_COMMIT_DEG;
+    const shadowOut=dir==="next"?"22px 0 44px -10px rgba(0,0,0,.5)":"-22px 0 44px -10px rgba(0,0,0,.5)";
     setTurning(dir);
     el.style.transformOrigin=hinge;
     el.style.transition="transform .22s cubic-bezier(.4,0,.7,1), box-shadow .22s ease";
@@ -2563,7 +2569,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
       setCurPage(p=>dir==="next"?Math.min(total-1,p+1):Math.max(0,p-1));
       el.style.transition="none";
       el.style.transform=`rotateY(${-outDeg}deg)`;
-      el.style.boxShadow=dir==="next"?"18px 0 40px -12px rgba(0,0,0,.4)":"-18px 0 40px -12px rgba(0,0,0,.4)";
+      el.style.boxShadow=dir==="next"?"-18px 0 40px -12px rgba(0,0,0,.4)":"18px 0 40px -12px rgba(0,0,0,.4)";
       requestAnimationFrame(()=>requestAnimationFrame(()=>{
         el.style.transition="transform .22s cubic-bezier(.3,0,.6,1), box-shadow .22s ease";
         el.style.transform="rotateY(0deg)";
@@ -2590,7 +2596,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
     if(dy>60)return;
     const el=pageContainerRef.current; if(!el)return;
     const width=el.clientWidth||320;
-    const atStart=dx>0&&curPage<=0, atEnd=dx<0&&curPage>=total-1;
+    const atStart=dx<0&&curPage<=0, atEnd=dx>0&&curPage>=total-1;
     if(atStart||atEnd)return;
     const deg=Math.max(-FLIP_DRAG_MAX,Math.min(FLIP_DRAG_MAX,-(dx/width)*FLIP_DRAG_MAX*1.6));
     const shadowAmt=Math.min(.4,Math.abs(deg)/FLIP_DRAG_MAX*.4);
@@ -2607,7 +2613,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
     pgTouchX.current=null;
     if(turning)return;
     if(Math.abs(dx)>60&&dy<50){
-      const dir=dx<0?"next":"prev";
+      const dir=dx>0?"next":"prev";
       if((dir==="next"&&curPage>=total-1)||(dir==="prev"&&curPage<=0)){springBack();return;}
       commitFlip(dir);
     } else springBack();
@@ -2694,7 +2700,14 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
         {/* Le papier de la page reste toujours blanc/ivoire, quel que soit le thème
             de l'app — l'encre du texte doit donc rester foncée fixe (#1c1208),
             pas t.tx (clair en thème sombre → texte invisible sur papier clair). */}
-        <div ref={pageTextRef} style={{direction:"rtl",textAlign:"justify",width:"100%",boxSizing:"border-box",overflowWrap:"break-word",wordBreak:"break-word",wordSpacing:"0.1em",WebkitTextAlignLast:"justify",textAlignLast:"justify",lineHeight:2.3,fontFamily:arFont||"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.6)*fitScale+"rem",maxWidth:"100%",color:"#1c1208",transition:immersive?"none":"font-size .2s ease"}}>
+        {/* textAlignLast:"right" (pas "justify") — sinon la dernière ligne
+            VISUELLE de la page (celle où le texte s'arrête, souvent un petit
+            bout de verset) se fait étirer sur toute la largeur comme les
+            autres lignes, avec le signe de fin de verset poussé tout au bord
+            au lieu de rester collé au dernier mot. Seule la dernière ligne
+            doit échapper à la justification, exactement comme dans un vrai
+            Mushaf imprimé. */}
+        <div ref={pageTextRef} style={{direction:"rtl",textAlign:"justify",width:"100%",boxSizing:"border-box",overflowWrap:"break-word",wordBreak:"break-word",wordSpacing:"0.1em",WebkitTextAlignLast:"right",textAlignLast:"right",lineHeight:2.3,fontFamily:arFont||"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.6)*fitScale+"rem",maxWidth:"100%",color:"#1c1208",transition:immersive?"none":"font-size .2s ease"}}>
           {fullPage.map((v,vi)=>{
             const prevSn=vi>0?fullPage[vi-1].sn:null;
             // Pas de bannière pour la toute première ligne de la sourate déjà sélectionnée
