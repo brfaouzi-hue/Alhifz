@@ -2823,6 +2823,11 @@ const [authError, setAuthError] = useState("");
   const {classes:myTeacherClasses} = useTeacherClasses(user?.id);
   const {assignments:myAssignments} = useStudentAssignments(user?.id);
   const pendingAssignments=useMemo(()=>myAssignments.filter(a=>!a.completed),[myAssignments]);
+  const urgentAssignments=useMemo(()=>pendingAssignments.filter(a=>{
+    if(!a.due_date)return false;
+    const daysLeft=(new Date(a.due_date).getTime()-Date.now())/86400000;
+    return daysLeft<=2; // en retard ou échéance dans les 48h
+  }),[pendingAssignments]);
   const [scheduleView,setScheduleView]=useState(null); // null = auto (suit `role`), sinon override manuel "teacher"|"student"
   const {displayName,updateDisplayName}=useMyProfile(user?.id);
   const [nameEdit,setNameEdit]=useState("");
@@ -4921,7 +4926,17 @@ return (
                 {!(hist[today()]||0)&&(<div style={{marginTop:7,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${t.bl}15`,borderRadius:8,border:`1px solid ${t.bl}30`,cursor:"pointer"}} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>sPct(x)<100);if(s)doSelect(s);}}><div style={{width:6,height:6,borderRadius:"50%",background:t.bl,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".63rem",color:t.bl,fontWeight:600,flex:1}}>Aucune mémorisation aujourd'hui — on commence ?</span><span style={{fontSize:".58rem",color:t.bl,opacity:.7}}>→</span></div>)}
                 {spacedDue.length>0&&(<div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${t.rd}15`,borderRadius:8,border:`1px solid ${t.rd}30`,cursor:"pointer"}} onClick={()=>setPage("pages")}><div style={{width:6,height:6,borderRadius:"50%",background:t.rd,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".63rem",color:t.rd,fontWeight:600,flex:1}}>{spacedDue.length} verset{spacedDue.length>1?"s":""} à réviser aujourd'hui</span><span style={{fontSize:".58rem",color:t.rd,opacity:.7}}>Voir →</span></div>)}
                 {bookmark&&(<div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${acc}10`,borderRadius:8,border:`1px solid ${acc}25`,cursor:"pointer"}} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>x.n===bookmark.sn);if(s)doSelect(s);}}><span style={{fontSize:".7rem",color:acc}}>◈</span><span style={{fontSize:".63rem",color:t.tx,fontWeight:600,flex:1}}>Reprendre : {bookmark.name}</span><span style={{fontSize:".58rem",color:t.tx3}}>→</span></div>)}
-                {pendingAssignments.length>0&&(<div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:"#9c27b015",borderRadius:8,border:"1px solid #9c27b030",cursor:"pointer"}} onClick={()=>setPage("join-class")}><span style={{fontSize:".7rem"}}>📝</span><span style={{fontSize:".63rem",color:"#9c27b0",fontWeight:600,flex:1}}>{pendingAssignments.length} devoir{pendingAssignments.length>1?"s":""} de ton prof à faire</span><span style={{fontSize:".58rem",color:"#9c27b0",opacity:.7}}>Voir →</span></div>)}
+                {pendingAssignments.length>0&&(()=>{const urg=urgentAssignments.length>0;const c=urg?"#e91e63":"#9c27b0";return(
+                  <div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:c+"15",borderRadius:8,border:`1px solid ${c}30`,cursor:"pointer"}} onClick={()=>setPage("join-class")}>
+                    <span style={{fontSize:".7rem"}}>{urg?"⚠️":"📝"}</span>
+                    <span style={{fontSize:".63rem",color:c,fontWeight:600,flex:1}}>
+                      {urg
+                        ?`${urgentAssignments.length} devoir${urgentAssignments.length>1?"s":""} à rendre très bientôt !`
+                        :`${pendingAssignments.length} devoir${pendingAssignments.length>1?"s":""} de ton prof à faire`}
+                    </span>
+                    <span style={{fontSize:".58rem",color:c,opacity:.7}}>Voir →</span>
+                  </div>
+                );})()}
                 {/* Streak */}
                 {false&&(<div onClick={()=>setPage("stats")} style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"6px 10px",background:"rgba(249,115,22,.08)",borderRadius:9,border:"1px solid rgba(249,115,22,.2)",cursor:"pointer"}}><span style={{fontSize:"1.1rem"}}>🔥</span><span style={{fontSize:".7rem",fontWeight:700,color:"#f97316",flex:1}}>{memStreak} jour{memStreak>1?"s":""} de suite</span><span style={{fontSize:".58rem",color:"#f97316",opacity:.7}}>Stats →</span></div>)}
               </div>

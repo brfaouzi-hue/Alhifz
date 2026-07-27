@@ -66,6 +66,7 @@ function ClassPanel({ cls, t, acc, onClose }) {
   const [form, setForm] = useState({ title: '', surah_n: 1, verse_from: 1, verse_to: 7, due_date: '' });
   const [saving, setSaving] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [expandedAssign, setExpandedAssign] = useState(null);
 
   const inactive = students.filter(s => daysSince(s.user_progress?.updated_at) > 7);
 
@@ -175,13 +176,23 @@ function ClassPanel({ cls, t, acc, onClose }) {
         {tab === 'assignments' && (
           <div>
             {assignments.map(a => {
-              const done = a.assignment_progress?.filter(p => p.completed).length || 0;
+              const progByStudent = {};
+              (a.assignment_progress || []).forEach(p => { progByStudent[p.student_id] = p; });
+              const done = students.filter(s => progByStudent[s.student_id]?.completed).length;
               const total2 = students.length;
               const overdue = a.due_date && new Date(a.due_date) < new Date();
+              const expanded = expandedAssign === a.id;
+              // Retardataires en premier (le prof veut voir qui n'a pas fait le
+              // devoir avant de voir qui l'a déjà fait) — "pas commencé" (aucune
+              // ligne assignment_progress) est distingué de "en cours".
+              const roster = students.map(s => {
+                const p = progByStudent[s.student_id];
+                return { s, done: !!p?.completed, versesDone: p?.verses_done || 0 };
+              }).sort((x, y) => Number(x.done) - Number(y.done));
               return (
-                <div key={a.id} style={{ padding: '12px 14px', borderRadius: 12, background: t.s1, border: '1px solid ' + (overdue ? '#e91e6333' : t.b1), marginBottom: 8 }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                    <div style={{ flex: 1 }}>
+                <div key={a.id} style={{ borderRadius: 12, background: t.s1, border: '1px solid ' + (overdue && done < total2 ? '#e91e6333' : t.b1), marginBottom: 8, overflow: 'hidden' }}>
+                  <div onClick={() => setExpandedAssign(expanded ? null : a.id)} style={{ padding: '12px 14px', display: 'flex', alignItems: 'flex-start', gap: 8, cursor: 'pointer' }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 700, fontSize: '.8rem', color: t.tx, marginBottom: 2 }}>{a.title || SURAHS[a.surah_n - 1]}</div>
                       <div style={{ fontSize: '.62rem', color: t.tx3 }}>{SURAHS[a.surah_n - 1]} · v.{a.verse_from}–{a.verse_to}</div>
                       {a.due_date && <div style={{ fontSize: '.6rem', color: overdue ? '#e91e63' : t.tx3, marginTop: 2 }}>
@@ -192,13 +203,33 @@ function ClassPanel({ cls, t, acc, onClose }) {
                       <div style={{ fontWeight: 700, fontSize: '.85rem', color: done === total2 && total2 > 0 ? t.gr : acc }}>{done}/{total2}</div>
                       <div style={{ fontSize: '.55rem', color: t.tx3 }}>complété</div>
                     </div>
-                    <button onClick={() => deleteAssignment(a.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.tx3, padding: 4 }}>
+                    <button onClick={e => { e.stopPropagation(); deleteAssignment(a.id); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.tx3, padding: 4 }}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
                     </button>
                   </div>
-                  <div style={{ height: 4, borderRadius: 2, background: t.b1, marginTop: 10, overflow: 'hidden' }}>
+                  <div style={{ height: 4, background: t.b1, margin: '0 14px 12px', borderRadius: 2, overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: (total2 > 0 ? done / total2 * 100 : 0) + '%', background: t.gr, borderRadius: 2, transition: 'width .4s' }} />
                   </div>
+                  {expanded && (
+                    <div style={{ borderTop: '1px solid ' + t.b1, padding: '8px 14px 12px' }}>
+                      {roster.length === 0
+                        ? <div style={{ fontSize: '.68rem', color: t.tx3, padding: '8px 0' }}>Aucun élève dans cette classe</div>
+                        : roster.map(({ s, done: sDone, versesDone }) => (
+                            <div key={s.student_id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0' }}>
+                              <span style={{ width: 18, height: 18, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.6rem', flexShrink: 0, background: sDone ? t.gr + '22' : (overdue ? '#e91e6322' : t.b1), color: sDone ? t.gr : (overdue ? '#e91e63' : t.tx3) }}>
+                                {sDone ? '✓' : '·'}
+                              </span>
+                              <span style={{ flex: 1, fontSize: '.72rem', color: t.tx, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {studentNames[s.student_id] || s.student_id.slice(0, 8) + '...'}
+                              </span>
+                              <span style={{ fontSize: '.6rem', color: sDone ? t.gr : t.tx3, flexShrink: 0 }}>
+                                {sDone ? 'Fait' : versesDone > 0 ? `${versesDone} v.` : 'Pas commencé'}
+                              </span>
+                            </div>
+                          ))
+                      }
+                    </div>
+                  )}
                 </div>
               );
             })}
