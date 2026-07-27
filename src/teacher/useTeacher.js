@@ -150,6 +150,48 @@ export function useStudentClasses(userId) {
   return { classes, loading };
 }
 
+// Devoirs vus côté élève : les profs créent des assignments (table `assignments`)
+// mais rien ne les affichait jamais côté élève, et personne n'écrivait dans
+// `assignment_progress` — donc le compteur "fait/total" du prof restait à 0/N.
+// On calcule la progression ici depuis les versets déjà mémorisés par l'élève
+// (user_progress.mem, la même source que tout le reste de l'app) et on la
+// synchronise silencieusement vers assignment_progress pour que le tableau de
+// bord prof reste juste.
+export function useStudentAssignments(userId) {
+  const [assignments, setAssignments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const load = useCallback(async () => {
+    if (!userId) { setLoading(false); return; }
+    setLoading(true);
+    const { data: memberships } = await supabase.from('class_members').select('class_id, classes(id, name, teacher_id)').eq('student_id', userId);
+    const classIds = [...new Set((memberships || []).map(m => m.class_id).filter(Boolean))];
+    if (!classIds.length) { setAssignments([]); setLoading(false); return; }
+    const clsMap = {};
+    (memberships || []).forEach(m => { if (m.classes) clsMap[m.class_id] = m.classes; });
+    const [{ data: rows }, { data: prog }] = await Promise.all([
+      supabase.from('assignments').select('*').in('class_id', classIds).order('due_date', { ascending: true }),
+      supabase.from('user_progress').select('mem').eq('user_id', userId).single(),
+    ]);
+    const mem = prog?.mem || {};
+    const list = (rows || []).map(a => {
+      const surahMem = mem[a.surah_n] || {};
+      let done = 0;
+      for (let v = a.verse_from; v <= a.verse_to; v++) if (surahMem[v]) done++;
+      const total = a.verse_to - a.verse_from + 1;
+      return { ...a, class_name: clsMap[a.class_id]?.name || '', done, total, completed: done >= total };
+    });
+    setAssignments(list);
+    setLoading(false);
+    list.forEach(a => {
+      supabase.from('assignment_progress')
+        .upsert({ assignment_id: a.id, student_id: userId, verses_done: a.done, completed: a.completed }, { onConflict: 'assignment_id,student_id' })
+        .then(({ error }) => { if (error) console.warn('assignment_progress sync', error.message); });
+    });
+  }, [userId]);
+  useEffect(() => { load(); }, [load]);
+  return { assignments, loading, reload: load };
+}
+
 export function useStudySession(userId) {
   const logSession = useCallback(async (surahN, versesCount, durationSec, scoreAvg) => {
     if (!userId) return;

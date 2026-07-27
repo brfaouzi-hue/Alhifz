@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";import { createPortal } from "react-dom";import { supabase, isSupabaseConfigured } from './supabase'
-import { useRole, useMyProfile, useTeacherClasses } from './teacher/useTeacher.js';
+import { useRole, useMyProfile, useTeacherClasses, useStudentAssignments } from './teacher/useTeacher.js';
 import TeacherDashboard from './teacher/TeacherDashboard.jsx';
 import JoinClass from './teacher/JoinClass.jsx';
 import NotificationBell from './teacher/NotificationBell.jsx';
@@ -836,13 +836,22 @@ function TajwidSpan({text,enabled,tjc}) {
   if(!enabled) return <bdi style={{direction:"rtl"}}>{clean.replace(/<[^>]*>/g,"").replace(/[۰-۹٠-٩]/g,"")}</bdi>;
   if(!clean.includes("<tajweed")) return <bdi style={{direction:"rtl",letterSpacing:0}}>{clean.replace(/<[^>]*>/g,"").replace(/[۰-۹٠-٩]/g,"")}</bdi>;
   // Remplacer les balises tajweed par des spans colorés
-  const colored=clean
+  let colored=clean
     .replace(/<tajweed[^>]*class=["']?([^"'> ]+)["']?[^>]*>/g,(m,cls)=>{
       const colorFn=TAJWID_CLASS_COLORS[cls];
       const color=colorFn?colorFn(tjc):null;
       return color?`<span style="color:${color};font-weight:bold" title="${cls.replace(/_/g,' ')}">`:'<span>';
     })
     .replace(/<\/tajweed>/g,"</span>");
+  // L'API coupe parfois une lettre de sa propre chadda/harakat : elle ferme le
+  // </tajweed> juste après la lettre de base et laisse le diacritique suivant
+  // (ex: chadda U+0651) en texte brut hors du span (vu sur idgham_shafawi,
+  // ex. 2:20 "لَهُم مَّشَوْا" → le 2e mim est dans le span mais sa chadda est
+  // hors du span). Séparer une lettre de son diacritique casse le rendu du
+  // moteur de shaping arabe (le mim "meurt"/se déforme) — on rattache donc
+  // tout diacritique combinant trouvé juste après un </span> à l'intérieur
+  // de celui-ci, avant qu'il ne se fasse fermer.
+  colored=colored.replace(/<\/span>([\u0610-\u061A\u064B-\u0652\u0653-\u065F\u0670\u06D6-\u06ED]+)/g,"$1</span>");
   return <bdi style={{direction:"rtl",letterSpacing:0,lineHeight:"inherit"}} dangerouslySetInnerHTML={{__html:colored}}/>;
 }
 
@@ -2354,7 +2363,13 @@ function SurahPageDivider({sn,t,arFont}){
   // dans une calligraphie propre au Coran (Amiri), plutôt qu'un badge/pilule
   // "UI moderne".
   return (
-    <div style={{direction:"ltr",textAlign:"center",margin:"22px 0"}}>
+    // textAlignLast:"justify" est hérité de pageTextRef (pour justifier la
+    // dernière ligne des paragraphes de versets) et s'applique À LA LIGNE, pas
+    // seulement quand text-align:justify — sur ce bandeau (une seule ligne
+    // courte = sa propre "dernière ligne"), ça écartait le Bismillah sur toute
+    // la largeur au lieu de le centrer. On force donc explicitement les deux
+    // propriétés ici pour casser cet héritage.
+    <div style={{direction:"ltr",textAlign:"center",textAlignLast:"center",WebkitTextAlignLast:"center",margin:"22px 0"}}>
       <div style={{display:"flex",alignItems:"center",gap:16}}>
         <div style={{flex:1,height:1,background:"linear-gradient(90deg,transparent,#8a7358aa)"}}/>
         <span style={{fontFamily:"Amiri,serif",fontWeight:700,fontSize:"1.55rem",color:"#8a7358",direction:"rtl",whiteSpace:"nowrap",letterSpacing:".5px"}}>سُورَةُ {s.ar}</span>
@@ -2408,8 +2423,6 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
   const [curPageLocal, setCurPageLocal] = React.useState(0);
   const curPage = curPageProp!==undefined?curPageProp:curPageLocal;
   const setCurPage = setCurPageProp||setCurPageLocal;
-  const [selVerse, setSelVerse] = React.useState(null); // verset sélectionné
-  const [partialV, setPartialV] = React.useState(null);
   const [gotoOpen, setGotoOpen] = React.useState(false);
   const [gotoVal, setGotoVal] = React.useState("");
   const [fillCache, setFillCache] = React.useState({}); // pageNum -> {before:[],after:[]} versets des sourates voisines partageant la page
@@ -2429,7 +2442,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
     return chunks;
   }, [verses, versePages]);
 
-  React.useEffect(()=>{if(curPageProp===undefined)setCurPage(0);setSelVerse(null);setFillCache({});},[selS?.n]);
+  React.useEffect(()=>{if(curPageProp===undefined)setCurPage(0);setFillCache({});},[selS?.n]);
 
   // guard moved below hooks
   const curEntry = pages[Math.min(curPage,pages.length-1)];
@@ -2560,7 +2573,6 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
     const onOut=()=>{
       el.removeEventListener("transitionend",onOut);
       setCurPage(p=>dir==="next"?Math.min(total-1,p+1):Math.max(0,p-1));
-      setSelVerse(null);
       el.style.transition="none";
       el.style.transform=`rotateY(${-outDeg}deg)`;
       el.style.boxShadow=dir==="next"?"18px 0 40px -12px rgba(0,0,0,.4)":"-18px 0 40px -12px rgba(0,0,0,.4)";
@@ -2618,18 +2630,16 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
     setGotoOpen(false);
   };
 
-  // Un tap ne fait plus jouer l'audio directement (uniquement sélectionner/
-  // désélectionner) — la lecture se fait via le bouton ▶ de la barre d'actions
-  // ou via le menu qui apparaît à l'appui long, jamais sur un simple tap.
-  const handleTap = (v) => {
-    setSelVerse(prev => prev?.n === v.n ? null : v);
-  };
-
+  // Un tap sur la page (texte ou fond) ne fait plus rien d'autre que basculer
+  // le chrome (header/nav) en mode plein écran — plus de sélection de verset
+  // ni de barre d'actions inline : toutes les actions vivent uniquement dans
+  // le menu qui apparaît à l'appui long (verseCtxMenu, géré au niveau App).
+  const toggleChromeTap = () => { if (immersive && onToggleChrome) onToggleChrome(); };
 
   // Normalisation pour comparaison arabe
 
   return (
-    <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0,background:"#ffffff",backgroundImage:'url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2760%27%20height%3D%2760%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%2523c8a87a%27%20stroke-width%3D%270.4%27%20opacity%3D%270.18%27%3E%3Cpath%20d%3D%27M30%200%20L60%2030%20L30%2060%20L0%2030%20Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2720%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2712%27/%3E%3Cpath%20d%3D%27M10%2010%20Q30%200%2050%2010%20Q60%2030%2050%2050%20Q30%2060%2010%2050%20Q0%2030%2010%2010Z%27/%3E%3Cpath%20d%3D%27M30%208%20L52%2030%20L30%2052%20L8%2030Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%276%27/%3E%3Cline%20x1%3D%2730%27%20y1%3D%270%27%20x2%3D%2730%27%20y2%3D%2760%27/%3E%3Cline%20x1%3D%270%27%20y1%3D%2730%27%20x2%3D%2760%27%20y2%3D%2730%27/%3E%3C/g%3E%3C/svg%3E")',backgroundSize:"60px 60px",borderRadius:immersive?0:6,overflow:"hidden",position:"relative"}} onClick={()=>setSelVerse(null)} onTouchStart={handlePgTouchStart} onTouchMove={handlePgTouchMove} onTouchEnd={handlePgTouchEnd}>
+    <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0,background:"#ffffff",backgroundImage:'url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2760%27%20height%3D%2760%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%2523c8a87a%27%20stroke-width%3D%270.4%27%20opacity%3D%270.18%27%3E%3Cpath%20d%3D%27M30%200%20L60%2030%20L30%2060%20L0%2030%20Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2720%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2712%27/%3E%3Cpath%20d%3D%27M10%2010%20Q30%200%2050%2010%20Q60%2030%2050%2050%20Q30%2060%2010%2050%20Q0%2030%2010%2010Z%27/%3E%3Cpath%20d%3D%27M30%208%20L52%2030%20L30%2052%20L8%2030Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%276%27/%3E%3Cline%20x1%3D%2730%27%20y1%3D%270%27%20x2%3D%2730%27%20y2%3D%2760%27/%3E%3Cline%20x1%3D%270%27%20y1%3D%2730%27%20x2%3D%2760%27%20y2%3D%2730%27/%3E%3C/g%3E%3C/svg%3E")',backgroundSize:"60px 60px",borderRadius:immersive?0:6,overflow:"hidden",position:"relative"}} onClick={toggleChromeTap} onTouchStart={handlePgTouchStart} onTouchMove={handlePgTouchMove} onTouchEnd={handlePgTouchEnd}>
       {/* Navigation — masquée en plein écran (immersive) : le header flottant du
           lecteur (App.jsx) fait déjà office de chrome, et le swipe gère le
           changement de page, donc pas de doublon ici (qui se superposerait au
@@ -2716,14 +2726,13 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
             }
             const isMem=!!(mem[String(selS?.n)]?.[String(v.n)]);
             const isPlay=playing===v.n;
-            const isSel=selVerse?.n===v.n;
             return (
               <React.Fragment key={v.n}>
                 {showDivider&&<SurahPageDivider sn={v.sn} t={t} arFont={arFont}/>}
-                <span onClick={e=>{e.stopPropagation();if(reviewMode&&!revealedVerses?.[v.n]){setRevealedVerses?.(p=>({...p,[v.n]:true}));return;}handleTap(v);}} onContextMenu={e=>{e.preventDefault();e.stopPropagation();setVerseCtxMenu({vn:v.n,sn:selS?.n,ar:v.ar,fr:v.fr});}} onTouchStart={e=>{_lpTimer.current=setTimeout(()=>setVerseCtxMenu({vn:v.n,sn:selS?.n,ar:v.ar,fr:v.fr}),500);}} onTouchEnd={()=>clearTimeout(_lpTimer.current)} onTouchMove={()=>clearTimeout(_lpTimer.current)}
+                <span onClick={e=>{e.stopPropagation();if(reviewMode&&!revealedVerses?.[v.n]){setRevealedVerses?.(p=>({...p,[v.n]:true}));return;}toggleChromeTap();}} onContextMenu={e=>{e.preventDefault();e.stopPropagation();setVerseCtxMenu({vn:v.n,sn:selS?.n,ar:v.ar,fr:v.fr});}} onTouchStart={e=>{_lpTimer.current=setTimeout(()=>setVerseCtxMenu({vn:v.n,sn:selS?.n,ar:v.ar,fr:v.fr}),500);}} onTouchEnd={()=>clearTimeout(_lpTimer.current)} onTouchMove={()=>clearTimeout(_lpTimer.current)}
                   style={{
                     color: isPlay?t.acc:isMem?t.gr:"inherit",
-                    background: isSel?t.acc+"08":isPlay?t.acc+"15":"transparent",
+                    background: isPlay?t.acc+"15":"transparent",
                     borderRadius:6, padding:"1px 3px",
                     cursor:"pointer", outline:"none",
                     WebkitTapHighlightColor:"transparent",
@@ -2738,50 +2747,9 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
                     : <TajwidSpan text={v.ar} enabled={showTj} tjc={tjc}/>
                   }
                 </span>
-                <AyahMarker n={v.n} color={isMem?t.gr:isPlay?t.acc:t.acc} onClick={e=>{e.stopPropagation();handleTap(v);}}/>
+                <AyahMarker n={v.n} color={isMem?t.gr:isPlay?t.acc:t.acc} onClick={e=>{e.stopPropagation();toggleChromeTap();}}/>
                 {showTr&&v.fr&&<div style={{display:"block",direction:"ltr",textAlign:"left",fontSize:".68rem",color:t.tx3,fontStyle:"italic",lineHeight:1.5,margin:"2px 0 6px",fontFamily:"sans-serif"}}>{v.fr.replace(/<[^>]*>/g,"")}</div>}
                   {showTf&&(()=>{const k=`${selS?.n}_${v.n}`;if(!tafsirData[k]&&loadTafsir)loadTafsir(selS?.n,v.n);return tafsirData[k]?<div style={{display:"block",direction:"ltr",textAlign:"left",fontSize:".72rem",color:"#5d4037",background:"#fff8e1",borderRadius:6,padding:"6px 8px",marginTop:4,fontFamily:"sans-serif",lineHeight:1.6,borderLeft:"3px solid #f9a825"}}><span style={{fontWeight:700,fontSize:".6rem",color:"#f9a825",display:"block",marginBottom:2}}>📖 Tafsir</span>{tafsirData[k]}</div>:null;})()}
-
-                {/* BARRE D'ACTIONS — apparaît au tap */}
-                {isSel&&(<>
-                  <span style={{display:"inline-flex",alignItems:"center",gap:0,background:t.s1,borderRadius:20,border:"1px solid "+t.b1,boxShadow:"0 2px 12px rgba(0,0,0,.12)",padding:"0 2px",margin:"0 4px",verticalAlign:"middle",direction:"ltr"}}
-                    onClick={e=>e.stopPropagation()}>
-                    {[
-                      {icon:"▶",tip:"Écouter",color:t.acc,fn:()=>{doPlay(v.n);setSelVerse(null);}},
-                      {icon:isMem?"✦":"○",tip:"Mémo",color:isMem?t.gr:t.tx3,fn:()=>{try{if(selS)toggleV(String(selS.n),String(v.n),v.ar||'');}catch(e){}setSelVerse(null);}},
-                      {icon:"❤",tip:"Favori",color:(selS&&isFav?isFav(String(selS.n),String(v.n)):false)?t.rd:t.tx3,fn:()=>{try{if(selS)toggleFav(String(selS.n),String(v.n));}catch(e){}setSelVerse(null);}},
-                      {icon:"✂",tip:"Partiel",color:t.pu,fn:()=>{setPartialV(pv=>pv?.n===v.n?null:v);}},
-                      {icon:"⋯",tip:"WBW",color:t.tx3,fn:()=>{if(wbwVerseRef)wbwVerseRef.current={sn:selS.n,vn:v.n};setWbwOpen&&setWbwOpen(true);setSelVerse(null);}},
-                    ].map(a=>(
-                      <button key={a.tip} onClick={a.fn} title={a.tip}
-                        style={{width:32,height:32,borderRadius:"50%",border:"none",background:"transparent",color:a.color,fontSize:".85rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",WebkitTapHighlightColor:"transparent",flexShrink:0}}>
-                        {a.icon}
-                      </button>
-                    ))}
-                  </span>
-                {partialV?.n===v.n&&(()=>{
-                  const w2=(v.ar||'').replace(/<[^>]*>/g,'').replace(/[﴿﴾]/g,'').trim().split(/\s+/).filter(Boolean);
-                  const si=partialV.s??0; const ei=partialV.e??Math.min(3,w2.length-1);
-                  const lo=Math.min(si,ei); const hi=Math.max(si,ei);
-                  return(
-                    <span style={{display:"inline-flex",flexDirection:"column",gap:5,background:t.pu+"12",borderRadius:12,border:"1px solid "+t.pu,padding:"8px 10px",margin:"2px 4px",verticalAlign:"middle",direction:"rtl",maxWidth:"100%"}} onClick={e=>e.stopPropagation()}>
-                      <span style={{fontSize:".58rem",color:t.pu,fontWeight:700,direction:"ltr"}}>✂ Sélectionne les mots · tap 1er puis dernier</span>
-                      <span style={{display:"flex",flexWrap:"wrap",gap:4,direction:"rtl",justifyContent:"flex-end"}}>
-                        {w2.map((w,wi)=>(
-                          <button key={wi} onClick={e=>{e.stopPropagation();setPartialV(p=>p.s===undefined?{...p,s:wi,e:wi}:{...p,e:wi});}}
-                            style={{padding:"3px 6px",borderRadius:8,fontFamily:"Amiri Quran,serif",fontSize:"1rem",cursor:"pointer",WebkitTapHighlightColor:"transparent",border:"1px solid "+(wi>=lo&&wi<=hi?t.pu:t.b1),background:wi>=lo&&wi<=hi?t.pu:"transparent",color:wi>=lo&&wi<=hi?"#fff":t.tx}}>
-                            {w}
-                          </button>
-                        ))}
-                      </span>
-                      <span style={{display:"flex",gap:6,direction:"ltr",alignItems:"center"}}>
-                        <button onClick={e=>{e.stopPropagation();setPartialV(p=>({n:p.n}));}} style={{padding:"3px 8px",borderRadius:10,border:"1px solid "+t.b1,background:"transparent",color:t.tx3,fontSize:".6rem",cursor:"pointer"}}>Réinitialiser</button>
-                        <button onClick={e=>{e.stopPropagation();doPlayPartial&&doPlayPartial(v.n,lo,hi,w2.length);setPartialV(null);setSelVerse(null);}} style={{padding:"4px 12px",borderRadius:20,border:"none",background:t.pu,color:"#fff",fontSize:".7rem",cursor:"pointer",fontWeight:700,marginLeft:"auto"}}>▶ Lire ces mots</button>
-                      </span>
-                    </span>
-                  );
-                })()}
-                </>)}
               </React.Fragment>
             );
           })}
@@ -2852,6 +2820,8 @@ const [authError, setAuthError] = useState("");
   const {role,setUserRole} = useRole(user?.id);
   const [roleSaving,setRoleSaving]=useState(false);
   const {classes:myTeacherClasses} = useTeacherClasses(user?.id);
+  const {assignments:myAssignments} = useStudentAssignments(user?.id);
+  const pendingAssignments=useMemo(()=>myAssignments.filter(a=>!a.completed),[myAssignments]);
   const [scheduleView,setScheduleView]=useState(null); // null = auto (suit `role`), sinon override manuel "teacher"|"student"
   const {displayName,updateDisplayName}=useMyProfile(user?.id);
   const [nameEdit,setNameEdit]=useState("");
@@ -4950,6 +4920,7 @@ return (
                 {!(hist[today()]||0)&&(<div style={{marginTop:7,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${t.bl}15`,borderRadius:8,border:`1px solid ${t.bl}30`,cursor:"pointer"}} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>sPct(x)<100);if(s)doSelect(s);}}><div style={{width:6,height:6,borderRadius:"50%",background:t.bl,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".63rem",color:t.bl,fontWeight:600,flex:1}}>Aucune mémorisation aujourd'hui — on commence ?</span><span style={{fontSize:".58rem",color:t.bl,opacity:.7}}>→</span></div>)}
                 {spacedDue.length>0&&(<div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${t.rd}15`,borderRadius:8,border:`1px solid ${t.rd}30`,cursor:"pointer"}} onClick={()=>setPage("pages")}><div style={{width:6,height:6,borderRadius:"50%",background:t.rd,animation:"pulse 1.5s infinite"}}/><span style={{fontSize:".63rem",color:t.rd,fontWeight:600,flex:1}}>{spacedDue.length} verset{spacedDue.length>1?"s":""} à réviser aujourd'hui</span><span style={{fontSize:".58rem",color:t.rd,opacity:.7}}>Voir →</span></div>)}
                 {bookmark&&(<div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:`${acc}10`,borderRadius:8,border:`1px solid ${acc}25`,cursor:"pointer"}} onClick={()=>{setPage("quran");const s=SURAHS.find(x=>x.n===bookmark.sn);if(s)doSelect(s);}}><span style={{fontSize:".7rem",color:acc}}>◈</span><span style={{fontSize:".63rem",color:t.tx,fontWeight:600,flex:1}}>Reprendre : {bookmark.name}</span><span style={{fontSize:".58rem",color:t.tx3}}>→</span></div>)}
+                {pendingAssignments.length>0&&(<div style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"5px 10px",background:"#9c27b015",borderRadius:8,border:"1px solid #9c27b030",cursor:"pointer"}} onClick={()=>setPage("join-class")}><span style={{fontSize:".7rem"}}>📝</span><span style={{fontSize:".63rem",color:"#9c27b0",fontWeight:600,flex:1}}>{pendingAssignments.length} devoir{pendingAssignments.length>1?"s":""} de ton prof à faire</span><span style={{fontSize:".58rem",color:"#9c27b0",opacity:.7}}>Voir →</span></div>)}
                 {/* Streak */}
                 {false&&(<div onClick={()=>setPage("stats")} style={{marginTop:6,display:"flex",alignItems:"center",gap:8,padding:"6px 10px",background:"rgba(249,115,22,.08)",borderRadius:9,border:"1px solid rgba(249,115,22,.2)",cursor:"pointer"}}><span style={{fontSize:"1.1rem"}}>🔥</span><span style={{fontSize:".7rem",fontWeight:700,color:"#f97316",flex:1}}>{memStreak} jour{memStreak>1?"s":""} de suite</span><span style={{fontSize:".58rem",color:"#f97316",opacity:.7}}>Stats →</span></div>)}
               </div>
@@ -6729,7 +6700,7 @@ return (
 
         {/* SETTINGS */}
         {page==="teacher"&&(user?<TeacherDashboard user={user} t={t} acc={t.acc} setPage={setPage}/>:<LoginRequiredScreen t={t} acc={t.acc} label="L'espace Enseignant" onLogin={()=>setShowAuthModal(true)}/>)}
-      {page==="join-class"&&(user?<JoinClass user={user} t={t} acc={t.acc} setPage={setPage} onJoined={()=>setPage("home")}/>:<LoginRequiredScreen t={t} acc={t.acc} label="Rejoindre une classe" onLogin={()=>setShowAuthModal(true)}/>)}
+      {page==="join-class"&&(user?<JoinClass user={user} t={t} acc={t.acc} setPage={setPage} onJoined={()=>setPage("home")} onOpenSurah={sn=>{const s=SURAHS.find(x=>x.n===sn);if(s){doSelect(s);setPage("quran");}}}/>:<LoginRequiredScreen t={t} acc={t.acc} label="Rejoindre une classe" onLogin={()=>setShowAuthModal(true)}/>)}
       {page==="schedule"&&(user?(()=>{
         const effectiveView=scheduleView||(role==="teacher"?"teacher":"student");
         const canSwitch=myTeacherClasses.length>0;
@@ -7353,7 +7324,7 @@ return (
           <div style={{fontSize:".6rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginBottom:12,fontWeight:700}}>Plus</div>
           <div style={{display:"flex",flexWrap:"wrap",gap:10}}>
             {[
-              {id:"pages",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,label:"Révision",badge:spacedDue.length},
+              {id:"pages",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M19.938 10.5a4 4 0 0 1 .585.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M19.967 17.484A4 4 0 0 1 18 18"/></svg>,label:"Révision",badge:spacedDue.length},
               {id:"khatma",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,label:"Khatma"},
               {id:"quiz",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,label:"Quiz"},
               {id:"stats",icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>,label:"Stats"},

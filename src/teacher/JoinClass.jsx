@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useJoinClass, useStudentClasses, useProfiles } from './useTeacher.js';
+import StudentAssignments from './StudentAssignments.jsx';
 
-export default function JoinClass({ user, t, acc, onJoined, setPage }) {
+export default function JoinClass({ user, t, acc, onJoined, setPage, onOpenSurah }) {
   const { joinByCode } = useJoinClass(user?.id);
   const { classes, loading } = useStudentClasses(user?.id);
   const teacherProfiles = useProfiles(classes.map(c => c?.teacher_id));
@@ -77,6 +78,10 @@ export default function JoinClass({ user, t, acc, onJoined, setPage }) {
             </button>
           ))}
         </div>
+      )}
+
+      {!loading && classes.length > 0 && (
+        <StudentAssignments userId={user?.id} t={t} acc={acc} onOpenSurah={onOpenSurah} />
       )}
     </div>
   );
