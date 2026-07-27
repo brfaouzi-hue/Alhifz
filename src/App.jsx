@@ -2498,42 +2498,30 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
     };
   },[fullPage,verseJuzHizb,selS]);
 
-  // Une vraie page de Mushaf a un nombre de lignes fixe (15) et le texte est
-  // toujours composé pour remplir exactement la page — nos pages courtes (peu de
-  // versets) laissaient donc un grand vide en bas à taille de police fixe. On
-  // agrandit le texte pour qu'il occupe mieux la page quand il tient largement
-  // dedans, et on centre verticalement le résultat.
+  // Une vraie page de Mushaf garde une taille de police CONSTANTE quel que soit
+  // le nombre de versets qu'elle contient — une page courte (Fatiha, 1ère page
+  // d'Al-Baqara…) laisse juste du blanc en bas, elle n'agrandit jamais son
+  // texte pour "remplir" la page. On ne fait donc plus jamais grossir le texte
+  // au-delà de la taille réglée par l'utilisateur (arabicSize) ; en plein écran
+  // on autorise seulement un RÉTRÉCISSEMENT si une page a exceptionnellement
+  // besoin de plus de place que le cadre n'en offre, pour éviter le scroll.
   const pageContainerRef=React.useRef(null);
   const pageTextRef=React.useRef(null);
   const [fitScale,setFitScale]=React.useState(1);
   const fitAttempts=React.useRef(0);
-  const fitBounds=React.useRef({lo:0.4,hi:3.6});
-  React.useLayoutEffect(()=>{setFitScale(1);fitAttempts.current=0;fitBounds.current={lo:0.4,hi:3.6};},[curPage,arabicSize,immersive]);
+  const fitBounds=React.useRef({lo:0.4,hi:1});
+  React.useLayoutEffect(()=>{setFitScale(1);fitAttempts.current=0;fitBounds.current={lo:0.4,hi:1};},[curPage,arabicSize,immersive]);
   React.useLayoutEffect(()=>{
+    if(!immersive)return; // mode carte intégré : toujours la taille normale, le scroll gère les pages longues
     const container=pageContainerRef.current,textEl=pageTextRef.current;
     if(!container||!textEl)return;
-    const availH=container.clientHeight-48,neededH=textEl.scrollHeight; // 48 = padding vertical du conteneur (24+24)
+    const padV=68; // padding vertical du conteneur en plein écran (44 haut + 24 bas)
+    const availH=container.clientHeight-padV,neededH=textEl.scrollHeight;
     if(!availH||!neededH)return;
-    if(!immersive){
-      // Mode carte intégré : on agrandit seulement si le texte tient largement
-      // (jamais de scroll requis dans ce mode, donc pas besoin de rétrécir).
-      if(neededH<availH*0.88){
-        const target=Math.min(1.9,(availH*0.94)/neededH);
-        if(target-fitScale>0.03)setFitScale(target);
-      }
-      return;
-    }
-    // Mode plein écran : une vraie page de Mushaf n'a jamais besoin de défiler —
-    // on vise un ajustement exact (agrandir OU rétrécir) pour que le texte
-    // remplisse le cadre pile, sans blanc en bas ni coupure. La hauteur du texte
-    // n'est PAS linéaire avec l'échelle (un agrandissement peut faire déborder
-    // un mot sur une ligne de plus, changeant la hauteur par paliers) — un pas
-    // "proportionnel" unique divergeait donc facilement. On procède par
-    // dichotomie sur [lo,hi] (fits ? lo=scale : hi=scale), qui converge de façon
-    // fiable quel que soit le profil de la fonction tant qu'elle est monotone.
     if(fitAttempts.current>=11)return;
-    const b=fitBounds.current;
     const fits=neededH<=availH*0.97;
+    if(fitScale>=1&&fits)return; // taille normale et ça rentre déjà : rien à faire
+    const b=fitBounds.current;
     if(fits)b.lo=fitScale; else b.hi=fitScale;
     if(b.hi-b.lo<0.02){
       if(Math.abs(fitScale-b.lo)>0.01){fitAttempts.current=999;setFitScale(b.lo);}
@@ -2702,7 +2690,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
       {/* Texte en flux continu — le wrapper porte la perspective 3D, pageContainerRef
           porte la rotation (tournage de page) sans perturber le calcul de fitScale */}
       <div style={{flex:"1 1 0%",minHeight:0,position:"relative",overflow:"hidden",perspective:1400}}>
-      <div ref={pageContainerRef} style={{height:"100%",overflowY:"auto",minWidth:0,width:"100%",boxSizing:"border-box",contain:"layout",padding:"24px 20px",WebkitOverflowScrolling:"touch",display:"flex",flexDirection:"column",justifyContent:fitScale>1.03?"center":"flex-start",backfaceVisibility:"hidden",willChange:"transform",background:"#fff"}} onClick={e=>{e.stopPropagation();if(immersive&&onToggleChrome)onToggleChrome();}}>
+      <div ref={pageContainerRef} style={{height:"100%",overflowY:"auto",minWidth:0,width:"100%",boxSizing:"border-box",contain:"layout",padding:immersive?"44px 20px 24px":"24px 20px",WebkitOverflowScrolling:"touch",display:"flex",flexDirection:"column",justifyContent:"flex-start",backfaceVisibility:"hidden",willChange:"transform",background:"#fff"}} onClick={e=>{e.stopPropagation();if(immersive&&onToggleChrome)onToggleChrome();}}>
         {/* Le papier de la page reste toujours blanc/ivoire, quel que soit le thème
             de l'app — l'encre du texte doit donc rester foncée fixe (#1c1208),
             pas t.tx (clair en thème sombre → texte invisible sur papier clair). */}
