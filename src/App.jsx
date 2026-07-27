@@ -4579,20 +4579,27 @@ return (
               </div>
             )}
             {aiPlanResult&&(
-              <div style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column",gap:10}}>
-                <div style={{padding:"12px 14px",background:t.s2,borderRadius:10,border:`1px solid ${t.b1}`,fontSize:".75rem",color:t.tx,lineHeight:1.8,whiteSpace:"pre-wrap",fontFamily:"DM Sans,sans-serif"}}>
-                  {aiPlanResult}
-                </div>
+              <>
+                {/* "Adopter" hors de la zone qui scrolle : le texte du plan est
+                    long (plusieurs paragraphes), ce bouton se retrouvait
+                    enterré tout en bas — invisible sans scroller jusqu'au
+                    bout, donnant l'impression que "ça ne s'ajoute pas au
+                    planning" alors que ça fonctionnait très bien. */}
                 {aiPlanStructured&&(
-                  <button onClick={adoptProgram} style={{width:"100%",padding:"11px",background:`linear-gradient(135deg,${t.gr},#2e7d32)`,border:"none",borderRadius:8,color:"#fff",fontSize:".8rem",fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+                  <button onClick={adoptProgram} style={{width:"100%",padding:"12px",background:`linear-gradient(135deg,${t.gr},#2e7d32)`,border:"none",borderRadius:10,color:"#fff",fontSize:".82rem",fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,flexShrink:0,boxShadow:`0 2px 12px ${t.gr}44`}}>
                     📅 Adopter ce plan dans Planning
                   </button>
                 )}
-                <div style={{display:"flex",gap:8}}>
+                <div style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column",gap:10,minHeight:0}}>
+                  <div style={{padding:"12px 14px",background:t.s2,borderRadius:10,border:`1px solid ${t.b1}`,fontSize:".75rem",color:t.tx,lineHeight:1.8,whiteSpace:"pre-wrap",fontFamily:"DM Sans,sans-serif"}}>
+                    {aiPlanResult}
+                  </div>
+                </div>
+                <div style={{display:"flex",gap:8,flexShrink:0}}>
                   <button onClick={()=>{navigator.clipboard?.writeText(aiPlanResult);}} style={{flex:1,padding:"9px",background:`${t.acc}18`,border:`1px solid ${t.acc}`,borderRadius:8,color:t.acc,fontSize:".75rem",cursor:"pointer",fontWeight:600}}>Copier le plan</button>
                   <button onClick={()=>{setAiPlanResult("");setAiPlanStructured(null);}} style={{flex:1,padding:"9px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:8,color:t.tx2,fontSize:".75rem",cursor:"pointer"}}>Nouveau plan</button>
                 </div>
-              </div>
+              </>
             )}
           </div>
         </div>
