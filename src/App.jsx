@@ -2868,7 +2868,14 @@ const [authError, setAuthError] = useState("");
   const [showTutorial,setShowTutorial]=useState(false);
   const [tutorialPage,setTutorialPage]=useState(0);
   const [onboardDone,setOnboardDone]=useState(()=>ld("qonboard",false));
-  const [showOnboard,setShowOnboard]=useState(()=>!ld("qonboard",false));
+  // Ce carrousel n'a jamais été monté dans le JSX (voir plus bas) — il ne
+  // sert donc en pratique QUE de replay manuel depuis Réglages, jamais d'écran
+  // de premier lancement (déjà couvert par l'écran "setup"). showOnboard doit
+  // donc démarrer à false, sinon vu que qonboard n'a jamais pu être marqué
+  // "true" (le bouton onDone n'ayant jamais pu être atteint), TOUS les
+  // utilisateurs existants le verraient apparaître au prochain chargement dès
+  // qu'on le monte enfin.
+  const [showOnboard,setShowOnboard]=useState(false);
   const [versetDuJourDismissed,setVersetDuJourDismissed]=useState(()=>ld("qvdjdis","")===today());
   const [showPage,setShowPage]=useState(false);
   const [mushafPage,setMushafPage]=useState(()=>ld("qmushaf_bookmark",1));
@@ -4650,6 +4657,13 @@ return (
       )}
 
       {/* ══ ONBOARDING ══ */}
+      {showOnboard&&(
+        <OnboardModal t={t} acc={acc} tn={tn}
+          onDone={()=>{setShowOnboard(false);setOnboardDone(true);sv("qonboard",true);}}
+          onSkip={()=>setShowOnboard(false)}
+          onTutorial={()=>{setShowOnboard(false);setShowTutorial(true);setTutorialPage(0);}}
+        />
+      )}
 
       {/* ══ TUTORIEL COMPLET ══ */}
       {showTutorial&&(
@@ -6807,7 +6821,18 @@ return (
                     {roleSaving?"…":role==="teacher"?"Activé":"Activer"}
                   </button>
                 </div>
-                <button onClick={()=>supabase.auth.signOut()} style={{width:"100%",padding:"13px",background:"transparent",border:`1px solid ${t.rd}55`,borderRadius:12,color:t.rd,fontWeight:700,fontSize:".82rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,transition:"background .2s"}} onMouseEnter={e=>e.currentTarget.style.background=`${t.rd}0a`} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                <button onClick={async()=>{
+                  // Rien n'indiquait visuellement qu'une déconnexion avait eu
+                  // lieu (la section Compte reste affichée à l'identique tant
+                  // qu'on ne quitte pas Réglages) — d'où l'impression que
+                  // "rien ne se passe". On attend le résultat, on affiche un
+                  // toast dans les deux cas, et on ramène vers l'accueil pour
+                  // un changement visible immédiat.
+                  const{error}=await supabase.auth.signOut();
+                  if(error){setToastMsg("Erreur — réessaie");return;}
+                  setToastMsg("Déconnecté ✓");
+                  setPage("home");
+                }} style={{width:"100%",padding:"13px",background:"transparent",border:`1px solid ${t.rd}55`,borderRadius:12,color:t.rd,fontWeight:700,fontSize:".82rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,transition:"background .2s"}} onMouseEnter={e=>e.currentTarget.style.background=`${t.rd}0a`} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                   Se déconnecter
                 </button>
