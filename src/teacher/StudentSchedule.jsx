@@ -34,7 +34,7 @@ function hoursUntil(dateStr, timeStr) {
   return (dt.getTime() - Date.now()) / 3600000;
 }
 
-export default function StudentSchedule({ userId, t, acc }) {
+export default function StudentSchedule({ userId, t, acc, myProgram, liveGoal, onDeleteProgram, onCreateProgram, personalEvents, onAddEvent, onRemoveEvent }) {
   const { slots, loading: slotsLoading, getBookingsForSlot } = useStudentSlots(userId);
   const { bookings, loading: bookingsLoading, createBooking, cancelBooking } = useStudentBookings(userId);
 
@@ -45,6 +45,8 @@ export default function StudentSchedule({ userId, t, acc }) {
   const [note, setNote] = useState('');
   const [booking, setBookingBusy] = useState(false);
   const [bookError, setBookError] = useState('');
+  const [eventComposer, setEventComposer] = useState(null); // {date} quand ouvert
+  const [eventForm, setEventForm] = useState({ time: '', text: '' });
 
   const weekStart = useMemo(() => {
     const base = getMonday(new Date());
@@ -174,6 +176,8 @@ export default function StudentSchedule({ userId, t, acc }) {
         {DAYS.map((day, i) => {
           const dateStr = weekDates[i];
           const dayCells = cells.filter(c => c.colIdx === i);
+          const hasPersonal = (personalEvents || []).some(e => e.date === dateStr);
+          const hasRevision = myProgram && dateStr >= myProgram.startDate && dateStr <= myProgram.endDate;
           const isToday = fmtDateISO(new Date()) === dateStr;
           const sel = selectedDay === i;
           return (
@@ -184,7 +188,7 @@ export default function StudentSchedule({ userId, t, acc }) {
             }}>
               <span style={{ fontSize: '.6rem', fontWeight: 700, color: sel ? '#fff' : t.tx2 }}>{day.label}</span>
               <span style={{ fontSize: '.82rem', fontWeight: 800, color: sel ? '#fff' : (isToday ? acc : t.tx) }}>{new Date(dateStr + 'T00:00:00').getDate()}</span>
-              {dayCells.length > 0 && <div style={{ width: 4, height: 4, borderRadius: '50%', background: sel ? '#fff' : acc, position: 'absolute', bottom: 5 }} />}
+              {(dayCells.length > 0 || hasPersonal || hasRevision) && <div style={{ width: 4, height: 4, borderRadius: '50%', background: sel ? '#fff' : acc, position: 'absolute', bottom: 5 }} />}
             </button>
           );
         })}
@@ -192,30 +196,91 @@ export default function StudentSchedule({ userId, t, acc }) {
 
       <div style={{ padding: '0 16px' }}>
         {(() => {
+          const selectedDate = weekDates[selectedDay];
           const dayCells = cells.filter(c => c.colIdx === selectedDay).sort((a, b) => a.slot.start_time.localeCompare(b.slot.start_time));
-          if (dayCells.length === 0) {
-            return <div style={{ textAlign: 'center', color: t.tx3, padding: '30px 10px', fontSize: '.78rem', background: t.s1, borderRadius: 14, border: '1px solid ' + t.b1 }}>Aucun créneau ce jour-là</div>;
-          }
-          return dayCells.map(cell => {
-            const style = classifyCell(cell);
-            const disabled = style.emoji === '⚫' && !myBookingFor(cell.slot.id, cell.date);
-            const already = myBookingFor(cell.slot.id, cell.date);
-            return (
-              <button key={cell.slot.id + cell.date} onClick={() => openBooking(cell)} disabled={disabled || !!already}
-                style={{
-                  width: '100%', display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left',
-                  padding: '12px 14px', borderRadius: 14, marginBottom: 8, border: '1px solid ' + t.b1,
-                  background: t.s1, cursor: (disabled || already) ? 'default' : 'pointer',
-                }}>
-                <div style={{ width: 3, alignSelf: 'stretch', borderRadius: 2, background: style.bg, flexShrink: 0 }} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '.8rem', fontWeight: 700, color: t.tx }}>{(cell.slot.start_time || '').slice(0, 5)} · {cell.slot.title || (cell.slot.max_students > 1 ? 'Cours collectif' : 'Cours individuel')}</div>
-                  <div style={{ fontSize: '.66rem', color: t.tx3, marginTop: 2 }}>{cell.slot.duration_min} min{cell.slot.level && ` · ${LEVEL_LABELS[cell.slot.level] || cell.slot.level}`}</div>
+          const dayPersonalEvents = (personalEvents || []).filter(e => e.date === selectedDate);
+          const untimedEvents = dayPersonalEvents.filter(e => !e.time);
+          const timedItems = [
+            ...dayCells.map(cell => ({ kind: 'slot', time: cell.slot.start_time, cell })),
+            ...dayPersonalEvents.filter(e => e.time).map(ev => ({ kind: 'event', time: ev.time, ev })),
+          ].sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+          // Le programme de révision perso n'a jamais d'heure fixe (ce n'est pas
+          // un rendez-vous) — il tourne tant que la date sélectionnée tombe dans
+          // sa période, sur CHAQUE jour, pas juste "aujourd'hui".
+          const revisionActive = myProgram && selectedDate >= myProgram.startDate && selectedDate <= myProgram.endDate;
+          const isEmpty = !revisionActive && untimedEvents.length === 0 && timedItems.length === 0;
+
+          return (<>
+            {revisionActive && (() => {
+              const actual = liveGoal?.current ?? 0;
+              const remaining = Math.max(0, myProgram.total - actual);
+              const onTrack = actual >= Math.round(myProgram.startVerses + (myProgram.total - myProgram.startVerses) * (Math.max(0, Math.min(1, (Date.now() - new Date(myProgram.startDate)) / Math.max(1, new Date(myProgram.endDate) - new Date(myProgram.startDate))))));
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 14, marginBottom: 8, border: '1px dashed ' + (onTrack ? t.gr : '#fb8c00'), background: (onTrack ? t.gr : '#fb8c00') + '0c' }}>
+                  <span style={{ fontSize: '1rem', flexShrink: 0 }}>📖</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '.78rem', fontWeight: 700, color: t.tx }}>
+                      {remaining <= 0 ? 'Objectif atteint ! 🎉' : `À réviser : ~${myProgram.dailyPace} verset${myProgram.dailyPace > 1 ? 's' : ''}`}
+                    </div>
+                    <div style={{ fontSize: '.63rem', color: t.tx3 }}>🎯 {myProgram.goalLabel} · sans horaire fixe</div>
+                  </div>
+                  <button onClick={onDeleteProgram} title="Supprimer le programme" style={{ background: 'none', border: 'none', color: t.tx3, cursor: 'pointer', fontSize: '.7rem', flexShrink: 0 }}>✕</button>
                 </div>
-                <span style={{ fontSize: '.6rem', fontWeight: 700, color: style.bg, background: style.bg + '18', padding: '4px 9px', borderRadius: 20, flexShrink: 0, whiteSpace: 'nowrap' }}>{style.emoji} {style.label}</span>
+              );
+            })()}
+            {untimedEvents.map(ev => (
+              <div key={ev.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 14, marginBottom: 8, border: '1px solid ' + t.b1, background: t.s1 }}>
+                <span style={{ fontSize: '.6rem', fontWeight: 700, color: acc, background: acc + '18', padding: '4px 8px', borderRadius: 20, flexShrink: 0 }}>Toute la journée</span>
+                <div style={{ flex: 1, fontSize: '.78rem', color: t.tx, minWidth: 0 }}>{ev.text}</div>
+                <button onClick={() => onRemoveEvent(ev.id)} style={{ background: 'none', border: 'none', color: t.tx3, cursor: 'pointer', fontSize: '.7rem', flexShrink: 0 }}>✕</button>
+              </div>
+            ))}
+            {isEmpty && (
+              <div style={{ textAlign: 'center', color: t.tx3, padding: '30px 10px', fontSize: '.78rem', background: t.s1, borderRadius: 14, border: '1px solid ' + t.b1 }}>Rien de prévu ce jour-là</div>
+            )}
+            {timedItems.map(item => {
+              if (item.kind === 'event') {
+                const ev = item.ev;
+                return (
+                  <div key={ev.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 14, marginBottom: 8, border: '1px solid ' + t.b1, background: t.s1 }}>
+                    <div style={{ width: 3, alignSelf: 'stretch', borderRadius: 2, background: acc, flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '.8rem', fontWeight: 700, color: t.tx }}>{ev.time} · {ev.text}</div>
+                    </div>
+                    <button onClick={() => onRemoveEvent(ev.id)} style={{ background: 'none', border: 'none', color: t.tx3, cursor: 'pointer', fontSize: '.7rem', flexShrink: 0 }}>✕</button>
+                  </div>
+                );
+              }
+              const cell = item.cell;
+              const style = classifyCell(cell);
+              const disabled = style.emoji === '⚫' && !myBookingFor(cell.slot.id, cell.date);
+              const already = myBookingFor(cell.slot.id, cell.date);
+              return (
+                <button key={cell.slot.id + cell.date} onClick={() => openBooking(cell)} disabled={disabled || !!already}
+                  style={{
+                    width: '100%', display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left',
+                    padding: '12px 14px', borderRadius: 14, marginBottom: 8, border: '1px solid ' + t.b1,
+                    background: t.s1, cursor: (disabled || already) ? 'default' : 'pointer',
+                  }}>
+                  <div style={{ width: 3, alignSelf: 'stretch', borderRadius: 2, background: style.bg, flexShrink: 0 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '.8rem', fontWeight: 700, color: t.tx }}>{(cell.slot.start_time || '').slice(0, 5)} · {cell.slot.title || (cell.slot.max_students > 1 ? 'Cours collectif' : 'Cours individuel')}</div>
+                    <div style={{ fontSize: '.66rem', color: t.tx3, marginTop: 2 }}>{cell.slot.duration_min} min{cell.slot.level && ` · ${LEVEL_LABELS[cell.slot.level] || cell.slot.level}`}</div>
+                  </div>
+                  <span style={{ fontSize: '.6rem', fontWeight: 700, color: style.bg, background: style.bg + '18', padding: '4px 9px', borderRadius: 20, flexShrink: 0, whiteSpace: 'nowrap' }}>{style.emoji} {style.label}</span>
+                </button>
+              );
+            })}
+            <button onClick={() => { setEventForm({ time: '', text: '' }); setEventComposer({ date: selectedDate }); }}
+              style={{ width: '100%', padding: '10px', borderRadius: 12, border: '1.5px dashed ' + t.b2, background: 'transparent', color: t.tx2, fontSize: '.72rem', fontWeight: 700, cursor: 'pointer', marginBottom: 8 }}>
+              + Ajouter à ce jour
+            </button>
+            {!myProgram && (
+              <button onClick={onCreateProgram} style={{ width: '100%', padding: '9px', borderRadius: 12, border: 'none', background: `${acc}12`, color: acc, fontSize: '.7rem', fontWeight: 700, cursor: 'pointer', marginBottom: 8 }}>
+                ✦ Créer mon programme de révision
               </button>
-            );
-          });
+            )}
+          </>);
         })()}
       </div>
 
@@ -294,6 +359,34 @@ export default function StudentSchedule({ userId, t, acc }) {
               <button className="tbtn" style={{ flex: 1 }} onClick={() => setBookModal(null)}>Annuler</button>
               <button className="mbtn" style={{ flex: 2, opacity: booking ? .7 : 1 }} disabled={booking} onClick={confirmBooking}>
                 {booking ? 'Réservation...' : 'Confirmer la réservation'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {eventComposer && (
+        <div className="overlay" onClick={() => setEventComposer(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 420 }}>
+            <h2 style={{ fontFamily: 'Amiri,serif', color: acc, marginBottom: 4 }}>Ajouter au planning</h2>
+            <p style={{ fontSize: '.72rem', color: t.tx3, marginBottom: 14 }}>{fmtDateFR(eventComposer.date)}</p>
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: '.62rem', color: t.tx3, marginBottom: 4 }}>Heure (optionnel — laisse vide pour "toute la journée")</div>
+              <input type="time" value={eventForm.time} onChange={e => setEventForm(p => ({ ...p, time: e.target.value }))}
+                style={{ width: '100%', padding: '9px 12px', borderRadius: 10, border: '1px solid ' + t.b1, background: t.navBg, color: t.tx, fontSize: '.8rem', boxSizing: 'border-box' }} />
+            </div>
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: '.62rem', color: t.tx3, marginBottom: 4 }}>Quoi ?</div>
+              <input autoFocus value={eventForm.text} onChange={e => setEventForm(p => ({ ...p, text: e.target.value }))}
+                onKeyDown={e => { if (e.key === 'Enter' && eventForm.text.trim()) { onAddEvent(eventComposer.date, eventForm.time, eventForm.text); setEventComposer(null); } }}
+                placeholder="Ex: Lire le hadith de Muslim" maxLength={120}
+                style={{ width: '100%', padding: '9px 12px', borderRadius: 10, border: '1px solid ' + t.b1, background: t.navBg, color: t.tx, fontSize: '.8rem', boxSizing: 'border-box' }} />
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button className="tbtn" style={{ flex: 1 }} onClick={() => setEventComposer(null)}>Annuler</button>
+              <button className="mbtn" style={{ flex: 2 }} disabled={!eventForm.text.trim()}
+                onClick={() => { onAddEvent(eventComposer.date, eventForm.time, eventForm.text); setEventComposer(null); }}>
+                Ajouter
               </button>
             </div>
           </div>

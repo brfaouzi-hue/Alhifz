@@ -3085,6 +3085,18 @@ const partialPlayRef=useRef(null); // {stopAt: ratio 0-1}
   // (preset:juz30/juz29/halfquran/fullquran, ou surah_N/juz_N/hizb_N) pour
   // recalculer la progression EN DIRECT depuis mem plutôt que sur un instantané figé.
   const [myProgram,setMyProgram]=useState(()=>ld("qmyprogram",null));
+  // Événements personnels du planning (façon Outlook) : une date, une heure
+  // optionnelle, un texte libre — indépendant des créneaux profs/élèves et du
+  // programme de révision, pour tout ce qu'on veut juste se noter à une date.
+  const [personalEvents,setPersonalEvents]=useState(()=>ld("qcalevents",[]));
+  const addPersonalEvent=(date,time,text)=>{
+    if(!date||!text?.trim())return;
+    const ev={id:Date.now()+"_"+Math.random().toString(36).slice(2),date,time:time||null,text:text.trim()};
+    setPersonalEvents(p=>{const n=[...p,ev];sv("qcalevents",n);return n;});
+  };
+  const removePersonalEvent=id=>{
+    setPersonalEvents(p=>{const n=p.filter(e=>e.id!==id);sv("qcalevents",n);return n;});
+  };
   const [ramadanTheme,setRamadanTheme]=useState(false);
   const [calligAnim,setCalligAnim]=useState(null); // {ar, x, y} — animation sur mémorisation // always false on load — user toggles manually
   const [pageRead,setPageRead]=useState(()=>ld("qpages",{}));
@@ -6938,64 +6950,14 @@ return (
                 ))}
               </div>
             )}
-            {effectiveView==="teacher"?<TeacherSchedule userId={user?.id} t={t} acc={t.acc}/>:<StudentSchedule userId={user?.id} t={t} acc={t.acc}/>}
-
-            {/* Mon Programme — même page Planning, pas un bloc à part : reprend
-                exactement le style "section" de StudentSchedule (label +
-                cartes), sans carte englobante ni séparateur, pour que ça se
-                lise comme une section de plus de la même liste. */}
-            <div style={{padding:"8px 16px"}}>
-              <div style={{fontSize:".68rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginBottom:8,fontWeight:700}}>Mon programme personnel</div>
-              {!myProgram?(
-                <div style={{textAlign:"center",color:t.tx3,padding:20,fontSize:".78rem",background:t.s1,borderRadius:12,border:`1px solid ${t.b1}`}}>
-                  Aucun programme actif.<br/>
-                  <button onClick={()=>setShowAIPlan(true)} style={{marginTop:10,padding:"8px 18px",borderRadius:10,border:"none",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,color:"#fff",fontWeight:700,fontSize:".75rem",cursor:"pointer"}}>✦ Créer mon programme</button>
-                </div>
-              ):(()=>{
-                const startD=new Date(myProgram.startDate),endD=new Date(myProgram.endDate);
-                const totalDays=Math.max(1,(endD-startD)/86400000);
-                const daysElapsed=Math.max(0,Math.min(totalDays,(Date.now()-startD)/86400000));
-                const daysLeft=Math.max(0,Math.ceil((endD-Date.now())/86400000));
-                const expected=Math.round(myProgram.startVerses+(myProgram.total-myProgram.startVerses)*(daysElapsed/totalDays));
-                const actual=liveGoal.current;
-                const onTrack=actual>=expected;
-                const pct=Math.min(100,Math.round((actual/Math.max(1,myProgram.total))*100));
-                const remaining=Math.max(0,myProgram.total-actual);
-                return(<>
-                  <div style={{padding:"10px 12px",borderRadius:12,background:t.s1,border:`1px solid ${t.b1}`,marginBottom:8}}>
-                    <div style={{display:"flex",alignItems:"center",gap:10}}>
-                      <div style={{width:8,height:8,borderRadius:"50%",flexShrink:0,background:onTrack?t.gr:"#fb8c00"}}/>
-                      <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontSize:".75rem",fontWeight:700,color:t.tx}}>
-                          {remaining<=0?"Objectif atteint ! 🎉":`À réviser : vise ~${myProgram.dailyPace} verset${myProgram.dailyPace>1?"s":""} aujourd'hui`}
-                        </div>
-                        <div style={{fontSize:".64rem",color:t.tx3}}>🎯 {myProgram.goalLabel}{myProgram.approx?" (estimation)":""} · {daysLeft>0?`${daysLeft}j restants`:"Terminé"}</div>
-                      </div>
-                      <span style={{fontSize:".6rem",fontWeight:700,color:onTrack?t.gr:"#fb8c00"}}>{onTrack?"En avance":"En retard"}</span>
-                      <button onClick={()=>{setMyProgram(null);sv("qmyprogram",null);setToastMsg("Programme supprimé");}} style={{background:"none",border:"none",color:t.tx3,cursor:"pointer",fontSize:".7rem",flexShrink:0}}>✕</button>
-                    </div>
-                    <div style={{height:6,borderRadius:3,background:t.b1,overflow:"hidden",marginTop:8}}>
-                      <div style={{height:"100%",width:pct+"%",background:onTrack?t.gr:"#fb8c00",borderRadius:3,transition:"width .4s"}}/>
-                    </div>
-                    <div style={{fontSize:".62rem",color:t.tx3,marginTop:4}}>{actual} / {myProgram.total} versets · {startD.toLocaleDateString("fr-FR")} → {endD.toLocaleDateString("fr-FR")}</div>
-                  </div>
-                  <div style={{display:"flex",flexDirection:"column",gap:5,maxHeight:120,overflowY:"auto",padding:"2px 4px"}}>
-                    {myProgram.milestones.map(m=>{
-                      const passed=new Date(m.date)<=new Date();
-                      const met=actual>=m.cumulativeTarget;
-                      return(
-                        <div key={m.week} style={{display:"flex",alignItems:"center",gap:8,fontSize:".66rem"}}>
-                          <span style={{width:14,textAlign:"center",color:passed?(met?t.gr:"#e91e63"):t.tx3}}>{passed?(met?"✓":"✗"):"○"}</span>
-                          <span style={{color:t.tx3,flexShrink:0}}>{new Date(m.date).toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit"})}</span>
-                          <span style={{color:t.tx2,flex:1}}>Semaine {m.week}</span>
-                          <span style={{color:t.tx3}}>{m.cumulativeTarget}v</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </>);
-              })()}
-            </div>
+            {effectiveView==="teacher"
+              ?<TeacherSchedule userId={user?.id} t={t} acc={t.acc}/>
+              :<StudentSchedule userId={user?.id} t={t} acc={t.acc}
+                  myProgram={myProgram} liveGoal={liveGoal}
+                  onDeleteProgram={()=>{setMyProgram(null);sv("qmyprogram",null);setToastMsg("Programme supprimé");}}
+                  onCreateProgram={()=>setShowAIPlan(true)}
+                  personalEvents={personalEvents} onAddEvent={addPersonalEvent} onRemoveEvent={removePersonalEvent}
+                />}
           </div>
         );
       })():<LoginRequiredScreen t={t} acc={t.acc} label="Le planning" onLogin={()=>setShowAuthModal(true)}/>)}
