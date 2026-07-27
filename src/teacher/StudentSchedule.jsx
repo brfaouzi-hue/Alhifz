@@ -360,7 +360,7 @@ export default function StudentSchedule({ userId, t, acc, myProgram, liveGoal, o
             <div style={{ marginBottom: 14 }}>
               <div style={{ fontSize: '.62rem', color: t.tx3, marginBottom: 4 }}>Note pour le prof (optionnel)</div>
               <textarea value={note} onChange={e => setNote(e.target.value)} rows={2} placeholder="Ex: je débute la sourate Al-Baqara"
-                style={{ width: '100%', padding: '9px 12px', borderRadius: 10, border: '1px solid ' + t.b1, background: t.navBg, color: t.tx, fontSize: '.75rem', boxSizing: 'border-box', resize: 'vertical' }} />
+                style={{ width: '100%', padding: '9px 12px', borderRadius: 10, border: '1px solid ' + t.b1, background: t.navBg, color: t.tx, fontSize: 16, boxSizing: 'border-box', resize: 'vertical' }} />
             </div>
             {bookError && <div style={{ color: t.rd, fontSize: '.7rem', marginBottom: 10, textAlign: 'center' }}>{bookError}</div>}
             <div style={{ display: 'flex', gap: 8 }}>
@@ -380,15 +380,18 @@ export default function StudentSchedule({ userId, t, acc, myProgram, liveGoal, o
             <p style={{ fontSize: '.72rem', color: t.tx3, marginBottom: 14 }}>{fmtDateFR(eventComposer.date)}</p>
             <div style={{ marginBottom: 14 }}>
               <div style={{ fontSize: '.62rem', color: t.tx3, marginBottom: 4 }}>Heure (optionnel — laisse vide pour "toute la journée")</div>
+              {/* fontSize doit rester >= 16px : en dessous, Safari iOS zoome
+                  automatiquement toute la page au focus et ne dézoome pas
+                  toujours tout seul en sortant du champ. */}
               <input type="time" value={eventForm.time} onChange={e => setEventForm(p => ({ ...p, time: e.target.value }))}
-                style={{ width: '100%', padding: '9px 12px', borderRadius: 10, border: '1px solid ' + t.b1, background: t.navBg, color: t.tx, fontSize: '.8rem', boxSizing: 'border-box' }} />
+                style={{ width: '100%', padding: '9px 12px', borderRadius: 10, border: '1px solid ' + t.b1, background: t.navBg, color: t.tx, fontSize: 16, boxSizing: 'border-box' }} />
             </div>
             <div style={{ marginBottom: 14 }}>
               <div style={{ fontSize: '.62rem', color: t.tx3, marginBottom: 4 }}>Quoi ?</div>
               <input autoFocus value={eventForm.text} onChange={e => setEventForm(p => ({ ...p, text: e.target.value }))}
                 onKeyDown={e => { if (e.key === 'Enter' && eventForm.text.trim()) { onAddEvent(eventComposer.date, eventForm.time, eventForm.text); setEventComposer(null); } }}
                 placeholder="Ex: Lire le hadith de Muslim" maxLength={120}
-                style={{ width: '100%', padding: '9px 12px', borderRadius: 10, border: '1px solid ' + t.b1, background: t.navBg, color: t.tx, fontSize: '.8rem', boxSizing: 'border-box' }} />
+                style={{ width: '100%', padding: '9px 12px', borderRadius: 10, border: '1px solid ' + t.b1, background: t.navBg, color: t.tx, fontSize: 16, boxSizing: 'border-box' }} />
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               <button className="tbtn" style={{ flex: 1 }} onClick={() => setEventComposer(null)}>Annuler</button>
