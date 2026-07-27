@@ -1221,6 +1221,68 @@ const TUTORIAL_SECTIONS=[
       },
     ],
   },
+  {
+    id:"teacher",label:"Élève & Enseignant",icon:"🎓",color:"#0d9488",
+    steps:[
+      {
+        title:"Active le mode enseignant",
+        desc:"Dans Réglages → Compte, active «Mode enseignant». Tu peux alors créer une classe et obtenir un code à partager avec tes élèves — repasser élève ne supprime rien.",
+        mock:{
+          lines:[
+            {type:"header",text:"Réglages · Compte",sub:"Amal"},
+            {type:"select",label:"Mode enseignant · Activé ✓"},
+            {type:"tip",text:"Chaque classe génère un code unique à 6 caractères"},
+          ]
+        }
+      },
+      {
+        title:"Crée ta classe et suis tes élèves",
+        desc:"Dans l'espace Enseignant, crée une classe (ex: Halaqa du vendredi) et partage le code affiché. Tes élèves apparaissent dans ta liste dès qu'ils rejoignent, avec leur progression réelle.",
+        mock:{
+          lines:[
+            {type:"header",text:"Halaqa du vendredi",sub:"Code : X7K2P9"},
+            {type:"select",label:"📖 12 élèves · 3 inactifs"},
+            {type:"tip",text:"Tape sur un élève pour voir son détail : versets, sourates, dernière activité"},
+          ]
+        }
+      },
+      {
+        title:"Assigne des devoirs suivis automatiquement",
+        desc:"Crée un devoir (sourate + versets + date limite). Déplie-le pour voir qui l'a fait — la progression de chaque élève se calcule toute seule à partir de ce qu'il a mémorisé, rien à valider à la main.",
+        mock:{
+          lines:[
+            {type:"header",text:"Devoirs · Al-Baqara 1-10",sub:"Échéance : 30/08"},
+            {type:"select",label:"✓ Yasmine — fait"},
+            {type:"select",label:"· Bilal — pas commencé"},
+            {type:"tip",text:"Les retardataires remontent toujours en premier"},
+          ]
+        }
+      },
+      {
+        title:"Rejoins la classe de ton prof",
+        desc:"Élève : dans «Ma classe», entre le code à 6 caractères donné par ton enseignant. Ses devoirs et son planning de créneaux apparaissent directement dans l'app, avec une alerte sur l'accueil si l'échéance approche.",
+        mock:{
+          lines:[
+            {type:"header",text:"Rejoindre une classe"},
+            {type:"select",label:"Code : X7K2P9"},
+            {type:"tip",text:"⚠ Un devoir en retard ou proche de l'échéance se met en évidence"},
+          ]
+        }
+      },
+      {
+        title:"Planifie ta propre mémorisation",
+        desc:"Dans l'onglet Planning, «Mon Programme» génère un plan avec l'IA (objectif + délai + niveau) ou selon tes propres dates de début et de fin. Ta progression réelle est comparée à la cadence jour après jour, avec des jalons datés.",
+        mock:{
+          lines:[
+            {type:"header",text:"Mon Programme",sub:"Juz 30 · 45j restants"},
+            {type:"bar",label:"Progression",pct:38},
+            {type:"grid30",done:[1,2,3,4,5,6,7,8,9,10,11,12]},
+            {type:"tip",text:"Un signal apparaît dès que tu prends du retard sur ton objectif"},
+          ]
+        }
+      },
+    ],
+  },
 ];
 
 function TutorialModal({t,acc,tn,page,setPage,onClose}){
@@ -3015,6 +3077,14 @@ const partialPlayRef=useRef(null); // {stopAt: ratio 0-1}
   const [aiPlanLoading,setAiPlanLoading]=useState(false);
   const [aiPlanResult,setAiPlanResult]=useState("");
   const [aiPlanParams,setAiPlanParams]=useState({goal:"juz30",months:"3",level:"debutant",dailyTime:"20"});
+  const [planMode,setPlanMode]=useState("ai"); // "ai" (mois/niveau) ou "manual" (dates précises)
+  const [manualDates,setManualDates]=useState(()=>({start:today(),end:""}));
+  const [aiPlanStructured,setAiPlanStructured]=useState(null); // {goalKey,goalLabel,total,startVerses,startDate,endDate,dailyPace,milestones,approx}
+  // Programme de révision personnel — lié au générateur (IA ou dates manuelles),
+  // visible et suivi depuis l'onglet Planning. goalKey encode le type d'objectif
+  // (preset:juz30/juz29/halfquran/fullquran, ou surah_N/juz_N/hizb_N) pour
+  // recalculer la progression EN DIRECT depuis mem plutôt que sur un instantané figé.
+  const [myProgram,setMyProgram]=useState(()=>ld("qmyprogram",null));
   const [ramadanTheme,setRamadanTheme]=useState(false);
   const [calligAnim,setCalligAnim]=useState(null); // {ar, x, y} — animation sur mémorisation // always false on load — user toggles manually
   const [pageRead,setPageRead]=useState(()=>ld("qpages",{}));
@@ -3978,13 +4048,90 @@ const handleSetNewPassword=async(newPass)=>{
   const isMem=(sn,vn)=>!!(mem[String(sn)]?.[String(vn)]);
   const isFav=(sn,vn)=>favorites.some(f=>f.key===`${sn}_${vn}`);
   const saveNote=(sn,vn,text)=>{const k=`${sn}_${vn}`;if(text.trim())setNotes(p=>({...p,[k]:text.trim()}));else setNotes(p=>{const n={...p};delete n[k];return n;});setEditingNote(null);};
-  // Génération plan mémorisation via Anthropic API
+  // Résout l'objectif choisi (préréglage OU juz/sourate/hizb précis) en
+  // {key,label,total,current,approx} — recalculable en direct depuis mem.
+  // Avant, customGoal était affiché/sélectionnable dans l'UI mais jamais lu
+  // par le calcul (qui retombait silencieusement sur goalVerses[null] donc
+  // 6236 = Coran complet, quel que soit le juz/sourate/hizb choisi).
+  const resolveGoal=React.useCallback((goalId,customGoal)=>{
+    const goalVerses={juz30:564,juz29:1127,halfquran:3118,fullquran:6236};
+    const goalLabels={juz30:"Juz 30",juz29:"Juz 29-30",halfquran:"Demi-Coran",fullquran:"Coran complet"};
+    if(customGoal){
+      const[kind,idStr]=customGoal.split("_");const id=+idStr;
+      if(kind==="surah"){
+        const s=SURAHS.find(x=>x.n===id);
+        return{key:customGoal,label:s?.name||"Sourate",total:s?.v||0,current:s?sMem(s):0,approx:false};
+      }
+      // Juz/Hizb : pas de table de bornes exactes par verset dans l'app —
+      // estimation via les sourates dont le juz de départ correspond (les
+      // sourates courtes de fin de Coran s'alignent presque exactement sur
+      // les bornes de juz, l'approximation est marginale ailleurs).
+      if(kind==="juz"){
+        const inJuz=SURAHS.filter(s=>s.juz===id);
+        const total=inJuz.reduce((a,s)=>a+s.v,0)||Math.round(6236/30);
+        const current=inJuz.reduce((a,s)=>a+sMem(s),0);
+        return{key:customGoal,label:`Juz ${id}`,total,current,approx:true};
+      }
+      if(kind==="hizb"){
+        const total=Math.round(6236/60);
+        return{key:customGoal,label:`Hizb ${id}`,total,current:0,approx:true};
+      }
+    }
+    return{key:goalId,label:goalLabels[goalId]||goalId,total:goalVerses[goalId]||6236,current:totalMem,approx:false};
+  },[totalMem,sMem]);
+
+  // Jalons hebdomadaires à VRAIES dates calendaires entre startDate et
+  // endDate, avec la cible cumulée attendue à chaque jalon — c'est ce qui
+  // permet d'afficher "en avance/en retard sur ton objectif" dans Planning.
+  const buildMilestones=(startDate,endDate,current,total)=>{
+    const start=new Date(startDate),end=new Date(endDate);
+    const totalDays=Math.max(1,Math.round((end-start)/86400000));
+    const remaining=Math.max(0,total-current);
+    const weeks=Math.max(1,Math.ceil(totalDays/7));
+    const milestones=[];
+    for(let w=1;w<=weeks;w++){
+      const d=new Date(start.getTime()+Math.min(w*7,totalDays)*86400000);
+      const cumulativeTarget=current+Math.round(remaining*Math.min(1,(w*7)/totalDays));
+      milestones.push({week:w,date:d.toISOString().slice(0,10),cumulativeTarget});
+    }
+    return milestones;
+  };
+
+  const adoptProgram=()=>{
+    if(!aiPlanStructured)return;
+    const program={...aiPlanStructured,createdAt:new Date().toISOString()};
+    setMyProgram(program);sv("qmyprogram",program);
+    setToastMsg("Programme ajouté à ton planning ✓");
+    setShowAIPlan(false);
+  };
+
+  const generateManualPlan=()=>{
+    if(!manualDates.end){setToastMsg("Choisis une date de fin");return;}
+    const goal=resolveGoal(aiPlanParams.goal,aiPlanParams.customGoal);
+    const start=manualDates.start,end=manualDates.end;
+    if(new Date(end)<=new Date(start)){setToastMsg("La date de fin doit être après le début");return;}
+    const totalDays=Math.max(1,Math.round((new Date(end)-new Date(start))/86400000));
+    const remaining=Math.max(0,goal.total-goal.current);
+    const dailyPace=Math.max(1,Math.ceil(remaining/totalDays));
+    const milestones=buildMilestones(start,end,goal.current,goal.total);
+    const structured={goalKey:goal.key,goalLabel:goal.label,total:goal.total,startVerses:goal.current,startDate:start,endDate:end,dailyPace,milestones,approx:goal.approx,source:"manual"};
+    setAiPlanStructured(structured);
+    setAiPlanResult(
+      "❖ PROGRAMME PERSONNALISÉ\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+      +"🎯 Objectif : "+goal.label+(goal.approx?" (estimation)":"")+"\n"
+      +"📅 Du "+new Date(start).toLocaleDateString("fr-FR")+" au "+new Date(end).toLocaleDateString("fr-FR")+" ("+totalDays+" jours)\n"
+      +"📖 "+goal.current+" / "+goal.total+" versets déjà faits — "+remaining+" restants\n"
+      +"⚡ Rythme nécessaire : "+dailyPace+" versets/jour\n\n"
+      +"Ce plan sera suivi automatiquement dans l'onglet Planning — ta progression réelle (versets mémorisés) sera comparée à cette cadence jour après jour."
+    );
+  };
+
+  // Génération plan mémorisation
   const generateAIPlan=async()=>{
     setAiPlanLoading(true);setAiPlanResult("");
     await new Promise(r=>setTimeout(r,800));
-    const goalVerses={juz30:564,juz29:1127,halfquran:3118,fullquran:6236};
-    const goalLabels={juz30:"Juz 30 (37 sourates — 564 versets)",juz29:"Juz 29-30 (1127 versets)",halfquran:"Demi-Coran (3118 versets)",fullquran:"Coran complet (6236 versets)"};
-    const remaining=Math.max(0,(goalVerses[aiPlanParams.goal]||6236)-totalMem);
+    const goal=resolveGoal(aiPlanParams.goal,aiPlanParams.customGoal);
+    const remaining=Math.max(0,goal.total-goal.current);
     const totalDays=parseInt(aiPlanParams.months)*30;
     const vPerDay=Math.ceil(remaining/totalDays);
     const mPerVerse=aiPlanParams.level==="debutant"?8:aiPlanParams.level==="intermediaire"?5:3;
@@ -3994,7 +4141,9 @@ const handleSetNewPassword=async(newPass)=>{
     const adjustedVpd=feasible?vPerDay:Math.max(1,Math.floor(timeAvail/mPerVerse));
     const adjustedMonths=adjustedVpd>0?Math.ceil(remaining/(adjustedVpd*30)):999;
     const completedSurahs=SURAHS.filter(s=>sMem(s)===s.v).map(s=>s.name).join(", ")||"aucune pour l'instant";
-    const nextSurahs=aiPlanParams.goal==="juz30"
+    const nextSurahs=aiPlanParams.customGoal?.startsWith("surah_")
+      ?[goal.label+" ("+goal.total+"v)"]
+      :aiPlanParams.goal==="juz30"
       ?["An-Naba (40v)","An-Naziat (46v)","Abasa (42v)","At-Takwir (29v)","Al-Infitar (19v)","Al-Mutaffifin (36v)","Al-Inshiqaq (25v)","Al-Buruj (22v)"]
       :aiPlanParams.level==="debutant"
       ?["Al-Fatiha (7v)","Al-Ikhlas (4v)","Al-Falaq (5v)","An-Nas (6v)","Al-Kawthar (3v)","Al-Asr (3v)","Al-Fil (5v)","Al-Humaza (9v)"]
@@ -4011,8 +4160,8 @@ const handleSetNewPassword=async(newPass)=>{
     const plan="\u2756 PLAN DE MEMORISATION PERSONNALISE\n"
       +"\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\n"
       +"\ud83d\udcca TON PROFIL\n"
-      +"\u2022 Objectif : "+(goalLabels[aiPlanParams.goal]||aiPlanParams.goal)+"\n"
-      +"\u2022 Versets memorises : "+totalMem+" / "+TOTAL_VERSES+"\n"
+      +"\u2022 Objectif : "+goal.label+(goal.approx?" (estimation)":"")+"\n"
+      +"\u2022 Versets memorises : "+goal.current+" / "+goal.total+"\n"
       +"\u2022 Versets restants : "+remaining+"\n"
       +"\u2022 Temps disponible : "+timeAvail+" min/jour\n"
       +"\u2022 Niveau : "+aiPlanParams.level+"\n"
@@ -4049,6 +4198,14 @@ const handleSetNewPassword=async(newPass)=>{
       +"Le Prophete \ufdfa a dit : \u00abLe meilleur d'entre vous est celui qui apprend le Coran et l'enseigne.\u00bb - Al-Bukhari\n\n"
       +adjustedVpd+" versets/jour = "+(adjustedVpd*365)+" versets en un an. La constance vaut mieux que l'intensite. \u0628\u0627\u0631\u0643 \u0627\u0644\u0644\u0647 \u0641\u064a\u0643";
         setAiPlanResult(plan);
+    const realStart=today();
+    const realEnd=new Date(Date.now()+adjustedMonths*30*86400000).toISOString().slice(0,10);
+    setAiPlanStructured({
+      goalKey:goal.key,goalLabel:goal.label,total:goal.total,startVerses:goal.current,
+      startDate:realStart,endDate:realEnd,dailyPace:adjustedVpd,
+      milestones:buildMilestones(realStart,realEnd,goal.current,goal.total),
+      approx:goal.approx,source:"ai",
+    });
     setAiPlanLoading(false);
   };
 
@@ -4344,6 +4501,11 @@ return (
             </div>
             {!aiPlanResult&&(
               <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                <div style={{display:"flex",gap:6,padding:3,background:t.s2,borderRadius:10,border:`1px solid ${t.b1}`}}>
+                  {[["ai","🤖 Laisser l'IA calculer"],["manual","📅 Choisir mes dates"]].map(([v,l])=>(
+                    <button key={v} onClick={()=>setPlanMode(v)} style={{flex:1,padding:"8px 4px",borderRadius:8,border:"none",background:planMode===v?t.acc:"transparent",color:planMode===v?"#fff":t.tx2,fontSize:".68rem",fontWeight:700,cursor:"pointer",transition:"all .15s"}}>{l}</button>
+                  ))}
+                </div>
                 <div>
                   <label style={{fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",display:"block",marginBottom:5}}>Objectif global</label>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
@@ -4371,33 +4533,49 @@ return (
                   </div>
                   {aiPlanParams.customGoal&&<div style={{fontSize:".6rem",color:t.acc,marginTop:4}}>✦ Objectif : {aiPlanParams.customGoal.replace("juz_","Juz ").replace("surah_",s=>` Sourate ${SURAHS.find(x=>x.n===+aiPlanParams.customGoal.split("_")[1])?.name||""}`).replace("hizb_","Hizb ")}</div>}
                 </div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-                  <div>
-                    <label style={{fontSize:".65rem",color:t.tx3,display:"block",marginBottom:4}}>Délai (mois)</label>
-                    <input className="sinp" type="number" min="1" max="120" value={aiPlanParams.months} onChange={e=>setAiPlanParams(p=>({...p,months:e.target.value}))} style={{width:"100%"}}/>
+                {planMode==="ai"?(<>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+                    <div>
+                      <label style={{fontSize:".65rem",color:t.tx3,display:"block",marginBottom:4}}>Délai (mois)</label>
+                      <input className="sinp" type="number" min="1" max="120" value={aiPlanParams.months} onChange={e=>setAiPlanParams(p=>({...p,months:e.target.value}))} style={{width:"100%"}}/>
+                    </div>
+                    <div>
+                      <label style={{fontSize:".65rem",color:t.tx3,display:"block",marginBottom:4}}>Min/jour</label>
+                      <input className="sinp" type="number" min="5" max="180" value={aiPlanParams.dailyTime} onChange={e=>setAiPlanParams(p=>({...p,dailyTime:e.target.value}))} style={{width:"100%"}}/>
+                    </div>
                   </div>
                   <div>
-                    <label style={{fontSize:".65rem",color:t.tx3,display:"block",marginBottom:4}}>Min/jour</label>
-                    <input className="sinp" type="number" min="5" max="180" value={aiPlanParams.dailyTime} onChange={e=>setAiPlanParams(p=>({...p,dailyTime:e.target.value}))} style={{width:"100%"}}/>
+                    <label style={{fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",display:"block",marginBottom:5}}>Niveau</label>
+                    <div style={{display:"flex",gap:6}}>
+                      {[["debutant","Débutant"],["intermediaire","Intermédiaire"],["avance","Avancé"]].map(([v,l])=>(
+                        <button key={v} onClick={()=>setAiPlanParams(p=>({...p,level:v}))} style={{flex:1,padding:"7px",borderRadius:8,border:`1.5px solid ${aiPlanParams.level===v?t.acc:t.b2}`,background:aiPlanParams.level===v?`${t.acc}15`:t.s2,color:aiPlanParams.level===v?t.acc:t.tx,fontSize:".7rem",cursor:"pointer",fontWeight:aiPlanParams.level===v?700:400,transition:"all .15s"}}>{l}</button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <label style={{fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",display:"block",marginBottom:5}}>Niveau</label>
-                  <div style={{display:"flex",gap:6}}>
-                    {[["debutant","Débutant"],["intermediaire","Intermédiaire"],["avance","Avancé"]].map(([v,l])=>(
-                      <button key={v} onClick={()=>setAiPlanParams(p=>({...p,level:v}))} style={{flex:1,padding:"7px",borderRadius:8,border:`1.5px solid ${aiPlanParams.level===v?t.acc:t.b2}`,background:aiPlanParams.level===v?`${t.acc}15`:t.s2,color:aiPlanParams.level===v?t.acc:t.tx,fontSize:".7rem",cursor:"pointer",fontWeight:aiPlanParams.level===v?700:400,transition:"all .15s"}}>{l}</button>
-                    ))}
+                  <button onClick={generateAIPlan} disabled={aiPlanLoading} style={{width:"100%",padding:"12px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:10,color:"#fff",fontSize:".85rem",fontWeight:700,cursor:"pointer",opacity:aiPlanLoading?.6:1,transition:"opacity .2s"}}>
+                    {aiPlanLoading?"Calcul en cours…":"✦ Générer mon parcours"}
+                  </button>
+                  {aiPlanLoading&&(
+                    <div style={{textAlign:"center",color:t.tx3,fontSize:".7rem"}}>
+                      <div style={{width:24,height:24,border:`2px solid ${t.acc}`,borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite",margin:"0 auto 8px"}}/>
+                      Analyse de ton profil en cours…
+                    </div>
+                  )}
+                </>):(<>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+                    <div>
+                      <label style={{fontSize:".65rem",color:t.tx3,display:"block",marginBottom:4}}>Date de début</label>
+                      <input className="sinp" type="date" value={manualDates.start} onChange={e=>setManualDates(p=>({...p,start:e.target.value}))} style={{width:"100%"}}/>
+                    </div>
+                    <div>
+                      <label style={{fontSize:".65rem",color:t.tx3,display:"block",marginBottom:4}}>Date de fin</label>
+                      <input className="sinp" type="date" min={manualDates.start} value={manualDates.end} onChange={e=>setManualDates(p=>({...p,end:e.target.value}))} style={{width:"100%"}}/>
+                    </div>
                   </div>
-                </div>
-                <button onClick={generateAIPlan} disabled={aiPlanLoading} style={{width:"100%",padding:"12px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:10,color:"#fff",fontSize:".85rem",fontWeight:700,cursor:"pointer",opacity:aiPlanLoading?.6:1,transition:"opacity .2s"}}>
-                  {aiPlanLoading?"Calcul en cours…":"✦ Générer mon parcours"}
-                </button>
-                {aiPlanLoading&&(
-                  <div style={{textAlign:"center",color:t.tx3,fontSize:".7rem"}}>
-                    <div style={{width:24,height:24,border:`2px solid ${t.acc}`,borderTopColor:"transparent",borderRadius:"50%",animation:"spin .7s linear infinite",margin:"0 auto 8px"}}/>
-                    Analyse de ton profil en cours…
-                  </div>
-                )}
+                  <button onClick={generateManualPlan} style={{width:"100%",padding:"12px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:10,color:"#fff",fontSize:".85rem",fontWeight:700,cursor:"pointer"}}>
+                    📅 Calculer mon rythme
+                  </button>
+                </>)}
               </div>
             )}
             {aiPlanResult&&(
@@ -4405,9 +4583,14 @@ return (
                 <div style={{padding:"12px 14px",background:t.s2,borderRadius:10,border:`1px solid ${t.b1}`,fontSize:".75rem",color:t.tx,lineHeight:1.8,whiteSpace:"pre-wrap",fontFamily:"DM Sans,sans-serif"}}>
                   {aiPlanResult}
                 </div>
+                {aiPlanStructured&&(
+                  <button onClick={adoptProgram} style={{width:"100%",padding:"11px",background:`linear-gradient(135deg,${t.gr},#2e7d32)`,border:"none",borderRadius:8,color:"#fff",fontSize:".8rem",fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+                    📅 Adopter ce plan dans Planning
+                  </button>
+                )}
                 <div style={{display:"flex",gap:8}}>
                   <button onClick={()=>{navigator.clipboard?.writeText(aiPlanResult);}} style={{flex:1,padding:"9px",background:`${t.acc}18`,border:`1px solid ${t.acc}`,borderRadius:8,color:t.acc,fontSize:".75rem",cursor:"pointer",fontWeight:600}}>Copier le plan</button>
-                  <button onClick={()=>setAiPlanResult("")} style={{flex:1,padding:"9px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:8,color:t.tx2,fontSize:".75rem",cursor:"pointer"}}>Nouveau plan</button>
+                  <button onClick={()=>{setAiPlanResult("");setAiPlanStructured(null);}} style={{flex:1,padding:"9px",background:t.s2,border:`1px solid ${t.b2}`,borderRadius:8,color:t.tx2,fontSize:".75rem",cursor:"pointer"}}>Nouveau plan</button>
                 </div>
               </div>
             )}
@@ -6734,8 +6917,67 @@ return (
       {page==="schedule"&&(user?(()=>{
         const effectiveView=scheduleView||(role==="teacher"?"teacher":"student");
         const canSwitch=myTeacherClasses.length>0;
+        const PRESET_GOALS=["juz30","juz29","halfquran","fullquran"];
+        const liveGoal=myProgram?(PRESET_GOALS.includes(myProgram.goalKey)?resolveGoal(myProgram.goalKey,null):resolveGoal(null,myProgram.goalKey)):null;
         return (
           <div>
+            {/* Mon Programme — plan personnel (IA ou dates manuelles), suivi en direct */}
+            <div style={{margin:"14px 14px 0",padding:16,borderRadius:14,background:t.s1,border:`1px solid ${t.b1}`}}>
+              {!myProgram?(
+                <div style={{textAlign:"center"}}>
+                  <div style={{fontSize:"1.6rem",marginBottom:6}}>📅</div>
+                  <div style={{fontWeight:700,fontSize:".85rem",color:t.tx,marginBottom:4}}>Aucun programme de révision actif</div>
+                  <div style={{fontSize:".7rem",color:t.tx3,marginBottom:12,lineHeight:1.5}}>Génère un plan avec l'IA ou choisis tes propres dates — il apparaîtra ici, suivi jour après jour.</div>
+                  <button onClick={()=>setShowAIPlan(true)} style={{padding:"9px 20px",borderRadius:10,border:"none",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,color:"#fff",fontWeight:700,fontSize:".78rem",cursor:"pointer"}}>✦ Créer mon programme</button>
+                </div>
+              ):(()=>{
+                const startD=new Date(myProgram.startDate),endD=new Date(myProgram.endDate);
+                const totalDays=Math.max(1,(endD-startD)/86400000);
+                const daysElapsed=Math.max(0,Math.min(totalDays,(Date.now()-startD)/86400000));
+                const daysLeft=Math.max(0,Math.ceil((endD-Date.now())/86400000));
+                const expected=Math.round(myProgram.startVerses+(myProgram.total-myProgram.startVerses)*(daysElapsed/totalDays));
+                const actual=liveGoal.current;
+                const onTrack=actual>=expected;
+                const pct=Math.min(100,Math.round((actual/Math.max(1,myProgram.total))*100));
+                return(
+                  <div>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
+                      <div>
+                        <div style={{fontWeight:700,fontSize:".85rem",color:t.tx}}>🎯 {myProgram.goalLabel}{myProgram.approx?" (estimation)":""}</div>
+                        <div style={{fontSize:".65rem",color:t.tx3,marginTop:2}}>
+                          {startD.toLocaleDateString("fr-FR")} → {endD.toLocaleDateString("fr-FR")} · {daysLeft>0?`${daysLeft}j restants`:"Terminé"}
+                        </div>
+                      </div>
+                      <button onClick={()=>{setMyProgram(null);sv("qmyprogram",null);setToastMsg("Programme supprimé");}} style={{background:"none",border:"none",color:t.tx3,cursor:"pointer",fontSize:".7rem"}}>✕</button>
+                    </div>
+                    <div style={{height:8,borderRadius:4,background:t.b1,overflow:"hidden",marginBottom:6}}>
+                      <div style={{height:"100%",width:pct+"%",background:onTrack?t.gr:"#fb8c00",borderRadius:4,transition:"width .4s"}}/>
+                    </div>
+                    <div style={{display:"flex",justifyContent:"space-between",fontSize:".65rem",marginBottom:12}}>
+                      <span style={{color:t.tx3}}>{actual} / {myProgram.total} versets</span>
+                      <span style={{color:onTrack?t.gr:"#fb8c00",fontWeight:700}}>
+                        {onTrack?`✓ En avance de ${actual-expected}v`:`⚠ En retard de ${expected-actual}v`}
+                      </span>
+                    </div>
+                    <div style={{fontSize:".62rem",color:t.tx3,textTransform:"uppercase",letterSpacing:1,fontWeight:700,marginBottom:6}}>Jalons</div>
+                    <div style={{display:"flex",flexDirection:"column",gap:5,maxHeight:140,overflowY:"auto"}}>
+                      {myProgram.milestones.map(m=>{
+                        const passed=new Date(m.date)<=new Date();
+                        const met=actual>=m.cumulativeTarget;
+                        return(
+                          <div key={m.week} style={{display:"flex",alignItems:"center",gap:8,fontSize:".68rem"}}>
+                            <span style={{width:14,textAlign:"center",color:passed?(met?t.gr:"#e91e63"):t.tx3}}>{passed?(met?"✓":"✗"):"○"}</span>
+                            <span style={{color:t.tx3,flexShrink:0}}>{new Date(m.date).toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit"})}</span>
+                            <span style={{color:t.tx2,flex:1}}>Semaine {m.week}</span>
+                            <span style={{color:t.tx3}}>{m.cumulativeTarget}v</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
             {canSwitch&&(
               <div style={{display:"flex",gap:6,padding:"10px 14px 0"}}>
                 {[["teacher","Vue Prof"],["student","Vue Élève"]].map(([id,label])=>(
