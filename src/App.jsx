@@ -6940,76 +6940,61 @@ return (
             )}
             {effectiveView==="teacher"?<TeacherSchedule userId={user?.id} t={t} acc={t.acc}/>:<StudentSchedule userId={user?.id} t={t} acc={t.acc}/>}
 
-            {/* Mon Programme — plan de révision personnel (IA ou dates manuelles),
-                volontairement séparé des créneaux de cours par une ligne : ce
-                n'est pas un horaire fixe avec un prof, juste un objectif perso
-                suivi en direct — d'où aussi le "à réviser aujourd'hui" en tête
-                plutôt qu'une liste qui ressemble à un emploi du temps. */}
-            <div style={{margin:"28px 14px 0",paddingTop:16,borderTop:`1px solid ${t.b1}`}}>
-              <div style={{fontSize:".62rem",color:t.tx3,textTransform:"uppercase",letterSpacing:1,fontWeight:700,marginBottom:10}}>Mon programme personnel</div>
-              <div style={{padding:16,borderRadius:14,background:t.s1,border:`1px solid ${t.b1}`}}>
-                {!myProgram?(
-                  <div style={{textAlign:"center"}}>
-                    <div style={{fontSize:"1.6rem",marginBottom:6}}>📅</div>
-                    <div style={{fontWeight:700,fontSize:".85rem",color:t.tx,marginBottom:4}}>Aucun programme de révision actif</div>
-                    <div style={{fontSize:".7rem",color:t.tx3,marginBottom:12,lineHeight:1.5}}>Génère un plan avec l'IA ou choisis tes propres dates — il apparaîtra ici, comme un objectif à suivre, pas un rendez-vous.</div>
-                    <button onClick={()=>setShowAIPlan(true)} style={{padding:"9px 20px",borderRadius:10,border:"none",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,color:"#fff",fontWeight:700,fontSize:".78rem",cursor:"pointer"}}>✦ Créer mon programme</button>
-                  </div>
-                ):(()=>{
-                  const startD=new Date(myProgram.startDate),endD=new Date(myProgram.endDate);
-                  const totalDays=Math.max(1,(endD-startD)/86400000);
-                  const daysElapsed=Math.max(0,Math.min(totalDays,(Date.now()-startD)/86400000));
-                  const daysLeft=Math.max(0,Math.ceil((endD-Date.now())/86400000));
-                  const expected=Math.round(myProgram.startVerses+(myProgram.total-myProgram.startVerses)*(daysElapsed/totalDays));
-                  const actual=liveGoal.current;
-                  const onTrack=actual>=expected;
-                  const pct=Math.min(100,Math.round((actual/Math.max(1,myProgram.total))*100));
-                  const remaining=Math.max(0,myProgram.total-actual);
-                  return(
-                    <div>
-                      <div style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:14,padding:"10px 12px",borderRadius:10,background:onTrack?`${t.gr}12`:"#fb8c0015",border:`1px solid ${onTrack?t.gr:"#fb8c00"}33`}}>
-                        <span style={{fontSize:"1.1rem"}}>📌</span>
-                        <div style={{flex:1}}>
-                          <div style={{fontSize:".78rem",fontWeight:700,color:t.tx}}>
-                            {remaining<=0?"Objectif atteint ! 🎉":`À réviser : vise ~${myProgram.dailyPace} verset${myProgram.dailyPace>1?"s":""} aujourd'hui`}
-                          </div>
-                          <div style={{fontSize:".65rem",color:onTrack?t.gr:"#fb8c00",fontWeight:600,marginTop:2}}>
-                            {onTrack?`✓ En avance de ${actual-expected}v sur ton rythme`:`⚠ En retard de ${expected-actual}v sur ton rythme`}
-                          </div>
+            {/* Mon Programme — même page Planning, pas un bloc à part : reprend
+                exactement le style "section" de StudentSchedule (label +
+                cartes), sans carte englobante ni séparateur, pour que ça se
+                lise comme une section de plus de la même liste. */}
+            <div style={{padding:"8px 16px"}}>
+              <div style={{fontSize:".68rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginBottom:8,fontWeight:700}}>Mon programme personnel</div>
+              {!myProgram?(
+                <div style={{textAlign:"center",color:t.tx3,padding:20,fontSize:".78rem",background:t.s1,borderRadius:12,border:`1px solid ${t.b1}`}}>
+                  Aucun programme actif.<br/>
+                  <button onClick={()=>setShowAIPlan(true)} style={{marginTop:10,padding:"8px 18px",borderRadius:10,border:"none",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,color:"#fff",fontWeight:700,fontSize:".75rem",cursor:"pointer"}}>✦ Créer mon programme</button>
+                </div>
+              ):(()=>{
+                const startD=new Date(myProgram.startDate),endD=new Date(myProgram.endDate);
+                const totalDays=Math.max(1,(endD-startD)/86400000);
+                const daysElapsed=Math.max(0,Math.min(totalDays,(Date.now()-startD)/86400000));
+                const daysLeft=Math.max(0,Math.ceil((endD-Date.now())/86400000));
+                const expected=Math.round(myProgram.startVerses+(myProgram.total-myProgram.startVerses)*(daysElapsed/totalDays));
+                const actual=liveGoal.current;
+                const onTrack=actual>=expected;
+                const pct=Math.min(100,Math.round((actual/Math.max(1,myProgram.total))*100));
+                const remaining=Math.max(0,myProgram.total-actual);
+                return(<>
+                  <div style={{padding:"10px 12px",borderRadius:12,background:t.s1,border:`1px solid ${t.b1}`,marginBottom:8}}>
+                    <div style={{display:"flex",alignItems:"center",gap:10}}>
+                      <div style={{width:8,height:8,borderRadius:"50%",flexShrink:0,background:onTrack?t.gr:"#fb8c00"}}/>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:".75rem",fontWeight:700,color:t.tx}}>
+                          {remaining<=0?"Objectif atteint ! 🎉":`À réviser : vise ~${myProgram.dailyPace} verset${myProgram.dailyPace>1?"s":""} aujourd'hui`}
                         </div>
+                        <div style={{fontSize:".64rem",color:t.tx3}}>🎯 {myProgram.goalLabel}{myProgram.approx?" (estimation)":""} · {daysLeft>0?`${daysLeft}j restants`:"Terminé"}</div>
                       </div>
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
-                        <div>
-                          <div style={{fontWeight:700,fontSize:".85rem",color:t.tx}}>🎯 {myProgram.goalLabel}{myProgram.approx?" (estimation)":""}</div>
-                          <div style={{fontSize:".65rem",color:t.tx3,marginTop:2}}>
-                            {startD.toLocaleDateString("fr-FR")} → {endD.toLocaleDateString("fr-FR")} · {daysLeft>0?`${daysLeft}j restants`:"Terminé"}
-                          </div>
-                        </div>
-                        <button onClick={()=>{setMyProgram(null);sv("qmyprogram",null);setToastMsg("Programme supprimé");}} style={{background:"none",border:"none",color:t.tx3,cursor:"pointer",fontSize:".7rem"}}>✕</button>
-                      </div>
-                      <div style={{height:8,borderRadius:4,background:t.b1,overflow:"hidden",marginBottom:6}}>
-                        <div style={{height:"100%",width:pct+"%",background:onTrack?t.gr:"#fb8c00",borderRadius:4,transition:"width .4s"}}/>
-                      </div>
-                      <div style={{fontSize:".65rem",color:t.tx3,marginBottom:12}}>{actual} / {myProgram.total} versets</div>
-                      <div style={{fontSize:".62rem",color:t.tx3,textTransform:"uppercase",letterSpacing:1,fontWeight:700,marginBottom:6}}>Jalons</div>
-                      <div style={{display:"flex",flexDirection:"column",gap:5,maxHeight:140,overflowY:"auto"}}>
-                        {myProgram.milestones.map(m=>{
-                          const passed=new Date(m.date)<=new Date();
-                          const met=actual>=m.cumulativeTarget;
-                          return(
-                            <div key={m.week} style={{display:"flex",alignItems:"center",gap:8,fontSize:".68rem"}}>
-                              <span style={{width:14,textAlign:"center",color:passed?(met?t.gr:"#e91e63"):t.tx3}}>{passed?(met?"✓":"✗"):"○"}</span>
-                              <span style={{color:t.tx3,flexShrink:0}}>{new Date(m.date).toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit"})}</span>
-                              <span style={{color:t.tx2,flex:1}}>Semaine {m.week}</span>
-                              <span style={{color:t.tx3}}>{m.cumulativeTarget}v</span>
-                            </div>
-                          );
-                        })}
-                      </div>
+                      <span style={{fontSize:".6rem",fontWeight:700,color:onTrack?t.gr:"#fb8c00"}}>{onTrack?"En avance":"En retard"}</span>
+                      <button onClick={()=>{setMyProgram(null);sv("qmyprogram",null);setToastMsg("Programme supprimé");}} style={{background:"none",border:"none",color:t.tx3,cursor:"pointer",fontSize:".7rem",flexShrink:0}}>✕</button>
                     </div>
-                  );
-                })()}
-              </div>
+                    <div style={{height:6,borderRadius:3,background:t.b1,overflow:"hidden",marginTop:8}}>
+                      <div style={{height:"100%",width:pct+"%",background:onTrack?t.gr:"#fb8c00",borderRadius:3,transition:"width .4s"}}/>
+                    </div>
+                    <div style={{fontSize:".62rem",color:t.tx3,marginTop:4}}>{actual} / {myProgram.total} versets · {startD.toLocaleDateString("fr-FR")} → {endD.toLocaleDateString("fr-FR")}</div>
+                  </div>
+                  <div style={{display:"flex",flexDirection:"column",gap:5,maxHeight:120,overflowY:"auto",padding:"2px 4px"}}>
+                    {myProgram.milestones.map(m=>{
+                      const passed=new Date(m.date)<=new Date();
+                      const met=actual>=m.cumulativeTarget;
+                      return(
+                        <div key={m.week} style={{display:"flex",alignItems:"center",gap:8,fontSize:".66rem"}}>
+                          <span style={{width:14,textAlign:"center",color:passed?(met?t.gr:"#e91e63"):t.tx3}}>{passed?(met?"✓":"✗"):"○"}</span>
+                          <span style={{color:t.tx3,flexShrink:0}}>{new Date(m.date).toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit"})}</span>
+                          <span style={{color:t.tx2,flex:1}}>Semaine {m.week}</span>
+                          <span style={{color:t.tx3}}>{m.cumulativeTarget}v</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>);
+              })()}
             </div>
           </div>
         );
