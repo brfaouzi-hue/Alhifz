@@ -871,15 +871,18 @@ function TajwidSpan({text,enabled,tjc}) {
   // identique et se rend correctement.
   const clean=raw.replace(/ٲ/g,"ٰ").replace(/\[[a-z]+\](.*?)\[\/[a-z]+\]/g,"$1").replace(/[﴿﴾۰-۹٠-٩]/g,"").replace(/\s+[١٢٣٤٥٦٧٨٩٠]+\s*$/,"");
   if(!enabled) return <bdi style={{direction:"rtl"}}>{clean.replace(/<[^>]*>/g,"").replace(/[۰-۹٠-٩]/g,"")}</bdi>;
-  if(!clean.includes("<tajweed")) return <bdi style={{direction:"rtl",letterSpacing:0}}>{clean.replace(/<[^>]*>/g,"").replace(/[۰-۹٠-٩]/g,"")}</bdi>;
+  // <tajweed> vient de l'endpoint par verset, <rule> du même champ mais
+  // renvoyé par l'endpoint par mot (utilisé pour le mode ligne) — même
+  // classification, juste un nom de balise différent selon l'endpoint.
+  if(!clean.includes("<tajweed")&&!clean.includes("<rule")) return <bdi style={{direction:"rtl",letterSpacing:0}}>{clean.replace(/<[^>]*>/g,"").replace(/[۰-۹٠-٩]/g,"")}</bdi>;
   // Remplacer les balises tajweed par des spans colorés
   let colored=clean
-    .replace(/<tajweed[^>]*class=["']?([^"'> ]+)["']?[^>]*>/g,(m,cls)=>{
+    .replace(/<(?:tajweed|rule)[^>]*class=["']?([^"'> ]+)["']?[^>]*>/g,(m,cls)=>{
       const colorFn=TAJWID_CLASS_COLORS[cls];
       const color=colorFn?colorFn(tjc):null;
       return color?`<span style="color:${color};font-weight:bold" title="${cls.replace(/_/g,' ')}">`:'<span>';
     })
-    .replace(/<\/tajweed>/g,"</span>");
+    .replace(/<\/(?:tajweed|rule)>/g,"</span>");
   // L'API coupe parfois une lettre de sa propre chadda/harakat : elle ferme le
   // </tajweed> juste après la lettre de base et laisse le diacritique suivant
   // (ex: chadda U+0651) en texte brut hors du span (vu sur idgham_shafawi,
@@ -2022,6 +2025,104 @@ async function shareVerseAsImage({ arText, frText, surahName, verseN }) {
     }, "image/png");
   });
 }
+// Carte de progression partageable — pour que l'effort d'un élève soit vu
+// et valorisé par un parent/prof en dehors de l'app (mêmes codes visuels
+// que shareVerseAsImage : canvas → PNG → partage natif ou téléchargement).
+async function shareProgressAsImage({name,versesMemorized,totalVerses,surahsDone,juzDone,streak}) {
+  try {
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+  } catch {}
+  const W = 1080, H = 1350;
+  const canvas = document.createElement("canvas");
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext("2d");
+
+  const GREEN = "#2e7d32", GOLD = "#c9a84c";
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, "#0d2818");
+  grad.addColorStop(1, "#122a1c");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.strokeStyle = "rgba(201,168,76,.45)"; ctx.lineWidth = 3;
+  ctx.strokeRect(36, 36, W - 72, H - 72);
+  ctx.strokeStyle = "rgba(201,168,76,.2)"; ctx.lineWidth = 1;
+  ctx.strokeRect(48, 48, W - 96, H - 96);
+
+  ctx.textAlign = "center";
+  ctx.font = '54px "Amiri Quran","Amiri",serif';
+  ctx.fillStyle = GOLD;
+  ctx.direction = "rtl";
+  ctx.fillText("الحفظ", W / 2, 165);
+  ctx.font = "22px sans-serif";
+  ctx.direction = "ltr";
+  ctx.fillStyle = "rgba(245,233,200,.7)";
+  ctx.fillText("AL-HIFZ — LE MÉMORISATEUR", W / 2, 205);
+
+  ctx.font = "bold 44px sans-serif";
+  ctx.fillStyle = "#f5e9c8";
+  ctx.fillText(name?`Progression de ${name}`:"Ma progression", W / 2, 300);
+
+  const pct = totalVerses>0?Math.round(versesMemorized/totalVerses*100):0;
+  ctx.font = "bold 130px sans-serif";
+  ctx.fillStyle = GOLD;
+  ctx.fillText(`${pct}%`, W / 2, 470);
+  ctx.font = "26px sans-serif";
+  ctx.fillStyle = "rgba(245,233,200,.75)";
+  ctx.fillText("du Coran mémorisé", W / 2, 515);
+
+  // Barre de progression
+  const barW = W - 200, barX = 100, barY = 555, barH = 18;
+  ctx.fillStyle = "rgba(255,255,255,.12)";
+  ctx.beginPath(); ctx.roundRect(barX, barY, barW, barH, 9); ctx.fill();
+  ctx.fillStyle = GREEN;
+  ctx.beginPath(); ctx.roundRect(barX, barY, Math.max(barH, barW * pct / 100), barH, 9); ctx.fill();
+
+  // Stats en grille 2x2
+  const stats = [
+    {l:"Versets mémorisés", v:`${versesMemorized}`},
+    {l:"Sourates terminées", v:`${surahsDone}/114`},
+    {l:"Juz terminés", v:`${juzDone}/30`},
+    {l:"Jours de suite", v:`${streak} 🔥`},
+  ];
+  const gridY = 650, cellW = (W-200)/2, cellH = 150;
+  stats.forEach((s,i)=>{
+    const col = i%2, row = Math.floor(i/2);
+    const cx = 100 + col*cellW + cellW/2;
+    const cy = gridY + row*cellH;
+    ctx.fillStyle = "rgba(255,255,255,.05)";
+    ctx.beginPath(); ctx.roundRect(100+col*cellW+10, cy, cellW-20, cellH-20, 16); ctx.fill();
+    ctx.font = "bold 50px sans-serif";
+    ctx.fillStyle = GOLD;
+    ctx.fillText(s.v, cx, cy+70);
+    ctx.font = "22px sans-serif";
+    ctx.fillStyle = "rgba(245,233,200,.75)";
+    ctx.fillText(s.l, cx, cy+105);
+  });
+
+  ctx.font = "26px 'Amiri Quran',serif";
+  ctx.fillStyle = "rgba(245,233,200,.65)";
+  ctx.fillText("Al-Hifz — le mémorisateur", W / 2, H - 80);
+
+  return new Promise((resolve) => {
+    canvas.toBlob(async (blob) => {
+      if (!blob) { resolve(false); return; }
+      const file = new File([blob], `alhifz-progression.png`, { type: "image/png" });
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: "Ma progression Al-Hifz", text: `${pct}% du Coran mémorisé sur Al-Hifz` });
+          resolve(true);
+          return;
+        } catch { /* utilisateur a annulé ou API a échoué — on retombe sur le téléchargement */ }
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "alhifz-progression.png"; a.click();
+      URL.revokeObjectURL(url);
+      resolve(true);
+    }, "image/png");
+  });
+}
 const stripTags=s=>{let r="";let inTag=false;for(const c of(s||"")){if(c==="<")inTag=true;else if(c===">")inTag=false;else if(!inTag)r+=c;}return r.replace(/ٲ/g,"ٰ");};
 
 function colorTajweed(html){
@@ -2562,6 +2663,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
                         onLongPress, setPage, wbwVerseRef, setWbwOpen, partialPlayRef, showTf, tafsirData, loadTafsir, doPlayPartial, setVerseCtxMenu, versePages, verseJuzHizb,
                         reviewMode, revealedVerses, setRevealedVerses,
                         karaokeMode, activeWordIdx, wordTimings, startPlaylist,
+                        memUnit, pageLines, loadPageLines, memLines, toggleMemLine,
                         immersive, chromeVisible, onToggleChrome, curPage:curPageProp, setCurPage:setCurPageProp}) {
   // ── Récitation in-page ──
 
@@ -2631,6 +2733,10 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
       }).catch(()=>setFillCache(p=>({...p,[curPg]:{before:[],after:[]}})));
   },[curPg,curPage,pages.length,selS,firstOwnVn,lastOwnVn]);
   const pageFill=fillCache[curPg]||{};
+  // Mode ligne : charge le découpage réel en lignes de la page courante à la demande
+  React.useEffect(()=>{
+    if(memUnit==="line"&&curPg&&loadPageLines)loadPageLines(curPg);
+  },[memUnit,curPg,loadPageLines]);
   const fullPage=React.useMemo(()=>[
     ...(pageFill.before||[]),
     ...cur.map(v=>({...v,sn:selS?.n,own:true})),
@@ -2876,7 +2982,30 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
             doit échapper à la justification, exactement comme dans un vrai
             Mushaf imprimé. */}
         <div ref={pageTextRef} style={{direction:"rtl",textAlign:"justify",width:"100%",boxSizing:"border-box",overflowWrap:"break-word",wordBreak:"break-word",wordSpacing:"0.1em",WebkitTextAlignLast:"right",textAlignLast:"right",lineHeight:2.3,fontFamily:arFont||"Amiri Quran,Amiri,serif",fontSize:(arabicSize||1.6)*fitScale+"rem",maxWidth:"100%",color:"#1c1208",transition:immersive?"none":"font-size .2s ease"}}>
-          {fullPage.map((v,vi)=>{
+          {memUnit==="line"&&pageLines[curPg]?(
+            // Mode ligne — une ligne RÉELLE du Mushaf (découpage line_number
+            // de l'API, pas le retour à la ligne du navigateur) par rangée,
+            // avec sa propre coche de mémorisation.
+            pageLines[curPg].map(({line,words})=>{
+              const ownWords=words.filter(w=>w.sn===selS?.n);
+              if(!ownWords.length)return null; // ligne d'une sourate voisine partageant la page
+              const key=`${selS?.n}_${curPg}_${line}`;
+              const isChecked=!!memLines[key];
+              return (
+                <div key={line} style={{display:"flex",alignItems:"center",gap:8,padding:"4px 0"}}>
+                  <span onClick={toggleChromeTap} style={{flex:1,cursor:"pointer"}}>
+                    {ownWords.map((w,wi)=>(
+                      <React.Fragment key={wi}><TajwidSpan text={w.text} enabled={showTj} tjc={tjc}/>{wi<ownWords.length-1?" ":""}</React.Fragment>
+                    ))}
+                  </span>
+                  <button onClick={e=>{e.stopPropagation();toggleMemLine(selS?.n,curPg,line);}}
+                    style={{width:22,height:22,borderRadius:"50%",border:`1.5px solid ${isChecked?t.gr:"#8a7358"}`,background:isChecked?t.gr:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,cursor:"pointer",padding:0}}>
+                    {isChecked&&<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                  </button>
+                </div>
+              );
+            })
+          ):fullPage.map((v,vi)=>{
             const prevSn=vi>0?fullPage[vi-1].sn:null;
             // Pas de bannière pour la toute première ligne de la sourate déjà sélectionnée
             // (son nom est déjà affiché en haut de l'écran) — seulement pour les vraies
@@ -2947,6 +3076,15 @@ export default function App() {
   const arFont=(FONTS.find(f=>f.id===fontId)||FONTS[0]).css;
   const [mem,setMem]=useState(()=>ld("qmem6",{}));
   const memHistory=React.useMemo(()=>{const h={};Object.entries(mem||{}).forEach(([sn,vs])=>{Object.entries(vs||{}).forEach(([vn,info])=>{if(info?.date){const d=info.date.slice(0,10);h[d]=(h[d]||0)+1;}});});return h;},[mem]);
+  // Unité de mémorisation choisie par l'utilisateur — "verse" (défaut, coche
+  // tout le verset) ou "line" (coche ligne par ligne, comme sur un vrai
+  // Mushaf papier). `mem` reste la seule source de vérité pour les stats
+  // globales (Juz/Hizb/%) : en mode ligne, cocher la dernière ligne d'un
+  // verset marque aussi automatiquement `mem` pour ce verset, donc rien
+  // d'autre dans l'app n'a besoin de connaître memLines.
+  const [memUnit,setMemUnit]=useState(()=>ld("qmemunit","verse"));
+  const [memLines,setMemLines]=useState(()=>ld("qmemlines",{})); // {"sn_pg_ligne": true}
+  const [pageLines,setPageLines]=useState({}); // cache {pageNum:[{line,words:[{text,sn,vn,isEnd}]}]} — re-téléchargeable, pas persisté
   const [settings,setSettings]=useState(()=>ld("qset6",null));
   const [hist,setHist]=useState(()=>ld("qhist6",{}));
   const [setup,setSetup]=useState(()=>!ld("qset6",null));
@@ -3933,6 +4071,64 @@ const handleSetNewPassword=async(newPass)=>{
     }
     done("Tafsir non disponible pour ce verset.");
   },[tafsirData]);
+
+  // Mode ligne — récupère le découpage RÉEL en lignes du Mushaf (word_fields
+  // line_number), pas le retour à la ligne du navigateur qui dépend de la
+  // taille d'écran/police et ne correspond à rien de physique.
+  const pageLinesLoadingRef=useRef({});
+  const loadPageLines=useCallback(async(pageNum)=>{
+    if(!pageNum||pageLines[pageNum]||pageLinesLoadingRef.current[pageNum])return;
+    pageLinesLoadingRef.current[pageNum]=true;
+    try{
+      const r=await fetch(`https://api.qurancdn.com/api/qdc/verses/by_page/${pageNum}?words=true&word_fields=line_number,text_uthmani,text_uthmani_tajweed,char_type_name&per_page=50`,{headers:{"User-Agent":"Mozilla/5.0"}});
+      if(!r.ok)throw new Error();
+      const d=await r.json();
+      const lines={};
+      (d.verses||[]).forEach(v=>{
+        const sn=parseInt(String(v.verse_key||"").split(":")[0])||null;
+        (v.words||[]).forEach(w=>{
+          if(w.char_type_name==="end")return; // marqueur numéro de verset, pas du texte
+          const ln=w.line_number;
+          if(!lines[ln])lines[ln]=[];
+          lines[ln].push({text:w.text_uthmani_tajweed||w.text_uthmani||"",sn,vn:v.verse_number});
+        });
+      });
+      const ordered=Object.keys(lines).map(Number).sort((a,b)=>a-b).map(ln=>({line:ln,words:lines[ln]}));
+      setPageLines(p=>({...p,[pageNum]:ordered}));
+    }catch{}
+    finally{pageLinesLoadingRef.current[pageNum]=false;}
+  },[pageLines]);
+
+  // Coche/décoche une ligne réelle du Mushaf ; répercute automatiquement sur
+  // `mem` (source de vérité des stats Juz/Hizb/%) dès que TOUTES les lignes
+  // contenant un mot d'un verset donné sont cochées — et inversement.
+  const toggleMemLine=(sn,pageNum,lineNum)=>{
+    const key=`${sn}_${pageNum}_${lineNum}`;
+    const willBeChecked=!memLines[key];
+    setMemLines(p=>{
+      const nv={...p};
+      if(nv[key])delete nv[key];else nv[key]=true;
+      sv("qmemlines",nv);
+      return nv;
+    });
+    const pl=pageLines[pageNum];
+    if(!pl)return;
+    const verseNumbers=[...new Set((pl.find(l=>l.line===lineNum)?.words||[]).filter(w=>w.sn===sn).map(w=>w.vn))];
+    verseNumbers.forEach(vn=>{
+      const verseLines=pl.filter(l=>l.words.some(w=>w.sn===sn&&w.vn===vn)).map(l=>l.line);
+      const allChecked=verseLines.every(ln=>{
+        const k=`${sn}_${pageNum}_${ln}`;
+        return k===key?willBeChecked:!!memLines[k];
+      });
+      setMem(p=>{
+        const k=String(sn),vk=String(vn);
+        const has=!!(p[k]||{})[vk];
+        if(allChecked&&!has){const c={...(p[k]||{}),[vk]:true};const nv={...p,[k]:c};sv("qmem6",nv);return nv;}
+        if(!allChecked&&has){const c={...(p[k]||{})};delete c[vk];const nv={...p,[k]:c};sv("qmem6",nv);return nv;}
+        return p;
+      });
+    });
+  };
 
   const buildUrl=(sn,vn)=>{
     const s=String(sn).padStart(3,"0");const v=String(vn).padStart(3,"0");
@@ -5973,7 +6169,7 @@ return (
                     {loadState==="error"&&(<div style={{textAlign:"center",padding:"24px",fontSize:".78rem"}}><div style={{fontSize:"1.5rem",marginBottom:10}}>🔌</div><div style={{color:t.rd,fontWeight:700,marginBottom:6}}>Connexion requise</div><div style={{color:t.tx3,marginBottom:14,lineHeight:1.5}}>Les versets de cette sourate sont chargés depuis internet.<br/>Vérifie ta connexion et réessaie.</div><button onClick={()=>{setLoadState("idle");setTimeout(()=>setSelS(s=>({...s})),100);}} style={{padding:"8px 20px",background:t.acc,border:"none",borderRadius:10,color:"#fff",fontWeight:700,cursor:"pointer",fontSize:".75rem"}}>🔄 Réessayer</button>{Q[selS?.n]?.length>0&&<div style={{marginTop:12,fontSize:".65rem",color:t.tx3}}>ou <button onClick={()=>{setVerses(Q[selS.n]);setLoadState("done");}} style={{background:"none",border:"none",color:t.acc,cursor:"pointer",fontWeight:700}}>utiliser les données embarquées</button></div>}</div>)}
                     {loadState==="done"&&(
                       <div className="vscroll-inner" style={pageMode?{direction:"ltr",textAlign:"left",padding:0,display:"flex",flexDirection:"column",height:"100%",minHeight:0,overflow:"hidden"}:{}}>
-                        {pageMode?(<QuranPageView tn={tn} verses={verses} selS={selS} t={t} tjc={tjc} showTj={showTj} showTr={showTr} arabicSize={arabicSize} arFont={arFont} mem={mem} hifzMode={hifzMode} hifzLevel={hifzLevel} playing={playing} toggleV={toggleV} toggleFav={toggleFav} isFav={isFav} doPlay={doPlay} sv={sv} setPage={setPage} wbwVerseRef={wbwVerseRef} setWbwOpen={setWbwOpen} partialPlayRef={partialPlayRef} showTf={showTf} tafsirData={tafsirData} loadTafsir={loadTafsir} doPlayPartial={doPlayPartial} setVerseCtxMenu={setVerseCtxMenu} versePages={versePages} verseJuzHizb={verseJuzHizb} reviewMode={reviewMode} revealedVerses={revealedVerses} setRevealedVerses={setRevealedVerses} karaokeMode={karaokeMode} activeWordIdx={activeWordIdx} wordTimings={wordTimings} startPlaylist={startPlaylist} curPage={quranCurPage} setCurPage={setQuranCurPage}/>):(<>
+                        {pageMode?(<QuranPageView tn={tn} verses={verses} selS={selS} t={t} tjc={tjc} showTj={showTj} showTr={showTr} arabicSize={arabicSize} arFont={arFont} mem={mem} hifzMode={hifzMode} hifzLevel={hifzLevel} playing={playing} toggleV={toggleV} toggleFav={toggleFav} isFav={isFav} doPlay={doPlay} sv={sv} setPage={setPage} wbwVerseRef={wbwVerseRef} setWbwOpen={setWbwOpen} partialPlayRef={partialPlayRef} showTf={showTf} tafsirData={tafsirData} loadTafsir={loadTafsir} doPlayPartial={doPlayPartial} setVerseCtxMenu={setVerseCtxMenu} versePages={versePages} verseJuzHizb={verseJuzHizb} reviewMode={reviewMode} revealedVerses={revealedVerses} setRevealedVerses={setRevealedVerses} karaokeMode={karaokeMode} activeWordIdx={activeWordIdx} wordTimings={wordTimings} startPlaylist={startPlaylist} curPage={quranCurPage} setCurPage={setQuranCurPage} memUnit={memUnit} pageLines={pageLines} loadPageLines={loadPageLines} memLines={memLines} toggleMemLine={toggleMemLine}/>):(<>
                         {selS.n!==1&&selS.n!==9&&(
                           <div style={{display:"block",textAlign:"center",padding:"8px 0 14px",fontSize:"1.4rem",color:t.acc,direction:"rtl"}}>
                             بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ
@@ -6088,6 +6284,7 @@ return (
                 reviewMode={reviewMode} revealedVerses={revealedVerses} setRevealedVerses={setRevealedVerses}
                 karaokeMode={karaokeMode} activeWordIdx={activeWordIdx} wordTimings={wordTimings} startPlaylist={startPlaylist}
                 curPage={quranCurPage} setCurPage={setQuranCurPage}
+                memUnit={memUnit} pageLines={pageLines} loadPageLines={loadPageLines} memLines={memLines} toggleMemLine={toggleMemLine}
                 immersive chromeVisible={readerChromeVisible} onToggleChrome={()=>setReaderChromeVisible(v=>!v)}
                 onLongPress={(v)=>setVerseMenu(v)}/>
             )}
@@ -6903,6 +7100,20 @@ return (
         {/* STATS */}
         {page==="stats"&&(
           <div className="sp">
+            {/* Carte de progression partageable — pour que l'effort soit vu
+                et valorisé par un parent/prof en dehors de l'app */}
+            <div style={{padding:"14px 16px 0"}}>
+              <button className="tbtn" style={{width:"100%",justifyContent:"center",borderColor:t.acc,color:t.acc,fontWeight:700,padding:"11px"}}
+                onClick={()=>shareProgressAsImage({
+                  name:displayName||"",
+                  versesMemorized:totalMem,totalVerses:TOTAL_VERSES,
+                  surahsDone:SURAHS.filter(s=>sMem(s)===s.v).length,
+                  juzDone:juzList.filter(j=>juzPct(j)===100).length,
+                  streak:memStreak,
+                })}>
+                📤 Partager ma progression
+              </button>
+            </div>
             {/* Graphe 7 derniers jours */}
             {(()=>{
               const days7=[];
@@ -7853,6 +8064,20 @@ return (
                   ))}
                   <button onClick={()=>setArabicSize(s=>Math.max(1,s-.2))} style={{padding:"3px 8px",borderRadius:10,border:"1px solid "+t.b1,background:"transparent",color:t.tx,fontSize:".6rem",cursor:"pointer"}}>A−</button>
                   <button onClick={()=>setArabicSize(s=>Math.min(2.5,s+.2))} style={{padding:"3px 8px",borderRadius:10,border:"1px solid "+t.b1,background:"transparent",color:t.tx,fontSize:".6rem",cursor:"pointer"}}>A+</button>
+                </div>
+              </div>
+              {/* Mémoriser par — verset entier (défaut) ou ligne réelle du
+                  Mushaf (comme sur un vrai Mushaf papier), au choix */}
+              <div style={{display:"flex",flexDirection:"column",gap:4}}>
+                <span style={{fontSize:".55rem",color:t.tx3,textTransform:"uppercase",letterSpacing:".5px"}}>Mémoriser par</span>
+                <div style={{display:"flex",gap:3}}>
+                  {[["verse","Verset"],["line","Ligne"]].map(([id,label])=>(
+                    <button key={id} onClick={()=>{setMemUnit(id);sv("qmemunit",id);}}
+                      style={{flex:1,padding:"5px 9px",borderRadius:10,fontSize:".62rem",cursor:"pointer",fontWeight:memUnit===id?700:400,
+                        border:"1px solid "+(memUnit===id?t.acc:t.b1),background:memUnit===id?t.acc+"18":"transparent",color:memUnit===id?t.acc:t.tx3}}>
+                      {label}
+                    </button>
+                  ))}
                 </div>
               </div>
               {/* Réciteur */}
