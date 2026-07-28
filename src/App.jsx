@@ -1639,13 +1639,13 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
     const spoken=isCurVerse&&speechResult
       ?stripAr(speechResult).split(/\s+/).filter(Boolean):[];
     return words.map((word,wi)=>{
-      const cleanW=stripAr(word).replace(/[ىة]/g,"ي");
+      const cleanW=stripAr(word).replace(/ى/g,"ا").replace(/ة/g,"ه");
       if(isCurVerse&&hasScore){
         const ws=speechScore.analysis?.[wi];
         return <span key={wi} style={{color:ws?.status==="ok"?t.gr:ws?.status==="wrong"?"#e91e63":t.tx3,margin:"0 2px",fontWeight:ws?.status==="ok"?600:400,transition:"color .15s"}}>{word} </span>;
       }
       if(isCurVerse&&isListening&&speechResult){
-        const cleanS=(spoken[wi]||"").replace(/[ىة]/g,"ي");
+        const cleanS=(spoken[wi]||"").replace(/ى/g,"ا").replace(/ة/g,"ه");
         const said=wi<spoken.length;
         const ok=said&&(cleanW===cleanS||cleanW.includes(cleanS)||cleanS.includes(cleanW));
         const bad=said&&!ok;
@@ -1890,6 +1890,19 @@ const trAuthErr=msg=>AUTH_ERR_FR[msg]||msg;
 const playDing=()=>{try{const ctx=new (window.AudioContext||window.webkitAudioContext)();const osc=ctx.createOscillator();const gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.type="sine";osc.frequency.value=880;gain.gain.setValueAtTime(0.15,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.35);osc.start();osc.stop(ctx.currentTime+0.35);}catch{}};
 // Son d'erreur — buzz grave descendant, pour la récitation ratée (mode invisible et hors ligne)
 const playError=()=>{try{const ctx=new (window.AudioContext||window.webkitAudioContext)();const osc=ctx.createOscillator();const gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.type="square";osc.frequency.setValueAtTime(180,ctx.currentTime);osc.frequency.exponentialRampToValueAtTime(85,ctx.currentTime+0.25);gain.gain.setValueAtTime(0.1,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.28);osc.start();osc.stop(ctx.currentTime+0.28);}catch{}};
+// Lettres disjointes (muqatta'at) — الم، كهيعص، طه… sont ÉCRITES comme des
+// glyphes collés sans espace mais RÉCITÉES comme des noms de lettres séparés
+// ("Alif, Lam, Mim") : un mot-à-mot naïf compare "الم" (1 token écrit) à
+// 3 mots prononcés et échoue systématiquement (ex: "Alif" est reconnu par la
+// synthèse vocale comme "ألف" = "mille", qui ne correspond à aucun mot du
+// texte écrit). Table des noms de lettres + variantes de reconnaissance
+// vocale tolérées, utilisée uniquement quand le verset entier n'est composé
+// que de lettres disjointes (voir analyzeRecitation).
+const MUQATTAAT_NAMES={
+  "ا":["الف","ألف"],"ل":["لام"],"م":["ميم"],"ص":["صاد"],"ر":["راء","را"],
+  "ك":["كاف"],"ه":["هاء","ها"],"ي":["ياء"],"ع":["عين"],"ط":["طا","طه","طاء"],
+  "س":["سين"],"ح":["حاء"],"ق":["قاف"],"ن":["نون"],
+};
 
 // Découpe un texte sur plusieurs lignes pour un rendu canvas (pas de wrap natif)
 function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight) {
@@ -4459,7 +4472,8 @@ const handleSetNewPassword=async(newPass)=>{
        // strip HTML tajweed
       .replace(/[ًٌٍَُِّْٰٓٔءۭۨ]/g,"")  // strip toutes diacritiques et hamza flottante
       .replace(/[أإآٱ]/g,"ا")              // toutes formes de alef → ا
-      .replace(/[ىة]/g,"ي")               // ta marbuta et alef maqsura → ي
+      .replace(/ى/g,"ا")                  // alef maqsura (son "aa") → ا
+      .replace(/ة/g,"ه")                  // ta marbuta (son "ah/h" en pause) → ه — PAS ي, sons différents
       .replace(/ؤ/g,"و")                  // waw avec hamza → و
       .replace(/ئ/g,"ي")                  // ya avec hamza → ي
       .replace(/\s+/g,"")
@@ -4468,9 +4482,13 @@ const handleSetNewPassword=async(newPass)=>{
     if(!ca||!cb) return false;
     if(ca===cb) return true;
     if(ca.includes(cb)||cb.includes(ca)) return true;
-    // Levenshtein tolérant — accepte 1 erreur par tranche de 4 caractères
-    const maxDist=Math.floor(Math.max(ca.length,cb.length)/4);
-    if(maxDist===0) return ca===cb;
+    // Levenshtein tolérant — la reconnaissance vocale arabe (surtout sur du
+    // classique/coranique) est bruitée même sur des mots courts ; exiger une
+    // correspondance exacte en dessous de 4 caractères (comme avant) rejetait
+    // à tort des mots de 2-3 lettres pourtant bien récités. Tolère désormais
+    // 1 erreur dès 2 caractères, en gardant l'exact pour les mots d'1 lettre.
+    const len=Math.max(ca.length,cb.length);
+    const maxDist=len<=1?0:Math.max(1,Math.round(len/3));
     const dp=Array.from({length:ca.length+1},(_,i)=>Array.from({length:cb.length+1},(_,j)=>i===0?j:j===0?i:0));
     for(let i=1;i<=ca.length;i++) for(let j=1;j<=cb.length;j++) dp[i][j]=ca[i-1]===cb[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
     return dp[ca.length][cb.length]<=maxDist;
@@ -4478,9 +4496,24 @@ const handleSetNewPassword=async(newPass)=>{
 
   // Analyse mot par mot — tolère l'ordre et les omissions mineures
   const analyzeRecitation=(targetAr,spoken)=>{
-    const stripH=s=>((s||"").replace(/<[^>]*>/g,"").replace(/[﴿﴾]/g,"").replace(/\s*[١٢٣٤٥٦٧٨٩٠]+\s*$/,"")).replace(/[ًٌٍَُِّْٰٓٔءۭۨ]/g,"").replace(/[أإآٱ]/g,"ا").replace(/[ىة]/g,"ي").replace(/ؤ/g,"و").replace(/ئ/g,"ي").trim();
+    const stripH=s=>((s||"").replace(/<[^>]*>/g,"").replace(/[﴿﴾]/g,"").replace(/\s*[١٢٣٤٥٦٧٨٩٠]+\s*$/,"")).replace(/[ًٌٍَُِّْٰٓٔءۭۨ]/g,"").replace(/[أإآٱ]/g,"ا").replace(/ى/g,"ا").replace(/ة/g,"ه").replace(/ؤ/g,"و").replace(/ئ/g,"ي").trim();
     const target=stripH(targetAr).split(/\s+/).filter(Boolean);
     const said=stripH(spoken).split(/\s+/).filter(Boolean);
+    // Lettres disjointes (muqatta'at) — verset entier = un seul mot écrit
+    // ("الم") qui se récite comme plusieurs noms de lettres séparés ("Alif,
+    // Lam, Mim"). Comparaison spécifique lettre par lettre plutôt que le
+    // mot-à-mot classique, sinon échec systématique (voir MUQATTAAT_NAMES).
+    if(target.length===1&&target[0].length<=5&&[...target[0]].every(c=>MUQATTAAT_NAMES[c])){
+      const letters=[...target[0]];
+      let sj=0,matched=0;
+      letters.forEach(L=>{
+        const names=MUQATTAAT_NAMES[L];
+        const ahead=said.slice(sj,sj+3).findIndex(w=>names.some(n=>arabicMatch(n,w)));
+        if(ahead>=0){sj+=ahead+1;matched++;}
+      });
+      const minNeeded=letters.length-Math.floor(letters.length/3);
+      return [{word:target[0],status:matched>=minNeeded?"ok":"wrong"}];
+    }
     if(!said.length) return target.map(tw=>({word:tw,status:"missing"}));
     let si=0;
     return target.map(tw=>{
