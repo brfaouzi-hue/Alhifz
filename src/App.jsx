@@ -1548,7 +1548,9 @@ function LoginRequiredScreen({t,acc,label,onLogin}){
 function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx,continuousMode:initChain,setContinuousMode,speechListening,speechVerseTarget,speechCountdown,speechScore,speechResult,showTj,tjc,mem,startListening,stopListening,setSpeechScore,setSpeechResult,countdownRef,setSpeechCountdown,doPlay,sm2Update,onClose}){
   const [idx,setIdx]=React.useState(initIdx||0);
   const [chain,setChain]=React.useState(true);
-  const [pageMode,setPageMode]=React.useState(false); // false=verset unique, true=page entière
+  const [pageMode,setPageMode]=React.useState(true); // false=verset unique, true=page entière (par défaut)
+  const [invisibleMode,setInvisibleMode]=React.useState(false); // masque le texte, révélé verset par verset une fois bien récité
+  const [revealedRecit,setRevealedRecit]=React.useState({}); // {vn:true} versets démasqués en mode invisible
   const idxRef=React.useRef(idx);
   const chainRef=React.useRef(true);
   const versesRef=React.useRef(verses);
@@ -1573,6 +1575,7 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
   const handleAttemptResult=React.useCallback((v,s)=>{
     if(sm2Update&&v) sm2Update(selS.n,v.n,s.pct>=90?5:s.pct>=70?4:3);
     if(s.pct>=70){
+      if(invisibleMode&&v) setRevealedRecit(p=>({...p,[v.n]:true}));
       if(chainRef.current) setTimeout(nextVerse,700);
     } else if(retryCountRef.current<2){
       retryCountRef.current+=1;
@@ -1580,9 +1583,12 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
         setSpeechScore(null);setSpeechResult("");
         startListening(v.ar||"",v.n,(s2)=>handleAttemptResult(v,s2));
       },900);
+    } else if(invisibleMode&&v){
+      // 3 tentatives ratées : on révèle quand même pour ne pas bloquer indéfiniment
+      setRevealedRecit(p=>({...p,[v.n]:true}));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[sm2Update,selS,startListening,setSpeechScore,setSpeechResult]);
+  },[sm2Update,selS,startListening,setSpeechScore,setSpeechResult,invisibleMode]);
 
   const nextVerse=React.useCallback(()=>{
     const n=idxRef.current+1;
@@ -1664,6 +1670,14 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
         <button onClick={()=>setPageMode(p=>!p)} style={{padding:"4px 10px",borderRadius:20,border:`1px solid ${pageMode?acc:t.b2}`,background:pageMode?acc+"18":"transparent",color:pageMode?acc:t.tx3,fontSize:".6rem",fontWeight:600,cursor:"pointer",flexShrink:0}}>
           {pageMode?"📄 Page":"📖 Verset"}
         </button>
+        {/* Mode invisible — masque le texte, révélé au fur et à mesure d'une bonne récitation */}
+        <button onClick={()=>setInvisibleMode(v=>!v)} title="Mode invisible — récite de mémoire, le texte se révèle si c'est juste"
+          style={{padding:"4px 9px",borderRadius:20,border:`1px solid ${invisibleMode?"#e91e63":t.b2}`,background:invisibleMode?"#e91e6318":"transparent",color:invisibleMode?"#e91e63":t.tx3,fontSize:".6rem",fontWeight:600,cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",gap:4}}>
+          {invisibleMode
+            ?<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            :<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          }
+        </button>
         {/* Enchainement */}
         <button onClick={toggleChain} style={{padding:"4px 10px",borderRadius:20,border:`1px solid ${chain?acc:t.b2}`,background:chain?acc+"18":"transparent",color:chain?acc:t.tx3,fontSize:".6rem",fontWeight:600,cursor:"pointer",flexShrink:0}}>
           {chain?"🔗 Auto":"✋ Manuel"}
@@ -1689,10 +1703,17 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
             {isMem&&<span style={{fontSize:".6rem",color:t.gr,fontWeight:700}}>✓ Mémorisé</span>}
           </div>
 
-          {/* Verset arabe avec surlignage */}
-          <div key={idx} style={{fontFamily:"Scheherazade New,Amiri Quran,serif",fontSize:"clamp(1.7rem,5.5vw,2.4rem)",direction:"rtl",textAlign:"center",lineHeight:2.3,padding:"0 8px",maxWidth:"100%"}}>
-            {renderWords(stripTags(curV?.ar||""),true,stripAr(curV?.ar||""))}
-          </div>
+          {/* Verset arabe avec surlignage — masqué en mode invisible tant que pas récité juste */}
+          {invisibleMode&&!revealedRecit[curV?.n]?(
+            <div key={idx} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:10,padding:"30px 0"}}>
+              <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"2.2em",height:"2.2em",borderRadius:"50%",border:`2px solid ${t.b2}`,fontSize:"1.2rem",fontWeight:700,color:t.tx3}}>{curV?.n}</span>
+              <span style={{fontSize:".65rem",color:t.tx3}}>Récite ce verset de mémoire</span>
+            </div>
+          ):(
+            <div key={idx} style={{fontFamily:"Scheherazade New,Amiri Quran,serif",fontSize:"clamp(1.7rem,5.5vw,2.4rem)",direction:"rtl",textAlign:"center",lineHeight:2.3,padding:"0 8px",maxWidth:"100%"}}>
+              {renderWords(stripTags(curV?.ar||""),true,stripAr(curV?.ar||""))}
+            </div>
+          )}
 
           {/* Score */}
           {hasScore&&(
@@ -1721,24 +1742,31 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
             const isCur=vi===idx;
             const isDone=vi<idx;
             const vAr=stripAr(v?.ar||"");
+            const masked=invisibleMode&&!revealedRecit[v.n];
             return(
               <div key={v.n} data-cur={String(isCur)}
                 onClick={()=>!isCur&&goTo(vi)}
                 style={{marginBottom:8,padding:"10px 12px",borderRadius:14,
                   background:isCur?(tn==="light"?"rgba(46,125,50,.07)":"rgba(46,125,50,.13)"):isDone?"rgba(0,0,0,.02)":"transparent",
                   border:isCur?`1.5px solid ${acc}44`:"1.5px solid transparent",
-                  transition:"all .3s",opacity:isDone?0.5:1,
+                  transition:"all .3s",opacity:isDone&&!masked?0.5:1,
                   cursor:isCur?"default":"pointer"}}
               >
-                <div style={{direction:"rtl",textAlign:"justify",fontFamily:"Scheherazade New,Amiri Quran,serif",fontSize:"clamp(1.3rem,3.8vw,1.75rem)",lineHeight:2.1}}>
-                  {renderWords(stripTags(v?.ar||""),isCur,vAr)}
-                  <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"1.3em",height:"1.3em",borderRadius:"50%",border:`1px solid ${isCur?acc:isDone?t.gr:t.b2}`,fontSize:".5em",fontWeight:600,color:isCur?acc:isDone?t.gr:t.tx3,background:isDone?t.gr+"22":"transparent",marginRight:4,verticalAlign:"middle"}}>{v.n}</span>
-                </div>
-                {v?.fr&&<div style={{direction:"ltr",textAlign:"left",fontSize:".68rem",color:t.tx3,fontStyle:"italic",lineHeight:1.5,marginTop:4}}>{stripTags(v.fr)}</div>}
-                {isDone&&<div style={{fontSize:".58rem",color:t.gr,marginTop:2,display:"flex",alignItems:"center",gap:3}}>
-                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>Récité
-                </div>}
-                {isCur&&!isListening&&!isCountdown&&!hasScore&&<div style={{fontSize:".58rem",color:acc,marginTop:4,opacity:.7}}>🎤 Appuie sur le micro pour réciter</div>}
+                {masked?(
+                  <div style={{display:"flex",justifyContent:"center",padding:"8px 0"}}>
+                    <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"1.6em",height:"1.6em",borderRadius:"50%",border:`1.5px solid ${isCur?acc:t.b2}`,fontSize:".85rem",fontWeight:700,color:isCur?acc:t.tx3}}>{v.n}</span>
+                  </div>
+                ):(<>
+                  <div style={{direction:"rtl",textAlign:"justify",fontFamily:"Scheherazade New,Amiri Quran,serif",fontSize:"clamp(1.3rem,3.8vw,1.75rem)",lineHeight:2.1}}>
+                    {renderWords(stripTags(v?.ar||""),isCur,vAr)}
+                    <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"1.3em",height:"1.3em",borderRadius:"50%",border:`1px solid ${isCur?acc:isDone?t.gr:t.b2}`,fontSize:".5em",fontWeight:600,color:isCur?acc:isDone?t.gr:t.tx3,background:isDone?t.gr+"22":"transparent",marginRight:4,verticalAlign:"middle"}}>{v.n}</span>
+                  </div>
+                  {v?.fr&&<div style={{direction:"ltr",textAlign:"left",fontSize:".68rem",color:t.tx3,fontStyle:"italic",lineHeight:1.5,marginTop:4}}>{stripTags(v.fr)}</div>}
+                  {isDone&&<div style={{fontSize:".58rem",color:t.gr,marginTop:2,display:"flex",alignItems:"center",gap:3}}>
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>Récité
+                  </div>}
+                </>)}
+                {isCur&&!isListening&&!isCountdown&&!hasScore&&<div style={{fontSize:".58rem",color:acc,marginTop:4,opacity:.7,textAlign:"center"}}>🎤 Appuie sur le micro pour réciter</div>}
               </div>
             );
           })}
@@ -1860,6 +1888,8 @@ const AUTH_ERR_FR={
 };
 const trAuthErr=msg=>AUTH_ERR_FR[msg]||msg;
 const playDing=()=>{try{const ctx=new (window.AudioContext||window.webkitAudioContext)();const osc=ctx.createOscillator();const gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.type="sine";osc.frequency.value=880;gain.gain.setValueAtTime(0.15,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.35);osc.start();osc.stop(ctx.currentTime+0.35);}catch{}};
+// Son d'erreur — buzz grave descendant, pour la récitation ratée (mode invisible et hors ligne)
+const playError=()=>{try{const ctx=new (window.AudioContext||window.webkitAudioContext)();const osc=ctx.createOscillator();const gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.type="square";osc.frequency.setValueAtTime(180,ctx.currentTime);osc.frequency.exponentialRampToValueAtTime(85,ctx.currentTime+0.25);gain.gain.setValueAtTime(0.1,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.28);osc.start();osc.stop(ctx.currentTime+0.28);}catch{}};
 
 // Découpe un texte sur plusieurs lignes pour un rendu canvas (pas de wrap natif)
 function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight) {
@@ -4505,7 +4535,8 @@ const handleSetNewPassword=async(newPass)=>{
           spokenWords:transcript.split(/\s+/),
         };
         setSpeechScore(score);
-        if(score.pct>=70)playDing();
+        if(score.pct>=70){playDing();}
+        else{playError();try{navigator.vibrate&&navigator.vibrate([35,50,35]);}catch{}}
         if(onDone) onDone(score);
       }
     };
