@@ -2264,7 +2264,7 @@ body>*{position:relative;z-index:1;}
 .vfill{height:100%;background:${t.gr};border-radius:99px;transition:width .5s;}
 .vtoolbar{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:7px 12px;border-bottom:1px solid ${t.b1};display:flex;align-items:center;gap:5px;flex-wrap:nowrap;background:${t.s2};}
 .vtoolbar::-webkit-scrollbar{display:none;}
-.tbtn{white-space:nowrap;flex-shrink:0;padding:4px 9px;border-radius:99px;border:1px solid ${t.b2};background:transparent;color:${t.tx2};font-size:.65rem;cursor:pointer;transition:all .2s;}
+.tbtn{white-space:nowrap;flex-shrink:0;padding:7px 14px;border-radius:99px;border:1px solid ${t.b2};background:transparent;color:${t.tx2};font-size:.74rem;cursor:pointer;transition:all .2s;min-height:34px;}
 .tbtn:hover{border-color:${acc};color:${acc};transform:translateY(-1px);}
 .tbtn.on{background:${acc};border-color:${acc};color:#fff;font-weight:600;}
 .tsel{background:${t.inputBg};border:1px solid ${t.b2};color:${t.tx};padding:4px 8px;border-radius:8px;font-size:.65rem;outline:none;}
@@ -2301,7 +2301,7 @@ body>*{position:relative;z-index:1;}
 .vtf-hd{font-size:.58rem;color:${t.pu};text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:3px;}
 .vacts{display:flex;gap:4px;margin-top:7px;flex-wrap:wrap;max-height:0;overflow:hidden;transition:max-height .25s ease,opacity .2s;opacity:0;pointer-events:none;}
 .vacts.open{max-height:120px;opacity:1;pointer-events:auto;}
-.vbtn{padding:3px 8px;border-radius:99px;border:1px solid ${t.b2};background:transparent;color:${t.tx3};font-size:.6rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:3px;}
+.vbtn{padding:6px 13px;border-radius:99px;border:1px solid ${t.b2};background:transparent;color:${t.tx3};font-size:.68rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:4px;min-height:30px;box-sizing:border-box;}
 .vbtn:hover{border-color:${acc};color:${acc};transform:translateY(-1px);}
 .vbtn.mem{background:${t.grD};border-color:${t.gr};color:${t.gr};}
 .vbtn.snd{border-color:${t.bl};color:${t.bl};}
@@ -2824,8 +2824,12 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
 }
 
 export default function App() {
+  // Toujours clair par défaut tant que l'utilisateur n'a pas choisi lui-même
+  // un thème — un effet précédent alignait ce choix sur les préférences
+  // système (prefers-color-scheme), donc un téléphone en mode sombre système
+  // affichait l'app en sombre malgré ce "light" par défaut, ce qui n'est pas
+  // ce qui est voulu ici.
   const [tn,setTn]=useState(()=>ld("qtheme2","light")); // qtheme2 = new key with new themes
-  React.useEffect(()=>{const mq=window.matchMedia("(prefers-color-scheme: dark)");const apply=()=>{if(!localStorage.getItem("qtheme2")){setTn(mq.matches?"dark":"light");}};apply();mq.addEventListener("change",apply);return()=>mq.removeEventListener("change",apply);},[]);
   const t=THEMES[tn]||THEMES.dark;
   // Palette tajwid choisie selon la LUMINOSITÉ réelle du fond du thème, pas
   // seulement le thème littéralement nommé "light" — le thème "mushaf" a lui
@@ -2925,7 +2929,7 @@ const [authError, setAuthError] = useState("");
   // masquée par défaut pour laisser toute la place à la page — un tap la ré-affiche.
   useEffect(()=>{if(page==="reader")setReaderChromeVisible(false);},[page]);
   const [verseMenu,setVerseMenu]=useState(null);
-  const [pageMode,setPageMode]=useState(()=>ld('qpagemode',false));
+  const [pageMode,setPageMode]=useState(()=>ld('qpagemode',true));
   const [showTf,setShowTf]=useState(false);
   const [showTutorial,setShowTutorial]=useState(false);
   const [tutorialPage,setTutorialPage]=useState(0);
@@ -2972,6 +2976,10 @@ const [authError, setAuthError] = useState("");
   const [joinCode,setJoinCode]=useState("");
   const [activeColKhatma,setActiveColKhatma]=useState(()=>ld("qactcolkhatma",null));
   const [goal,setGoal]=useState("5");
+  // Popup rapide pour changer l'objectif quotidien depuis l'accueil — avant,
+  // le seul moyen était un champ number caché dans Réglages, sans aucune
+  // affordance visible pour dire "c'est modifiable ici".
+  const [showGoalEdit,setShowGoalEdit]=useState(false);
   const [baselineInput,setBaselineInput]=useState("0"); // versets déjà connus à l'inscription
   const [startDate,setStartDate]=useState(new Date().toISOString().split("T")[0]);
   const [arabicSize,setArabicSize]=useState(()=>ld("qasize",1.65));
@@ -3037,6 +3045,14 @@ const partialPlayRef=useRef(null); // {stopAt: ratio 0-1}
   const [playlist,setPlaylist]=useState([]);
   const [playlistIdx,setPlaylistIdx]=useState(0);
   const [playlistActive,setPlaylistActive]=useState(false);
+  // Répéter un bloc de versets plusieurs fois (façon Tarteel) — avant, une
+  // playlist s'arrêtait toujours net à la fin, impossible de la boucler.
+  const [playlistRepeat,setPlaylistRepeat]=useState(1); // nombre de tours voulus, Infinity = en boucle
+  const [playlistRepDone,setPlaylistRepDone]=useState(1); // tours déjà effectués
+  const playlistRepeatRef=useRef(1);
+  const playlistRepDoneRef=useRef(1);
+  const [showBlockPlay,setShowBlockPlay]=useState(false);
+  const [blockForm,setBlockForm]=useState({from:1,to:7,repeat:1});
   const [showWeeklyReport,setShowWeeklyReport]=useState(false);
   const [chartView,setChartView]=useState("daily");
   const [testMode,setTestMode]=useState(false);
@@ -3103,6 +3119,22 @@ const partialPlayRef=useRef(null); // {stopAt: ratio 0-1}
   const [revFlags,setRevFlags]=useState(()=>ld("qrevflags",{})); // {surahN: "active"|"mastered"|"paused"}
   const [revSessions,setRevSessions]=useState(()=>ld("qrevsessions",[])); // [{date,sn,score,mode}]
   const [revFilter,setRevFilter]=useState("all");
+  // Plages de révision personnalisées — avant, "Révision" ne permettait de
+  // suivre QUE des sourates entières ; on peut maintenant cibler juste "les
+  // versets X à Y que je connais déjà" d'une sourate, sans devoir suivre
+  // toute la sourate. Le moteur SM-2 (state `spaced`) est déjà par verset,
+  // seule l'organisation par plage manquait.
+  const [revRanges,setRevRanges]=useState(()=>ld("qrevranges",[])); // [{id,sn,from,to}]
+  const [showRangeAdd,setShowRangeAdd]=useState(false);
+  const [rangeForm,setRangeForm]=useState({sn:1,from:1,to:7});
+  const addRevRange=()=>{
+    const sn=parseInt(rangeForm.sn),from=Math.max(1,parseInt(rangeForm.from)||1),to=Math.max(from,parseInt(rangeForm.to)||from);
+    const nr={id:Date.now()+"_"+Math.random().toString(36).slice(2),sn,from,to};
+    setRevRanges(p=>{const n=[...p,nr];sv("qrevranges",n);return n;});
+    setShowRangeAdd(false);
+    setToastMsg("Plage ajoutée à la révision ✓");
+  };
+  const removeRevRange=id=>setRevRanges(p=>{const n=p.filter(r=>r.id!==id);sv("qrevranges",n);return n;});
   const [swipeState,setSwipeState]=useState({});
   const swipeTouchStart=useRef({});
   const [verses,setVerses]=useState([]);
@@ -3375,7 +3407,7 @@ const handleSetNewPassword=async(newPass)=>{
     setVerseSearchResults(results.slice(0,30));setVerseSearchLoading(false);
   },[]);
 
-  const startPlaylist=(sn,vs,startVn=1)=>{
+  const startPlaylist=(sn,vs,startVn=1,repeat=1)=>{
     if(!audioRef.current)return;
     const items=vs.filter(v=>v&&v.n).map(v=>({sn,vn:v.n}));
     if(!items.length)return;
@@ -3385,6 +3417,8 @@ const handleSetNewPassword=async(newPass)=>{
     setPlaylist(items);
     setPlaylistIdx(idx);
     setPlaylistActive(true);
+    setPlaylistRepeat(repeat);
+    setPlaylistRepDone(1);
     setPlaying(first.vn);
     const audio=audioRef.current;
     audio.pause();
@@ -3843,6 +3877,8 @@ const handleSetNewPassword=async(newPass)=>{
   playingRef.current=playing;
   playlistRef.current=playlist;
   playlistActiveRef.current=playlistActive;
+  playlistRepeatRef.current=playlistRepeat;
+  playlistRepDoneRef.current=playlistRepDone;
 
   // handleEnded unifié — playlist prioritaire, sinon loop
   useEffect(()=>{
@@ -3868,6 +3904,19 @@ const handleSetNewPassword=async(newPass)=>{
           setPlaying(next.vn);
           setPlaylistIdx(curIdx+1);
           addToHistory(next.sn,next.vn);
+        } else if(playlistRepeatRef.current===Infinity||playlistRepDoneRef.current<playlistRepeatRef.current){
+          // Bloc terminé mais il reste des tours à faire (façon Tarteel) —
+          // on repart du premier verset du bloc au lieu de s'arrêter net.
+          const first=playlistRef.current[0];
+          if(!first){setPlaylistActive(false);setPlaying(null);setAudioPlaying(false);setAudioPct(0);return;}
+          setPlaylistRepDone(p=>p+1);
+          const url=buildUrl(first.sn,first.vn);
+          audio.src=url;
+          audio.load();
+          audio.play().catch(()=>{});
+          setPlaying(first.vn);
+          setPlaylistIdx(0);
+          addToHistory(first.sn,first.vn);
         } else {
           // fin de la playlist
           setPlaylistActive(false);
@@ -4282,9 +4331,11 @@ const handleSetNewPassword=async(newPass)=>{
 
   const createList=name=>{if(!name.trim())return;const nl={id:Date.now(),name:name.trim(),items:[]};setLists(p=>[...p,nl]);setNewListName("");return nl;};
 
-  const startTimer=()=>{
+  // tick() ne fait que faire avancer l'intervalle — startTimer (réinitialise à
+  // fond) et resumeTimer (reprend tel quel après pause) partagent cette même
+  // logique de décompte, seule la valeur de départ de timerLeft diffère.
+  const tickTimer=()=>{
     if(timerRef.current)clearInterval(timerRef.current);
-    setTimerLeft(timerDuration*60);
     setTimerRunning(true);
     timerRef.current=setInterval(()=>{
       setTimerLeft(p=>{
@@ -4297,6 +4348,17 @@ const handleSetNewPassword=async(newPass)=>{
         return p-1;
       });
     },1000);
+  };
+  const startTimer=()=>{
+    setTimerLeft(timerDuration*60);
+    tickTimer();
+  };
+  // Reprendre après une pause NE DOIT PAS repartir de timerDuration*60 — avant,
+  // le bouton "Reprendre" appelait startTimer() par erreur et repartait donc
+  // toujours du plein temps (ex: 20:00) au lieu de continuer depuis la valeur
+  // restante au moment de la pause (ex: 16:20).
+  const resumeTimer=()=>{
+    tickTimer();
   };
   const pauseTimer=()=>{
     clearInterval(timerRef.current);
@@ -4617,6 +4679,62 @@ return (
         </div>
       )}
 
+      {/* Popup rapide : modifier l'objectif quotidien depuis l'accueil */}
+      {showGoalEdit&&(
+        <div className="overlay" onClick={()=>setShowGoalEdit(false)}>
+          <div style={{background:t.s1,border:`1px solid ${t.acc}`,borderRadius:18,padding:24,maxWidth:420,width:"88%"}} onClick={e=>e.stopPropagation()}>
+            <h2 style={{fontFamily:"Amiri,serif",fontSize:"1.2rem",color:t.acc,marginBottom:4}}>Objectif quotidien</h2>
+            <p style={{fontSize:".7rem",color:t.tx3,marginBottom:16}}>Combien de versets veux-tu mémoriser par jour ?</p>
+            <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:20}}>
+              {[3,5,7,10,15,20].map(n=>(
+                <button key={n} onClick={()=>setGoal(String(n))} style={{padding:"9px 16px",borderRadius:10,border:"1px solid "+(goal===String(n)?t.acc:t.b1),background:goal===String(n)?t.acc+"18":"transparent",color:goal===String(n)?t.acc:t.tx3,fontWeight:goal===String(n)?700:400,cursor:"pointer",fontSize:".8rem",transition:"all .15s"}}>
+                  {n}v/j
+                </button>
+              ))}
+            </div>
+            <div style={{display:"flex",gap:8}}>
+              <button className="tbtn" style={{flex:1}} onClick={()=>setShowGoalEdit(false)}>Annuler</button>
+              <button className="mbtn" style={{flex:2}} onClick={()=>{
+                const g=parseInt(goal)||5;
+                setSettings(s=>{const ns={...(s||{}),dailyGoal:g,goal:g};sv("qset6",ns);return ns;});
+                setShowGoalEdit(false);
+                setToastMsg("Objectif mis à jour ✓");
+              }}>Enregistrer</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Popup : ajouter une plage de révision personnalisée */}
+      {showRangeAdd&&(
+        <div className="overlay" onClick={()=>setShowRangeAdd(false)}>
+          <div style={{background:t.s1,border:`1px solid ${t.acc}`,borderRadius:18,padding:24,maxWidth:420,width:"88%"}} onClick={e=>e.stopPropagation()}>
+            <h2 style={{fontFamily:"Amiri,serif",fontSize:"1.2rem",color:t.acc,marginBottom:4}}>Plage de révision</h2>
+            <p style={{fontSize:".7rem",color:t.tx3,marginBottom:16}}>Cible juste les versets que tu connais déjà, sans suivre toute la sourate.</p>
+            <div style={{marginBottom:12}}>
+              <label style={{display:"block",fontSize:".62rem",color:t.tx3,marginBottom:5}}>Sourate</label>
+              <select value={rangeForm.sn} onChange={e=>{const sn=+e.target.value;setRangeForm(p=>({...p,sn,to:Math.min(p.to,SURAHS[sn-1]?.v||p.to)}));}} style={{width:"100%",padding:"9px 10px",borderRadius:10,border:"1px solid "+t.b1,background:t.navBg,color:t.tx,fontSize:16}}>
+                {SURAHS.map(s=><option key={s.n} value={s.n}>{s.n}. {s.name}</option>)}
+              </select>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:20}}>
+              <div>
+                <label style={{display:"block",fontSize:".62rem",color:t.tx3,marginBottom:5}}>Du verset</label>
+                <input type="number" min="1" max={SURAHS[rangeForm.sn-1]?.v||286} value={rangeForm.from} onChange={e=>setRangeForm(p=>({...p,from:e.target.value}))} style={{width:"100%",padding:"9px 10px",borderRadius:10,border:"1px solid "+t.b1,background:t.navBg,color:t.tx,fontSize:16,boxSizing:"border-box"}}/>
+              </div>
+              <div>
+                <label style={{display:"block",fontSize:".62rem",color:t.tx3,marginBottom:5}}>Au verset</label>
+                <input type="number" min="1" max={SURAHS[rangeForm.sn-1]?.v||286} value={rangeForm.to} onChange={e=>setRangeForm(p=>({...p,to:e.target.value}))} style={{width:"100%",padding:"9px 10px",borderRadius:10,border:"1px solid "+t.b1,background:t.navBg,color:t.tx,fontSize:16,boxSizing:"border-box"}}/>
+              </div>
+            </div>
+            <div style={{display:"flex",gap:8}}>
+              <button className="tbtn" style={{flex:1}} onClick={()=>setShowRangeAdd(false)}>Annuler</button>
+              <button className="mbtn" style={{flex:2}} onClick={addRevRange}>Ajouter</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Splash */}
       {splash&&(
         <div style={{position:"fixed",inset:0,zIndex:300,background:tn==="dark"?"#07090d":"#f5f7f0",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:6}}>
@@ -4754,7 +4872,7 @@ return (
             </div>
           </div>
         )}
-        {verseCtxMenu&&(<div onClick={()=>setVerseCtxMenu(null)} style={{position:"fixed",inset:0,zIndex:999,background:"rgba(0,0,0,.5)"}}><div onClick={e=>e.stopPropagation()} style={{position:"fixed",bottom:0,left:0,right:0,background:t.s1,borderRadius:"20px 20px 0 0",boxShadow:"0 -4px 30px rgba(0,0,0,.15)",paddingBottom:"max(16px,env(safe-area-inset-bottom))",maxHeight:"70vh",overflowY:"auto"}}><div style={{width:36,height:4,borderRadius:2,background:t.b1,margin:"12px auto 0"}}/><div style={{padding:"12px 20px 14px",borderBottom:"1px solid "+t.b1}}><div style={{fontSize:".6rem",color:t.acc,fontWeight:700,marginBottom:4,textTransform:"uppercase"}}>{(SURAHS||[]).find(s=>s.n===verseCtxMenu.sn)?.name||"Sourate"} {verseCtxMenu.sn}:{verseCtxMenu.vn}</div><div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.2rem",color:t.tx,direction:"rtl",lineHeight:2,textAlign:"right"}}>{stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,""))}</div>{verseCtxMenu.fr&&<div style={{fontSize:".72rem",color:t.tx3,fontStyle:"italic",marginTop:4}}>{(verseCtxMenu.fr||"").replace(/<[^>]*>/g,"").slice(0,100)}</div>}</div><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",padding:"8px 0",borderBottom:"1px solid "+t.b1}}>{[{icon:"▶",label:"Ecouter",active:false,color:t.acc,fn:()=>{doPlay(verseCtxMenu.vn);setVerseCtxMenu(null);}},{icon:"✓",label:isMem(verseCtxMenu.sn,verseCtxMenu.vn)?"Memorise":"Memoriser",active:isMem(verseCtxMenu.sn,verseCtxMenu.vn),color:t.gr,fn:()=>{toggleV(verseCtxMenu.sn,verseCtxMenu.vn,"");setVerseCtxMenu(null);}},{icon:"❤",label:isFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn))?"Retire":"Favori",active:isFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn)),color:t.rd,fn:()=>{toggleFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn));setVerseCtxMenu(null);}},{icon:"🔖",label:"Signet",active:bookmark?.sn===verseCtxMenu.sn&&bookmark?.vn===verseCtxMenu.vn,color:t.acc,fn:()=>{setBookmark(b=>b?.sn===verseCtxMenu.sn&&b?.vn===verseCtxMenu.vn?null:{sn:verseCtxMenu.sn,vn:verseCtxMenu.vn});setVerseCtxMenu(null);}}].map(a=>(<button key={a.label} onClick={a.fn} style={{padding:"10px 4px 6px",background:"transparent",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:4}}><div style={{width:40,height:40,borderRadius:"50%",border:"2px solid "+(a.active?a.color:t.b1),background:a.active?a.color+"15":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.1rem",color:a.active?a.color:t.tx3}}>{a.icon}</div><span style={{fontSize:".55rem",color:a.active?a.color:t.tx3,fontWeight:a.active?700:400}}>{a.label}</span></button>))}</div>{[{icon:<Icons.Book size={17}/>,label:"Tafsir",sub:"Commentaire du verset",active:showTf,color:t.pu,fn:()=>{setShowTf(p=>!p);setVerseCtxMenu(null);}},{icon:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,label:"Traduction",sub:"Sens en français",active:showTr,color:t.bl,fn:()=>{setShowTr(p=>!p);setVerseCtxMenu(null);}},{icon:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>,label:"Mot a mot",sub:"Sens de chaque mot (anglais)",color:"#fb8c00",fn:()=>{if(wbwVerseRef)wbwVerseRef.current={sn:verseCtxMenu.sn,vn:verseCtxMenu.vn};setWbwOpen&&setWbwOpen(true);setVerseCtxMenu(null);}},{icon:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>,label:"Lecture partielle",sub:"Lire une partie",color:"#00838f",fn:()=>{const words=stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,"")).trim().split(/\s+/).filter(Boolean);setPartialVerse({sn:verseCtxMenu.sn,vn:verseCtxMenu.vn,words,from:0,to:words.length-1});setVerseCtxMenu(null);}},{icon:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>,label:"Copier",sub:null,color:t.tx3,fn:()=>{try{navigator.clipboard?.writeText(stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,"")));}catch(e){}setToastMsg("Copie!");setVerseCtxMenu(null);}},{icon:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>,label:"Partager en image",sub:"Carte PNG pour WhatsApp",color:t.gr,fn:()=>{const artx=stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,""));const frtx=(verseCtxMenu.fr||"").replace(/<[^>]*>/g,"");const surahName=(SURAHS||[]).find(s=>s.n===verseCtxMenu.sn)?.name||"Coran";shareVerseAsImage({arText:artx,frText:frtx,surahName,verseN:verseCtxMenu.vn});setVerseCtxMenu(null);}}].map(a=>(<button key={a.label} onClick={a.fn} style={{display:"flex",alignItems:"center",gap:14,width:"100%",padding:"13px 20px",background:"transparent",border:"none",borderTop:"1px solid "+t.b1,color:t.tx,cursor:"pointer",textAlign:"left"}}><div style={{width:36,height:36,borderRadius:12,background:(a.color||t.tx3)+"18",display:"flex",alignItems:"center",justifyContent:"center",color:a.color||t.tx3,flexShrink:0}}>{a.icon}</div><div style={{flex:1}}><div style={{fontSize:".85rem",fontWeight:600}}>{a.label}</div>{a.sub&&<div style={{fontSize:".68rem",color:t.tx3,marginTop:1}}>{a.sub}</div>}</div><div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>{a.active!==undefined&&(<div style={{width:20,height:20,borderRadius:"50%",background:a.active?t.acc:"transparent",border:"2px solid "+(a.active?t.acc:t.b1),transition:"all .2s"}}/>)}<span style={{color:t.tx3}}>›</span></div></button>))}<button onClick={()=>setVerseCtxMenu(null)} style={{width:"100%",padding:"14px",background:"transparent",border:"none",borderTop:"2px solid "+t.b1,color:t.tx3,fontSize:".85rem",cursor:"pointer",fontWeight:600}}>Annuler</button></div></div>)}
+        {verseCtxMenu&&(<div onClick={()=>setVerseCtxMenu(null)} style={{position:"fixed",inset:0,zIndex:999,background:"rgba(0,0,0,.5)"}}><div onClick={e=>e.stopPropagation()} style={{position:"fixed",bottom:0,left:0,right:0,background:t.s1,borderRadius:"20px 20px 0 0",boxShadow:"0 -4px 30px rgba(0,0,0,.15)",paddingBottom:"max(16px,env(safe-area-inset-bottom))",maxHeight:"70vh",overflowY:"auto"}}><div style={{width:36,height:4,borderRadius:2,background:t.b1,margin:"12px auto 0"}}/><div style={{padding:"12px 20px 14px",borderBottom:"1px solid "+t.b1}}><div style={{fontSize:".6rem",color:t.acc,fontWeight:700,marginBottom:4,textTransform:"uppercase"}}>{(SURAHS||[]).find(s=>s.n===verseCtxMenu.sn)?.name||"Sourate"} {verseCtxMenu.sn}:{verseCtxMenu.vn}</div><div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.2rem",color:t.tx,direction:"rtl",lineHeight:2,textAlign:"right"}}>{stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,""))}</div>{verseCtxMenu.fr&&<div style={{fontSize:".72rem",color:t.tx3,fontStyle:"italic",marginTop:4}}>{(verseCtxMenu.fr||"").replace(/<[^>]*>/g,"").slice(0,100)}</div>}</div><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",padding:"8px 0",borderBottom:"1px solid "+t.b1}}>{[{icon:"▶",label:"Ecouter",active:false,color:t.acc,fn:()=>{doPlay(verseCtxMenu.vn);setVerseCtxMenu(null);}},{icon:"✓",label:isMem(verseCtxMenu.sn,verseCtxMenu.vn)?"Memorise":"Memoriser",active:isMem(verseCtxMenu.sn,verseCtxMenu.vn),color:t.gr,fn:()=>{toggleV(verseCtxMenu.sn,verseCtxMenu.vn,"");setVerseCtxMenu(null);}},{icon:"❤",label:isFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn))?"Retire":"Favori",active:isFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn)),color:t.rd,fn:()=>{toggleFav(String(verseCtxMenu.sn),String(verseCtxMenu.vn));setVerseCtxMenu(null);}},{icon:"🔖",label:"Signet",active:bookmark?.sn===verseCtxMenu.sn&&bookmark?.vn===verseCtxMenu.vn,color:t.acc,fn:()=>{setBookmark(b=>b?.sn===verseCtxMenu.sn&&b?.vn===verseCtxMenu.vn?null:{sn:verseCtxMenu.sn,vn:verseCtxMenu.vn});setVerseCtxMenu(null);}}].map(a=>(<button key={a.label} onClick={a.fn} style={{padding:"10px 4px 6px",background:"transparent",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:4}}><div style={{width:40,height:40,borderRadius:"50%",border:"2px solid "+(a.active?a.color:t.b1),background:a.active?a.color+"15":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.1rem",color:a.active?a.color:t.tx3}}>{a.icon}</div><span style={{fontSize:".55rem",color:a.active?a.color:t.tx3,fontWeight:a.active?700:400}}>{a.label}</span></button>))}</div>{[{icon:<Icons.Book size={17}/>,label:"Tafsir",sub:"Commentaire du verset",active:showTf,color:t.pu,fn:()=>{setShowTf(p=>!p);setVerseCtxMenu(null);}},{icon:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,label:"Traduction",sub:"Sens en français",active:showTr,color:t.bl,fn:()=>{setShowTr(p=>!p);setVerseCtxMenu(null);}},{icon:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>,label:"Mot a mot",sub:"Sens de chaque mot (anglais)",color:"#fb8c00",fn:()=>{if(wbwVerseRef)wbwVerseRef.current={sn:verseCtxMenu.sn,vn:verseCtxMenu.vn};setWbwOpen&&setWbwOpen(true);setVerseCtxMenu(null);}},{icon:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>,label:"Lecture partielle",sub:"Lire une partie",color:"#00838f",fn:()=>{const words=stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,"")).trim().split(/\s+/).filter(Boolean);setPartialVerse({sn:verseCtxMenu.sn,vn:verseCtxMenu.vn,words,from:0,to:words.length-1});setVerseCtxMenu(null);}},{icon:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>,label:"Bloc de lecture",sub:"Choisir plusieurs versets à répéter — comme Tarteel",color:"#7c3aed",fn:()=>{setBlockForm({from:verseCtxMenu.vn,to:Math.min((SURAHS.find(s=>s.n===verseCtxMenu.sn)?.v||verseCtxMenu.vn),verseCtxMenu.vn+6),repeat:1});setShowBlockPlay(true);setVerseCtxMenu(null);}},{icon:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>,label:"Copier",sub:null,color:t.tx3,fn:()=>{try{navigator.clipboard?.writeText(stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,"")));}catch(e){}setToastMsg("Copie!");setVerseCtxMenu(null);}},{icon:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>,label:"Partager en image",sub:"Carte PNG pour WhatsApp",color:t.gr,fn:()=>{const artx=stripArabicNums((verseCtxMenu.ar||"").replace(/<[^>]*>/g,""));const frtx=(verseCtxMenu.fr||"").replace(/<[^>]*>/g,"");const surahName=(SURAHS||[]).find(s=>s.n===verseCtxMenu.sn)?.name||"Coran";shareVerseAsImage({arText:artx,frText:frtx,surahName,verseN:verseCtxMenu.vn});setVerseCtxMenu(null);}}].map(a=>(<button key={a.label} onClick={a.fn} style={{display:"flex",alignItems:"center",gap:14,width:"100%",padding:"13px 20px",background:"transparent",border:"none",borderTop:"1px solid "+t.b1,color:t.tx,cursor:"pointer",textAlign:"left"}}><div style={{width:36,height:36,borderRadius:12,background:(a.color||t.tx3)+"18",display:"flex",alignItems:"center",justifyContent:"center",color:a.color||t.tx3,flexShrink:0}}>{a.icon}</div><div style={{flex:1}}><div style={{fontSize:".85rem",fontWeight:600}}>{a.label}</div>{a.sub&&<div style={{fontSize:".68rem",color:t.tx3,marginTop:1}}>{a.sub}</div>}</div><div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>{a.active!==undefined&&(<div style={{width:20,height:20,borderRadius:"50%",background:a.active?t.acc:"transparent",border:"2px solid "+(a.active?t.acc:t.b1),transition:"all .2s"}}/>)}<span style={{color:t.tx3}}>›</span></div></button>))}<button onClick={()=>setVerseCtxMenu(null)} style={{width:"100%",padding:"14px",background:"transparent",border:"none",borderTop:"2px solid "+t.b1,color:t.tx3,fontSize:".85rem",cursor:"pointer",fontWeight:600}}>Annuler</button></div></div>)}
 
       {/* Modal Lecture partielle */}
       {partialVerse&&(
@@ -4829,6 +4947,47 @@ return (
                 setPartialVerse(null);
               }}>📋 Copier</button>
               <button className="tbtn" onClick={()=>setPartialVerse(null)} style={{borderColor:t.b2,color:t.tx3}}>Fermer</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Bloc de lecture — sélectionner plusieurs versets à répéter,
+          façon Tarteel (au lieu de la seule "Lecture partielle" mot-à-mot
+          dans UN verset, ou de "▶ Page/Sourate" qui ne bouclent jamais). */}
+      {showBlockPlay&&selS&&(
+        <div className="overlay" onClick={()=>setShowBlockPlay(false)}>
+          <div className="modal" onClick={e=>e.stopPropagation()} style={{maxWidth:420}}>
+            <h2 style={{fontFamily:"Amiri,serif",color:t.acc,marginBottom:4}}>🔁 Bloc de lecture</h2>
+            <p style={{fontSize:".72rem",color:t.tx3,marginBottom:16}}>{selS.name} — choisis les versets à lire, et combien de fois.</p>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
+              <div>
+                <label style={{display:"block",fontSize:".62rem",color:t.tx3,marginBottom:5}}>Du verset</label>
+                <input type="number" min="1" max={selS.v} value={blockForm.from} onChange={e=>setBlockForm(p=>({...p,from:e.target.value}))} style={{width:"100%",padding:"9px 10px",borderRadius:10,border:"1px solid "+t.b1,background:t.inputBg,color:t.tx,fontSize:16,boxSizing:"border-box"}}/>
+              </div>
+              <div>
+                <label style={{display:"block",fontSize:".62rem",color:t.tx3,marginBottom:5}}>Au verset</label>
+                <input type="number" min="1" max={selS.v} value={blockForm.to} onChange={e=>setBlockForm(p=>({...p,to:e.target.value}))} style={{width:"100%",padding:"9px 10px",borderRadius:10,border:"1px solid "+t.b1,background:t.inputBg,color:t.tx,fontSize:16,boxSizing:"border-box"}}/>
+              </div>
+            </div>
+            <div style={{marginBottom:20}}>
+              <label style={{display:"block",fontSize:".62rem",color:t.tx3,marginBottom:6}}>Répéter</label>
+              <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                {[1,2,3,5,10,Infinity].map(n=>(
+                  <button key={n===Infinity?"inf":n} onClick={()=>setBlockForm(p=>({...p,repeat:n}))} style={{padding:"8px 14px",borderRadius:10,border:"1px solid "+(blockForm.repeat===n?t.acc:t.b1),background:blockForm.repeat===n?t.acc+"18":"transparent",color:blockForm.repeat===n?t.acc:t.tx3,fontWeight:blockForm.repeat===n?700:400,cursor:"pointer",fontSize:".8rem"}}>
+                    {n===Infinity?"∞":`${n}×`}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div style={{display:"flex",gap:8}}>
+              <button className="tbtn" style={{flex:1}} onClick={()=>setShowBlockPlay(false)}>Annuler</button>
+              <button className="mbtn" style={{flex:2}} onClick={()=>{
+                const from=Math.max(1,parseInt(blockForm.from)||1),to=Math.max(from,parseInt(blockForm.to)||from);
+                const block=verses.filter(v=>v.n>=from&&v.n<=to);
+                if(block.length)startPlaylist(selS.n,block,from,blockForm.repeat);
+                setShowBlockPlay(false);
+              }}>▶ Lire le bloc</button>
             </div>
           </div>
         </div>
@@ -5112,9 +5271,10 @@ return (
                     </div>
                     {/* 4 KPIs */}
                     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"5px 6px"}}>
-                      <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:`linear-gradient(150deg,${t.s3},${t.s2})`,borderRadius:9,boxShadow:"2px 2px 5px rgba(0,0,0,.12), -1px -1px 2px rgba(255,255,255,.05), inset 0 1px 0 rgba(255,255,255,.04)",border:`1px solid ${t.b1}80`}}>
+                      <div onClick={()=>{setGoal(String(settings?.dailyGoal||5));setShowGoalEdit(true);}} style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:`linear-gradient(150deg,${t.s3},${t.s2})`,borderRadius:9,boxShadow:"2px 2px 5px rgba(0,0,0,.12), -1px -1px 2px rgba(255,255,255,.05), inset 0 1px 0 rgba(255,255,255,.04)",border:`1px solid ${t.b1}80`,cursor:"pointer",position:"relative"}} title="Modifier l'objectif quotidien">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.bl} strokeWidth="1.5" strokeLinecap="round" opacity=".8"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-5 0v-15A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 8A2.5 2.5 0 0 1 17 10.5v9a2.5 2.5 0 0 1-5 0v-9A2.5 2.5 0 0 1 14.5 8Z"/></svg>
                         <div><div style={{fontSize:".8rem",fontWeight:700,color:t.bl,lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{vpd}<span style={{fontSize:".52rem",fontWeight:500}}> v/j</span></div><div style={{fontSize:".44rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",marginTop:1}}>Rythme</div></div>
+                        <span style={{position:"absolute",top:3,right:4,fontSize:".55rem",opacity:.6}}>✎</span>
                       </div>
                       <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 7px",background:`linear-gradient(150deg,${t.s3},${t.s2})`,borderRadius:9,boxShadow:"2px 2px 5px rgba(0,0,0,.12), -1px -1px 2px rgba(255,255,255,.05), inset 0 1px 0 rgba(255,255,255,.04)",border:`1px solid ${t.b1}80`}}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round" opacity=".8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
@@ -5948,6 +6108,50 @@ return (
                 })}
               </div>
             )}
+
+            {/* Plages personnalisées — pour réviser juste "les versets X à Y
+                que je connais déjà" sans suivre toute la sourate */}
+            <div className="card">
+              <div className="ch">
+                <span className="ct">Plages personnalisées</span>
+                <button onClick={()=>{setRangeForm({sn:selS?.n||1,from:1,to:Math.min(7,SURAHS[(selS?.n||1)-1]?.v||7)});setShowRangeAdd(true);}} style={{fontSize:".62rem",color:t.acc,background:"none",border:"none",cursor:"pointer",fontWeight:700}}>+ Ajouter une plage</button>
+              </div>
+              {revRanges.length===0?(
+                <div style={{padding:"16px 14px",textAlign:"center",color:t.tx3,fontSize:".72rem"}}>
+                  Cible juste "versets 1 à 50 d'Al-Baqara" par exemple, sans devoir suivre toute la sourate.
+                </div>
+              ):(
+                <div>
+                  {revRanges.map(r=>{
+                    const s=SURAHS.find(x=>x.n===r.sn);
+                    if(!s)return null;
+                    const versesInRange=Array.from({length:r.to-r.from+1},(_,i)=>r.from+i);
+                    const memInRange=versesInRange.filter(vn=>isMem(String(r.sn),String(vn))).length;
+                    const dueInRange=versesInRange.filter(vn=>spacedDue.includes(`${r.sn}_${vn}`)).length;
+                    const pctR=Math.round(memInRange/versesInRange.length*100);
+                    return (
+                      <div key={r.id} style={{padding:"12px 16px",borderBottom:`1px solid ${t.b1}`}}>
+                        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                          <div style={{flex:1,minWidth:0}}>
+                            <div style={{fontWeight:700,fontSize:".8rem",color:t.tx}}>{s.name} · v.{r.from}–{r.to}</div>
+                            <div style={{fontSize:".6rem",color:t.tx3,marginTop:1}}>{memInRange}/{versesInRange.length} mémorisés{dueInRange>0?` · ${dueInRange} dus`:""}</div>
+                          </div>
+                          {dueInRange>0&&<span style={{fontSize:".6rem",background:`${t.rd}18`,color:t.rd,padding:"1px 7px",borderRadius:99,fontWeight:700,flexShrink:0}}>{dueInRange} dus</span>}
+                          <button onClick={()=>removeRevRange(r.id)} style={{background:"none",border:"none",color:t.tx3,cursor:"pointer",fontSize:".7rem",flexShrink:0}}>✕</button>
+                        </div>
+                        <div style={{height:5,background:t.b1,borderRadius:99,overflow:"hidden",marginBottom:8}}>
+                          <div style={{height:"100%",width:`${pctR}%`,background:pctR===100?t.gr:t.acc,borderRadius:99}}/>
+                        </div>
+                        <div style={{display:"flex",gap:6}}>
+                          <button className="vbtn" style={{borderColor:t.bl,color:t.bl}} onClick={()=>{doSelect(s);setPage("quran");}}>Ouvrir</button>
+                          {dueInRange>0&&<button className="vbtn" style={{borderColor:t.rd,color:t.rd}} onClick={()=>{versesInRange.forEach(vn=>{if(spacedDue.includes(`${r.sn}_${vn}`))markSpaced(r.sn,vn);});}}>Réviser tous</button>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
             {/* Ajouter des sourates à réviser */}
             <div className="card">
@@ -7424,7 +7628,7 @@ return (
               </button>
             )}
             {!timerRunning&&timerLeft!==null&&timerLeft>0&&(
-              <button onClick={startTimer} style={{padding:"14px 32px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:14,color:"#000",fontWeight:800,fontSize:"1rem",cursor:"pointer"}}>
+              <button onClick={resumeTimer} style={{padding:"14px 32px",background:`linear-gradient(135deg,${t.acc},${t.acc2})`,border:"none",borderRadius:14,color:"#000",fontWeight:800,fontSize:"1rem",cursor:"pointer"}}>
                 ▶ Reprendre
               </button>
             )}
