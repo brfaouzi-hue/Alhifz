@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useTeacherSlots, useTeacherBookings } from './useSchedule.js';
 import { useTeacherClasses, useProfiles, useClassStudents } from './useTeacher.js';
 import { buildICS, downloadICS } from './ics.js';
+import StyledSelect from '../StyledSelect.jsx';
 
 const DAYS = [
   { label: 'Lun', dow: 1 }, { label: 'Mar', dow: 2 }, { label: 'Mer', dow: 3 },
@@ -412,11 +413,11 @@ export default function TeacherSchedule({ userId, t, acc }) {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
                   <div>
                     <div style={{ fontSize: '.62rem', color: t.tx3, marginBottom: 4 }}>Niveau</div>
-                    <select value={form.level} onChange={e => setForm(p => ({ ...p, level: e.target.value }))}
+                    <StyledSelect value={form.level} onChange={e => setForm(p => ({ ...p, level: e.target.value }))}
                       style={{ width: '100%', padding: '9px 8px', borderRadius: 10, border: '1px solid ' + t.b1, background: t.navBg, color: t.tx, fontSize: '.72rem' }}>
                       <option value="">—</option>
                       {LEVELS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                    </select>
+                    </StyledSelect>
                   </div>
                   <div>
                     <div style={{ fontSize: '.62rem', color: t.tx3, marginBottom: 4 }}>Max élèves</div>
@@ -442,10 +443,10 @@ export default function TeacherSchedule({ userId, t, acc }) {
               {form.recurring ? (
                 <div>
                   <div style={{ fontSize: '.62rem', color: t.tx3, marginBottom: 4 }}>Jour</div>
-                  <select value={form.day_of_week} onChange={e => setForm(p => ({ ...p, day_of_week: e.target.value }))}
+                  <StyledSelect value={form.day_of_week} onChange={e => setForm(p => ({ ...p, day_of_week: e.target.value }))}
                     style={{ width: '100%', padding: '9px 4px', borderRadius: 10, border: '1px solid ' + t.b1, background: t.navBg, color: t.tx, fontSize: '.7rem' }}>
                     {DAYS.map(d => <option key={d.dow} value={d.dow}>{d.label}</option>)}
-                  </select>
+                  </StyledSelect>
                 </div>
               ) : (
                 <div>
@@ -461,21 +462,21 @@ export default function TeacherSchedule({ userId, t, acc }) {
               </div>
               <div>
                 <div style={{ fontSize: '.62rem', color: t.tx3, marginBottom: 4 }}>Durée</div>
-                <select value={form.duration_min} onChange={e => setForm(p => ({ ...p, duration_min: e.target.value }))}
+                <StyledSelect value={form.duration_min} onChange={e => setForm(p => ({ ...p, duration_min: e.target.value }))}
                   style={{ width: '100%', padding: '9px 4px', borderRadius: 10, border: '1px solid ' + t.b1, background: t.navBg, color: t.tx, fontSize: '.7rem' }}>
                   {DURATIONS.map(d => <option key={d} value={d}>{d} min</option>)}
-                </select>
+                </StyledSelect>
               </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
               <div>
                 <div style={{ fontSize: '.62rem', color: t.tx3, marginBottom: 4 }}>Classe associée</div>
-                <select value={form.class_id} onChange={e => setForm(p => ({ ...p, class_id: e.target.value }))}
+                <StyledSelect value={form.class_id} onChange={e => setForm(p => ({ ...p, class_id: e.target.value }))}
                   style={{ width: '100%', padding: '9px 6px', borderRadius: 10, border: '1px solid ' + t.b1, background: t.navBg, color: t.tx, fontSize: '.7rem' }}>
                   <option value="">Aucune (tous mes élèves)</option>
                   {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
+                </StyledSelect>
               </div>
               <div>
                 <div style={{ fontSize: '.62rem', color: t.tx3, marginBottom: 4 }}>Prix (€, optionnel)</div>
@@ -490,11 +491,11 @@ export default function TeacherSchedule({ userId, t, acc }) {
                 {!form.class_id ? (
                   <div style={{ fontSize: '.65rem', color: t.tx3, fontStyle: 'italic', padding: '9px 2px' }}>Choisis une classe ci-dessus pour cibler un élève</div>
                 ) : (
-                  <select value={form.student_id} onChange={e => setForm(p => ({ ...p, student_id: e.target.value }))}
+                  <StyledSelect value={form.student_id} onChange={e => setForm(p => ({ ...p, student_id: e.target.value }))}
                     style={{ width: '100%', padding: '9px 6px', borderRadius: 10, border: '1px solid ' + t.b1, background: t.navBg, color: t.tx, fontSize: '.7rem' }}>
                     <option value="">Ouvert à toute la classe</option>
                     {classRoster.map(s => <option key={s.student_id} value={s.student_id}>{rosterNames[s.student_id] || s.student_id.slice(0, 8) + '...'}</option>)}
-                  </select>
+                  </StyledSelect>
                 )}
                 {form.student_id && <div style={{ fontSize: '.6rem', color: acc, marginTop: 4 }}>Ce créneau ne sera visible que par {rosterNames[form.student_id] || 'cet élève'}</div>}
               </div>

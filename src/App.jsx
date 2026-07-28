@@ -5,6 +5,7 @@ import JoinClass from './teacher/JoinClass.jsx';
 import NotificationBell from './teacher/NotificationBell.jsx';
 import TeacherSchedule from './teacher/TeacherSchedule.jsx';
 import StudentSchedule from './teacher/StudentSchedule.jsx';
+import StyledSelect from './StyledSelect.jsx';
 
 const SURAHS = [
   {n:1,name:"Al-Fatiha",ar:"الفاتحة",v:7,juz:1,type:"Mecquoise"},
@@ -2108,10 +2109,10 @@ function MushafPage({page,t,tjc,arFont,edition,nightMode=false,fullscreen,onTogg
         <button onClick={onPrev} style={{background:"rgba(201,168,76,.12)",border:"1px solid rgba(201,168,76,.22)",color:AC,padding:"5px 12px",borderRadius:8,cursor:"pointer",fontWeight:700,fontSize:".85rem"}}>◄</button>
 
         {/* Sélecteur sourate */}
-        <select onChange={e=>{const sn=parseInt(e.target.value);if(!sn||!onGoTo)return;onGoTo(SURAH_PAGES[sn-1]||1);e.target.value="";}} style={{flex:1,padding:"4px 8px",borderRadius:7,border:"1px solid rgba(201,168,76,.3)",background:"rgba(0,0,0,.4)",color:AC,fontSize:".6rem",cursor:"pointer",outline:"none"}} defaultValue="">
+        <StyledSelect onChange={e=>{const sn=parseInt(e.target.value);if(!sn||!onGoTo)return;onGoTo(SURAH_PAGES[sn-1]||1);e.target.value="";}} style={{flex:1,padding:"4px 8px",borderRadius:7,border:"1px solid rgba(201,168,76,.3)",background:"rgba(0,0,0,.4)",color:AC,fontSize:".6rem",cursor:"pointer",outline:"none"}} defaultValue="">
           <option value="">📖 p.{page||1} — Aller à une sourate…</option>
           {SURAHS.map(s=><option key={s.n} value={s.n}>{s.n}. {s.name} · {s.ar}</option>)}
-        </select>
+        </StyledSelect>
 
         {/* Boutons actions */}
         <div style={{display:"flex",gap:4,flexShrink:0}}>
@@ -4598,18 +4599,18 @@ return (
                 <div>
                   <label style={{fontSize:".65rem",color:t.tx3,textTransform:"uppercase",letterSpacing:"1px",display:"block",marginBottom:5}}>Ou choisir précisément</label>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
-                    <select onChange={e=>{const v=+e.target.value;if(v)setAiPlanParams(p=>({...p,customGoal:`juz_${v}`,goal:null}));}} style={{padding:"7px 6px",borderRadius:8,border:`1px solid ${aiPlanParams.customGoal?.startsWith("juz_")?t.acc:t.b2}`,background:aiPlanParams.customGoal?.startsWith("juz_")?`${t.acc}15`:t.s2,color:aiPlanParams.customGoal?.startsWith("juz_")?t.acc:t.tx,fontSize:".65rem",cursor:"pointer",outline:"none"}}>
+                    <StyledSelect onChange={e=>{const v=+e.target.value;if(v)setAiPlanParams(p=>({...p,customGoal:`juz_${v}`,goal:null}));}} style={{padding:"7px 6px",borderRadius:8,border:`1px solid ${aiPlanParams.customGoal?.startsWith("juz_")?t.acc:t.b2}`,background:aiPlanParams.customGoal?.startsWith("juz_")?`${t.acc}15`:t.s2,color:aiPlanParams.customGoal?.startsWith("juz_")?t.acc:t.tx,fontSize:".65rem",cursor:"pointer",outline:"none"}}>
                       <option value="">Juz…</option>
                       {Array.from({length:30},(_,i)=>i+1).map(j=><option key={j} value={j}>Juz {j}</option>)}
-                    </select>
-                    <select onChange={e=>{const v=+e.target.value;if(v)setAiPlanParams(p=>({...p,customGoal:`surah_${v}`,goal:null}));}} style={{padding:"7px 6px",borderRadius:8,border:`1px solid ${aiPlanParams.customGoal?.startsWith("surah_")?t.acc:t.b2}`,background:aiPlanParams.customGoal?.startsWith("surah_")?`${t.acc}15`:t.s2,color:aiPlanParams.customGoal?.startsWith("surah_")?t.acc:t.tx,fontSize:".65rem",cursor:"pointer",outline:"none"}}>
+                    </StyledSelect>
+                    <StyledSelect onChange={e=>{const v=+e.target.value;if(v)setAiPlanParams(p=>({...p,customGoal:`surah_${v}`,goal:null}));}} style={{padding:"7px 6px",borderRadius:8,border:`1px solid ${aiPlanParams.customGoal?.startsWith("surah_")?t.acc:t.b2}`,background:aiPlanParams.customGoal?.startsWith("surah_")?`${t.acc}15`:t.s2,color:aiPlanParams.customGoal?.startsWith("surah_")?t.acc:t.tx,fontSize:".65rem",cursor:"pointer",outline:"none"}}>
                       <option value="">Sourate…</option>
                       {SURAHS.map(s=><option key={s.n} value={s.n}>{s.name}</option>)}
-                    </select>
-                    <select onChange={e=>{const v=+e.target.value;if(v)setAiPlanParams(p=>({...p,customGoal:`hizb_${v}`,goal:null}));}} style={{padding:"7px 6px",borderRadius:8,border:`1px solid ${aiPlanParams.customGoal?.startsWith("hizb_")?t.acc:t.b2}`,background:aiPlanParams.customGoal?.startsWith("hizb_")?`${t.acc}15`:t.s2,color:aiPlanParams.customGoal?.startsWith("hizb_")?t.acc:t.tx,fontSize:".65rem",cursor:"pointer",outline:"none"}}>
+                    </StyledSelect>
+                    <StyledSelect onChange={e=>{const v=+e.target.value;if(v)setAiPlanParams(p=>({...p,customGoal:`hizb_${v}`,goal:null}));}} style={{padding:"7px 6px",borderRadius:8,border:`1px solid ${aiPlanParams.customGoal?.startsWith("hizb_")?t.acc:t.b2}`,background:aiPlanParams.customGoal?.startsWith("hizb_")?`${t.acc}15`:t.s2,color:aiPlanParams.customGoal?.startsWith("hizb_")?t.acc:t.tx,fontSize:".65rem",cursor:"pointer",outline:"none"}}>
                       <option value="">Hizb…</option>
                       {Array.from({length:60},(_,i)=>i+1).map(h=><option key={h} value={h}>Hizb {h}</option>)}
-                    </select>
+                    </StyledSelect>
                   </div>
                   {aiPlanParams.customGoal&&<div style={{fontSize:".6rem",color:t.acc,marginTop:4}}>✦ Objectif : {aiPlanParams.customGoal.replace("juz_","Juz ").replace("surah_",s=>` Sourate ${SURAHS.find(x=>x.n===+aiPlanParams.customGoal.split("_")[1])?.name||""}`).replace("hizb_","Hizb ")}</div>}
                 </div>
@@ -4719,9 +4720,9 @@ return (
             <p style={{fontSize:".7rem",color:t.tx3,marginBottom:16}}>Cible juste les versets que tu connais déjà, sans suivre toute la sourate.</p>
             <div style={{marginBottom:12}}>
               <label style={{display:"block",fontSize:".62rem",color:t.tx3,marginBottom:5}}>Sourate</label>
-              <select value={rangeForm.sn} onChange={e=>{const sn=+e.target.value;setRangeForm(p=>({...p,sn,to:Math.min(p.to,SURAHS[sn-1]?.v||p.to)}));}} style={{width:"100%",padding:"9px 10px",borderRadius:10,border:"1px solid "+t.b1,background:t.navBg,color:t.tx,fontSize:16}}>
+              <StyledSelect value={rangeForm.sn} onChange={e=>{const sn=+e.target.value;setRangeForm(p=>({...p,sn,to:Math.min(p.to,SURAHS[sn-1]?.v||p.to)}));}} style={{width:"100%",padding:"9px 10px",borderRadius:10,border:"1px solid "+t.b1,background:t.navBg,color:t.tx,fontSize:16}}>
                 {SURAHS.map(s=><option key={s.n} value={s.n}>{s.n}. {s.name}</option>)}
-              </select>
+              </StyledSelect>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:20}}>
               <div>
@@ -6645,10 +6646,10 @@ return (
                 <div style={{display:"flex",gap:5,marginBottom:12,flexWrap:"wrap"}}>
                   <button onClick={()=>{setQuizFilter("memorized");setQuizFilterSurah(null);setQuizQ(null);}} style={{padding:"4px 10px",borderRadius:99,border:`1px solid ${quizFilter==="memorized"&&!quizFilterSurah?t.acc:t.b2}`,background:quizFilter==="memorized"&&!quizFilterSurah?`${t.acc}15`:t.s2,color:quizFilter==="memorized"&&!quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer",fontWeight:600}}>Mes mémorisés</button>
                   <button onClick={()=>{setQuizFilter("all");setQuizFilterSurah(null);setQuizQ(null);}} style={{padding:"4px 10px",borderRadius:99,border:`1px solid ${quizFilter==="all"&&!quizFilterSurah?t.acc:t.b2}`,background:quizFilter==="all"&&!quizFilterSurah?`${t.acc}15`:t.s2,color:quizFilter==="all"&&!quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer"}}>Tout</button>
-                  <select value={quizFilterSurah||""} onChange={e=>{const v=+e.target.value||null;setQuizFilterSurah(v);setQuizFilter(v?"surah":"memorized");setQuizQ(null);}} style={{padding:"4px 8px",borderRadius:99,border:`1px solid ${quizFilterSurah?t.acc:t.b2}`,background:quizFilterSurah?`${t.acc}15`:t.s2,color:quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer",outline:"none"}}>
+                  <StyledSelect value={quizFilterSurah||""} onChange={e=>{const v=+e.target.value||null;setQuizFilterSurah(v);setQuizFilter(v?"surah":"memorized");setQuizQ(null);}} style={{padding:"4px 8px",borderRadius:99,border:`1px solid ${quizFilterSurah?t.acc:t.b2}`,background:quizFilterSurah?`${t.acc}15`:t.s2,color:quizFilterSurah?t.acc:t.tx3,fontSize:".62rem",cursor:"pointer",outline:"none"}}>
                     <option value="">Par sourate…</option>
                     {SURAHS.map(s=><option key={s.n} value={s.n}>{s.n}. {s.name}</option>)}
-                  </select>
+                  </StyledSelect>
                 </div>
 
                 {!quizQ&&(
