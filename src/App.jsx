@@ -2657,6 +2657,11 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
     const dx=e.touches[0].clientX-pgTouchX.current;
     const dy=Math.abs(e.touches[0].clientY-pgTouchY.current);
     if(dy>60)return;
+    // Sans ce preventDefault, un swipe horizontal proche du bord de l'écran
+    // est parfois récupéré par le geste natif "précédent" du navigateur
+    // (surtout Safari iOS) au lieu de tourner la page — d'où l'impression
+    // que ça devient saccadé après quelques swipes fluides.
+    if(Math.abs(dx)>dy&&e.cancelable)e.preventDefault();
     const el=pageContainerRef.current; if(!el)return;
     const width=el.clientWidth||320;
     const atStart=dx<0&&curPage<=0, atEnd=dx>0&&curPage>=total-1;
@@ -2696,7 +2701,7 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
   // Normalisation pour comparaison arabe
 
   return (
-    <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0,background:"#ffffff",backgroundImage:'url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2760%27%20height%3D%2760%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%2523c8a87a%27%20stroke-width%3D%270.4%27%20opacity%3D%270.18%27%3E%3Cpath%20d%3D%27M30%200%20L60%2030%20L30%2060%20L0%2030%20Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2720%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2712%27/%3E%3Cpath%20d%3D%27M10%2010%20Q30%200%2050%2010%20Q60%2030%2050%2050%20Q30%2060%2010%2050%20Q0%2030%2010%2010Z%27/%3E%3Cpath%20d%3D%27M30%208%20L52%2030%20L30%2052%20L8%2030Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%276%27/%3E%3Cline%20x1%3D%2730%27%20y1%3D%270%27%20x2%3D%2730%27%20y2%3D%2760%27/%3E%3Cline%20x1%3D%270%27%20y1%3D%2730%27%20x2%3D%2760%27%20y2%3D%2730%27/%3E%3C/g%3E%3C/svg%3E")',backgroundSize:"60px 60px",borderRadius:immersive?0:6,overflow:"hidden",position:"relative"}} onClick={toggleChromeTap} onTouchStart={handlePgTouchStart} onTouchMove={handlePgTouchMove} onTouchEnd={handlePgTouchEnd}>
+    <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:0,background:"#ffffff",backgroundImage:'url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2760%27%20height%3D%2760%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%2523c8a87a%27%20stroke-width%3D%270.4%27%20opacity%3D%270.18%27%3E%3Cpath%20d%3D%27M30%200%20L60%2030%20L30%2060%20L0%2030%20Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2720%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%2712%27/%3E%3Cpath%20d%3D%27M10%2010%20Q30%200%2050%2010%20Q60%2030%2050%2050%20Q30%2060%2010%2050%20Q0%2030%2010%2010Z%27/%3E%3Cpath%20d%3D%27M30%208%20L52%2030%20L30%2052%20L8%2030Z%27/%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2730%27%20r%3D%276%27/%3E%3Cline%20x1%3D%2730%27%20y1%3D%270%27%20x2%3D%2730%27%20y2%3D%2760%27/%3E%3Cline%20x1%3D%270%27%20y1%3D%2730%27%20x2%3D%2760%27%20y2%3D%2730%27/%3E%3C/g%3E%3C/svg%3E")',backgroundSize:"60px 60px",borderRadius:immersive?0:6,overflow:"hidden",position:"relative",touchAction:"pan-y"}} onClick={toggleChromeTap} onTouchStart={handlePgTouchStart} onTouchMove={handlePgTouchMove} onTouchEnd={handlePgTouchEnd}>
       {/* Navigation — masquée en plein écran (immersive) : le header flottant du
           lecteur (App.jsx) fait déjà office de chrome, et le swipe gère le
           changement de page, donc pas de doublon ici (qui se superposerait au
