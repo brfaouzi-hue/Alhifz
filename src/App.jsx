@@ -2303,6 +2303,18 @@ body>*{position:relative;z-index:1;}
 .vacts{display:flex;gap:4px;margin-top:7px;flex-wrap:wrap;max-height:0;overflow:hidden;transition:max-height .25s ease,opacity .2s;opacity:0;pointer-events:none;}
 .vacts.open{max-height:120px;opacity:1;pointer-events:auto;}
 .vbtn{padding:6px 13px;border-radius:99px;border:1px solid ${t.b2};background:transparent;color:${t.tx3};font-size:.68rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:4px;min-height:30px;box-sizing:border-box;}
+/* ── Bouton play flottant — effet 3D (dôme glacé + reflet) ── */
+.play-fab{position:relative;width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;color:#fff;font-size:1.15rem;
+  background:linear-gradient(150deg, color-mix(in srgb, ${t.gr} 65%, white) 0%, ${t.gr} 52%, color-mix(in srgb, ${t.gr} 78%, black) 100%);
+  box-shadow:0 5px 16px rgba(0,0,0,.32), 0 1px 2px rgba(0,0,0,.2), inset 0 1.5px 1.5px rgba(255,255,255,.5), inset 0 -4px 6px rgba(0,0,0,.28);
+  display:flex;align-items:center;justify-content:center;transition:transform .15s cubic-bezier(.34,1.56,.64,1),box-shadow .15s ease;touch-action:manipulation;}
+.play-fab::before{content:"";position:absolute;top:5px;left:9px;width:15px;height:7px;border-radius:50%;background:rgba(255,255,255,.55);filter:blur(1.5px);pointer-events:none;}
+.play-fab:active{transform:scale(.9);box-shadow:0 2px 8px rgba(0,0,0,.28),inset 0 1px 1px rgba(255,255,255,.35),inset 0 -2px 4px rgba(0,0,0,.3);}
+.play-fab.playing{animation:playFabPulse 1.8s ease-in-out infinite;}
+@keyframes playFabPulse{
+  0%,100%{box-shadow:0 5px 16px rgba(0,0,0,.32),0 1px 2px rgba(0,0,0,.2),inset 0 1.5px 1.5px rgba(255,255,255,.5),inset 0 -4px 6px rgba(0,0,0,.28),0 0 0 0 ${t.gr}66;}
+  50%{box-shadow:0 5px 16px rgba(0,0,0,.32),0 1px 2px rgba(0,0,0,.2),inset 0 1.5px 1.5px rgba(255,255,255,.5),inset 0 -4px 6px rgba(0,0,0,.28),0 0 0 9px ${t.gr}00;}
+}
 .vbtn:hover{border-color:${acc};color:${acc};transform:translateY(-1px);}
 .vbtn.mem{background:${t.grD};border-color:${t.gr};color:${t.gr};}
 .vbtn.snd{border-color:${t.bl};color:${t.bl};}
@@ -7773,13 +7785,7 @@ return (
               </div>
             </div>
           ):(
-            <button onClick={()=>setPlayerOpen(true)}
-              style={{width:44,height:44,borderRadius:"50%",border:"none",touchAction:"manipulation",
-                background:t.gr,
-                boxShadow:playing!==null?`0 4px 18px ${t.gr}88`:"0 3px 14px rgba(0,0,0,.25)",
-                color:"#fff",
-                fontSize:"1.1rem",cursor:"pointer",
-                display:"flex",alignItems:"center",justifyContent:"center"}}>
+            <button onClick={()=>setPlayerOpen(true)} className={"play-fab"+(playing!==null?" playing":"")}>
               ▶
             </button>
           )}
