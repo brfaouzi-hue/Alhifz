@@ -2986,6 +2986,12 @@ const [authError, setAuthError] = useState("");
   const [loopCount,setLoopCount]=useState(3);
   const [loopCurrent,setLoopCurrent]=useState(0);
   const [loopInfinite,setLoopInfinite]=useState(false);
+  // Plage de versets à jouer depuis le mini-player flottant (bottom-right) —
+  // avant, "Répétitions" ne s'appliquait qu'au bouton ▶ Sourate/verset seul ;
+  // on peut maintenant dire "de tel verset à tel verset" directement là, sans
+  // passer par le menu appui-long séparé.
+  const [playerFrom,setPlayerFrom]=useState(1);
+  const [playerTo,setPlayerTo]=useState(7);
   const [reviewMode,setReviewMode]=useState(false);
   const [hifzMode,setHifzMode]=useState(false);
   const [hifzLevel,setHifzLevel]=useState({});
@@ -3629,7 +3635,7 @@ const handleSetNewPassword=async(newPass)=>{
 
   // FIX 1: doSelect — scroll uniquement sur mobile (<860px) — corrige le "saut" de page
   const doSelect=s=>{
-    setSelS(s);setPlaying(null);setNavOpen(false); if(!versePages[s.n]){fetch(`https://api.qurancdn.com/api/qdc/verses/by_chapter/${s.n}?per_page=300&fields=page_number,juz_number,hizb_number`).then(r=>r.json()).then(d=>{const m={},jh={};(d.verses||[]).forEach(v=>{m[v.verse_number]=v.page_number;jh[v.verse_number]={j:v.juz_number,h:v.hizb_number};});setVersePages(p=>{const nv={...p,[s.n]:m};try{localStorage.setItem("vp",JSON.stringify(nv));}catch{}return nv;});setVerseJuzHizb(p=>{const nv={...p,[s.n]:jh};try{localStorage.setItem("vjh",JSON.stringify(nv));}catch{}return nv;});}).catch(()=>{});}loadAudioSegments(s.n,rec?.qurancdn||7).catch(()=>{});
+    setSelS(s);setPlaying(null);setNavOpen(false);setPlayerFrom(1);setPlayerTo(Math.min(7,s.v)); if(!versePages[s.n]){fetch(`https://api.qurancdn.com/api/qdc/verses/by_chapter/${s.n}?per_page=300&fields=page_number,juz_number,hizb_number`).then(r=>r.json()).then(d=>{const m={},jh={};(d.verses||[]).forEach(v=>{m[v.verse_number]=v.page_number;jh[v.verse_number]={j:v.juz_number,h:v.hizb_number};});setVersePages(p=>{const nv={...p,[s.n]:m};try{localStorage.setItem("vp",JSON.stringify(nv));}catch{}return nv;});setVerseJuzHizb(p=>{const nv={...p,[s.n]:jh};try{localStorage.setItem("vjh",JSON.stringify(nv));}catch{}return nv;});}).catch(()=>{});}loadAudioSegments(s.n,rec?.qurancdn||7).catch(()=>{});
     setMushafPage(SURAH_PAGE[s.n]||1);
     if(audioRef.current){audioRef.current.pause();audioRef.current.src="";}
     // scroll supprimé — causait le saut sur iOS
@@ -7748,12 +7754,32 @@ return (
                   </button>
                 </div>
               </div>
+              {/* Plage de versets — "de tel verset à tel verset", combinée
+                  avec les Répétitions ci-dessus pour boucler un bloc précis
+                  au lieu de toute la sourate. */}
+              <div style={{display:"flex",flexDirection:"column",gap:4}}>
+                <span style={{fontSize:".55rem",color:t.tx3,textTransform:"uppercase",letterSpacing:".5px"}}>Plage de versets</span>
+                <div style={{display:"flex",gap:6,alignItems:"center"}}>
+                  <input type="number" min="1" max={selS.v} value={playerFrom} onChange={e=>setPlayerFrom(Math.max(1,Math.min(+e.target.value||1,playerTo)))}
+                    style={{width:0,flex:1,padding:"4px 6px",borderRadius:8,border:"1px solid "+t.b1,background:t.inputBg,color:t.tx,fontSize:16,boxSizing:"border-box",textAlign:"center"}}/>
+                  <span style={{fontSize:".6rem",color:t.tx3,flexShrink:0}}>à</span>
+                  <input type="number" min="1" max={selS.v} value={playerTo} onChange={e=>setPlayerTo(Math.min(selS.v,Math.max(+e.target.value||1,playerFrom)))}
+                    style={{width:0,flex:1,padding:"4px 6px",borderRadius:8,border:"1px solid "+t.b1,background:t.inputBg,color:t.tx,fontSize:16,boxSizing:"border-box",textAlign:"center"}}/>
+                  <button onClick={()=>{setPlayerFrom(1);setPlayerTo(selS.v);}} title="Toute la sourate" style={{flexShrink:0,padding:"4px 8px",borderRadius:8,border:"1px solid "+t.b1,background:"transparent",color:t.tx3,fontSize:".58rem",cursor:"pointer"}}>Tout</button>
+                </div>
+              </div>
               {/* Boutons action */}
               <div style={{display:"flex",gap:6,marginTop:2}}>
-                <button onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,playing||sv||1);}}
+                <button onClick={()=>{
+                  if(playlistActive&&playlist[0]?.sn===selS.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();return;}
+                  const block=verses.filter(v=>v.n>=playerFrom&&v.n<=playerTo);
+                  if(!block.length)return;
+                  const startVn=(playing&&playing>=playerFrom&&playing<=playerTo)?playing:playerFrom;
+                  startPlaylist(selS.n,block,startVn,loopInfinite?Infinity:loopCount);
+                }}
                   style={{flex:1,padding:"8px 0",borderRadius:12,border:"none",fontWeight:700,fontSize:".75rem",cursor:"pointer",
                     background:playlistActive&&playlist[0]?.sn===selS.n?"#e53935":t.acc,color:"#fff"}}>
-                  {playlistActive&&playlist[0]?.sn===selS.n?"⏸ Stop":"▶ Sourate"}
+                  {playlistActive&&playlist[0]?.sn===selS.n?"⏸ Stop":(playerFrom===1&&playerTo===selS.v?"▶ Sourate":`▶ v.${playerFrom}-${playerTo}`)}
                 </button>
                 <button onClick={()=>{if(!verses.length)return;stopListening();setSpeechScore(null);setContinuousMode(false);setContinuousIdx(playing&&verses.findIndex(v=>v.n===playing)>-1?verses.findIndex(v=>v.n===playing):0);setRecitModal(true);setPlayerOpen(false);}}
                   style={{flex:1,padding:"8px 0",borderRadius:12,border:"1px solid "+t.acc,fontWeight:700,fontSize:".75rem",cursor:"pointer",background:"transparent",color:t.acc}}>
