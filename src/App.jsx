@@ -1732,44 +1732,35 @@ function RecitModal({verses,selS,t,acc,tn,continuousIdx:initIdx,setContinuousIdx
       )}
 
       {/* ═══════════════════════════════════════════════
-          MODE PAGE — tous les versets, style Tarteel
+          MODE PAGE — flux continu justifié, comme une vraie page de Mushaf
+          (avant : une carte par verset empilée "ligne par ligne" — remplacé
+          par le même rendu que le mode lecture Coran : texte qui coule et
+          se justifie, marqueurs de fin de verset inline dans le flux).
       ═══════════════════════════════════════════════ */}
       {pageMode&&(
-        <div style={{flex:1,overflowY:"auto",padding:"12px 10px 8px",WebkitOverflowScrolling:"touch"}}
+        <div style={{flex:1,overflowY:"auto",padding:"18px 18px 10px",WebkitOverflowScrolling:"touch"}}
           ref={el=>{if(el){const a=el.querySelector('[data-cur="true"]');if(a)a.scrollIntoView({block:"center",behavior:"smooth"});}}}
         >
-          {verses.map((v,vi)=>{
-            const isCur=vi===idx;
-            const isDone=vi<idx;
-            const vAr=stripAr(v?.ar||"");
-            const masked=invisibleMode&&!revealedRecit[v.n];
-            return(
-              <div key={v.n} data-cur={String(isCur)}
-                onClick={()=>!isCur&&goTo(vi)}
-                style={{marginBottom:8,padding:"10px 12px",borderRadius:14,
-                  background:isCur?(tn==="light"?"rgba(46,125,50,.07)":"rgba(46,125,50,.13)"):isDone?"rgba(0,0,0,.02)":"transparent",
-                  border:isCur?`1.5px solid ${acc}44`:"1.5px solid transparent",
-                  transition:"all .3s",opacity:isDone&&!masked?0.5:1,
-                  cursor:isCur?"default":"pointer"}}
-              >
-                {masked?(
-                  <div style={{display:"flex",justifyContent:"center",padding:"8px 0"}}>
-                    <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"1.6em",height:"1.6em",borderRadius:"50%",border:`1.5px solid ${isCur?acc:t.b2}`,fontSize:".85rem",fontWeight:700,color:isCur?acc:t.tx3}}>{v.n}</span>
-                  </div>
-                ):(<>
-                  <div style={{direction:"rtl",textAlign:"justify",fontFamily:"Scheherazade New,Amiri Quran,serif",fontSize:"clamp(1.3rem,3.8vw,1.75rem)",lineHeight:2.1}}>
-                    {renderWords(stripTags(v?.ar||""),isCur,vAr)}
-                    <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"1.3em",height:"1.3em",borderRadius:"50%",border:`1px solid ${isCur?acc:isDone?t.gr:t.b2}`,fontSize:".5em",fontWeight:600,color:isCur?acc:isDone?t.gr:t.tx3,background:isDone?t.gr+"22":"transparent",marginRight:4,verticalAlign:"middle"}}>{v.n}</span>
-                  </div>
-                  {v?.fr&&<div style={{direction:"ltr",textAlign:"left",fontSize:".68rem",color:t.tx3,fontStyle:"italic",lineHeight:1.5,marginTop:4}}>{stripTags(v.fr)}</div>}
-                  {isDone&&<div style={{fontSize:".58rem",color:t.gr,marginTop:2,display:"flex",alignItems:"center",gap:3}}>
-                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>Récité
-                  </div>}
-                </>)}
-                {isCur&&!isListening&&!isCountdown&&!hasScore&&<div style={{fontSize:".58rem",color:acc,marginTop:4,opacity:.7,textAlign:"center"}}>🎤 Appuie sur le micro pour réciter</div>}
-              </div>
-            );
-          })}
+          <div style={{direction:"rtl",textAlign:"justify",WebkitTextAlignLast:"right",textAlignLast:"right",overflowWrap:"break-word",wordSpacing:"0.1em",lineHeight:2.4,fontFamily:"Scheherazade New,Amiri Quran,serif",fontSize:"clamp(1.35rem,4vw,1.85rem)"}}>
+            {verses.map((v,vi)=>{
+              const isCur=vi===idx;
+              const isDone=vi<idx;
+              const vAr=stripAr(v?.ar||"");
+              const masked=invisibleMode&&!revealedRecit[v.n];
+              return(
+                <React.Fragment key={v.n}>
+                  <span data-cur={String(isCur)} onClick={()=>!isCur&&goTo(vi)}
+                    style={{color:isCur?acc:isDone&&!masked?t.gr:"inherit",background:isCur?acc+"15":"transparent",borderRadius:6,padding:"1px 3px",cursor:isCur?"default":"pointer",WebkitTapHighlightColor:"transparent"}}>
+                    {!masked&&renderWords(stripTags(v?.ar||""),isCur,vAr)}
+                  </span>
+                  <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"1.3em",height:"1.3em",borderRadius:"50%",border:`1px solid ${isCur?acc:isDone&&!masked?t.gr:t.b2}`,fontSize:".5em",fontWeight:700,color:isCur?acc:isDone&&!masked?t.gr:t.tx3,background:isDone&&!masked?t.gr+"22":"transparent",margin:"0 4px",verticalAlign:"middle"}}>{v.n}</span>
+                </React.Fragment>
+              );
+            })}
+          </div>
+          {/* Traduction + statut — uniquement pour le verset courant, sous le flux */}
+          {curV?.fr&&!(invisibleMode&&!revealedRecit[curV.n])&&<div style={{direction:"ltr",textAlign:"left",fontSize:".72rem",color:t.tx3,fontStyle:"italic",lineHeight:1.6,marginTop:16,paddingTop:12,borderTop:`1px solid ${t.b1}`}}>{stripTags(curV.fr)}</div>}
+          {!isListening&&!isCountdown&&!hasScore&&<div style={{fontSize:".62rem",color:acc,marginTop:10,opacity:.7,textAlign:"center"}}>🎤 Appuie sur le micro pour réciter le verset {curV?.n}</div>}
         </div>
       )}
 
@@ -1903,6 +1894,13 @@ const MUQATTAAT_NAMES={
   "ك":["كاف"],"ه":["هاء","ها"],"ي":["ياء"],"ع":["عين"],"ط":["طا","طه","طاء"],
   "س":["سين"],"ح":["حاء"],"ق":["قاف"],"ن":["نون"],
 };
+// Liste blanche EXACTE des 14 séquences de lettres disjointes qui ouvrent
+// réellement 29 sourates du Coran — volontairement une liste fermée (pas une
+// simple vérification "toutes les lettres du mot en font partie") car des
+// mots très courants comme "قل"/"من"/"لم"/"هل" sont eux aussi entièrement
+// composés de lettres muqatta'at et seraient sinon traités à tort comme
+// des lettres disjointes.
+const MUQATTAAT_SEQS=new Set(["الم","المص","الر","المر","كهيعص","طه","طسم","طس","يس","ص","حم","عسق","ق","ن"]);
 
 // Découpe un texte sur plusieurs lignes pour un rendu canvas (pas de wrap natif)
 function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight) {
@@ -4499,32 +4497,43 @@ const handleSetNewPassword=async(newPass)=>{
     const stripH=s=>((s||"").replace(/<[^>]*>/g,"").replace(/[﴿﴾]/g,"").replace(/\s*[١٢٣٤٥٦٧٨٩٠]+\s*$/,"")).replace(/[ًٌٍَُِّْٰٓٔءۭۨ]/g,"").replace(/[أإآٱ]/g,"ا").replace(/ى/g,"ا").replace(/ة/g,"ه").replace(/ؤ/g,"و").replace(/ئ/g,"ي").trim();
     const target=stripH(targetAr).split(/\s+/).filter(Boolean);
     const said=stripH(spoken).split(/\s+/).filter(Boolean);
-    // Lettres disjointes (muqatta'at) — verset entier = un seul mot écrit
-    // ("الم") qui se récite comme plusieurs noms de lettres séparés ("Alif,
-    // Lam, Mim"). Comparaison spécifique lettre par lettre plutôt que le
-    // mot-à-mot classique, sinon échec systématique (voir MUQATTAAT_NAMES).
-    if(target.length===1&&target[0].length<=5&&[...target[0]].every(c=>MUQATTAAT_NAMES[c])){
+    if(!said.length) return target.map(tw=>({word:tw,status:"missing"}));
+    const results=[];
+    let ti=0,si=0;
+    // Lettres disjointes (muqatta'at) — écrites comme un seul mot collé
+    // ("الم") mais récitées comme plusieurs noms de lettres séparés ("Alif,
+    // Lam, Mim"), parfois suivies d'autres mots dans le même verset (ex:
+    // Yunus 10:1 "الر تلك آيات..."). Liste blanche EXACTE des 14 séquences
+    // réelles du Coran (pas un simple "toutes les lettres en font partie") :
+    // sinon des mots très courants entièrement composés de lettres muqatta'at
+    // comme "قل"/"من"/"لم"/"هل" seraient à tort traités comme des lettres
+    // disjointes. Recherche sur tout le transcript (pas juste le début) pour
+    // tolérer un Bismillah ou une hésitation dite avant.
+    if(MUQATTAAT_SEQS.has(target[0])){
       const letters=[...target[0]];
-      let sj=0,matched=0;
+      const used=new Set();
+      let matched=0;
       letters.forEach(L=>{
         const names=MUQATTAAT_NAMES[L];
-        const ahead=said.slice(sj,sj+3).findIndex(w=>names.some(n=>arabicMatch(n,w)));
-        if(ahead>=0){sj+=ahead+1;matched++;}
+        const idx=said.findIndex((w,i)=>!used.has(i)&&names.some(n=>arabicMatch(n,w)));
+        if(idx>=0){used.add(idx);matched++;}
       });
       const minNeeded=letters.length-Math.floor(letters.length/3);
-      return [{word:target[0],status:matched>=minNeeded?"ok":"wrong"}];
+      results.push({word:target[0],status:matched>=minNeeded?"ok":"wrong"});
+      si=used.size?Math.max(...used)+1:0;
+      ti=1;
     }
-    if(!said.length) return target.map(tw=>({word:tw,status:"missing"}));
-    let si=0;
-    return target.map(tw=>{
-      if(si>=said.length) return {word:tw,status:"missing"};
-      if(arabicMatch(tw,said[si])){si++;return {word:tw,status:"ok"};}
+    for(;ti<target.length;ti++){
+      const tw=target[ti];
+      if(si>=said.length){results.push({word:tw,status:"missing"});continue;}
+      if(arabicMatch(tw,said[si])){si++;results.push({word:tw,status:"ok"});continue;}
       // Cherche dans les 4 prochains mots (skip de mots)
       const ahead=said.slice(si,si+4).findIndex(w=>arabicMatch(tw,w));
-      if(ahead>=0){si+=ahead+1;return {word:tw,status:"ok"};}
+      if(ahead>=0){si+=ahead+1;results.push({word:tw,status:"ok"});continue;}
       si++; // avance quand même pour ne pas bloquer
-      return {word:tw,status:"wrong"};
-    });
+      results.push({word:tw,status:"wrong"});
+    }
+    return results;
   };
 
   const startListening=(verseAr,vn,onDone)=>{
