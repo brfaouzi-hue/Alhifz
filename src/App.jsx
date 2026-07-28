@@ -2383,7 +2383,7 @@ body>*{position:relative;z-index:1;}
 .toggle.on::after{transform:translateX(18px);}
 /* ── Modal ── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);}
-.modal{background:${t.s1};border:1px solid ${acc};border-radius:18px;padding:26px;max-width:380px;width:92%;}
+.modal{background:${t.s1};border:1px solid ${acc};border-radius:18px;padding:26px;max-width:380px;width:92%;max-height:calc(100vh - 48px);max-height:calc(100dvh - 48px);overflow-y:auto;box-sizing:border-box;}
 .modal h2{font-family:'Amiri',serif;font-size:1.7rem;color:${acc};margin-bottom:5px;}
 .modal p{font-size:.76rem;color:${t.tx2};line-height:1.65;margin-bottom:18px;}
 .modal label{display:block;font-size:.64rem;color:${t.tx3};text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
