@@ -305,7 +305,7 @@ const RECITERS = [
   {id:"minshawi",everyayah:"Minshawy_Murattal_128kbps",name:"Al-Minshawi",ar:"المنشاوي"},
   {id:"husary",everyayah:"Husary_128kbps",name:"Al-Husary",ar:"الحصري"},
   {id:"sudais",everyayah:"Abdurrahmaan_As-Sudais_192kbps",name:"Al-Sudais",ar:"السديس"},
-  {id:"shuraym",everyayah:"Shuraym_128kbps",name:"Al-Shuraym",ar:"الشريم"},
+  {id:"shuraym",everyayah:"Saood_ash-Shuraym_128kbps",name:"Al-Shuraym",ar:"الشريم"},
   {id:"mahermuaiqly",everyayah:"MaherAlMuaiqly128kbps",name:"Maher Al-Muaiqly",ar:"ماهر المعيقلي"},
   {id:"hanirifai",everyayah:"Hani_Rifai_192kbps",name:"Hani Ar-Rifai",ar:"هاني الرفاعي"},
   {id:"dussary",everyayah:"Yasser_Ad-Dussary_128kbps",name:"Yasser Al-Dossari",ar:"ياسر الدوسري"},
