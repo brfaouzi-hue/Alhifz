@@ -2688,22 +2688,47 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
     setFitScale(mid);
   },[curPage,fitScale,fullPage.length,arabicSize,immersive,chromeVisible]);
 
-  // ── Swipe façon liseuse (Kindle/e-reader) — remplace l'ancien effet de
-  // tournage de page 3D (rotation + double animation chaînée via
-  // transitionend), qui se grippait après quelques swipes : un
-  // transitionend qui ne se déclenche pas laisse "turning" bloqué à vie et
-  // plus aucun swipe ne répond ensuite. Ici la page suit le doigt en
-  // translation simple et un setTimeout (durée fixe, jamais bloqué) gère la
-  // suite — beaucoup plus robuste, et donne l'impression d'une seule page
-  // continue qui glisse plutôt qu'un livre qu'on feuillette.
-  const SWIPE_ANIM_MS=200;
+  // ── Effet de tournage de page 3D (façon livre/Mushaf) ──
+  // Repris de la version originale (plus de flow que le simple slide), mais
+  // le minutage passe désormais par des setTimeout à durée fixe au lieu de
+  // deux transitionend chaînés : si l'un d'eux ne se déclenchait pas,
+  // "turning" restait bloqué à vie et plus aucun swipe ne répondait
+  // ensuite — c'était la vraie cause du grippage, pas l'effet 3D en lui-même.
+  const FLIP_DRAG_MAX=62, FLIP_COMMIT_DEG=94, FLIP_OUT_MS=220, FLIP_IN_MS=220;
   const dragActive=React.useRef(false);
   const [turning,setTurning]=React.useState(false);
 
-  const resetSwipe=(animate)=>{
+  const springBack=()=>{
     const el=pageContainerRef.current; if(!el)return;
-    el.style.transition=animate?`transform ${SWIPE_ANIM_MS}ms ease-out`:"none";
-    el.style.transform="translateX(0)";
+    el.style.transition="transform .18s ease-out, box-shadow .18s ease-out";
+    el.style.transform="rotateY(0deg)"; el.style.boxShadow="none";
+  };
+
+  const commitFlip=dir=>{
+    // Un vrai Mushaf se feuillette dans le sens de l'arabe : la page suivante
+    // se révèle en pivotant depuis la DROITE (l'inverse d'un livre LTR), donc
+    // le sens "next"/"prev" ici est inversé par rapport à un lecteur latin.
+    const el=pageContainerRef.current; if(!el)return;
+    const hinge=dir==="next"?"right center":"left center";
+    const outDeg=dir==="next"?-FLIP_COMMIT_DEG:FLIP_COMMIT_DEG;
+    const shadowOut=dir==="next"?"22px 0 44px -10px rgba(0,0,0,.5)":"-22px 0 44px -10px rgba(0,0,0,.5)";
+    setTurning(true);
+    el.style.transformOrigin=hinge;
+    el.style.transition=`transform ${FLIP_OUT_MS}ms cubic-bezier(.4,0,.7,1), box-shadow ${FLIP_OUT_MS}ms ease`;
+    el.style.transform=`rotateY(${outDeg}deg)`;
+    el.style.boxShadow=shadowOut;
+    setTimeout(()=>{
+      setCurPage(p=>dir==="next"?Math.min(total-1,p+1):Math.max(0,p-1));
+      el.style.transition="none";
+      el.style.transform=`rotateY(${-outDeg}deg)`;
+      el.style.boxShadow=dir==="next"?"-18px 0 40px -12px rgba(0,0,0,.4)":"18px 0 40px -12px rgba(0,0,0,.4)";
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        el.style.transition=`transform ${FLIP_IN_MS}ms cubic-bezier(.3,0,.6,1), box-shadow ${FLIP_IN_MS}ms ease`;
+        el.style.transform="rotateY(0deg)";
+        el.style.boxShadow="none";
+        setTimeout(()=>{setTurning(false);},FLIP_IN_MS);
+      }));
+    },FLIP_OUT_MS);
   };
 
   const handlePgTouchStart=e=>{
@@ -2726,11 +2751,16 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
     // preventDefault soit pris en compte (listener passive par défaut).
     if(Math.abs(dx)>16&&Math.abs(dx)>dy&&e.cancelable)e.preventDefault();
     const el=pageContainerRef.current; if(!el)return;
+    const width=el.clientWidth||320;
     const atStart=dx<0&&curPage<=0, atEnd=dx>0&&curPage>=total-1;
     // Résistance élastique en bout de sourate plutôt qu'un blocage sec —
     // donne un vrai retour tactile ("c'est la fin") au lieu d'un geste mort.
     const eff=(atStart||atEnd)?dx/3:dx;
-    el.style.transform=`translateX(${eff}px)`;
+    const deg=Math.max(-FLIP_DRAG_MAX,Math.min(FLIP_DRAG_MAX,-(eff/width)*FLIP_DRAG_MAX*1.6));
+    const shadowAmt=Math.min(.4,Math.abs(deg)/FLIP_DRAG_MAX*.4);
+    el.style.transformOrigin=eff<0?"left center":"right center";
+    el.style.transform=`rotateY(${deg}deg)`;
+    el.style.boxShadow=`${eff<0?"-":""}${Math.min(24,Math.abs(deg)/FLIP_DRAG_MAX*24)}px 0 30px -14px rgba(0,0,0,${shadowAmt})`;
   };
   const handlePgTouchMoveRef=React.useRef(handlePgTouchMove);
   handlePgTouchMoveRef.current=handlePgTouchMove;
@@ -2748,21 +2778,12 @@ function QuranPageView({verses, selS, t, tjc, tn, showTj, showTr, arabicSize, ar
     const dy=Math.abs(pgTouchY.current-e.changedTouches[0].clientY);
     pgTouchX.current=null;
     if(turning)return;
-    const el=pageContainerRef.current; if(!el)return;
-    const width=el.clientWidth||320;
     const dir=dx>0?"next":"prev"; // sens Mushaf arabe, inversé vs un livre latin
     const canGo=dir==="next"?curPage<total-1:curPage>0;
     if(Math.abs(dx)>60&&dy<50&&canGo){
-      setTurning(true);
-      el.style.transition=`transform ${SWIPE_ANIM_MS}ms ease-out`;
-      el.style.transform=`translateX(${dx>0?width:-width}px)`;
-      setTimeout(()=>{
-        setCurPage(p=>dir==="next"?Math.min(total-1,p+1):Math.max(0,p-1));
-        resetSwipe(false);
-        setTurning(false);
-      },SWIPE_ANIM_MS);
+      commitFlip(dir);
     } else {
-      resetSwipe(true);
+      springBack();
     }
   };
   const gotoPage=(pgNum)=>{
