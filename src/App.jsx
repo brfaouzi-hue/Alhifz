@@ -7640,8 +7640,11 @@ return (
       {/* Mini player flottant — visible en mode carte ET en plein écran
           (avant limité à page==="quran" ; le header du mode plein écran avait
           ses propres play/réciter/réglages en double). z-index au-dessus du
-          conteneur plein écran (zIndex:100) pour rester cliquable par-dessus. */}
-      {selS&&(page==="quran"||page==="reader")&&(<div style={{position:"fixed",bottom:"calc(env(safe-area-inset-bottom,0px) + 68px)",right:16,zIndex:105,width:44,height:44,touchAction:"none"}}>
+          conteneur plein écran (zIndex:100) pour rester cliquable par-dessus.
+          En plein écran, il suit le header : masqué par défaut, réapparaît
+          au tap (readerChromeVisible) — sinon il restait affiché en
+          permanence par-dessus la lecture. */}
+      {selS&&(page==="quran"||(page==="reader"&&readerChromeVisible))&&(<div style={{position:"fixed",bottom:"calc(env(safe-area-inset-bottom,0px) + 68px)",right:16,zIndex:105,width:44,height:44,touchAction:"none"}}>
           {playerOpen?(
             <div style={{position:"absolute",bottom:54,right:0,background:t.s1,borderRadius:20,boxShadow:"0 4px 24px rgba(0,0,0,.2)",border:"1px solid "+t.b1,padding:"12px 14px",width:230,maxHeight:"calc(100dvh - 120px)",overflowY:"auto",display:"flex",flexDirection:"column",gap:8}}>
               {/* Header avec fermeture */}
