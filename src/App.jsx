@@ -2919,7 +2919,6 @@ const [authError, setAuthError] = useState("");
   const [search,setSearch]=useState("");
   const [showTr,setShowTr]=useState(false);
   const [showTj,setShowTj]=useState(false);
-  const [showReaderSettings,setShowReaderSettings]=useState(false);
   const [readerChromeVisible,setReaderChromeVisible]=useState(true);
   // Levé au niveau App (au lieu d'un state interne à QuranPageView) car le mode
   // page (carte) et le mode plein écran (reader) montent chacun leur propre
@@ -3636,7 +3635,14 @@ const handleSetNewPassword=async(newPass)=>{
 
   // FIX 1: doSelect — scroll uniquement sur mobile (<860px) — corrige le "saut" de page
   const doSelect=s=>{
-    setSelS(s);setPlaying(null);setNavOpen(false);setPlayerFrom(1);setPlayerTo(Math.min(7,s.v)); if(!versePages[s.n]){fetch(`https://api.qurancdn.com/api/qdc/verses/by_chapter/${s.n}?per_page=300&fields=page_number,juz_number,hizb_number`).then(r=>r.json()).then(d=>{const m={},jh={};(d.verses||[]).forEach(v=>{m[v.verse_number]=v.page_number;jh[v.verse_number]={j:v.juz_number,h:v.hizb_number};});setVersePages(p=>{const nv={...p,[s.n]:m};try{localStorage.setItem("vp",JSON.stringify(nv));}catch{}return nv;});setVerseJuzHizb(p=>{const nv={...p,[s.n]:jh};try{localStorage.setItem("vjh",JSON.stringify(nv));}catch{}return nv;});}).catch(()=>{});}loadAudioSegments(s.n,rec?.qurancdn||7).catch(()=>{});
+    // Choisir une sourate ouvre directement le mode plein écran (immersif) —
+    // avant, il fallait d'abord atterrir sur la vue "carte" intégrée puis
+    // taper ⛶ à la main. setPage doit être appelé APRÈS tout appel de
+    // setPage("quran") fait par l'appelant dans le même handler (React
+    // regroupe les setState synchrones, le dernier appelé gagne) — les sites
+    // d'appel qui faisaient doSelect(s);setPage("quran") ont donc dû retirer
+    // ce setPage("quran") redondant désormais court-circuité ici.
+    setSelS(s);setPlaying(null);setNavOpen(false);setPlayerFrom(1);setPlayerTo(Math.min(7,s.v));setPage("reader"); if(!versePages[s.n]){fetch(`https://api.qurancdn.com/api/qdc/verses/by_chapter/${s.n}?per_page=300&fields=page_number,juz_number,hizb_number`).then(r=>r.json()).then(d=>{const m={},jh={};(d.verses||[]).forEach(v=>{m[v.verse_number]=v.page_number;jh[v.verse_number]={j:v.juz_number,h:v.hizb_number};});setVersePages(p=>{const nv={...p,[s.n]:m};try{localStorage.setItem("vp",JSON.stringify(nv));}catch{}return nv;});setVerseJuzHizb(p=>{const nv={...p,[s.n]:jh};try{localStorage.setItem("vjh",JSON.stringify(nv));}catch{}return nv;});}).catch(()=>{});}loadAudioSegments(s.n,rec?.qurancdn||7).catch(()=>{});
     setMushafPage(SURAH_PAGE[s.n]||1);
     if(audioRef.current){audioRef.current.pause();audioRef.current.src="";}
     // scroll supprimé — causait le saut sur iOS
@@ -3644,7 +3650,6 @@ const handleSetNewPassword=async(newPass)=>{
   const resumeToVerse=(s,vn)=>{
     setResumeTarget({sn:s.n,vn});
     doSelect(s);
-    setPage("quran");
   };
   React.useEffect(()=>{
     if(!resumeTarget||loadState!=="done"||!selS||selS.n!==resumeTarget.sn)return;
@@ -4091,7 +4096,6 @@ const handleSetNewPassword=async(newPass)=>{
     if(!pageMode){setPageMode(true);sv("qpagemode",true);}
     setPendingTextPage(pageNum);
     doSelect(s);
-    setPage("quran");
   };
   React.useEffect(()=>{
     if(pendingTextPage==null||!selS)return;
@@ -5336,7 +5340,7 @@ return (
                     <button onClick={()=>{setVersetDuJourDismissed(true);sv("qvdjdis",today());}} style={{background:"none",border:"none",cursor:"pointer",fontSize:".8rem",padding:0,color:t.tx3,opacity:.6}}>✕</button>
                   </div>
                 </div>
-                <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.3rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx,cursor:"pointer"}} onClick={()=>{const s=SURAHS.find(x=>x.n===versetDuJour.sn);if(s){doSelect(s);setPage("quran");}}}>{stripTags(versetDuJour.ar||"")}</div>
+                <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.3rem",direction:"rtl",textAlign:"right",lineHeight:2,color:t.tx,cursor:"pointer"}} onClick={()=>{const s=SURAHS.find(x=>x.n===versetDuJour.sn);if(s){doSelect(s);}}}>{stripTags(versetDuJour.ar||"")}</div>
                 {versetDuJour.fr&&<div style={{fontSize:".65rem",color:t.tx2,fontStyle:"italic",lineHeight:1.5,marginTop:4}}>{versetDuJour.fr}</div>}
               </div>
             )}
@@ -5906,8 +5910,13 @@ return (
             )}
             </div>
 
-            {/* ── HEADER + barre réglages — chrome flottant, masqué par défaut,
-                 un tap sur la page l'affiche/le masque (onToggleChrome ci-dessus) ── */}
+            {/* ── HEADER — chrome flottant, masqué par défaut, un tap sur la
+                 page l'affiche/le masque (onToggleChrome ci-dessus). Simplifié
+                 à juste retour + titre : play/réciter/réglages vivaient ici EN
+                 DOUBLE avec le mini-player flottant (bottom-right), qui a
+                 maintenant tout ce qu'il faut (réciteur, vitesse, boucle,
+                 plage de versets, tajwid/traduction/hifz/taille) au même
+                 endroit — plus besoin de deux jeux de contrôles séparés. */}
             <div style={{position:"absolute",top:0,left:0,right:0,zIndex:20,transform:readerChromeVisible?"translateY(0)":"translateY(-100%)",transition:"transform .25s ease",pointerEvents:readerChromeVisible?"auto":"none"}}>
             <div style={{display:"flex",alignItems:"center",gap:8,padding:"10px 12px",borderBottom:"1px solid "+t.b1,background:t.navBg,backdropFilter:"blur(16px)",boxShadow:"0 4px 20px rgba(0,0,0,.15)",flexShrink:0,paddingTop:"max(10px,env(safe-area-inset-top))"}}>
               <button onClick={()=>{setPage("quran");setPlaying(null);if(audioRef.current){audioRef.current.pause();audioRef.current.src="";}}}
@@ -5918,74 +5927,8 @@ return (
                 <div style={{fontFamily:"Amiri,serif",fontSize:"1.2rem",color:t.acc,fontWeight:700,lineHeight:1.2}}>{selS.ar}</div>
                 <div style={{fontSize:".55rem",color:t.tx3,letterSpacing:"1px",textTransform:"uppercase"}}>{selS.name} · {selS.v} v.</div>
               </div>
-              <button
-                style={{width:34,height:34,borderRadius:"50%",border:"1px solid "+(playing!==null?t.acc:t.b1),background:playing!==null?t.acc:"transparent",color:playing!==null?"#fff":t.tx,cursor:"pointer",fontSize:".9rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}
-                onClick={()=>{if(playlistActive&&playlist[0]?.sn===selS?.n){setPlaylistActive(false);setPlaying(null);if(audioRef.current)audioRef.current.pause();}else if(verses.length>0)startPlaylist(selS.n,verses,playing||1);}}>
-                {playing!==null?"⏸":"▶"}
-              </button>
-              <button 
-                onClick={()=>{
-                  setContinuousMode(true);
-                  setContinuousIdx(0);
-                  setRecitModal(true);
-                }}
-                style={{width:34,height:34,borderRadius:"50%",border:"1px solid "+t.acc,background:t.acc+"15",color:t.acc,cursor:"pointer",fontSize:"1rem",display:"flex",alignItems:"center",justifyContent:"center"}}
-                title="Réciter la page"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V6zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-2.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
-              </button>
-              <button onClick={()=>setShowReaderSettings(p=>!p)}
-                style={{width:34,height:34,borderRadius:"50%",border:"1px solid "+(showReaderSettings?t.acc:t.b1),background:showReaderSettings?t.acc+"15":"transparent",color:showReaderSettings?t.acc:t.tx,cursor:"pointer",fontSize:".85rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                ⚙
-              </button>
+              <div style={{width:34,flexShrink:0}}/>
             </div>
-
-            {/* ── PANNEAU SETTINGS (slide-down) ── */}
-            {showReaderSettings&&(
-              <div style={{background:t.s2,borderBottom:"1px solid "+t.b1,padding:"12px 14px",flexShrink:0}}>
-                <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:8}}>
-                  {[["Tajwid",showTj,()=>setShowTj(p=>!p)],["Traduction",showTr,()=>setShowTr(p=>!p)],["Hifz",hifzMode,()=>setHifzMode(p=>!p)]].map(([label,on,fn])=>(
-                    <button key={label} onClick={fn}
-                      style={{padding:"5px 12px",borderRadius:20,border:"1px solid "+(on?t.acc:t.b1),background:on?t.acc+"18":"transparent",color:on?t.acc:t.tx3,fontSize:".7rem",fontWeight:on?700:400,cursor:"pointer"}}>
-                      {label}
-                    </button>
-                  ))}
-                  <button onClick={()=>setArabicSize(s=>Math.max(1,s-.2))} style={{padding:"5px 10px",borderRadius:20,border:"1px solid "+t.b1,background:"transparent",color:t.tx,fontSize:".7rem",cursor:"pointer"}}>A−</button>
-                  <button onClick={()=>setArabicSize(s=>Math.min(2.5,s+.2))} style={{padding:"5px 10px",borderRadius:20,border:"1px solid "+t.b1,background:"transparent",color:t.tx,fontSize:".7rem",cursor:"pointer"}}>A+</button>
-                </div>
-                <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
-                  <span style={{fontSize:".6rem",color:t.tx3,alignSelf:"center",marginRight:4}}>Vitesse</span>
-                  {[0.5,0.75,1,1.25,1.5].map(s=>(
-                    <button key={s} onClick={()=>setPlaybackRate(s)}
-                      style={{padding:"3px 8px",borderRadius:20,border:"1px solid "+(playbackRate===s?t.acc:t.b1),background:playbackRate===s?t.acc+"18":"transparent",color:playbackRate===s?t.acc:t.tx3,fontSize:".65rem",cursor:"pointer"}}>
-                      {s}×
-                    </button>
-                  ))}
-                  <span style={{fontSize:".6rem",color:t.tx3,alignSelf:"center",marginLeft:6,marginRight:4}}>Boucle</span>
-                  {[1,3,5].map(n=>(
-                    <button key={n} onClick={()=>{setLoopCount(n);setLoopInfinite(false);}}
-                      style={{padding:"3px 8px",borderRadius:20,border:"1px solid "+(loopCount===n&&!loopInfinite?t.acc:t.b1),background:loopCount===n&&!loopInfinite?t.acc+"18":"transparent",color:loopCount===n&&!loopInfinite?t.acc:t.tx3,fontSize:".65rem",cursor:"pointer"}}>
-                      {n}×
-                    </button>
-                  ))}
-                  <button onClick={()=>setLoopInfinite(p=>!p)}
-                    style={{padding:"3px 8px",borderRadius:20,border:"1px solid "+(loopInfinite?t.acc:t.b1),background:loopInfinite?t.acc+"18":"transparent",color:loopInfinite?t.acc:t.tx3,fontSize:".65rem",cursor:"pointer"}}>
-                    ∞
-                  </button>
-                  <button onClick={()=>{setShowReaderSettings(false);setRecitModal(true);}}
-                    style={{padding:"3px 10px",borderRadius:20,border:"1px solid "+t.pu,background:"transparent",color:t.pu,fontSize:".65rem",cursor:"pointer",marginLeft:4}}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style={{verticalAlign:"middle"}}><path d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V6zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-2.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg> Réciter
-                  </button>
-                </div>
-                <div style={{display:"flex",alignItems:"center",gap:5,marginTop:4,flexWrap:"wrap",borderTop:"1px solid "+t.b1,paddingTop:6}}>
-                  <span style={{fontSize:".6rem",color:t.tx3,flexShrink:0}}>Lecture v.</span>
-                  <input type="number" min="1" max={verses.length||286} defaultValue="1" id="pS" style={{width:38,padding:"2px 4px",borderRadius:6,border:"1px solid "+t.b1,background:t.s2,color:t.tx,fontSize:".7rem",textAlign:"center"}}/>
-                  <span style={{fontSize:".6rem",color:t.tx3}}>→</span>
-                  <input type="number" min="1" max={verses.length||286} defaultValue={verses.length||7} id="pE" style={{width:38,padding:"2px 4px",borderRadius:6,border:"1px solid "+t.b1,background:t.s2,color:t.tx,fontSize:".7rem",textAlign:"center"}}/>
-                  <button onClick={()=>{const s=parseInt(document.getElementById("pS")?.value)||1;const e2=parseInt(document.getElementById("pE")?.value)||verses.length;if(partialPlayRef)partialPlayRef.current={startAt:s,stopAt:e2};doPlay(s);setShowReaderSettings(false);}} style={{padding:"3px 10px",borderRadius:20,border:"1px solid "+t.acc,background:t.acc+"15",color:t.acc,fontSize:".65rem",cursor:"pointer",fontWeight:700}}>▶ Lire</button>
-                </div>
-              </div>
-            )}
             </div>
 
             {/* ── MENU CONTEXTUEL VERSET (appui long) ── */}
@@ -6103,7 +6046,7 @@ return (
                       </div>
                       {/* Actions */}
                       <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                        <button className="vbtn" style={{borderColor:t.bl,color:t.bl}} onClick={()=>{doSelect(s);setPage("quran");}}>Ouvrir</button>
+                        <button className="vbtn" style={{borderColor:t.bl,color:t.bl}} onClick={()=>{doSelect(s);}}>Ouvrir</button>
                         {sMem(s)>=2&&(<button className="vbtn" style={{borderColor:t.pu,color:t.pu}} onClick={()=>startTest(s,selS?.n===s.n?verses:(Q[s.n]||[]))}>Test mémoire</button>)}
                         {spacedKeys.length>0&&(<button className="vbtn" style={{borderColor:t.rd,color:t.rd}} onClick={()=>{spacedKeys.forEach(k=>{const[sn,vn]=k.split("_").map(Number);markSpaced(sn,vn);});}}>Réviser tous</button>)}
                         {lastSession&&(<span style={{fontSize:".6rem",color:t.tx3,alignSelf:"center",marginLeft:"auto"}}>Dernière session : {new Date(lastSession.date).toLocaleDateString("fr-FR",{day:"numeric",month:"short"})}</span>)}
@@ -6150,7 +6093,7 @@ return (
                           <div style={{height:"100%",width:`${pctR}%`,background:pctR===100?t.gr:t.acc,borderRadius:99}}/>
                         </div>
                         <div style={{display:"flex",gap:6}}>
-                          <button className="vbtn" style={{borderColor:t.bl,color:t.bl}} onClick={()=>{doSelect(s);setPage("quran");}}>Ouvrir</button>
+                          <button className="vbtn" style={{borderColor:t.bl,color:t.bl}} onClick={()=>{doSelect(s);}}>Ouvrir</button>
                           {dueInRange>0&&<button className="vbtn" style={{borderColor:t.rd,color:t.rd}} onClick={()=>{versesInRange.forEach(vn=>{if(spacedDue.includes(`${r.sn}_${vn}`))markSpaced(r.sn,vn);});}}>Réviser tous</button>}
                         </div>
                       </div>
@@ -6209,7 +6152,7 @@ return (
                 <div className="ch"><span className="ct">Maîtrisées</span><span style={{fontSize:".65rem",color:t.gr,fontWeight:700}}>{Object.entries(revFlags).filter(([,f])=>f==="mastered").length} sourates</span></div>
                 <div style={{display:"flex",flexWrap:"wrap",gap:6,padding:12}}>
                   {SURAHS.filter(s=>revFlags[String(s.n)]==="mastered").map(s=>(
-                    <div key={s.n} style={{padding:"5px 12px",borderRadius:99,background:`${t.gr}15`,border:`1px solid ${t.gr}44`,display:"flex",alignItems:"center",gap:6,cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";}} onMouseLeave={e=>{e.currentTarget.style.transform="";}} onClick={()=>{doSelect(s);setPage("quran");}}>
+                    <div key={s.n} style={{padding:"5px 12px",borderRadius:99,background:`${t.gr}15`,border:`1px solid ${t.gr}44`,display:"flex",alignItems:"center",gap:6,cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";}} onMouseLeave={e=>{e.currentTarget.style.transform="";}} onClick={()=>{doSelect(s);}}>
                       <span style={{fontSize:".68rem",fontWeight:700,color:t.gr}}>{s.name}</span>
                       <span style={{fontFamily:"Amiri,serif",fontSize:".78rem",color:t.acc}}>{s.ar}</span>
                       <button onClick={e=>{e.stopPropagation();setRevFlags(p=>{const n={...p};delete n[String(s.n)];return n;});}} style={{background:"none",border:"none",color:`${t.gr}77`,cursor:"pointer",fontSize:".65rem",padding:"0 0 0 2px",lineHeight:1}}>✕</button>
@@ -6571,7 +6514,7 @@ return (
                     <div style={{fontFamily:"Amiri Quran,serif",fontSize:"1.2rem",direction:"rtl",textAlign:"right",color:t.tx,lineHeight:2,marginBottom:6}}>{fav.ar}</div>
                     {fav.fr&&<div style={{fontSize:".7rem",color:t.tx2,fontStyle:"italic",lineHeight:1.6}}>{fav.fr}</div>}
                     <div style={{marginTop:8,display:"flex",gap:6}}>
-                      <button className="vbtn snd" onClick={()=>{const s=SURAHS.find(x=>x.n===fav.sn);if(s){doSelect(s);setPage("quran");}}}><Icons.Book size={10}/>Ouvrir</button>
+                      <button className="vbtn snd" onClick={()=>{const s=SURAHS.find(x=>x.n===fav.sn);if(s){doSelect(s);}}}><Icons.Book size={10}/>Ouvrir</button>
                       <button className="vbtn" onClick={()=>setShareVerse({sn:fav.sn,vn:fav.vn,ar:fav.ar,fr:fav.fr,surah:fav.surah,surahAr:SURAHS.find(s=>s.n===fav.sn)?.ar||""})}><Icons.Share size={10}/>Partager</button>
                     </div>
                   </div>
@@ -6612,7 +6555,7 @@ return (
                 <div className="ch"><span className="ct">Historique de lecture</span><button className="tbtn" style={{borderColor:t.rd,color:t.rd,fontSize:".6rem"}} onClick={()=>setReadHistory([])}>Effacer</button></div>
                 <div style={{maxHeight:260,overflowY:"auto"}}>
                   {readHistory.slice(0,20).map((h,i)=>(
-                    <div key={i} style={{padding:"8px 14px",borderBottom:`1px solid ${t.b1}`,display:"flex",alignItems:"center",gap:10,cursor:"pointer",transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=t.s2} onMouseLeave={e=>e.currentTarget.style.background=""} onClick={()=>{const s=SURAHS.find(x=>x.n===h.sn);if(s){doSelect(s);setPage("quran");}}}>
+                    <div key={i} style={{padding:"8px 14px",borderBottom:`1px solid ${t.b1}`,display:"flex",alignItems:"center",gap:10,cursor:"pointer",transition:"background .15s"}} onMouseEnter={e=>e.currentTarget.style.background=t.s2} onMouseLeave={e=>e.currentTarget.style.background=""} onClick={()=>{const s=SURAHS.find(x=>x.n===h.sn);if(s){doSelect(s);}}}>
                       <span style={{fontSize:".72rem",color:t.acc,fontWeight:600}}>{h.surah}</span>
                       <span style={{fontSize:".65rem",color:t.tx3}}>v.{h.vn}</span>
                       <span style={{fontSize:".6rem",color:t.tx3,marginLeft:"auto"}}>{new Date(h.ts).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}</span>
@@ -6951,7 +6894,7 @@ return (
                     const r=isComplete?baseR+1.5:baseR;
                     return (
                       <g key={s.n} style={{cursor:"pointer"}}
-                        onClick={()=>{doSelect(s);setPage("quran");}}>
+                        onClick={()=>{doSelect(s);}}>
                         {/* Halo pour les sourates complètes */}
                         {isComplete&&(
                           <circle cx={x} cy={y} r={r+3} fill="url(#starGlow)" opacity="0.4">
@@ -7096,7 +7039,7 @@ return (
                 <div className="ch"><span className="ct">Progression par sourate</span></div>
                 <div style={{padding:"10px 14px",display:"flex",flexDirection:"column",gap:6}}>
                   {topS.map((s,i)=>(
-                    <div key={s.n} className="trow" style={{padding:"5px 8px",cursor:"pointer"}} onClick={()=>{doSelect(s);setPage("quran");}}>
+                    <div key={s.n} className="trow" style={{padding:"5px 8px",cursor:"pointer"}} onClick={()=>{doSelect(s);}}>
                       <span style={{width:20,textAlign:"right",fontSize:".65rem",color:t.tx3,flexShrink:0}}>{i+1}</span>
                       <span style={{minWidth:80,fontSize:".72rem",fontWeight:600,color:s.p===100?t.gr:t.tx}}>{s.name}</span>
                       <div className="tbar"><div className="tfill" style={{width:`${s.p}%`,background:s.p===100?t.gr:t.acc}}/></div>
@@ -7128,7 +7071,7 @@ return (
                 <div className="ch"><span className="ct">Prochaines sourates à terminer</span></div>
                 <div className="cd-grid">
                   {cdS.map(s=>(
-                    <div key={s.n} className="cdc" onClick={()=>{doSelect(s);setPage("quran");}}>
+                    <div key={s.n} className="cdc" onClick={()=>{doSelect(s);}}>
                       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}><span style={{fontFamily:"Amiri,serif",fontSize:".95rem",color:t.acc}}>{s.ar}</span>{s.p>0&&<span style={{fontSize:".6rem",color:t.gr,fontWeight:700,background:`${t.gr}18`,padding:"1px 6px",borderRadius:99}}>{s.p}%</span>}</div>
                       <div style={{fontSize:".72rem",fontWeight:600,color:t.tx,marginBottom:3}}>{s.name}</div>
                       <div style={{height:4,background:t.b1,borderRadius:99,overflow:"hidden",marginBottom:5}}><div style={{height:"100%",width:`${s.p}%`,background:t.gr,borderRadius:99}}/></div>
@@ -7143,7 +7086,7 @@ return (
 
         {/* SETTINGS */}
         {page==="teacher"&&(user?<TeacherDashboard user={user} t={t} acc={t.acc} setPage={setPage}/>:<LoginRequiredScreen t={t} acc={t.acc} label="L'espace Enseignant" onLogin={()=>setShowAuthModal(true)}/>)}
-      {page==="join-class"&&(user?<JoinClass user={user} t={t} acc={t.acc} setPage={setPage} onJoined={()=>setPage("home")} onOpenSurah={sn=>{const s=SURAHS.find(x=>x.n===sn);if(s){doSelect(s);setPage("quran");}}}/>:<LoginRequiredScreen t={t} acc={t.acc} label="Rejoindre une classe" onLogin={()=>setShowAuthModal(true)}/>)}
+      {page==="join-class"&&(user?<JoinClass user={user} t={t} acc={t.acc} setPage={setPage} onJoined={()=>setPage("home")} onOpenSurah={sn=>{const s=SURAHS.find(x=>x.n===sn);if(s){doSelect(s);}}}/>:<LoginRequiredScreen t={t} acc={t.acc} label="Rejoindre une classe" onLogin={()=>setShowAuthModal(true)}/>)}
       {page==="schedule"&&(user?(()=>{
         const effectiveView=scheduleView||(role==="teacher"?"teacher":"student");
         const canSwitch=myTeacherClasses.length>0;
@@ -7694,14 +7637,34 @@ return (
 
       {/* Bottom nav */}
 
-      {/* Mini player flottant */}
-      {selS&&page==="quran"&&(<div style={{position:"fixed",bottom:"calc(env(safe-area-inset-bottom,0px) + 68px)",right:16,zIndex:95,width:44,height:44,touchAction:"none"}}>
+      {/* Mini player flottant — visible en mode carte ET en plein écran
+          (avant limité à page==="quran" ; le header du mode plein écran avait
+          ses propres play/réciter/réglages en double). z-index au-dessus du
+          conteneur plein écran (zIndex:100) pour rester cliquable par-dessus. */}
+      {selS&&(page==="quran"||page==="reader")&&(<div style={{position:"fixed",bottom:"calc(env(safe-area-inset-bottom,0px) + 68px)",right:16,zIndex:105,width:44,height:44,touchAction:"none"}}>
           {playerOpen?(
-            <div style={{position:"absolute",bottom:54,right:0,background:t.s1,borderRadius:20,boxShadow:"0 4px 24px rgba(0,0,0,.2)",border:"1px solid "+t.b1,padding:"12px 14px",width:230,display:"flex",flexDirection:"column",gap:8}}>
+            <div style={{position:"absolute",bottom:54,right:0,background:t.s1,borderRadius:20,boxShadow:"0 4px 24px rgba(0,0,0,.2)",border:"1px solid "+t.b1,padding:"12px 14px",width:230,maxHeight:"calc(100dvh - 120px)",overflowY:"auto",display:"flex",flexDirection:"column",gap:8}}>
               {/* Header avec fermeture */}
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <span style={{fontSize:".65rem",fontWeight:700,color:t.acc}}>{selS.name||"Sourate "+selS.n}</span>
                 <button onClick={()=>setPlayerOpen(false)} style={{background:"none",border:"none",color:t.tx3,cursor:"pointer",fontSize:"1rem",lineHeight:1}}>×</button>
+              </div>
+              {/* Affichage — tajwid/traduction/hifz/taille, avant seulement
+                  disponibles dans le panneau réglages du mode plein écran
+                  (maintenant supprimé, tout est ici) */}
+              <div style={{display:"flex",flexDirection:"column",gap:4}}>
+                <span style={{fontSize:".55rem",color:t.tx3,textTransform:"uppercase",letterSpacing:".5px"}}>Affichage</span>
+                <div style={{display:"flex",flexWrap:"wrap",gap:3}}>
+                  {[["Tajwid",showTj,()=>setShowTj(p=>!p)],["Traduction",showTr,()=>setShowTr(p=>!p)],["Hifz",hifzMode,()=>setHifzMode(p=>!p)]].map(([label,on,fn])=>(
+                    <button key={label} onClick={fn}
+                      style={{padding:"3px 9px",borderRadius:10,fontSize:".6rem",cursor:"pointer",fontWeight:on?700:400,
+                        border:"1px solid "+(on?t.acc:t.b1),background:on?t.acc+"18":"transparent",color:on?t.acc:t.tx3}}>
+                      {label}
+                    </button>
+                  ))}
+                  <button onClick={()=>setArabicSize(s=>Math.max(1,s-.2))} style={{padding:"3px 8px",borderRadius:10,border:"1px solid "+t.b1,background:"transparent",color:t.tx,fontSize:".6rem",cursor:"pointer"}}>A−</button>
+                  <button onClick={()=>setArabicSize(s=>Math.min(2.5,s+.2))} style={{padding:"3px 8px",borderRadius:10,border:"1px solid "+t.b1,background:"transparent",color:t.tx,fontSize:".6rem",cursor:"pointer"}}>A+</button>
+                </div>
               </div>
               {/* Réciteur */}
               <div style={{display:"flex",flexDirection:"column",gap:4}}>
